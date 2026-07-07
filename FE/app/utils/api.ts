@@ -3,6 +3,7 @@
 import type { FetchOptions, ResponseType } from 'ofetch'
 import { defu } from 'defu'
 import { HttpStatus } from '~/enums/http'
+import type { LoginResponse } from '~/types/auth'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -95,7 +96,7 @@ export class ApiClient {
             if (!refreshTokenStr) throw new Error('No refresh token available')
 
             // Fetch trực tiếp để lấy token mới (Thay URL này bằng endpoint thật của hệ thống BE)
-            const refreshRes = await $fetch<ApiResponse<{ accessToken: string }>>('/auth/refresh', {
+            const refreshRes = await $fetch<ApiResponse<LoginResponse>>('/auth/refresh', {
               baseURL: config.public.apiBaseUrl as string,
               method: 'POST',
               body: { refreshToken: refreshTokenStr }
