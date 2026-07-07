@@ -3,6 +3,7 @@
 Dự án này là toàn bộ mã nguồn Frontend (Nuxt.js) cho hệ thống phần mềm quản lý và vận hành xưởng bún, bao gồm 4 module cốt lõi được xây dựng trong cùng một codebase.
 
 ## 🌟 4 Module Chính
+
 1. **Web Admin Dashboard (`/admin`)**: Dành cho Quản lý/Chủ xưởng để điều hành, quản lý khách hàng, công nợ, đơn hàng, kho và thống kê.
 2. **Mobile App Tài Xế (`/driver`)**: Dành cho tài xế giao hàng (được build thành Native App thông qua Capacitor). Hiển thị lộ trình tối ưu, xác nhận giao hàng và thu tiền.
 3. **Zalo Mini App / Web Form (`/wholesale`)**: Kênh đặt hàng cho khách sỉ tự động nhập số lượng lấy ngày mai.
