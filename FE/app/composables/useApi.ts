@@ -20,7 +20,7 @@ export function useApi<T>(url: string, opts: UseFetchOptions<T> = {}) {
     onRequest({ options }) {
       if (import.meta.client) {
         try {
-          ;(options as any).toast = useToast()
+          (options as any).toast = useToast()
         } catch {
           // Bỏ qua nếu mất context
         }
