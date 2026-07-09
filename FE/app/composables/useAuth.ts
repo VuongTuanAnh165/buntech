@@ -16,7 +16,7 @@ export const useAuth = () => {
         // Lưu trữ Tokens vào Cookie an toàn
         useCookie('auth_token').value = res.data.accessToken
         useCookie('refresh_token').value = res.data.refreshToken
-        
+
         // Điều hướng vào trang chủ (Dashboard Admin)
         navigateTo('/')
       }

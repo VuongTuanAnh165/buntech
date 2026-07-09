@@ -1,5 +1,5 @@
 import { ApiClient } from '~/utils/api'
-import type { ApiResponse } from '~/utils/api'
+import type { ApiResponse } from '~/types/api'
 import type { LoginPayload, LoginResponse, RefreshTokenPayload } from '~/types/auth'
 
 export const AuthService = {

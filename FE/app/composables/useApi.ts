@@ -20,7 +20,7 @@ export function useApi<T>(url: string, opts: UseFetchOptions<T> = {}) {
     onRequest({ options }) {
       if (import.meta.client) {
         try {
-          (options as any).toast = useToast()
+          ;(options as any).toast = useToast()
         } catch {
           // Bỏ qua nếu mất context
         }
@@ -46,7 +46,11 @@ export function useApi<T>(url: string, opts: UseFetchOptions<T> = {}) {
     onResponse({ response, options }) {
       if (import.meta.client) {
         const toast = (options as any).toast
-        if (toast && response.status >= HttpStatus.OK && response.status < HttpStatus.MULTIPLE_CHOICES) {
+        if (
+          toast &&
+          response.status >= HttpStatus.OK &&
+          response.status < HttpStatus.MULTIPLE_CHOICES
+        ) {
           const message = (response._data as any)?.message
           if (message) {
             toast.add({ title: 'Thành công', description: message, color: 'success' })
@@ -61,8 +65,10 @@ export function useApi<T>(url: string, opts: UseFetchOptions<T> = {}) {
       console.error(`[useApi Response Error] ${response.status} at ${request}`)
       if (import.meta.client) {
         const toast = (options as any).toast
-        if (toast && response.status !== HttpStatus.UNAUTHORIZED) { // 401 sẽ do api.ts xử lý refresh token
-          const message = (response._data as any)?.message || 'Có lỗi xảy ra từ máy chủ, vui lòng thử lại.'
+        if (toast && response.status !== HttpStatus.UNAUTHORIZED) {
+          // 401 sẽ do api.ts xử lý refresh token
+          const message =
+            (response._data as any)?.message || 'Có lỗi xảy ra từ máy chủ, vui lòng thử lại.'
           toast.add({ title: 'Thất bại', description: message, color: 'error' })
         }
       }

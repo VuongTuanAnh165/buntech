@@ -3,16 +3,10 @@
 import type { FetchOptions, ResponseType } from 'ofetch'
 import { defu } from 'defu'
 import { HttpStatus } from '~/enums/http'
+import type { ApiResponse } from '~/types/api'
 import type { LoginResponse } from '~/types/auth'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-
-export interface ApiResponse<T = any> {
-  success: boolean
-  data?: T
-  message?: string
-  errorCode?: string
-}
 
 // Biến cục bộ để quản lý hàng đợi (Queue) Refresh Token
 let isRefreshing = false
@@ -51,7 +45,11 @@ export class ApiClient {
       onResponse({ response, options }) {
         if (import.meta.client) {
           const toast = (options as any).toast
-          if (toast && response.status >= HttpStatus.OK && response.status < HttpStatus.MULTIPLE_CHOICES) {
+          if (
+            toast &&
+            response.status >= HttpStatus.OK &&
+            response.status < HttpStatus.MULTIPLE_CHOICES
+          ) {
             const message = response._data?.message
             if (message) {
               toast.add({ title: 'Thành công', description: message, color: 'success' })
@@ -83,7 +81,8 @@ export class ApiClient {
               refreshQueue.push({ resolve, reject })
             }).then(() => {
               // Sau khi refresh xong, gọi lại API vừa bị kẹt với token mới
-              return $fetch(request, options as any)
+              // @ts-ignore: Bỏ qua lỗi đệ quy type của Nuxt 4 (nếu có) để tránh lỗi Unused directive trên IDE
+              return $fetch(request as string, options as any)
             })
           }
 
@@ -116,7 +115,8 @@ export class ApiClient {
               refreshQueue = []
 
               // Gọi lại API gốc
-              return $fetch(originalRequest, options as any)
+              // @ts-ignore: Bỏ qua lỗi đệ quy type của Nuxt 4 (nếu có)
+              return $fetch(originalRequest as string, options as any)
             }
           } catch (error) {
             // Nếu lấy token mới thất bại -> Clear queue, xóa cookie và logout
