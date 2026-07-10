@@ -19,7 +19,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   // --- Cấu hình Pinia Persisted State ---
-  piniaPersistedstate: {
+  piniaPluginPersistedstate: {
     storage: 'localStorage',
     cookieOptions: {
       sameSite: 'lax',
@@ -64,5 +64,11 @@ export default defineNuxtConfig({
       // Biến dùng được ở cả Client và Server
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api'
     }
+  },
+
+  // Cấu hình Caching (SWR) cho các trang tĩnh (Landing page)
+  routeRules: {
+    '/': { swr: 3600 }, // Cache trang chủ 1 tiếng trên server
+    '/gioi-thieu': { static: true }
   }
 })

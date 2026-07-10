@@ -25,7 +25,13 @@ export const useFormSubmit = () => {
     /** Có reset form sau khi thành công không? Mặc định: false */
     resetAfterSuccess?: boolean
     /** Ref của FormWrapper để tự động hiển thị lỗi 422 */
-    formRef?: Ref<{ setErrors: (errors: { path: string; message: string }[]) => void; clearErrors: () => void } | undefined>
+    formRef?: Ref<
+      | {
+          setErrors: (errors: { path: string; message: string }[]) => void
+          clearErrors: () => void
+        }
+      | undefined
+    >
   }
 
   /**
