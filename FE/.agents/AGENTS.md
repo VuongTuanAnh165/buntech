@@ -122,23 +122,25 @@ export const useAuth = () => {
 
 Enterprise App cần chia tách rõ ràng:
 
-- **`services/` hoặc `repositories/`:** Nơi định nghĩa các logic gọi API thuần túy.
-- **`composables/`:** Nơi chứa state và gọi các services/repositories ở trên.
-- Tránh việc viết logic `$fetch` trực tiếp dải rác khắp nơi trong các Components.
+- **`services/`:** Nơi định nghĩa các logic gọi API thuần túy. 
+- **Tận dụng `ApiClient`:** Phải sử dụng class `ApiClient` (từ `~/utils/api.ts`) thay vì `$fetch` trực tiếp. `ApiClient` đã được cấu hình sẵn để tự động gắn Token, tự động Refresh Token và catch lỗi 422.
+- **`composables/`:** Nơi chứa state và gọi các hàm trong thư mục `services/`.
+- Tránh việc viết logic gọi API trực tiếp dải rác khắp nơi trong các Components.
 
-> ❌ **CODE XẤU (Gọi API cứng trong UI)**
+> ❌ **CODE XẤU (Gọi API cứng trong UI và không dùng ApiClient)**
 
 ```vue
 <script setup>
-const data = await $fetch('/api/heavy-data') // Gây rối code UI
+const data = await $fetch('/api/heavy-data') // Gây rối code UI, thiếu Token config
 </script>
 ```
 
-> ✅ **CODE CHUẨN (Tách biệt Data Layer)**
+> ✅ **CODE CHUẨN (Tách biệt Data Layer với ApiClient)**
 
 ```ts
 // services/productService.ts
-export const fetchProducts = () => $fetch('/api/products')
+import { ApiClient } from '~/utils/api'
+export const fetchProducts = () => ApiClient.get('/products')
 
 // composables/useProduct.ts
 export const useProduct = () => {
@@ -199,10 +201,40 @@ await callOnce('fetch-config', async () => {
 
 ---
 
-## 7. Xử lý Form (Nuxt UI + Zod)
+## 7. Xử lý Form & Bắt lỗi tự động (Nuxt UI + Zod)
 
-- Ưu tiên sử dụng component `<UForm>` của **Nuxt UI** kết hợp với **Zod Schema** để validate thay vì tự build form.
-- Luôn kiểm soát trạng thái submit (disable nút bấm bằng thuộc tính `loading` khi đang call API bằng `isSubmitting`) để tránh người dùng click 2 lần.
+Hệ thống đã được thiết kế sẵn cơ chế **Tự động Map lỗi 422 từ Backend** thẳng lên giao diện:
+
+- BẮT BUỘC sử dụng component bọc ngoài `<FormWrapper>` kết hợp với `<UForm>` của **Nuxt UI** và **Zod Schema**.
+- BẮT BUỘC dùng composable `useFormSubmit` để thực hiện hàm submit. Truyền `formRef` vào option để composable tự động parse lỗi Validation HTTP 422 từ API và bôi đỏ các field nhập liệu.
+
+> ✅ **CODE CHUẨN (Form tự động bắt lỗi API 422)**
+
+```vue
+<script setup lang="ts">
+const formRef = ref()
+const state = reactive({ email: '', password: '' })
+
+// useFormSubmit tự động quản lý isSubmitting và map lỗi 422
+const onSubmit = useFormSubmit(
+  async (data) => await authService.login(data.email, data.password),
+  {
+    formRef, // Truyền formRef vào đây là lỗi tự động được xử lý!
+    successMessage: 'Thành công'
+  }
+)
+</script>
+
+<template>
+  <FormWrapper ref="formRef" :schema="schema" :state="state" @submit="onSubmit">
+    <UFormGroup label="Email" name="email">
+      <UInput v-model="state.email" />
+    </UFormGroup>
+    <!-- loading state được form wrapper lo -->
+    <UButton type="submit" loading>Submit</UButton>
+  </FormWrapper>
+</template>
+```
 
 ---
 
