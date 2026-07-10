@@ -64,6 +64,22 @@ export class ApiClient {
         const { request, response, options } = context
         console.error(`[API Response Error] ${response.status} at ${request}`)
 
+        // 1. Xử lý lỗi Validate (HTTP 422) từ Backend
+        if (response.status === HttpStatus.UNPROCESSABLE_ENTITY) {
+          // Trích xuất mảng lỗi validation từ BE: { errors: { email: ['...'] } }
+          const errors = response._data?.errors
+          if (errors) {
+            const formattedErrors = Object.entries(errors).map(([key, messages]) => ({
+              path: key,
+              message: Array.isArray(messages) ? messages[0] : messages
+            }))
+            // Gắn mảng lỗi định dạng chuẩn Nuxt UI vào object response._data
+            response._data.validationErrors = formattedErrors
+          }
+          // Không hiển thị Toast cho 422 vì lỗi sẽ được bôi đỏ trên từng ô Input
+          return
+        }
+
         if (import.meta.client) {
           const toast = (options as any).toast
           // Không bắn Toast lỗi ngay nếu là 401 vì ta đang có logic Refresh Token ngầm

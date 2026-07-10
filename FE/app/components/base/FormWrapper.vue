@@ -72,15 +72,29 @@ const onSubmit = async (event: FormSubmitEvent<unknown>) => {
   }
 }
 
+const formRef = ref()
+
 const stopSubmitting = () => {
   isSubmitting.value = false
 }
 
-defineExpose({ isSubmitting, stopSubmitting })
+const setErrors = (errors: { path: string; message: string }[]) => {
+  if (formRef.value) {
+    formRef.value.setErrors(errors)
+  }
+}
+
+const clearErrors = () => {
+  if (formRef.value) {
+    formRef.value.clear()
+  }
+}
+
+defineExpose({ isSubmitting, stopSubmitting, setErrors, clearErrors })
 </script>
 
 <template>
-  <UForm :schema="schema" :state="state" :class="formClass" @submit="onSubmit">
+  <UForm ref="formRef" :schema="schema" :state="state" :class="formClass" @submit="onSubmit">
     <!-- Form Fields Slot -->
     <slot />
 

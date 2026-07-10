@@ -24,6 +24,8 @@ export const useFormSubmit = () => {
     onError?: (error: unknown) => void
     /** Có reset form sau khi thành công không? Mặc định: false */
     resetAfterSuccess?: boolean
+    /** Ref của FormWrapper để tự động hiển thị lỗi 422 */
+    formRef?: Ref<{ setErrors: (errors: { path: string; message: string }[]) => void; clearErrors: () => void } | undefined>
   }
 
   /**
@@ -38,18 +40,27 @@ export const useFormSubmit = () => {
 
       isSubmitting.value = true
       try {
+        if (options?.formRef) {
+          options.formRef.value?.clearErrors?.()
+        }
+
         await submitFn(data)
 
         if (options?.onSuccess) {
           await options.onSuccess()
         }
-      } catch (error) {
-        // Toast lỗi đã được ApiClient xử lý tự động
+      } catch (err: unknown) {
+        const error = err as { data?: { validationErrors?: { path: string; message: string }[] } }
+        // Tự động map lỗi 422 vào Form nếu có truyền formRef
+        if (options?.formRef && error?.data?.validationErrors) {
+          options.formRef.value?.setErrors?.(error.data.validationErrors)
+        }
+
         // Chỉ gọi onError callback nếu dev cần xử lý thêm
         if (options?.onError) {
-          options.onError(error)
+          options.onError(err)
         }
-        console.error('[useFormSubmit Error]', error)
+        console.error('[useFormSubmit Error]', err)
       } finally {
         isSubmitting.value = false
       }
