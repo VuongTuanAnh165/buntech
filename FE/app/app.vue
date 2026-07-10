@@ -1,5 +1,10 @@
+<script setup lang="ts">
+import { vi } from '@nuxt/ui/locale'
+</script>
+
 <template>
-  <UApp :toaster="{ position: 'top-right' }">
+  <UApp :locale="vi" :toaster="{ position: 'top-right' }">
+    <NuxtLoadingIndicator color="var(--ui-primary)" :height="3" :throttle="200" />
     <NuxtRouteAnnouncer />
     <NuxtLayout>
       <NuxtPage />

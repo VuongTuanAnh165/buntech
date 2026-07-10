@@ -81,7 +81,6 @@ export class ApiClient {
               refreshQueue.push({ resolve, reject })
             }).then(() => {
               // Sau khi refresh xong, gọi lại API vừa bị kẹt với token mới
-              // @ts-ignore: Bỏ qua lỗi đệ quy type của Nuxt 4 (nếu có) để tránh lỗi Unused directive trên IDE
               return $fetch(request as string, options as any)
             })
           }
@@ -115,7 +114,6 @@ export class ApiClient {
               refreshQueue = []
 
               // Gọi lại API gốc
-              // @ts-ignore: Bỏ qua lỗi đệ quy type của Nuxt 4 (nếu có)
               return $fetch(originalRequest as string, options as any)
             }
           } catch (error) {

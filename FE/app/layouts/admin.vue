@@ -32,6 +32,12 @@ const userStore = useCurrentUserStore()
       <!-- Footer: User info + Logout -->
       <template #footer="{ collapsed }">
         <div class="flex flex-col gap-2">
+          <!-- Color Mode Toggle -->
+          <div class="flex justify-center">
+            <UColorModeButton size="xs" color="neutral" variant="ghost" />
+          </div>
+
+          <!-- User Menu -->
           <UDropdownMenu
             :items="[
               [
