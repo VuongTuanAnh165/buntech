@@ -1,6 +1,6 @@
 export enum Role {
-  ADMIN = 'admin',
-  DRIVER = 'driver',
-  WHOLESALE = 'wholesale',
-  RETAIL = 'retail',
+  ADMIN = 'admin', // admin
+  DRIVER = 'driver', // driver
+  WHOLESALE = 'wholesale', // wholesale
+  RETAIL = 'retail', // retail
 }

@@ -1,5 +1,5 @@
 export enum InventoryType {
-  IN = 'in',
-  OUT = 'out',
-  ADJUSTMENT = 'adjustment',
+  IN = 'in', // nhập
+  OUT = 'out', // xuất
+  ADJUSTMENT = 'adjustment', // điều chỉnh
 }

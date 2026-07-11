@@ -1,6 +1,6 @@
 export enum DeliveryStatus {
-  PENDING = 'pending',
-  DELIVERING = 'delivering',
-  SUCCESS = 'success',
-  FAILED = 'failed',
+  PENDING = 'pending', //   đang chờ xử lý đơn
+  DELIVERING = 'delivering', //   đang giao
+  SUCCESS = 'success', //   thành công
+  FAILED = 'failed', //   thất bại
 }
