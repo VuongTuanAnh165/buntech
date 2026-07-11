@@ -122,7 +122,7 @@ export const useAuth = () => {
 
 Enterprise App cần chia tách rõ ràng:
 
-- **`services/`:** Nơi định nghĩa các logic gọi API thuần túy. 
+- **`services/`:** Nơi định nghĩa các logic gọi API thuần túy.
 - **Tận dụng `ApiClient`:** Phải sử dụng class `ApiClient` (từ `~/utils/api.ts`) thay vì `$fetch` trực tiếp. `ApiClient` đã được cấu hình sẵn để tự động gắn Token, tự động Refresh Token và catch lỗi 422.
 - **`composables/`:** Nơi chứa state và gọi các hàm trong thư mục `services/`.
 - Tránh việc viết logic gọi API trực tiếp dải rác khắp nơi trong các Components.
@@ -216,13 +216,10 @@ const formRef = ref()
 const state = reactive({ email: '', password: '' })
 
 // useFormSubmit tự động quản lý isSubmitting và map lỗi 422
-const onSubmit = useFormSubmit(
-  async (data) => await authService.login(data.email, data.password),
-  {
-    formRef, // Truyền formRef vào đây là lỗi tự động được xử lý!
-    successMessage: 'Thành công'
-  }
-)
+const onSubmit = useFormSubmit(async (data) => await authService.login(data.email, data.password), {
+  formRef, // Truyền formRef vào đây là lỗi tự động được xử lý!
+  successMessage: 'Thành công'
+})
 </script>
 
 <template>

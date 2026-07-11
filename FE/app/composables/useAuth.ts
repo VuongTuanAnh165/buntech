@@ -17,8 +17,12 @@ export const useAuth = () => {
         useCookie('auth_token').value = res.data.accessToken
         useCookie('refresh_token').value = res.data.refreshToken
 
-        // Điều hướng vào trang chủ (Dashboard Admin)
-        navigateTo('/')
+        // Đọc query param `redirect` để điều hướng về trang trước đó
+        const route = useRoute()
+        const redirectPath = route.query.redirect as string | undefined
+
+        // Điều hướng
+        navigateTo(redirectPath || '/')
       }
     } catch (error) {
       // Toast lỗi đã được ApiClient tự động hiển thị, ở đây không cần alert hay toast thủ công nữa

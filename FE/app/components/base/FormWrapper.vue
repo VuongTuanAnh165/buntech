@@ -99,22 +99,24 @@ defineExpose({ isSubmitting, stopSubmitting, setErrors, clearErrors })
     <slot />
 
     <!-- Actions -->
-    <div class="flex items-center justify-end gap-3 pt-4">
-      <UButton
-        v-if="showCancel"
-        :label="cancelLabel"
-        color="neutral"
-        variant="outline"
-        :disabled="isSubmitting"
-        @click="emit('cancel')"
-      />
-      <UButton
-        type="submit"
-        :label="submitLabel"
-        :icon="submitIcon"
-        :loading="isSubmitting"
-        :disabled="disabled || isSubmitting"
-      />
-    </div>
+    <slot name="actions" :is-submitting="isSubmitting">
+      <div class="flex items-center justify-end gap-3 pt-4">
+        <UButton
+          v-if="showCancel"
+          :label="cancelLabel"
+          color="neutral"
+          variant="outline"
+          :disabled="isSubmitting"
+          @click="emit('cancel')"
+        />
+        <UButton
+          type="submit"
+          :label="submitLabel"
+          :icon="submitIcon"
+          :loading="isSubmitting"
+          :disabled="disabled || isSubmitting"
+        />
+      </div>
+    </slot>
   </UForm>
 </template>
