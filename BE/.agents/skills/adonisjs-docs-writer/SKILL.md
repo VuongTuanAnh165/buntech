@@ -37,11 +37,13 @@ Exception handling provides a centralized system for managing errors...
 ### Code Examples
 
 **No sandwich pattern**: Never explain code both before AND after. Choose one:
+
 - Preferred: Explanation before code, with inline comments for details
 - Alternative: Only inline comments within code
 
-```markdown
+````markdown
 <!-- CORRECT: Explanation before + inline comments -->
+
 Named middleware receive options. This middleware checks roles and terminates early if unauthorized.
 
 ```ts title="app/middleware/authorize_middleware.ts"
@@ -56,16 +58,21 @@ export default class AuthorizeMiddleware {
   }
 }
 ```
+````
 
 <!-- WRONG: Sandwich pattern -->
+
 Let's build a middleware that checks roles.
 
 ```ts
-if (user.role !== options.role) { return response.unauthorized() }
+if (user.role !== options.role) {
+  return response.unauthorized()
+}
 ```
 
 This code checks whether the user's role matches the required role.
-```
+
+````
 
 **Complete, runnable examples**: Include all imports and realistic usage. Never use pseudo-code.
 
@@ -88,8 +95,10 @@ import PostsController from '#controllers/posts_controller'
 // Correct - lazy load
 import { controllers } from '#generated/controllers'
 router.get('/posts', [controllers.Posts, 'index'])
-```
+````
+
 :::
+
 ```
 
 ### Tone and Explanation
@@ -129,3 +138,4 @@ router.get('/posts', [controllers.Posts, 'index'])
 For comprehensive rules with examples, see [references/full-guidelines.md](references/full-guidelines.md).
 
 For the interview process when creating new documentation, see [references/interview-process.md](references/interview-process.md).
+```

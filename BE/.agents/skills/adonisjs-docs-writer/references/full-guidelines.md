@@ -68,13 +68,16 @@ Once you understand the basics...
 
 Provide step-by-step instructions using `::::steps` format:
 
-```markdown
+````markdown
 ::::steps
 
 :::step{title="Generate the controller"}
+
 ```bash
 node ace make:controller posts
 ```
+````
+
 :::
 
 :::step{title="Add your first action"}
@@ -82,7 +85,8 @@ node ace make:controller posts
 :::
 
 ::::
-```
+
+````
 
 ### LOW: Next Steps Navigation
 
@@ -105,9 +109,11 @@ Put custom code in `bin/console.ts` instead:
 ```ts title="bin/console.ts"
 // [!code ++]
 console.log('Setting up custom environment...')
-```
+````
+
 :::
-```
+
+````
 
 ### HIGH: Detailed Warnings (Why/What/Solution)
 
@@ -119,7 +125,7 @@ Explain why it's problematic, what happens if ignored, and how to fix it.
 :::tip
 Make sure to call `await next()`. Otherwise middleware logs appear out of sequence.
 :::
-```
+````
 
 ---
 
@@ -130,7 +136,8 @@ Make sure to call `await next()`. Otherwise middleware logs appear out of sequen
 Never explain code both before AND after. Choose one approach:
 
 **Option 1 (preferred)**: Explanation before, inline comments for details
-```markdown
+
+````markdown
 Named middleware receive a third parameter for options. This middleware checks options against user roles, terminates early if unauthorized, or calls next() to continue.
 
 ```ts title="app/middleware/authorize_middleware.ts"
@@ -144,7 +151,9 @@ export default class AuthorizeMiddleware {
   }
 }
 ```
-```
+````
+
+````
 
 **Option 2**: Only inline comments
 ```markdown
@@ -169,8 +178,9 @@ export default class LogMiddleware {
     logger.info(`${method} ${uri}: ${status}`)
   }
 }
-```
-```
+````
+
+````
 
 **WRONG** (sandwich pattern):
 ```markdown
@@ -179,10 +189,11 @@ Let's build a logging middleware.
 ```ts
 const startTime = process.hrtime()
 await next()
-```
+````
 
 The middleware captures start time before calling next(), then calculates duration.
-```
+
+````
 
 ### CRITICAL: Complete, Runnable Examples
 
@@ -196,7 +207,7 @@ export default class UsersController {
     return response.json({ users: [] })
   }
 }
-```
+````
 
 ### CRITICAL: File Paths on Every Code Block
 
@@ -306,17 +317,17 @@ node ace make:controller posts
 Use tables exclusively for comparing features or showing differences.
 
 ```markdown
-| Feature | v1.x | v2.x |
-|---------|------|------|
-| Async support | Callbacks | Promises |
-| Type safety | None | TypeScript |
+| Feature       | v1.x      | v2.x       |
+| ------------- | --------- | ---------- |
+| Async support | Callbacks | Promises   |
+| Type safety   | None      | TypeScript |
 ```
 
 ### HIGH: Options Component for References
 
 Use `::::options` for parameters, configuration, and properties.
 
-```markdown
+````markdown
 ::::options
 
 :::option{name="request" dataType="Request"}
@@ -324,9 +335,11 @@ Instance of the Request class containing HTTP request information.
 
 ```javascript
 app.get('/user/:id', (req, res) => {
-  console.log(req.request.url);
-});
+  console.log(req.request.url)
+})
 ```
+````
+
 :::
 
 :::option{name="response" dataType="Response"}
@@ -334,7 +347,8 @@ Instance of the Response class for sending HTTP responses.
 :::
 
 ::::
-```
+
+````
 
 ---
 
@@ -346,7 +360,7 @@ Include references to related documentation with descriptive link text.
 
 ```markdown
 See also: [Make controller command](../references/commands.md#makecontroller)
-```
+````
 
 ### MEDIUM: Inline Contextual Links
 
@@ -392,6 +406,7 @@ Use `:::note` for general information.
 ## Priority Checklist
 
 ### CRITICAL (Non-Negotiable)
+
 - [ ] Overview section at start
 - [ ] No sandwich pattern
 - [ ] Complete, runnable code
@@ -404,6 +419,7 @@ Use `:::note` for general information.
 - [ ] Strategic warnings
 
 ### HIGH (Essential)
+
 - [ ] Extensive context for complex topics
 - [ ] Complexity labels
 - [ ] Change highlighting
@@ -415,6 +431,7 @@ Use `:::note` for general information.
 - [ ] See also sections
 
 ### MEDIUM (Recommended)
+
 - [ ] Frontmatter
 - [ ] Common mistake anticipation
 - [ ] Progressive code complexity
@@ -424,6 +441,7 @@ Use `:::note` for general information.
 - [ ] Tips for gotchas
 
 ### LOW (Nice-to-Have)
+
 - [ ] Next steps navigation
 - [ ] Error symptom details
 - [ ] Notes for context

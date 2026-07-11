@@ -5,6 +5,7 @@ Use this process when creating new AdonisJS documentation from scratch.
 ## How This Works
 
 Ask questions one at a time to gather:
+
 1. What you're documenting
 2. Who your audience is
 3. What complexity levels to cover
@@ -21,6 +22,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 1. Topic Identification
 
 > What feature, concept, or topic are you documenting?
+>
 > - Name of the feature (e.g., 'Middleware', 'Controllers')
 > - One-sentence description of what it does
 > - Why this feature exists (what problem does it solve?)
@@ -30,6 +32,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 2. Audience & Complexity
 
 > Who is the primary audience?
+>
 > - Beginners, intermediate, or advanced developers?
 > - Should this cover multiple skill levels?
 > - Prerequisites they should know first?
@@ -39,6 +42,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 3. Core Concept & Structure
 
 > Help me understand the feature's structure:
+>
 > - What are the 2-3 most important things developers need to know?
 > - Is there a natural progression from simple to complex?
 > - What's the simplest working example?
@@ -48,6 +52,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 4. Practical Example
 
 > Let's build a realistic example:
+>
 > - What real-world scenario? (Posts, Users, Products—not Foo/Bar)
 > - What would the route look like?
 > - What would the controller method look like?
@@ -58,6 +63,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 5. Code Walkthrough
 
 > For the simplest version:
+>
 > - What imports are needed?
 > - What's the complete route definition?
 > - What's the complete controller method?
@@ -68,6 +74,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 6. Progressive Complexity
 
 > What are the next levels of complexity? For each:
+>
 > - What additional capability does it add?
 > - Concrete example of when you'd use it?
 > - Any new code or configuration required?
@@ -77,6 +84,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 7. Common Mistakes & Gotchas
 
 > What mistakes do developers commonly make?
+>
 > - What error or confusion do they experience?
 > - Why does this happen?
 > - What's the correct approach?
@@ -86,6 +94,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 8. Warnings & Pitfalls
 
 > Are there situations where this could cause problems?
+>
 > - What could go wrong?
 > - What are the consequences?
 > - How do you avoid or fix it?
@@ -95,6 +104,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 9. Configuration & Setup
 
 > Is any configuration required before using this?
+>
 > - What file(s) need to be configured?
 > - What are key configuration options?
 > - What are sensible defaults?
@@ -105,6 +115,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 10. Related Concepts
 
 > What other documentation should we link to?
+>
 > - Prerequisites readers should understand first?
 > - Related features that work well with this?
 > - Advanced topics they might explore next?
@@ -114,6 +125,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 11. Testing & Verification
 
 > How can developers verify this is working?
+>
 > - What should they see when it works?
 > - What simple test can they run?
 > - Any debugging tips?
@@ -123,6 +135,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 12. Real-World Use Cases
 
 > What are 2-3 realistic scenarios?
+>
 > - Describe the business context
 > - Why is this feature the right solution?
 > - Any industry-specific examples?
@@ -132,6 +145,7 @@ After gathering information, write documentation following priority-ranked guide
 ### 13. Performance & Best Practices
 
 > Any performance considerations or best practices?
+>
 > - What should developers be aware of?
 > - Any optimization tips?
 > - Common anti-patterns to avoid?
@@ -145,6 +159,7 @@ After gathering information, write documentation following priority-ranked guide
 Write documentation in phases:
 
 ### Phase 1: Critical Elements
+
 1. Overview section with context
 2. Complete, runnable code examples with file paths
 3. Necessary warnings with solutions
@@ -154,6 +169,7 @@ Write documentation in phases:
 7. Confident language throughout
 
 ### Phase 2: High Priority Elements
+
 8. Extensive context for complex concepts
 9. Change highlighting for code modifications
 10. Detailed warnings (Why/What/Solution)
@@ -163,11 +179,13 @@ Write documentation in phases:
 14. See also sections
 
 ### Phase 3: Medium Priority Elements
+
 15. Tips for common mistakes
 16. CLI examples with output
 17. Progressive complexity examples
 
 ### Phase 4: Low Priority Polish
+
 18. Next steps navigation
 19. Note boxes for additional context
 

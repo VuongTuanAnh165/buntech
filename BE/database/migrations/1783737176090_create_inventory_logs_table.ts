@@ -7,7 +7,13 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
-      table.integer('material_id').unsigned().references('id').inTable('raw_materials').onDelete('CASCADE')
+      table
+        .integer('material_id')
+        .unsigned()
+        .references('id')
+        .inTable('raw_materials')
+        .onDelete('CASCADE')
+        .index()
       table.enum('type', Object.values(InventoryType)).notNullable()
       table.decimal('quantity', 10, 2).notNullable()
       table.string('reference_id', 100).nullable()

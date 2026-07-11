@@ -8,8 +8,21 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
-      table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
-      table.integer('order_id').unsigned().references('id').inTable('orders').onDelete('SET NULL').nullable()
+      table
+        .integer('user_id')
+        .unsigned()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
+        .index()
+      table
+        .integer('order_id')
+        .unsigned()
+        .references('id')
+        .inTable('orders')
+        .onDelete('SET NULL')
+        .index()
+        .nullable()
       table.decimal('amount', 12, 2).notNullable()
       table.enum('type', Object.values(TransactionType)).notNullable()
       table.enum('payment_method', Object.values(PaymentMethod)).notNullable()

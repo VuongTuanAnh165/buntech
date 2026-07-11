@@ -10,9 +10,29 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
-      table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
-      table.integer('shipping_address_id').unsigned().references('id').inTable('addresses').onDelete('SET NULL').nullable()
-      table.integer('driver_id').unsigned().references('id').inTable('users').onDelete('SET NULL').nullable()
+      table
+        .integer('user_id')
+        .unsigned()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
+        .index()
+      table
+        .integer('shipping_address_id')
+        .unsigned()
+        .references('id')
+        .inTable('addresses')
+        .onDelete('SET NULL')
+        .index()
+        .nullable()
+      table
+        .integer('driver_id')
+        .unsigned()
+        .references('id')
+        .inTable('users')
+        .onDelete('SET NULL')
+        .index()
+        .nullable()
       table.date('delivery_date').notNullable()
       table.decimal('total_amount', 12, 2).notNullable()
       table.enum('status', Object.values(OrderStatus)).defaultTo(OrderStatus.PENDING)

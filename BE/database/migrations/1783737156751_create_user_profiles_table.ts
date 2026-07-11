@@ -5,7 +5,14 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE').primary()
+      table
+        .integer('user_id')
+        .unsigned()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
+        .index()
+        .primary()
       table.decimal('current_debt', 12, 2).defaultTo(0)
       table.decimal('debt_limit', 12, 2).defaultTo(0)
       table.string('store_name', 255).nullable()
