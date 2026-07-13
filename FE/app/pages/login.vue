@@ -48,55 +48,49 @@ const onSubmit = handleSubmit(
 </script>
 
 <template>
-  <div class="flex min-h-dvh bg-slate-950">
-    <!-- CỘT TRÁI: Ảnh nền (Ẩn trên màn hình nhỏ) -->
-    <div class="relative hidden lg:block lg:w-1/2">
-      <!-- Dùng NuxtImg thay cho img theo Rule 9 của AGENTS.md -->
-      <NuxtImg
-        src="/images/login_bg.webp"
-        alt="Space Theme Background"
-        class="absolute inset-0 h-full w-full object-cover"
-        format="webp"
-      />
-      <!-- Gradient tối mờ giúp text dễ đọc hơn -->
-      <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
+  <div class="relative flex min-h-dvh items-center justify-center p-4 sm:p-0">
+    <!-- Ảnh nền -->
+    <!-- Dùng NuxtImg thay cho img theo Rule 9 của AGENTS.md -->
+    <NuxtImg
+      src="/images/login_bg.webp"
+      alt="Login Background"
+      class="absolute inset-0 h-full w-full object-cover"
+      format="webp"
+    />
 
-      <!-- Content đè lên ảnh -->
-      <div class="absolute inset-0 flex flex-col items-start justify-between p-12">
-        <div class="flex items-center gap-2">
-          <UIcon name="i-lucide-wheat" class="size-8 text-white" />
-          <span class="text-2xl font-bold text-white">BunTech</span>
-        </div>
+    <!-- Lớp phủ màu để dễ đọc hơn -->
+    <div class="absolute inset-0"></div>
 
-        <div class="mb-10 max-w-lg text-white">
-          <h1 class="mb-4 text-5xl font-bold tracking-tight">BẮT ĐẦU HÀNH TRÌNH CỦA BẠN!</h1>
-          <p class="text-xl text-gray-300">
-            Khám phá không gian công nghệ với hệ thống quản lý xưởng bún thông minh.
+    <!-- Container theo chuẩn login-card -->
+    <div class="z-10 w-full max-w-[450px]">
+      <div class="mb-6 flex justify-center">
+        <NuxtLink to="/">
+          <NuxtImg
+            src="/images/logo.webp"
+            alt="Logo"
+            class="h-[50px] w-auto"
+            format="webp"
+          />
+        </NuxtLink>
+      </div>
+
+      <UCard
+        :ui="{
+          base: 'w-full login-main',
+          background: 'bg-white',
+          ring: 'ring-0',
+          shadow: 'shadow-2xl',
+          rounded: 'rounded-xl',
+          body: { padding: 'p-8 sm:p-10' }
+        }"
+      >
+        <div class="mb-6">
+          <h4 class="mb-2 text-2xl font-semibold text-slate-800 dark:text-white">
+            Đăng nhập tài khoản
+          </h4>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Nhập số điện thoại & mật khẩu để đăng nhập
           </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- CỘT PHẢI: Form Đăng nhập -->
-    <div
-      class="relative flex w-full items-center justify-center overflow-hidden p-6 sm:p-12 lg:w-1/2"
-    >
-      <!-- Ảnh nền cho Mobile (chỉ hiện trên màn nhỏ, ở phần trên cùng) -->
-      <div class="absolute inset-x-0 top-0 -z-10 h-1/2 lg:hidden">
-        <!-- Dùng NuxtImg thay cho img theo Rule 9 của AGENTS.md -->
-        <NuxtImg
-          src="/images/login_bg.webp"
-          alt="Space Theme Background Mobile"
-          class="h-full w-full object-cover opacity-80"
-          format="webp"
-        />
-        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950" />
-      </div>
-
-      <!-- Form Container -->
-      <div class="z-10 w-full max-w-md">
-        <div class="mt-10 mb-6 text-left lg:mt-0">
-          <h2 class="mb-2 text-4xl font-bold tracking-wide text-white uppercase">ĐĂNG NHẬP</h2>
         </div>
 
         <!-- Dùng FormWrapper theo Rule 7 của AGENTS.md -->
@@ -104,43 +98,27 @@ const onSubmit = handleSubmit(
           ref="formRef"
           :schema="schema"
           :state="state"
-          form-class="space-y-5"
+          form-class="space-y-4"
           @submit="onSubmit"
         >
-          <UFormField name="phoneNumber">
+          <UFormField label="Số điện thoại" name="phoneNumber">
             <UInput
               v-model="state.phoneNumber"
               placeholder="Nhập số điện thoại"
-              icon="i-lucide-phone"
-              size="xl"
-              variant="soft"
-              class="w-full text-white"
-              :ui="{
-                base: 'bg-slate-900/80 backdrop-blur-sm border-slate-800 focus:border-primary-500 h-12'
-              }"
+              size="lg"
+              class="w-full"
+              :ui="{ base: 'h-11' }"
             />
           </UFormField>
 
-          <UFormField name="password">
-            <template #hint>
-              <ULink
-                to="/forgot-password"
-                class="text-primary-400 hover:text-primary-300 text-sm font-medium"
-              >
-                Quên mật khẩu?
-              </ULink>
-            </template>
+          <UFormField label="Mật khẩu" name="password">
             <UInput
               v-model="state.password"
               :type="showPassword ? 'text' : 'password'"
-              placeholder="Nhập mật khẩu"
-              icon="i-lucide-lock"
-              size="xl"
-              variant="soft"
-              class="w-full text-white"
-              :ui="{
-                base: 'bg-slate-900/80 backdrop-blur-sm border-slate-800 focus:border-primary-500 h-12'
-              }"
+              placeholder="*********"
+              size="lg"
+              class="w-full"
+              :ui="{ base: 'h-11' }"
             >
               <template #trailing>
                 <UButton
@@ -148,66 +126,86 @@ const onSubmit = handleSubmit(
                   variant="ghost"
                   :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
                   :padded="false"
-                  class="text-gray-400 hover:text-white"
+                  class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                   @click="togglePassword"
                 />
               </template>
             </UInput>
           </UFormField>
 
+          <div class="mt-2 flex items-center justify-between">
+            <UCheckbox id="remember" name="remember" label="Ghi nhớ mật khẩu" />
+            <ULink
+              to="/forgot-password"
+              class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium"
+            >
+              Quên mật khẩu?
+            </ULink>
+          </div>
+
           <!-- Tận dụng slot actions của FormWrapper (vừa bổ sung) để custom nút submit -->
           <template #actions="{ isSubmitting }">
-            <div class="w-full pt-2">
+            <div class="mt-5">
               <UButton
                 type="submit"
                 label="Đăng nhập"
                 color="primary"
-                variant="solid"
                 block
-                size="xl"
+                size="lg"
                 :loading="isSubmitting"
-                class="border-none bg-gradient-to-r from-purple-600 to-blue-600 py-3 font-semibold text-white hover:from-purple-500 hover:to-blue-500"
+                class="h-11 text-base font-medium shadow-md"
               />
             </div>
           </template>
         </BaseFormWrapper>
 
-        <div class="mt-8 mb-4">
-          <div class="relative mb-6 flex items-center">
-            <div class="flex-grow border-t border-slate-800" />
-            <span class="mx-4 flex-shrink-0 text-sm text-slate-400">Hoặc tiếp tục với</span>
-            <div class="flex-grow border-t border-slate-800" />
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
+        <div class="mt-8">
+          <h6 class="mb-4 text-center text-sm font-medium text-slate-500">Hoặc đăng nhập bằng</h6>
+          <div class="flex justify-center gap-3">
             <UButton
-              label="Google"
-              icon="i-simple-icons-google"
+              icon="i-simple-icons-linkedin"
               color="neutral"
               variant="soft"
-              block
-              size="lg"
-              class="border border-slate-800 bg-slate-900/80 py-2.5 text-white backdrop-blur-sm hover:bg-slate-800"
+              target="_blank"
+              to="https://www.linkedin.com/login"
+              class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 p-3"
             />
             <UButton
-              label="Facebook"
+              icon="i-simple-icons-x"
+              color="neutral"
+              variant="soft"
+              target="_blank"
+              to="https://twitter.com/login"
+              class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 p-3"
+            />
+            <UButton
               icon="i-simple-icons-facebook"
               color="neutral"
               variant="soft"
-              block
-              size="lg"
-              class="border border-slate-800 bg-slate-900/80 py-2.5 text-white backdrop-blur-sm hover:bg-slate-800"
+              target="_blank"
+              to="https://www.facebook.com/"
+              class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 p-3"
+            />
+            <UButton
+              icon="i-simple-icons-google"
+              color="neutral"
+              variant="soft"
+              target="_blank"
+              to="https://www.google.com/"
+              class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 p-3"
             />
           </div>
-
-          <p class="mt-8 text-center text-sm text-slate-400">
-            Chưa có tài khoản?
-            <ULink to="/signup" class="text-primary-400 hover:text-primary-300 font-medium"
-              >Đăng ký ngay</ULink
-            >
-          </p>
         </div>
-      </div>
+
+        <p class="mt-8 text-center text-sm text-slate-600 dark:text-slate-400">
+          Chưa có tài khoản?
+          <ULink
+            to="/signup"
+            class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 ml-1 font-medium"
+            >Tạo tài khoản</ULink
+          >
+        </p>
+      </UCard>
     </div>
   </div>
 </template>
