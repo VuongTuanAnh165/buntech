@@ -12,7 +12,7 @@ export default class AuthService {
   /**
    * Đăng nhập: Cấp cả Opaque Token (Access) và Custom Refresh Token
    */
-  public async login(phoneNumber: string, passwordText: string) {
+  public async login(phoneNumber: string, passwordText: string, rememberMe?: boolean) {
     // 1. Tìm user
     const user = await User.findBy('phone_number', phoneNumber)
     if (!user) {
@@ -31,12 +31,15 @@ export default class AuthService {
       expiresIn: '1 hour',
     })
 
-    // 4. Tạo Refresh Token ngẫu nhiên (hạn 30 ngày)
+    // 4. Tạo Refresh Token ngẫu nhiên (hạn 30 ngày nếu rememberMe, ngược lại 1 ngày)
     const tokenString = stringHelpers.generateRandom(64)
     const refreshToken = new RefreshToken()
     refreshToken.userId = user.id
     refreshToken.token = tokenString
-    refreshToken.expiresAt = DateTime.now().plus({ days: 30 })
+
+    const expiresDays = rememberMe ? 30 : 1
+    refreshToken.expiresAt = DateTime.now().plus({ days: expiresDays })
+
     refreshToken.isRevoked = false
     await refreshToken.save()
 

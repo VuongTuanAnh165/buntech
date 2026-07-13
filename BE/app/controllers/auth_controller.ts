@@ -16,7 +16,11 @@ export default class AuthController extends BaseController {
   async login(ctx: HttpContext) {
     const payload = await ctx.request.validateUsing(loginValidator)
 
-    const tokens = await this.authService.login(payload.phoneNumber, payload.password)
+    const tokens = await this.authService.login(
+      payload.phoneNumber,
+      payload.password,
+      payload.rememberMe
+    )
 
     // Trả về theo format `data: { accessToken, refreshToken }` (Không message)
     return this.sendSuccess(ctx.response, tokens)
@@ -48,12 +52,12 @@ export default class AuthController extends BaseController {
       role: user.role,
       profile: user.profile
         ? {
-          avatarUrl: user.profile.avatarUrl,
-          storeName: user.profile.storeName,
-          currentDebt: user.profile.currentDebt,
-          debtLimit: user.profile.debtLimit,
-          zaloUserId: user.profile.zaloUserId,
-        }
+            avatarUrl: user.profile.avatarUrl,
+            storeName: user.profile.storeName,
+            currentDebt: user.profile.currentDebt,
+            debtLimit: user.profile.debtLimit,
+            zaloUserId: user.profile.zaloUserId,
+          }
         : null,
     }
 

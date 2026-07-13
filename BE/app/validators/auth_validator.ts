@@ -7,6 +7,7 @@ export const loginValidator = vine.compile(
   vine.object({
     phoneNumber: vine.string().mobile({ strictMode: false }), // Relaxed strictMode based on local context
     password: vine.string().minLength(6),
+    rememberMe: vine.boolean().optional(),
   })
 )
 
