@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { vi } from '@nuxt/ui/locale'
+
+await callOnce('master-data-sync', async () => {
+  await useMasterData().initSync()
+})
 </script>
 
 <template>
