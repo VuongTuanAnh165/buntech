@@ -31,7 +31,10 @@ export default class MasterDataService {
 
     // Hash the response with a prefix to force cache invalidation when structure changes
     const payloadString = JSON.stringify(rawData)
-    const currentHash = crypto.createHash('sha256').update('v2_wards_' + payloadString).digest('hex')
+    const currentHash = crypto
+      .createHash('sha256')
+      .update('v2_wards_' + payloadString)
+      .digest('hex')
 
     // Get the latest hash from master_data_syncs
     const lastSync = await MasterDataSync.query()
@@ -97,7 +100,7 @@ export default class MasterDataService {
       )
 
       const codesToDelete: number[] = []
-      const newItemsMap = new Map(itemsToUpsert.map(item => [item.code, item]))
+      const newItemsMap = new Map(itemsToUpsert.map((item) => [item.code, item]))
 
       for (const record of existingRecords) {
         if (!newCodes.has(record.code)) {

@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import MasterDataService from '#services/master_data_service'
+import { HttpStatus } from '#enums/http_status'
 
 @inject()
 export default class MasterDataController {
@@ -28,7 +29,7 @@ export default class MasterDataController {
     // Check ETag
     const ifNoneMatch = request.header('if-none-match')
     if (currentVersion && ifNoneMatch === currentVersion) {
-      return response.status(304).send('') // Not Modified
+      return response.status(HttpStatus.NOT_MODIFIED).send('') // Not Modified
     }
 
     const divisionsTree = await this.masterDataService.getDivisionsTree()

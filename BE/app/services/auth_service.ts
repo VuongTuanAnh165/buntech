@@ -6,6 +6,7 @@ import BusinessException from '#exceptions/business_exception'
 import { Exception } from '@adonisjs/core/exceptions'
 import { DateTime } from 'luxon'
 import stringHelpers from '@adonisjs/core/helpers/string'
+import { HttpStatus } from '#enums/http_status'
 
 @inject()
 export default class AuthService {
@@ -16,14 +17,20 @@ export default class AuthService {
     // 1. Tìm user
     const user = await User.findBy('phone_number', phoneNumber)
     if (!user) {
-      throw new BusinessException('Số điện thoại hoặc mật khẩu không chính xác', 400)
+      throw new BusinessException(
+        'Số điện thoại hoặc mật khẩu không chính xác',
+        HttpStatus.BAD_REQUEST
+      )
     }
 
     // 2. Kiểm tra mật khẩu
     // `withAuthFinder(hash)` mixin adds static `verifyCredentials` but doing it directly is clear:
     const isPasswordValid = await hash.verify(user.password, passwordText)
     if (!isPasswordValid) {
-      throw new BusinessException('Số điện thoại hoặc mật khẩu không chính xác', 400)
+      throw new BusinessException(
+        'Số điện thoại hoặc mật khẩu không chính xác',
+        HttpStatus.BAD_REQUEST
+      )
     }
 
     // 3. Tạo Opaque Access Token (hạn 1 tiếng)
@@ -59,15 +66,15 @@ export default class AuthService {
     // 2. Kiểm tra hợp lệ
     if (!refreshTokenRecord) {
       // Đúng mã HTTP 401 như FE mong đợi để ép văng ra luồng Force Logout
-      throw new Exception('Token không hợp lệ hoặc đã hết hạn', { status: 401 })
+      throw new Exception('Token không hợp lệ hoặc đã hết hạn', { status: HttpStatus.UNAUTHORIZED })
     }
 
     if (refreshTokenRecord.isRevoked) {
-      throw new Exception('Token đã bị thu hồi', { status: 401 })
+      throw new Exception('Token đã bị thu hồi', { status: HttpStatus.UNAUTHORIZED })
     }
 
     if (refreshTokenRecord.expiresAt < DateTime.now()) {
-      throw new Exception('Token đã hết hạn', { status: 401 })
+      throw new Exception('Token đã hết hạn', { status: HttpStatus.UNAUTHORIZED })
     }
 
     // 3. Lấy User tương ứng
