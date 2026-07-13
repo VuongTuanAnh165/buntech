@@ -18,11 +18,12 @@ const { login } = useAuth()
 
 const schema = z.object({
   phoneNumber: z.string().min(1, 'Vui lòng nhập số điện thoại'),
-  password: z.string().min(1, 'Vui lòng nhập mật khẩu')
+  password: z.string().min(1, 'Vui lòng nhập mật khẩu'),
+  rememberMe: z.boolean().optional()
 })
 
 type Schema = z.output<typeof schema>
-const state = reactive<Partial<Schema>>({ phoneNumber: '', password: '' })
+const state = reactive<Partial<Schema>>({ phoneNumber: '', password: '', rememberMe: false })
 
 const showPassword = ref(false)
 const togglePassword = () => {
@@ -109,7 +110,7 @@ const socialProviders = [
       </UFormField>
 
       <div class="mt-2 flex items-center justify-between">
-        <UCheckbox id="remember" name="remember" label="Ghi nhớ mật khẩu" class="cursor-pointer" />
+        <UCheckbox id="rememberMe" v-model="state.rememberMe" name="rememberMe" label="Ghi nhớ mật khẩu" class="cursor-pointer" />
         <ULink
           to="/forgot-password"
           class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium cursor-pointer"

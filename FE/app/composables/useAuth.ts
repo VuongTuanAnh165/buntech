@@ -13,9 +13,11 @@ export const useAuth = () => {
     try {
       const res = await AuthService.login(payload)
       if (res.data) {
+        const cookieOptions = payload.rememberMe ? { maxAge: 60 * 60 * 24 * 30 } : {}
+        
         // Lưu trữ Tokens vào Cookie an toàn
-        useCookie('auth_token').value = res.data.accessToken
-        useCookie('refresh_token').value = res.data.refreshToken
+        useCookie('auth_token', cookieOptions).value = res.data.accessToken
+        useCookie('refresh_token', cookieOptions).value = res.data.refreshToken
 
         // Đọc query param `redirect` để điều hướng về trang trước đó
         const route = useRoute()

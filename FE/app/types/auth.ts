@@ -1,6 +1,7 @@
 export interface LoginPayload {
-  email: string
+  phoneNumber: string
   password: string
+  rememberMe?: boolean
 }
 
 export interface LoginResponse {
