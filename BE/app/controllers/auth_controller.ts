@@ -48,12 +48,12 @@ export default class AuthController extends BaseController {
       role: user.role,
       profile: user.profile
         ? {
-            avatarUrl: user.profile.avatarUrl,
-            storeName: user.profile.storeName,
-            currentDebt: user.profile.currentDebt,
-            debtLimit: user.profile.debtLimit,
-            zaloUserId: user.profile.zaloUserId,
-          }
+          avatarUrl: user.profile.avatarUrl,
+          storeName: user.profile.storeName,
+          currentDebt: user.profile.currentDebt,
+          debtLimit: user.profile.debtLimit,
+          zaloUserId: user.profile.zaloUserId,
+        }
         : null,
     }
 
