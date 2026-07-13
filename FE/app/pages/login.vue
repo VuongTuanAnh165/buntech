@@ -101,7 +101,7 @@ const socialProviders = [
               variant="ghost"
               :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
               :padded="false"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
               @click="togglePassword"
             />
           </template>
@@ -109,10 +109,10 @@ const socialProviders = [
       </UFormField>
 
       <div class="mt-2 flex items-center justify-between">
-        <UCheckbox id="remember" name="remember" label="Ghi nhớ mật khẩu" />
+        <UCheckbox id="remember" name="remember" label="Ghi nhớ mật khẩu" class="cursor-pointer" />
         <ULink
           to="/forgot-password"
-          class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium"
+          class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-medium cursor-pointer"
         >
           Quên mật khẩu?
         </ULink>
@@ -128,7 +128,7 @@ const socialProviders = [
             block
             size="lg"
             :loading="isSubmitting"
-            class="h-11 text-base font-medium shadow-md"
+            class="h-11 text-base font-medium shadow-md cursor-pointer"
           />
         </div>
       </template>
@@ -145,7 +145,7 @@ const socialProviders = [
           variant="soft"
           target="_blank"
           :to="provider.to"
-          class="bg-slate-100 p-3 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700"
+          class="bg-slate-100 p-3 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 cursor-pointer"
         />
       </div>
     </div>
@@ -154,7 +154,7 @@ const socialProviders = [
       Chưa có tài khoản?
       <ULink
         to="/signup"
-        class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 ml-1 font-medium"
+        class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 ml-1 font-medium cursor-pointer"
         >Tạo tài khoản</ULink
       >
     </p>
