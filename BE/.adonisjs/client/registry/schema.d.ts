@@ -43,4 +43,28 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/auth_controller').default['me']>>>
     }
   }
+  'master_data.get_divisions_version': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/master-data/divisions/version'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/master_data_controller').default['getDivisionsVersion']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/master_data_controller').default['getDivisionsVersion']>>>
+    }
+  }
+  'master_data.get_divisions': {
+    methods: ["GET","HEAD"]
+    pattern: '/api/v1/master-data/divisions'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/master_data_controller').default['getDivisions']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/master_data_controller').default['getDivisions']>>>
+    }
+  }
 }

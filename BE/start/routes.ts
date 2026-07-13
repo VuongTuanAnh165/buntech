@@ -22,5 +22,15 @@ router
     router
       .get('/auth/me', [() => import('#controllers/auth_controller'), 'me'])
       .use(middleware.auth())
+
+    // Master Data
+    router.get('/master-data/divisions/version', [
+      () => import('#controllers/master_data_controller'),
+      'getDivisionsVersion',
+    ])
+    router.get('/master-data/divisions', [
+      () => import('#controllers/master_data_controller'),
+      'getDivisions',
+    ])
   })
   .prefix('/api/v1')

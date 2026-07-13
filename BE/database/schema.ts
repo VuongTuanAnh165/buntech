@@ -13,11 +13,11 @@ export class AddressSchema extends BaseModel {
     'createdAt',
     'createdBy',
     'deletedAt',
-    'district',
     'id',
     'isDefault',
     'latitude',
     'longitude',
+    'province',
     'updatedAt',
     'updatedBy',
     'userId',
@@ -32,8 +32,6 @@ export class AddressSchema extends BaseModel {
   declare createdBy: number | null
   @column.dateTime()
   declare deletedAt: DateTime | null
-  @column()
-  declare district: string | null
   @column({ isPrimary: true })
   declare id: number
   @column()
@@ -42,6 +40,8 @@ export class AddressSchema extends BaseModel {
   declare latitude: string | null
   @column()
   declare longitude: string | null
+  @column()
+  declare province: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
@@ -50,6 +50,39 @@ export class AddressSchema extends BaseModel {
   declare userId: number | null
   @column()
   declare ward: string | null
+}
+
+export class AdministrativeDivisionSchema extends BaseModel {
+  static $columns = [
+    'code',
+    'codename',
+    'createdAt',
+    'divisionType',
+    'level',
+    'name',
+    'parentCode',
+    'phoneCode',
+    'updatedAt',
+  ] as const
+  $columns = AdministrativeDivisionSchema.$columns
+  @column({ isPrimary: true })
+  declare code: number
+  @column()
+  declare codename: string
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare divisionType: string
+  @column()
+  declare level: string
+  @column()
+  declare name: string
+  @column()
+  declare parentCode: number | null
+  @column()
+  declare phoneCode: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class AuthAccessTokenSchema extends BaseModel {
@@ -224,6 +257,33 @@ export class InventoryLogSchema extends BaseModel {
   declare updatedAt: DateTime | null
   @column()
   declare updatedBy: number | null
+}
+
+export class MasterDataSyncSchema extends BaseModel {
+  static $columns = [
+    'createdAt',
+    'id',
+    'sourceHash',
+    'status',
+    'syncedAt',
+    'type',
+    'updatedAt',
+  ] as const
+  $columns = MasterDataSyncSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare sourceHash: string
+  @column()
+  declare status: string
+  @column.dateTime()
+  declare syncedAt: DateTime
+  @column()
+  declare type: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class OrderItemSchema extends BaseModel {

@@ -7,4 +7,8 @@ export interface ApiDefinition {
     refresh: typeof routes['auth.refresh']
     me: typeof routes['auth.me']
   }
+  masterData: {
+    getDivisionsVersion: typeof routes['master_data.get_divisions_version']
+    getDivisions: typeof routes['master_data.get_divisions']
+  }
 }

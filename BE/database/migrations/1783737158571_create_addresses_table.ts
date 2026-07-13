@@ -13,7 +13,7 @@ export default class extends BaseSchema {
         .inTable('users')
         .onDelete('CASCADE')
         .index()
-      table.string('district', 100).nullable()
+      table.string('province', 100).nullable()
       table.string('ward', 100).nullable()
       table.text('address_line').nullable()
       table.decimal('latitude', 10, 8).nullable()
