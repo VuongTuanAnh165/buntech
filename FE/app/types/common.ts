@@ -1,3 +1,5 @@
+import type { Role } from '~/enums/role'
+
 /**
  * Entity gốc — Mọi entity trong hệ thống đều kế thừa từ đây.
  */
@@ -32,14 +34,21 @@ export interface ConfirmDialogOptions {
   icon?: string
 }
 
+export interface CurrentUserProfile {
+  avatarUrl: string | null
+  storeName: string | null
+  currentDebt: string | null
+  debtLimit: string | null
+  zaloUserId: string | null
+}
+
 /**
  * Thông tin User hiện tại (lưu trong Pinia Store).
  */
 export interface CurrentUser {
   id: string | number
-  email: string
   fullName: string
-  phone?: string
-  avatar?: string
-  role: 'admin' | 'driver' | 'wholesale_customer'
+  phoneNumber: string
+  role: Role
+  profile: CurrentUserProfile | null
 }

@@ -18,7 +18,7 @@
     />
 
     <!-- Lớp phủ màu để dễ đọc hơn -->
-    <div class="absolute inset-0"></div>
+    <div class="absolute inset-0" />
 
     <!-- Container theo chuẩn login-card -->
     <div class="z-10 w-full max-w-[450px]">

@@ -24,19 +24,24 @@ export class ApiClient {
     opts?: FetchOptions<R>
   ): Promise<T> {
     const config = useRuntimeConfig()
+    const token = useCookie('auth_token').value
+    let toast: any = null
+    
+    if (import.meta.client) {
+      try {
+        toast = useToast()
+      } catch {
+        // Bỏ qua nếu không có context
+      }
+    }
 
     const defaultOptions: FetchOptions<R> = {
       baseURL: config.public.apiBaseUrl as string,
       method,
       onRequest({ options }) {
-        if (import.meta.client) {
-          try {
-            ;(options as any).toast = useToast()
-          } catch {
-            // Bỏ qua nếu không lấy được context
-          }
+        if (toast) {
+          ;(options as any).toast = toast
         }
-        const token = useCookie('auth_token').value
         if (token) {
           options.headers = new Headers(options.headers || {})
           options.headers.set('Authorization', `Bearer ${token}`)
@@ -44,15 +49,15 @@ export class ApiClient {
       },
       onResponse({ response, options }) {
         if (import.meta.client) {
-          const toast = (options as any).toast
+          const toastRef = (options as any).toast
           if (
-            toast &&
+            toastRef &&
             response.status >= HttpStatus.OK &&
             response.status < HttpStatus.MULTIPLE_CHOICES
           ) {
             const message = response._data?.message
             if (message) {
-              toast.add({ title: 'Thành công', description: message, color: 'success' })
+              toastRef.add({ title: 'Thành công', description: message, color: 'success' })
             }
           }
         }
@@ -89,57 +94,64 @@ export class ApiClient {
           }
         }
 
-        // 1. CƠ CHẾ TỰ ĐỘNG REFRESH TOKEN KHI GẶP LỖI UNAUTHORIZED
+        // 2. CƠ CHẾ TỰ ĐỘNG REFRESH TOKEN KHI GẶP LỖI UNAUTHORIZED
         if (response.status === HttpStatus.UNAUTHORIZED) {
           // Nếu đang có tiến trình refresh token chạy rồi, ta đưa request này vào Queue chờ
           if (isRefreshing) {
             return new Promise((resolve, reject) => {
               refreshQueue.push({ resolve, reject })
             }).then(() => {
-              // Sau khi refresh xong, gọi lại API vừa bị kẹt với token mới
               return $fetch(request as string, options as any)
             })
           }
 
-          const originalRequest = request
           isRefreshing = true
-
+          const originalRequest = request
+          
+          // Lấy Nuxt App context để chạy an toàn bên trong callback async
+          const nuxtApp = tryUseNuxtApp()
+          
           try {
-            // Lấy refresh_token từ cookie
-            const refreshTokenStr = useCookie('refresh_token').value
-            if (!refreshTokenStr) throw new Error('No refresh token available')
+            const runRefresh = async () => {
+              const refreshTokenStr = useCookie('refresh_token').value
+              if (!refreshTokenStr) throw new Error('No refresh token available')
 
-            // Fetch trực tiếp để lấy token mới (Thay URL này bằng endpoint thật của hệ thống BE)
-            const refreshRes = await $fetch<ApiResponse<LoginResponse>>('/auth/refresh', {
-              baseURL: config.public.apiBaseUrl as string,
-              method: 'POST',
-              body: { refreshToken: refreshTokenStr }
-            })
+              const refreshRes = await $fetch<ApiResponse<LoginResponse>>('/auth/refresh', {
+                baseURL: (useRuntimeConfig().public.apiBaseUrl as string),
+                method: 'POST',
+                body: { refreshToken: refreshTokenStr }
+              })
 
-            const newToken = refreshRes.data?.accessToken
+              const newToken = refreshRes.data?.accessToken
+              if (newToken) {
+                useCookie('auth_token').value = newToken
+                options.headers = new Headers(options.headers || {})
+                options.headers.set('Authorization', `Bearer ${newToken}`)
+              }
+              return newToken
+            }
+
+            // Gọi runRefresh bên trong context nếu có, hoặc gọi thường
+            const newToken = nuxtApp 
+              ? await nuxtApp.runWithContext(runRefresh) 
+              : await runRefresh()
+
             if (newToken) {
-              const authCookie = useCookie('auth_token')
-              authCookie.value = newToken
-
-              // Cập nhật lại header của request hiện tại
-              options.headers = new Headers(options.headers || {})
-              options.headers.set('Authorization', `Bearer ${newToken}`)
-
-              // Xả hàng đợi: Báo cho các request đang chờ biết là đã refresh xong
               refreshQueue.forEach((q) => q.resolve())
               refreshQueue = []
-
-              // Gọi lại API gốc
               return $fetch(originalRequest as string, options as any)
             }
           } catch (error) {
-            // Nếu lấy token mới thất bại -> Clear queue, xóa cookie và logout
             refreshQueue.forEach((q) => q.reject(error))
             refreshQueue = []
-
-            useCookie('auth_token').value = null
-            useCookie('refresh_token').value = null
-            navigateTo('/login')
+            
+            if (nuxtApp) {
+              nuxtApp.runWithContext(() => {
+                useCookie('auth_token').value = null
+                useCookie('refresh_token').value = null
+                navigateTo('/login')
+              })
+            }
           } finally {
             isRefreshing = false
           }

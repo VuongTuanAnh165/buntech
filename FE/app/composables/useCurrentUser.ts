@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import type { CurrentUser } from '~/types/common'
-import type { ApiResponse } from '~/types/api'
+import { AuthService } from '~/services/authService'
+
+import { Role } from '~/enums/role'
 
 /**
  * Pinia Store quản lý thông tin User hiện tại.
@@ -15,9 +17,10 @@ export const useCurrentUserStore = defineStore(
 
     // --- Getters ---
     const isLoggedIn = computed(() => !!currentUser.value)
-    const isAdmin = computed(() => currentUser.value?.role === 'admin')
-    const isDriver = computed(() => currentUser.value?.role === 'driver')
-    const isWholesaleCustomer = computed(() => currentUser.value?.role === 'wholesale_customer')
+    const isAdmin = computed(() => currentUser.value?.role === Role.ADMIN)
+    const isDriver = computed(() => currentUser.value?.role === Role.DRIVER)
+    const isWholesale = computed(() => currentUser.value?.role === Role.WHOLESALE)
+    const isRetail = computed(() => currentUser.value?.role === Role.RETAIL)
 
     const userInitials = computed(() => {
       if (!currentUser.value?.fullName) return ''
@@ -40,13 +43,7 @@ export const useCurrentUserStore = defineStore(
 
       isLoading.value = true
       try {
-        const config = useRuntimeConfig()
-        const res = await $fetch<ApiResponse<CurrentUser>>('/auth/me', {
-          baseURL: config.public.apiBaseUrl as string,
-          headers: {
-            Authorization: `Bearer ${token.value}`
-          }
-        })
+        const res = await AuthService.getCurrentUser()
         if (res.data) {
           currentUser.value = res.data
         }
@@ -81,7 +78,8 @@ export const useCurrentUserStore = defineStore(
       isLoggedIn,
       isAdmin,
       isDriver,
-      isWholesaleCustomer,
+      isWholesale,
+      isRetail,
       userInitials,
       // Actions
       fetchUser,

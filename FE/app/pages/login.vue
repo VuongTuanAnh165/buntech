@@ -56,14 +56,8 @@ const socialProviders = [
 
 <template>
   <UCard
-    :ui="{
-      base: 'w-full login-main',
-      background: 'bg-white',
-      ring: 'ring-0',
-      shadow: 'shadow-2xl',
-      rounded: 'rounded-xl',
-      body: { padding: 'p-8 sm:p-10' }
-    }"
+    class="w-full login-main rounded-xl bg-white shadow-2xl ring-0"
+    :ui="{ body: 'p-8 sm:p-10' }"
   >
     <div class="mb-6">
       <h4 class="mb-2 text-2xl font-semibold text-slate-800 dark:text-white">

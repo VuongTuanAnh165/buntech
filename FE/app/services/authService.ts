@@ -23,5 +23,12 @@ export const AuthService = {
       method: 'POST',
       body: payload
     })
+  },
+
+  /**
+   * LẤY THÔNG TIN NGƯỜI DÙNG HIỆN TẠI
+   */
+  getCurrentUser() {
+    return ApiClient.get<ApiResponse<import('~/types/common').CurrentUser>>('/auth/me')
   }
 }
