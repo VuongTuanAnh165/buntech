@@ -7,16 +7,8 @@ definePageMeta({
   layout: false
 })
 
-// Redirect dựa theo role user
-const userStore = useCurrentUserStore()
-
-if (userStore.isDriver) {
-  navigateTo('/driver/delivery')
-} else {
-  navigateTo('/admin')
-}
 </script>
 
 <template>
-  <div />
+  <div>hello world</div>
 </template>
