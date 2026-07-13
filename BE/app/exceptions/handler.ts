@@ -1,5 +1,14 @@
 import app from '@adonisjs/core/services/app'
 import { type HttpContext, ExceptionHandler } from '@adonisjs/core/http'
+import { HttpStatus } from '#enums/http_status'
+
+type ApiError = Error & {
+  status?: number
+  code?: string
+  messages?: any
+  name?: string
+  errorCode?: string
+}
 
 export default class HttpExceptionHandler extends ExceptionHandler {
   /**
@@ -13,18 +22,18 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
-    const err = error as any
+    const err = error as ApiError
 
     // 1. Lỗi Validation từ VineJS
     if (
       err.name === 'ValidationException' ||
       err.code === 'E_VALIDATION_ERROR' ||
-      err.status === 422
+      err.status === HttpStatus.UNPROCESSABLE_ENTITY
     ) {
       const formattedErrors: Record<string, string[]> = {}
 
       if (Array.isArray(err.messages)) {
-        err.messages.forEach((msg: any) => {
+        err.messages.forEach((msg: Record<string, string>) => {
           if (!formattedErrors[msg.field]) {
             formattedErrors[msg.field] = []
           }
@@ -35,7 +44,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
         Object.assign(formattedErrors, err.messages)
       }
 
-      return ctx.response.status(422).json({
+      return ctx.response.status(HttpStatus.UNPROCESSABLE_ENTITY).json({
         success: false,
         message: 'Dữ liệu không hợp lệ',
         errors: formattedErrors,
@@ -44,19 +53,19 @@ export default class HttpExceptionHandler extends ExceptionHandler {
 
     // 2. Lỗi BusinessException (Lỗi nghiệp vụ)
     if (err.name === 'BusinessException') {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         success: false,
         message: err.message || 'Có lỗi xảy ra',
       }
       if (err.errorCode) {
         payload.errorCode = err.errorCode
       }
-      return ctx.response.status(err.status || 400).json(payload)
+      return ctx.response.status(err.status || HttpStatus.BAD_REQUEST).json(payload)
     }
 
     // 3. Các lỗi API khác
     if (ctx.request.accepts(['json'])) {
-      return ctx.response.status(err.status || 500).json({
+      return ctx.response.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: err.message || 'Có lỗi xảy ra từ máy chủ, vui lòng thử lại.',
         errorCode: err.code || 'INTERNAL_ERROR',

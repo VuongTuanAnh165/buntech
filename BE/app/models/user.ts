@@ -3,9 +3,10 @@ import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { type AccessToken, DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
-import { column, hasMany } from '@adonisjs/lucid/orm'
-import type { HasMany } from '@adonisjs/lucid/types/relations'
+import { column, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import Order from '#models/order'
+import UserProfile from '#models/user_profile'
 
 export default class User extends compose(AppBaseModel, withAuthFinder(hash)) {
   static accessTokens = DbAccessTokensProvider.forModel(User)
@@ -28,6 +29,9 @@ export default class User extends compose(AppBaseModel, withAuthFinder(hash)) {
 
   @hasMany(() => Order)
   declare orders: HasMany<typeof Order>
+
+  @hasOne(() => UserProfile)
+  declare profile: HasOne<typeof UserProfile>
 
   get initials() {
     const name = this.fullName || 'User'

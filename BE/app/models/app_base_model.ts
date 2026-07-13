@@ -25,12 +25,12 @@ export default class AppBaseModel extends BaseModel {
    * Tự động ẩn các bản ghi đã xóa mềm khi query
    */
   @beforeFind()
-  static ignoreDeletedFind(query: ModelQueryBuilderContract<any, any>) {
+  static ignoreDeletedFind(query: ModelQueryBuilderContract<typeof AppBaseModel, AppBaseModel>) {
     query.whereNull(`${query.model.table}.deleted_at`)
   }
 
   @beforeFetch()
-  static ignoreDeletedFetch(query: ModelQueryBuilderContract<any, any>) {
+  static ignoreDeletedFetch(query: ModelQueryBuilderContract<typeof AppBaseModel, AppBaseModel>) {
     query.whereNull(`${query.model.table}.deleted_at`)
   }
 }

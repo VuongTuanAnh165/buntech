@@ -1,5 +1,6 @@
 import { type LucidModel } from '@adonisjs/lucid/types/model'
-
+import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import { DateTime } from 'luxon'
 export default class BaseService<T extends LucidModel> {
   protected model: T
 
@@ -10,15 +11,17 @@ export default class BaseService<T extends LucidModel> {
   /**
    * Phân trang cơ bản
    */
-  public async paginate(page: number = 1, limit: number = 10, queryBuilder?: any) {
+  public async paginate(
+    page: number = 1,
+    limit: number = 10,
+    queryBuilder?: ModelQueryBuilderContract<T, InstanceType<T>>
+  ) {
     const query = queryBuilder ? queryBuilder : this.model.query()
 
-    // Tự động filter các bản ghi chưa bị xóa mềm nếu Model có hỗ trợ
-    if (this.model.$hasColumn('deletedAt')) {
-      query.whereNull('deleted_at')
-    }
+    // Giới hạn max limit = 100 để tránh sập RAM
+    const safeLimit = Math.min(limit, 100)
 
-    return await query.paginate(page, limit)
+    return await query.paginate(page, safeLimit)
   }
 
   /**
@@ -26,11 +29,6 @@ export default class BaseService<T extends LucidModel> {
    */
   public async findById(id: number) {
     const query = this.model.query().where('id', id)
-
-    if (this.model.$hasColumn('deletedAt')) {
-      query.whereNull('deleted_at')
-    }
-
     return await query.first()
   }
 
@@ -43,11 +41,13 @@ export default class BaseService<T extends LucidModel> {
 
     // Nếu Model có cột deleted_at
     if ('deletedAt' in record) {
-      record.merge({ deletedAt: new Date() } as any) // Note: luxon DateTime handling might be needed depending on the exact column config
+      // @ts-expect-error - Dynamically checked above
+      record.merge({ deletedAt: DateTime.now() })
 
       // Nếu Model có cập nhật người xóa (nếu có cột deleted_by, ở đây ta dùng updated_by tạm)
       if (deletedBy && 'updatedBy' in record) {
-        record.merge({ updatedBy: deletedBy } as any)
+        // @ts-expect-error - Dynamically checked above
+        record.merge({ updatedBy: deletedBy })
       }
 
       await record.save()

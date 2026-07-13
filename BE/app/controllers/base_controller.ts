@@ -1,11 +1,16 @@
 import type { HttpContext } from '@adonisjs/core/http'
-
+import { HttpStatus } from '#enums/http_status'
+import type { ModelPaginatorContract } from '@adonisjs/lucid/types/model'
 export default class BaseController {
   /**
    * Helper format trả về thành công chuẩn FE
    */
-  protected sendSuccess(response: HttpContext['response'], data: any = null, message: string = '') {
-    const payload: any = {
+  protected sendSuccess(
+    response: HttpContext['response'],
+    data: unknown = null,
+    message: string = ''
+  ) {
+    const payload: Record<string, unknown> = {
       success: true,
       data,
     }
@@ -14,16 +19,20 @@ export default class BaseController {
       payload.message = message
     }
 
-    return response.status(200).json(payload)
+    return response.status(HttpStatus.OK).json(payload)
   }
 
   /**
    * Helper format trả về danh sách phân trang chuẩn FE
    * Truyền vào đối tượng paginator của Lucid Model
    */
-  protected sendPaginated(response: HttpContext['response'], paginator: any, message: string = '') {
+  protected sendPaginated(
+    response: HttpContext['response'],
+    paginator: ModelPaginatorContract<any>,
+    message: string = ''
+  ) {
     const meta = paginator.getMeta()
-    const payload: any = {
+    const payload: Record<string, unknown> = {
       success: true,
       data: paginator.all(),
       meta: {
@@ -38,6 +47,6 @@ export default class BaseController {
       payload.message = message
     }
 
-    return response.status(200).json(payload)
+    return response.status(HttpStatus.OK).json(payload)
   }
 }

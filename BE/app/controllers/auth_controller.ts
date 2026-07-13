@@ -33,4 +33,30 @@ export default class AuthController extends BaseController {
     // Trả về theo format `data: { accessToken }` (Không message)
     return this.sendSuccess(ctx.response, token)
   }
+
+  /**
+   * GET /api/v1/auth/me
+   */
+  async me(ctx: HttpContext) {
+    const user = ctx.auth.user!
+    await user.load((preloader) => preloader.load('profile'))
+
+    const data = {
+      id: user.id,
+      fullName: user.fullName,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      profile: user.profile
+        ? {
+            avatarUrl: user.profile.avatarUrl,
+            storeName: user.profile.storeName,
+            currentDebt: user.profile.currentDebt,
+            debtLimit: user.profile.debtLimit,
+            zaloUserId: user.profile.zaloUserId,
+          }
+        : null,
+    }
+
+    return this.sendSuccess(ctx.response, data)
+  }
 }
