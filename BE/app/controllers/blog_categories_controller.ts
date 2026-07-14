@@ -2,6 +2,7 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import BlogCategoryService from '#services/blog_category_service'
 import { createBlogCategoryValidator, updateBlogCategoryValidator } from '#validators/blog_category'
+import { HttpStatus } from '#enums/http_status'
 
 @inject()
 export default class BlogCategoriesController {
@@ -50,7 +51,7 @@ export default class BlogCategoriesController {
     const payload = await request.validateUsing(createBlogCategoryValidator)
     const category = await this.blogCategoryService.create(payload)
 
-    return response.status(201).json({
+    return response.status(HttpStatus.CREATED).json({
       success: true,
       message: 'Tạo danh mục thành công',
       data: category,

@@ -483,6 +483,63 @@ export class ProductImageSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class ProductReviewImageSchema extends BaseModel {
+  static $columns = ['createdAt', 'fileUrl', 'id', 'reviewId', 'updatedAt'] as const
+  $columns = ProductReviewImageSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare fileUrl: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare reviewId: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
+export class ProductReviewSchema extends BaseModel {
+  static $columns = [
+    'content',
+    'createdAt',
+    'deletedAt',
+    'hasPurchased',
+    'id',
+    'isApproved',
+    'productId',
+    'rating',
+    'repliedBy',
+    'replyContent',
+    'updatedAt',
+    'userId',
+  ] as const
+  $columns = ProductReviewSchema.$columns
+  @column()
+  declare content: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column()
+  declare hasPurchased: boolean | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isApproved: boolean | null
+  @column()
+  declare productId: number | null
+  @column()
+  declare rating: number
+  @column()
+  declare repliedBy: number | null
+  @column()
+  declare replyContent: string | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
+}
+
 export class ProductionLogSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -527,6 +584,7 @@ export class ProductionLogSchema extends BaseModel {
 
 export class ProductSchema extends BaseModel {
   static $columns = [
+    'averageRating',
     'basePrice',
     'categoryId',
     'content',
@@ -541,11 +599,14 @@ export class ProductSchema extends BaseModel {
     'shortDescription',
     'slug',
     'thumbnailUrl',
+    'totalReviews',
     'unit',
     'updatedAt',
     'updatedBy',
   ] as const
   $columns = ProductSchema.$columns
+  @column()
+  declare averageRating: string | null
   @column()
   declare basePrice: string
   @column()
@@ -574,6 +635,8 @@ export class ProductSchema extends BaseModel {
   declare slug: string
   @column()
   declare thumbnailUrl: string | null
+  @column()
+  declare totalReviews: number | null
   @column()
   declare unit: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })

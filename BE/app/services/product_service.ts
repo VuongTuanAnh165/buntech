@@ -4,6 +4,7 @@ import drive from '@adonisjs/drive/services/main'
 import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
+import { Pagination } from '#enums/pagination'
 import { type createProductValidator, type updateProductValidator } from '#validators/product'
 import db from '@adonisjs/lucid/services/db'
 import logger from '@adonisjs/core/services/logger'
@@ -16,7 +17,7 @@ export default class ProductService {
    * Admin: Phân trang danh sách sản phẩm
    */
   async paginate(page: number = 1, limit: number = 10) {
-    const safeLimit = Math.min(limit, 100)
+    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
     return await Product.query()
       .select(
         'id',
@@ -38,7 +39,7 @@ export default class ProductService {
    * Client: Phân trang / Lọc sản phẩm
    */
   async clientList(page: number = 1, limit: number = 10, categoryId?: number) {
-    const safeLimit = Math.min(limit, 100)
+    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
     const query = Product.query()
       .select(
         'id',

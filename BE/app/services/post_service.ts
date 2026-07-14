@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import drive from '@adonisjs/drive/services/main'
 import { randomUUID } from 'node:crypto'
 import type { Infer } from '@vinejs/vine/types'
+import { Pagination } from '#enums/pagination'
 import { type createPostValidator, type updatePostValidator } from '#validators/post'
 
 export type CreatePostDTO = Infer<typeof createPostValidator>
@@ -15,7 +16,7 @@ interface GetPostListOptions {
 
 export default class PostService {
   async getList(page: number = 1, limit: number = 10, options?: GetPostListOptions) {
-    const safeLimit = Math.min(limit, 100)
+    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
     const query = Post.query()
       .select(
         'id',

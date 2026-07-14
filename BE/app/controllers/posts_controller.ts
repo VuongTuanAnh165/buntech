@@ -2,6 +2,8 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import PostService from '#services/post_service'
 import { createPostValidator, updatePostValidator } from '#validators/post'
+import { HttpStatus } from '#enums/http_status'
+import { Pagination } from '#enums/pagination'
 
 @inject()
 export default class PostsController {
@@ -11,9 +13,9 @@ export default class PostsController {
    * Public API: Get all published posts
    */
   async clientIndex({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = Math.min(request.input('limit', 10), 100)
-    const categoryId = request.input('category_id')
+    const page = request.input('page', Pagination.DEFAULT_PAGE)
+    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const categoryId = request.input('categoryId')
 
     const posts = await this.postService.getList(page, limit, {
       isPublic: true,
@@ -43,9 +45,9 @@ export default class PostsController {
    * Admin API: Get all posts
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = Math.min(request.input('limit', 10), 100)
-    const categoryId = request.input('category_id')
+    const page = request.input('page', Pagination.DEFAULT_PAGE)
+    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const categoryId = request.input('categoryId')
 
     const posts = await this.postService.getList(page, limit, {
       categoryId: categoryId ? Number(categoryId) : undefined,
@@ -79,7 +81,7 @@ export default class PostsController {
 
     const post = await this.postService.create(payload, authorId)
 
-    return response.status(201).json({
+    return response.status(HttpStatus.CREATED).json({
       success: true,
       message: 'Tạo bài viết thành công',
       data: post,

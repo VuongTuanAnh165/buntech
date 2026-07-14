@@ -7,6 +7,7 @@ import { column, hasMany, hasOne } from '@adonisjs/lucid/orm'
 import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import Order from '#models/order'
 import UserProfile from '#models/user_profile'
+import ProductReview from '#models/product_review'
 
 export default class User extends compose(AppBaseModel, withAuthFinder(hash)) {
   static accessTokens = DbAccessTokensProvider.forModel(User)
@@ -32,6 +33,9 @@ export default class User extends compose(AppBaseModel, withAuthFinder(hash)) {
 
   @hasOne(() => UserProfile)
   declare profile: HasOne<typeof UserProfile>
+
+  @hasMany(() => ProductReview)
+  declare reviews: HasMany<typeof ProductReview>
 
   get initials() {
     const name = this.fullName || 'User'

@@ -24,6 +24,10 @@ export default class extends BaseSchema {
       table.string('meta_description', 160).nullable()
       table.boolean('is_active').defaultTo(true)
 
+      // Denormalization for Product Reviews
+      table.decimal('average_rating', 3, 2).defaultTo(0.0)
+      table.integer('total_reviews').defaultTo(0).unsigned()
+
       table.timestamp('created_at')
       table.timestamp('updated_at')
       table.timestamp('deleted_at').nullable()

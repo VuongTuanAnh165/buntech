@@ -10,4 +10,5 @@ export const controllers = {
   Posts: () => import('#controllers/posts_controller'),
   Categories: () => import('#controllers/categories_controller'),
   Products: () => import('#controllers/products_controller'),
+  ProductReviews: () => import('#controllers/product_reviews_controller'),
 }

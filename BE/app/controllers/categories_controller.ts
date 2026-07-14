@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import CategoryService from '#services/category_service'
 import { createCategoryValidator, updateCategoryValidator } from '#validators/category'
+import { Pagination } from '#enums/pagination'
 
 @inject()
 export default class CategoriesController {
@@ -11,8 +12,8 @@ export default class CategoriesController {
    * GET /api/v1/admin/categories
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 10)
+    const page = request.input('page', Pagination.DEFAULT_PAGE)
+    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
 
     const categories = await this.categoryService.paginate(page, limit)
 

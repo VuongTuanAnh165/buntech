@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import ProductService from '#services/product_service'
 import { createProductValidator, updateProductValidator } from '#validators/product'
+import { Pagination } from '#enums/pagination'
 
 @inject()
 export default class ProductsController {
@@ -11,8 +12,8 @@ export default class ProductsController {
    * GET /api/v1/admin/products
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 10)
+    const page = request.input('page', Pagination.DEFAULT_PAGE)
+    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
 
     const products = await this.productService.paginate(page, limit)
     const meta = products.getMeta()
@@ -33,8 +34,8 @@ export default class ProductsController {
    * GET /api/v1/products
    */
   async clientIndex({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 10)
+    const page = request.input('page', Pagination.DEFAULT_PAGE)
+    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
     const categoryId = request.input('categoryId')
 
     const products = await this.productService.clientList(
