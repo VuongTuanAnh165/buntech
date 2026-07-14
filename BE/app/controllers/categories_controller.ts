@@ -3,7 +3,16 @@ import { inject } from '@adonisjs/core'
 import CategoryService from '#services/category_service'
 import { createCategoryValidator, updateCategoryValidator } from '#validators/category'
 import { Pagination } from '#enums/pagination'
-import { ApiOperation } from '@foadonis/openapi/decorators'
+import { ApiOperation, ApiBody } from '@foadonis/openapi/decorators'
+import {
+  ApiOkResponse,
+  ApiOkListResponse,
+  ApiCreatedResponse,
+  ApiPaginatedResponse,
+  ApiOkMessageOnlyResponse,
+  ApiPaginationQuery,
+} from '#decorators/openapi'
+import Category from '#models/category'
 
 @inject()
 export default class CategoriesController {
@@ -13,6 +22,8 @@ export default class CategoriesController {
    * GET /api/v1/admin/categories
    */
   @ApiOperation({ summary: 'Admin - Get all categories (Paginated)' })
+  @ApiPaginationQuery()
+  @ApiPaginatedResponse(Category)
   async index({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -36,6 +47,7 @@ export default class CategoriesController {
    * GET /api/v1/categories
    */
   @ApiOperation({ summary: 'Client - Get all active categories' })
+  @ApiOkListResponse(Category)
   async clientIndex({ response }: HttpContext) {
     const categories = await this.categoryService.clientList()
     return response.json({
@@ -48,6 +60,8 @@ export default class CategoriesController {
    * POST /api/v1/admin/categories
    */
   @ApiOperation({ summary: 'Admin - Create a new category' })
+  @ApiBody({ type: () => createCategoryValidator })
+  @ApiCreatedResponse(Category)
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createCategoryValidator)
     const userId = auth.user?.id
@@ -63,6 +77,7 @@ export default class CategoriesController {
    * GET /api/v1/admin/categories/:id
    */
   @ApiOperation({ summary: 'Admin - Get category by ID' })
+  @ApiOkResponse(Category)
   async show({ params, response }: HttpContext) {
     const category = await this.categoryService.findById(params.id)
     return response.json({
@@ -75,6 +90,7 @@ export default class CategoriesController {
    * GET /api/v1/categories/:id
    */
   @ApiOperation({ summary: 'Client - Get category by ID' })
+  @ApiOkResponse(Category)
   async clientShow({ params, response }: HttpContext) {
     const category = await this.categoryService.findByIdForClient(params.id)
     return response.json({
@@ -87,6 +103,8 @@ export default class CategoriesController {
    * PUT /api/v1/admin/categories/:id
    */
   @ApiOperation({ summary: 'Admin - Update category' })
+  @ApiBody({ type: () => updateCategoryValidator })
+  @ApiOkResponse(Category)
   async update({ params, request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(updateCategoryValidator)
     const userId = auth.user?.id
@@ -102,6 +120,7 @@ export default class CategoriesController {
    * DELETE /api/v1/admin/categories/:id
    */
   @ApiOperation({ summary: 'Admin - Delete category' })
+  @ApiOkMessageOnlyResponse()
   async destroy({ params, response, auth }: HttpContext) {
     const userId = auth.user?.id
     await this.categoryService.delete(params.id, userId)

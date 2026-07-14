@@ -3,7 +3,15 @@ import { inject } from '@adonisjs/core'
 import ProductService from '#services/product_service'
 import { createProductValidator, updateProductValidator } from '#validators/product'
 import { Pagination } from '#enums/pagination'
-import { ApiOperation } from '@foadonis/openapi/decorators'
+import { ApiOperation, ApiQuery, ApiBody } from '@foadonis/openapi/decorators'
+import {
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiPaginatedResponse,
+  ApiOkMessageOnlyResponse,
+  ApiPaginationQuery,
+} from '#decorators/openapi'
+import Product from '#models/product'
 
 @inject()
 export default class ProductsController {
@@ -13,6 +21,8 @@ export default class ProductsController {
    * GET /api/v1/admin/products
    */
   @ApiOperation({ summary: 'Admin - Get all products (Paginated)' })
+  @ApiPaginationQuery()
+  @ApiPaginatedResponse(Product)
   async index({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -36,6 +46,14 @@ export default class ProductsController {
    * GET /api/v1/products
    */
   @ApiOperation({ summary: 'Client - Get products' })
+  @ApiPaginationQuery()
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    type: 'integer',
+    description: 'Filter by category ID',
+  })
+  @ApiPaginatedResponse(Product)
   async clientIndex({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -64,6 +82,8 @@ export default class ProductsController {
    * POST /api/v1/admin/products
    */
   @ApiOperation({ summary: 'Admin - Create a new product' })
+  @ApiBody({ type: () => createProductValidator })
+  @ApiCreatedResponse(Product)
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createProductValidator)
     const userId = auth.user?.id
@@ -79,6 +99,7 @@ export default class ProductsController {
    * GET /api/v1/admin/products/:id
    */
   @ApiOperation({ summary: 'Admin - Get product by ID' })
+  @ApiOkResponse(Product)
   async show({ params, response }: HttpContext) {
     const product = await this.productService.findById(params.id)
     return response.json({
@@ -91,6 +112,7 @@ export default class ProductsController {
    * GET /api/v1/products/:id
    */
   @ApiOperation({ summary: 'Client - Get product details' })
+  @ApiOkResponse(Product)
   async clientShow({ params, response }: HttpContext) {
     // Client dùng chung endpoint lấy chi tiết bằng ID
     const product = await this.productService.findByIdForClient(params.id)
@@ -104,6 +126,8 @@ export default class ProductsController {
    * PUT /api/v1/admin/products/:id
    */
   @ApiOperation({ summary: 'Admin - Update product' })
+  @ApiBody({ type: () => updateProductValidator })
+  @ApiOkResponse(Product)
   async update({ params, request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(updateProductValidator)
     const userId = auth.user?.id
@@ -119,6 +143,7 @@ export default class ProductsController {
    * DELETE /api/v1/admin/products/:id
    */
   @ApiOperation({ summary: 'Admin - Delete product' })
+  @ApiOkMessageOnlyResponse()
   async destroy({ params, response, auth }: HttpContext) {
     const userId = auth.user?.id
     await this.productService.delete(params.id, userId)

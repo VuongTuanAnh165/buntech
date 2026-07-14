@@ -8,7 +8,15 @@ import {
 } from '#validators/product_review'
 import { HttpStatus } from '#enums/http_status'
 import { Pagination } from '#enums/pagination'
-import { ApiOperation } from '@foadonis/openapi/decorators'
+import { ApiOperation, ApiBody } from '@foadonis/openapi/decorators'
+import {
+  ApiOkMessageResponse,
+  ApiOkMessageOnlyResponse,
+  ApiOkMessageListResponse,
+  ApiCreatedMessageResponse,
+  ApiPaginationQuery,
+} from '#decorators/openapi'
+import ProductReview from '#models/product_review'
 
 @inject()
 export default class ProductReviewsController {
@@ -18,6 +26,8 @@ export default class ProductReviewsController {
    * Client API: Get product reviews
    */
   @ApiOperation({ summary: 'Client - Get reviews for a product' })
+  @ApiPaginationQuery()
+  @ApiOkMessageListResponse(ProductReview)
   async clientIndex({ params, request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -35,6 +45,8 @@ export default class ProductReviewsController {
    * Client API: Post a new review
    */
   @ApiOperation({ summary: 'Client - Post a new review' })
+  @ApiBody({ type: () => createProductReviewValidator })
+  @ApiCreatedMessageResponse(ProductReview)
   async store({ params, request, response, auth }: HttpContext) {
     const user = auth.user!
     const payload = await request.validateUsing(createProductReviewValidator)
@@ -52,6 +64,8 @@ export default class ProductReviewsController {
    * Admin API: Get all product reviews
    */
   @ApiOperation({ summary: 'Admin - Get all reviews' })
+  @ApiPaginationQuery()
+  @ApiOkMessageListResponse(ProductReview)
   async index({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -69,6 +83,8 @@ export default class ProductReviewsController {
    * Admin API: Approve/Reject a review
    */
   @ApiOperation({ summary: 'Admin - Approve or Reject a review' })
+  @ApiBody({ type: () => approveProductReviewValidator })
+  @ApiOkMessageResponse(ProductReview)
   async approve({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(approveProductReviewValidator)
 
@@ -85,6 +101,7 @@ export default class ProductReviewsController {
    * Admin API: Delete a review
    */
   @ApiOperation({ summary: 'Admin - Delete a review' })
+  @ApiOkMessageOnlyResponse()
   async destroy({ params, response }: HttpContext) {
     await this.productReviewService.delete(params.id)
 
@@ -98,6 +115,8 @@ export default class ProductReviewsController {
    * Admin API: Reply to a review
    */
   @ApiOperation({ summary: 'Admin - Reply to a review' })
+  @ApiBody({ type: () => replyProductReviewValidator })
+  @ApiOkMessageResponse(ProductReview)
   async reply({ params, request, response, auth }: HttpContext) {
     const admin = auth.user!
     const payload = await request.validateUsing(replyProductReviewValidator)
