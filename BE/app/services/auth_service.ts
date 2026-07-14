@@ -7,6 +7,7 @@ import { Exception } from '@adonisjs/core/exceptions'
 import { DateTime } from 'luxon'
 import stringHelpers from '@adonisjs/core/helpers/string'
 import { HttpStatus } from '#enums/http_status'
+import db from '@adonisjs/lucid/services/db'
 
 @inject()
 export default class AuthService {
@@ -24,7 +25,6 @@ export default class AuthService {
     }
 
     // 2. Kiểm tra mật khẩu
-    // `withAuthFinder(hash)` mixin adds static `verifyCredentials` but doing it directly is clear:
     const isPasswordValid = await hash.verify(user.password, passwordText)
     if (!isPasswordValid) {
       throw new BusinessException(
@@ -33,26 +33,42 @@ export default class AuthService {
       )
     }
 
-    // 3. Tạo Opaque Access Token (hạn 1 tiếng)
-    const accessToken = await User.accessTokens.create(user, ['*'], {
-      expiresIn: '1 hour',
-    })
+    let createdAccessTokenId: string | number | undefined
 
-    // 4. Tạo Refresh Token ngẫu nhiên (hạn 30 ngày nếu rememberMe, ngược lại 1 ngày)
-    const tokenString = stringHelpers.generateRandom(64)
-    const refreshToken = new RefreshToken()
-    refreshToken.userId = user.id
-    refreshToken.token = tokenString
+    const trx = await db.transaction()
+    try {
+      // 3. Tạo Opaque Access Token (hạn 1 tiếng)
+      // Lưu ý: User.accessTokens.create không nhận `trx`, nên phải rollback thủ công nếu phần sau bị lỗi
+      const accessToken = await User.accessTokens.create(user, ['*'], {
+        expiresIn: '1 hour',
+      })
+      createdAccessTokenId = accessToken.identifier
 
-    const expiresDays = rememberMe ? 30 : 1
-    refreshToken.expiresAt = DateTime.now().plus({ days: expiresDays })
+      // 4. Tạo Refresh Token ngẫu nhiên (hạn 30 ngày nếu rememberMe, ngược lại 1 ngày)
+      const tokenString = stringHelpers.generateRandom(64)
+      const refreshToken = new RefreshToken()
+      refreshToken.useTransaction(trx)
+      refreshToken.userId = user.id
+      refreshToken.token = tokenString
 
-    refreshToken.isRevoked = false
-    await refreshToken.save()
+      const expiresDays = rememberMe ? 30 : 1
+      refreshToken.expiresAt = DateTime.now().plus({ days: expiresDays })
+      refreshToken.isRevoked = false
+      await refreshToken.save()
 
-    return {
-      accessToken: accessToken.value!.release(), // Get the plaintext token
-      refreshToken: refreshToken.token,
+      await trx.commit()
+
+      return {
+        accessToken: accessToken.value!.release(), // Get the plaintext token
+        refreshToken: refreshToken.token,
+      }
+    } catch (error) {
+      await trx.rollback()
+      // Application-level rollback for access token
+      if (createdAccessTokenId) {
+        await User.accessTokens.delete(user, createdAccessTokenId)
+      }
+      throw error
     }
   }
 
@@ -65,7 +81,6 @@ export default class AuthService {
 
     // 2. Kiểm tra hợp lệ
     if (!refreshTokenRecord) {
-      // Đúng mã HTTP 401 như FE mong đợi để ép văng ra luồng Force Logout
       throw new Exception('Token không hợp lệ hoặc đã hết hạn', { status: HttpStatus.UNAUTHORIZED })
     }
 
@@ -84,8 +99,6 @@ export default class AuthService {
     const newAccessToken = await User.accessTokens.create(user, ['*'], {
       expiresIn: '1 hour',
     })
-
-    // (Lưu ý: FE không yêu cầu cấp mới refresh_token ở bước này, giữ nguyên token cũ)
 
     return {
       accessToken: newAccessToken.value!.release(),

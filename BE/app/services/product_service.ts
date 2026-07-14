@@ -1,18 +1,21 @@
 import Product from '#models/product'
 import ProductImage from '#models/product_image'
-import drive from '@adonisjs/drive/services/main'
-import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
 import { Pagination } from '#enums/pagination'
 import { type createProductValidator, type updateProductValidator } from '#validators/product'
 import db from '@adonisjs/lucid/services/db'
 import logger from '@adonisjs/core/services/logger'
+import FileUploadService from '#services/file_upload_service'
+import { inject } from '@adonisjs/core'
 
 type CreateProductDTO = Infer<typeof createProductValidator>
 type UpdateProductDTO = Infer<typeof updateProductValidator>
 
+@inject()
 export default class ProductService {
+  constructor(protected fileUploadService: FileUploadService) {}
+
   /**
    * Admin: Phân trang danh sách sản phẩm
    */
@@ -99,20 +102,17 @@ export default class ProductService {
 
     // 1. Upload ALL files BEFORE transaction
     if (thumbnail) {
-      const key = `products/thumbnails/${randomUUID()}.${thumbnail.extname}`
-      await thumbnail.moveToDisk(key)
-      thumbnailUrl = await drive.use().getUrl(key)
-      newFileKeys.push(key)
+      const uploadResult = await this.fileUploadService.upload(thumbnail, 'products/thumbnails')
+      thumbnailUrl = uploadResult.url
+      newFileKeys.push(uploadResult.key)
     }
 
     if (images && images.length > 0) {
+      const uploadResults = await this.fileUploadService.uploadMany(images, 'products/gallery')
       let order = 1
-      for (const img of images) {
-        const key = `products/gallery/${randomUUID()}.${img.extname}`
-        await img.moveToDisk(key)
-        const fileUrl = await drive.use().getUrl(key)
-        newFileKeys.push(key)
-        imageRecordsData.push({ fileUrl, displayOrder: order++ })
+      for (const res of uploadResults) {
+        newFileKeys.push(res.key)
+        imageRecordsData.push({ fileUrl: res.url, displayOrder: order++ })
       }
     }
 
@@ -142,11 +142,8 @@ export default class ProductService {
     } catch (error) {
       await trx.rollback()
       // Rollback files on disk
-      for (const key of newFileKeys) {
-        await drive
-          .use()
-          .delete(key)
-          .catch(() => {})
+      if (newFileKeys.length > 0) {
+        await this.fileUploadService.deleteMany(newFileKeys)
       }
       logger.error({ err: error }, 'Tạo sản phẩm thất bại')
       throw error
@@ -167,16 +164,15 @@ export default class ProductService {
 
     // 1. Upload New Thumbnail
     if (thumbnail) {
-      const key = `products/thumbnails/${randomUUID()}.${thumbnail.extname}`
-      await thumbnail.moveToDisk(key)
-      thumbnailUrl = await drive.use().getUrl(key)
-      newFileKeys.push(key)
+      const oldThumbKey = this.fileUploadService.extractKeyFromUrl(
+        product.thumbnailUrl,
+        'products/thumbnails'
+      )
+      if (oldThumbKey) oldKeysToDelete.push(oldThumbKey)
 
-      if (product.thumbnailUrl && product.thumbnailUrl.includes('products/thumbnails/')) {
-        oldKeysToDelete.push(
-          product.thumbnailUrl.substring(product.thumbnailUrl.indexOf('products/thumbnails/'))
-        )
-      }
+      const uploadResult = await this.fileUploadService.upload(thumbnail, 'products/thumbnails')
+      thumbnailUrl = uploadResult.url
+      newFileKeys.push(uploadResult.key)
     }
 
     // 2. Query old images to delete BEFORE transaction so we can get their keys
@@ -186,9 +182,8 @@ export default class ProductService {
         .whereIn('id', deletedImageIds)
 
       for (const img of imagesToDelete) {
-        if (img.fileUrl.includes('products/gallery/')) {
-          oldKeysToDelete.push(img.fileUrl.substring(img.fileUrl.indexOf('products/gallery/')))
-        }
+        const oldGalleryKey = this.fileUploadService.extractKeyFromUrl(img.fileUrl, 'products/gallery')
+        if (oldGalleryKey) oldKeysToDelete.push(oldGalleryKey)
       }
     }
 
@@ -200,12 +195,10 @@ export default class ProductService {
         .first()
       let order = maxOrderRecord?.displayOrder ? maxOrderRecord.displayOrder + 1 : 1
 
-      for (const img of images) {
-        const key = `products/gallery/${randomUUID()}.${img.extname}`
-        await img.moveToDisk(key)
-        const fileUrl = await drive.use().getUrl(key)
-        newFileKeys.push(key)
-        imageRecordsData.push({ fileUrl, displayOrder: order++ })
+      const uploadResults = await this.fileUploadService.uploadMany(images, 'products/gallery')
+      for (const res of uploadResults) {
+        newFileKeys.push(res.key)
+        imageRecordsData.push({ fileUrl: res.url, displayOrder: order++ })
       }
     }
 
@@ -235,40 +228,27 @@ export default class ProductService {
       }
 
       if (imageOrders) {
-        try {
-          const orders = JSON.parse(imageOrders) as Array<{ id: number; order: number }>
-          if (Array.isArray(orders)) {
-            for (const item of orders) {
-              await ProductImage.query({ client: trx })
-                .where('id', item.id)
-                .where('productId', product.id)
-                .update({ displayOrder: item.order })
-            }
-          }
-        } catch (e) {
-          logger.warn('Parse imageOrders thất bại')
+        for (const item of imageOrders) {
+          await ProductImage.query({ client: trx })
+            .where('id', item.id)
+            .where('productId', product.id)
+            .update({ displayOrder: item.order })
         }
       }
 
       await trx.commit()
 
       // AFTER Commit, delete old files
-      for (const key of oldKeysToDelete) {
-        await drive
-          .use()
-          .delete(key)
-          .catch(() => {})
+      if (oldKeysToDelete.length > 0) {
+        await this.fileUploadService.deleteMany(oldKeysToDelete)
       }
 
       return product
     } catch (error) {
       await trx.rollback()
       // DB Failed, cleanup newly uploaded files
-      for (const key of newFileKeys) {
-        await drive
-          .use()
-          .delete(key)
-          .catch(() => {})
+      if (newFileKeys.length > 0) {
+        await this.fileUploadService.deleteMany(newFileKeys)
       }
       logger.error({ err: error }, 'Cập nhật sản phẩm thất bại')
       throw error

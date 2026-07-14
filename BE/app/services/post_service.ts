@@ -1,10 +1,11 @@
 import Post from '#models/post'
 import { DateTime } from 'luxon'
-import drive from '@adonisjs/drive/services/main'
-import { randomUUID } from 'node:crypto'
 import type { Infer } from '@vinejs/vine/types'
 import { Pagination } from '#enums/pagination'
 import { type createPostValidator, type updatePostValidator } from '#validators/post'
+import FileUploadService from '#services/file_upload_service'
+import { inject } from '@adonisjs/core'
+import logger from '@adonisjs/core/services/logger'
 
 export type CreatePostDTO = Infer<typeof createPostValidator>
 export type UpdatePostDTO = Infer<typeof updatePostValidator>
@@ -14,7 +15,10 @@ interface GetPostListOptions {
   categoryId?: number
 }
 
+@inject()
 export default class PostService {
+  constructor(protected fileUploadService: FileUploadService) {}
+
   async getList(page: number = 1, limit: number = 10, options?: GetPostListOptions) {
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
     const query = Post.query()
@@ -79,19 +83,17 @@ export default class PostService {
     let newKey: string | undefined
 
     if (thumbnail) {
-      newKey = `posts/thumbnails/${randomUUID()}.${thumbnail.extname}`
-      await thumbnail.moveToDisk(newKey)
-      thumbnailUrl = await drive.use().getUrl(newKey)
+      const uploadResult = await this.fileUploadService.upload(thumbnail, 'posts/thumbnails')
+      thumbnailUrl = uploadResult.url
+      newKey = uploadResult.key
     }
 
     try {
       return await Post.create({ ...postData, thumbnailUrl, authorId })
     } catch (error) {
+      logger.error({ err: error }, 'Tạo bài viết thất bại')
       if (newKey) {
-        await drive
-          .use()
-          .delete(newKey)
-          .catch(() => {})
+        await this.fileUploadService.delete(newKey)
       }
       throw error
     }
@@ -102,18 +104,16 @@ export default class PostService {
     const { thumbnail, ...postData } = data
 
     let thumbnailUrl: string | undefined
-    let oldKeyToDelete: string | undefined
+    let oldKeyToDelete: string | null = null
     let newKey: string | undefined
 
     if (thumbnail) {
       // Đánh dấu file cũ để xóa sau
-      if (post.thumbnailUrl && post.thumbnailUrl.includes('posts/thumbnails/')) {
-        oldKeyToDelete = post.thumbnailUrl.substring(post.thumbnailUrl.indexOf('posts/thumbnails/'))
-      }
+      oldKeyToDelete = this.fileUploadService.extractKeyFromUrl(post.thumbnailUrl, 'posts/thumbnails')
 
-      newKey = `posts/thumbnails/${randomUUID()}.${thumbnail.extname}`
-      await thumbnail.moveToDisk(newKey)
-      thumbnailUrl = await drive.use().getUrl(newKey)
+      const uploadResult = await this.fileUploadService.upload(thumbnail, 'posts/thumbnails')
+      thumbnailUrl = uploadResult.url
+      newKey = uploadResult.key
     }
 
     try {
@@ -122,19 +122,14 @@ export default class PostService {
 
       // Xóa file cũ sau khi DB save thành công
       if (oldKeyToDelete) {
-        await drive
-          .use()
-          .delete(oldKeyToDelete)
-          .catch(() => {})
+        await this.fileUploadService.delete(oldKeyToDelete)
       }
 
       return post
     } catch (error) {
+      logger.error({ err: error }, 'Cập nhật bài viết thất bại')
       if (newKey) {
-        await drive
-          .use()
-          .delete(newKey)
-          .catch(() => {})
+        await this.fileUploadService.delete(newKey)
       }
       throw error
     }

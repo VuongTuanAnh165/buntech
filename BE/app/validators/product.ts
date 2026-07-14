@@ -74,9 +74,16 @@ export const updateProductValidator = vine.compile(
     deletedImageIds: vine.array(vine.number()).optional(),
 
     // Update display orders: [{"id": 1, "order": 2}]
-    // Should be parsed as a string JSON on form-data if FE sends it as string,
-    // but VineJS automatically coerces JSON array strings if configured, or we can use vine.string() and parse in service.
-    // Let's accept it as a string to parse manually since Form-Data handles nested arrays poorly across different HTTP clients.
-    imageOrders: vine.string().optional(),
+    imageOrders: vine
+      .string()
+      .optional()
+      .transform((value) => {
+        if (!value) return undefined
+        try {
+          return JSON.parse(value) as Array<{ id: number; order: number }>
+        } catch (error) {
+          return undefined
+        }
+      }),
   })
 )

@@ -4,20 +4,25 @@ import Product from '#models/product'
 import OrderItem from '#models/order_item'
 import db from '@adonisjs/lucid/services/db'
 import { Pagination } from '#enums/pagination'
-import drive from '@adonisjs/drive/services/main'
-import { randomUUID } from 'node:crypto'
 import type { Infer } from '@vinejs/vine/types'
 import {
   type createProductReviewValidator,
   type approveProductReviewValidator,
   type replyProductReviewValidator,
 } from '#validators/product_review'
+import FileUploadService from '#services/file_upload_service'
+import { inject } from '@adonisjs/core'
+import logger from '@adonisjs/core/services/logger'
+import { DateTime } from 'luxon'
 
 export type CreateProductReviewDTO = Infer<typeof createProductReviewValidator>
 export type ApproveProductReviewDTO = Infer<typeof approveProductReviewValidator>
 export type ReplyProductReviewDTO = Infer<typeof replyProductReviewValidator>
 
+@inject()
 export default class ProductReviewService {
+  constructor(protected fileUploadService: FileUploadService) {}
+
   /**
    * Client: Get approved reviews for a product
    */
@@ -65,16 +70,15 @@ export default class ProductReviewService {
 
     const hasPurchased = !!orderItem
 
+    const uploadedImageUrls: string[] = []
     const uploadedImageKeys: string[] = []
 
     // 1. Upload files BEFORE transaction to prevent blocking
     if (images && images.length > 0) {
-      for (const image of images) {
-        if (!image) continue
-        const key = `reviews/${productId}/${randomUUID()}.${image.extname}`
-        await image.moveToDisk(key)
-        const fileUrl = await drive.use().getUrl(key)
-        uploadedImageKeys.push(fileUrl) // In real world we might just store keys, but let's store URLs as per our migration
+      const uploadResults = await this.fileUploadService.uploadMany(images, `reviews/${productId}`)
+      for (const res of uploadResults) {
+        uploadedImageUrls.push(res.url)
+        uploadedImageKeys.push(res.key)
       }
     }
 
@@ -94,8 +98,8 @@ export default class ProductReviewService {
         await newReview.save()
 
         // Create images
-        if (uploadedImageKeys.length > 0) {
-          const imageRecords = uploadedImageKeys.map((fileUrl) => ({
+        if (uploadedImageUrls.length > 0) {
+          const imageRecords = uploadedImageUrls.map((fileUrl) => ({
             reviewId: newReview.id,
             fileUrl,
           }))
@@ -108,15 +112,10 @@ export default class ProductReviewService {
       return review
     } catch (error) {
       // 3. Rollback: Delete uploaded files if DB transaction fails
-      for (const fileUrl of uploadedImageKeys) {
-        // fileUrl is the URL, we need to extract the key to delete.
-        // Assuming URL contains the key. Let's just try to delete the known key format
-        const key = fileUrl.substring(fileUrl.indexOf('reviews/'))
-        await drive
-          .use()
-          .delete(key)
-          .catch(() => {})
+      if (uploadedImageKeys.length > 0) {
+        await this.fileUploadService.deleteMany(uploadedImageKeys)
       }
+      logger.error({ err: error }, 'Create product review failed')
       throw error
     }
   }
@@ -125,14 +124,23 @@ export default class ProductReviewService {
    * Admin: Approve or reject a review
    */
   async approve(id: number, data: ApproveProductReviewDTO) {
-    const review = await ProductReview.findOrFail(id)
-    review.isApproved = data.isApproved
-    await review.save()
+    const trx = await db.transaction()
+    try {
+      const review = await ProductReview.findOrFail(id, { client: trx })
+      review.useTransaction(trx)
+      review.isApproved = data.isApproved
+      await review.save()
 
-    // Recalculate if it's approved or rejected
-    await this.recalculateRating(review.productId!)
+      // Recalculate if it's approved or rejected
+      await this.recalculateRating(review.productId!, trx)
 
-    return review
+      await trx.commit()
+      return review
+    } catch (error) {
+      await trx.rollback()
+      logger.error({ err: error }, 'Duyệt đánh giá thất bại')
+      throw error
+    }
   }
 
   /**
@@ -151,34 +159,43 @@ export default class ProductReviewService {
    * Admin: Delete a review
    */
   async delete(id: number) {
-    const review = await ProductReview.findOrFail(id)
-    review.deletedAt = require('luxon').DateTime.now()
-    await review.save()
+    const trx = await db.transaction()
+    try {
+      const review = await ProductReview.findOrFail(id, { client: trx })
+      review.useTransaction(trx)
+      review.deletedAt = DateTime.now()
+      await review.save()
 
-    // Recalculate
-    await this.recalculateRating(review.productId!)
+      // Recalculate
+      await this.recalculateRating(review.productId!, trx)
+
+      await trx.commit()
+    } catch (error) {
+      await trx.rollback()
+      logger.error({ err: error }, 'Xóa đánh giá thất bại')
+      throw error
+    }
   }
 
   /**
    * Helper: Recalculate product average rating and total reviews
    */
-  private async recalculateRating(productId: number) {
-    await db.transaction(async (trx) => {
-      // Get aggregate
-      const result = await trx.rawQuery(
-        'SELECT COUNT(id) as total, AVG(rating) as average FROM product_reviews WHERE product_id = ? AND is_approved = true AND deleted_at IS NULL',
-        [productId]
-      )
+  private async recalculateRating(productId: number, trx: any) {
+    // Get aggregate
+    const result = await trx.rawQuery(
+      'SELECT COUNT(id) as total, AVG(rating) as average FROM product_reviews WHERE product_id = ? AND is_approved = true AND deleted_at IS NULL',
+      [productId]
+    )
 
-      const totalReviews = result[0][0].total || 0
-      const averageRating = result[0][0].average ? Number.parseFloat(result[0][0].average) : 0.0
+    const totalReviews = result[0][0].total || 0
+    const averageRating = result[0][0].average ? Number.parseFloat(result[0][0].average) : 0.0
 
-      // Update product
-      const product = await Product.findOrFail(productId, { client: trx })
-      product.totalReviews = totalReviews
-      product.averageRating = String(averageRating)
+    // Update product
+    const product = await Product.findOrFail(productId, { client: trx })
+    product.useTransaction(trx)
+    product.totalReviews = totalReviews
+    product.averageRating = String(averageRating)
 
-      await product.save()
-    })
+    await product.save()
   }
 }

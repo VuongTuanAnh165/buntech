@@ -151,3 +151,4 @@ router
   })
   .prefix('/api/v1')
   .use(middleware.auth())
+  .use(middleware.admin())

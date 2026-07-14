@@ -1,15 +1,19 @@
 import Category from '#models/category'
-import drive from '@adonisjs/drive/services/main'
-import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
 import { type createCategoryValidator, type updateCategoryValidator } from '#validators/category'
 import { Pagination } from '#enums/pagination'
+import FileUploadService from '#services/file_upload_service'
+import { inject } from '@adonisjs/core'
+import logger from '@adonisjs/core/services/logger'
 
 type CreateCategoryDTO = Infer<typeof createCategoryValidator>
 type UpdateCategoryDTO = Infer<typeof updateCategoryValidator>
 
+@inject()
 export default class CategoryService {
+  constructor(protected fileUploadService: FileUploadService) {}
+
   /**
    * Lấy danh sách phân trang (Cho Admin)
    */
@@ -55,9 +59,9 @@ export default class CategoryService {
     let newKey: string | undefined
 
     if (thumbnail) {
-      newKey = `categories/${randomUUID()}.${thumbnail.extname}`
-      await thumbnail.moveToDisk(newKey)
-      thumbnailUrl = await drive.use().getUrl(newKey)
+      const uploadResult = await this.fileUploadService.upload(thumbnail, 'categories')
+      thumbnailUrl = uploadResult.url
+      newKey = uploadResult.key
     }
 
     try {
@@ -70,11 +74,9 @@ export default class CategoryService {
 
       return category
     } catch (error) {
+      logger.error({ err: error }, 'Tạo danh mục thất bại')
       if (newKey) {
-        await drive
-          .use()
-          .delete(newKey)
-          .catch(() => {})
+        await this.fileUploadService.delete(newKey)
       }
       throw error
     }
@@ -88,20 +90,16 @@ export default class CategoryService {
     const { thumbnail, ...categoryData } = data
 
     let thumbnailUrl: string | undefined
-    let oldKeyToDelete: string | undefined
+    let oldKeyToDelete: string | null = null
     let newKey: string | undefined
 
     if (thumbnail) {
-      newKey = `categories/${randomUUID()}.${thumbnail.extname}`
-      await thumbnail.moveToDisk(newKey)
-      thumbnailUrl = await drive.use().getUrl(newKey)
+      const uploadResult = await this.fileUploadService.upload(thumbnail, 'categories')
+      thumbnailUrl = uploadResult.url
+      newKey = uploadResult.key
 
       // Đánh dấu file cũ để xóa sau khi DB save thành công
-      if (category.thumbnailUrl && category.thumbnailUrl.includes('categories/')) {
-        oldKeyToDelete = category.thumbnailUrl.substring(
-          category.thumbnailUrl.indexOf('categories/')
-        )
-      }
+      oldKeyToDelete = this.fileUploadService.extractKeyFromUrl(category.thumbnailUrl, 'categories')
     }
 
     try {
@@ -115,19 +113,14 @@ export default class CategoryService {
 
       // Xóa file cũ sau khi commit DB thành công
       if (oldKeyToDelete) {
-        await drive
-          .use()
-          .delete(oldKeyToDelete)
-          .catch(() => {})
+        await this.fileUploadService.delete(oldKeyToDelete)
       }
 
       return category
     } catch (error) {
+      logger.error({ err: error }, 'Cập nhật danh mục thất bại')
       if (newKey) {
-        await drive
-          .use()
-          .delete(newKey)
-          .catch(() => {})
+        await this.fileUploadService.delete(newKey)
       }
       throw error
     }
