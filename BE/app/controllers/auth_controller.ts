@@ -2,6 +2,7 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import AuthService from '#services/auth_service'
 import { loginValidator, refreshValidator } from '#validators/auth_validator'
+import { ApiOperation } from '@foadonis/openapi/decorators'
 
 @inject()
 export default class AuthController {
@@ -10,6 +11,7 @@ export default class AuthController {
   /**
    * POST /api/v1/auth/login
    */
+  @ApiOperation({ summary: 'Login user' })
   async login({ request, response }: HttpContext) {
     const payload = await request.validateUsing(loginValidator)
 
@@ -28,6 +30,7 @@ export default class AuthController {
   /**
    * POST /api/v1/auth/refresh
    */
+  @ApiOperation({ summary: 'Refresh access token' })
   async refresh({ request, response }: HttpContext) {
     const payload = await request.validateUsing(refreshValidator)
 
@@ -42,6 +45,7 @@ export default class AuthController {
   /**
    * GET /api/v1/auth/me
    */
+  @ApiOperation({ summary: 'Get current user profile' })
   async me({ auth, response }: HttpContext) {
     const user = auth.user!
     await user.load((preloader) => preloader.load('profile'))

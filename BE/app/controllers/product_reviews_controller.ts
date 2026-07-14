@@ -8,6 +8,7 @@ import {
 } from '#validators/product_review'
 import { HttpStatus } from '#enums/http_status'
 import { Pagination } from '#enums/pagination'
+import { ApiOperation } from '@foadonis/openapi/decorators'
 
 @inject()
 export default class ProductReviewsController {
@@ -16,6 +17,7 @@ export default class ProductReviewsController {
   /**
    * Client API: Get product reviews
    */
+  @ApiOperation({ summary: 'Client - Get reviews for a product' })
   async clientIndex({ params, request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -32,6 +34,7 @@ export default class ProductReviewsController {
   /**
    * Client API: Post a new review
    */
+  @ApiOperation({ summary: 'Client - Post a new review' })
   async store({ params, request, response, auth }: HttpContext) {
     const user = auth.user!
     const payload = await request.validateUsing(createProductReviewValidator)
@@ -48,6 +51,7 @@ export default class ProductReviewsController {
   /**
    * Admin API: Get all product reviews
    */
+  @ApiOperation({ summary: 'Admin - Get all reviews' })
   async index({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -64,6 +68,7 @@ export default class ProductReviewsController {
   /**
    * Admin API: Approve/Reject a review
    */
+  @ApiOperation({ summary: 'Admin - Approve or Reject a review' })
   async approve({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(approveProductReviewValidator)
 
@@ -79,6 +84,7 @@ export default class ProductReviewsController {
   /**
    * Admin API: Delete a review
    */
+  @ApiOperation({ summary: 'Admin - Delete a review' })
   async destroy({ params, response }: HttpContext) {
     await this.productReviewService.delete(params.id)
 
@@ -91,6 +97,7 @@ export default class ProductReviewsController {
   /**
    * Admin API: Reply to a review
    */
+  @ApiOperation({ summary: 'Admin - Reply to a review' })
   async reply({ params, request, response, auth }: HttpContext) {
     const admin = auth.user!
     const payload = await request.validateUsing(replyProductReviewValidator)

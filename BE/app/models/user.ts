@@ -8,24 +8,29 @@ import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import Order from '#models/order'
 import UserProfile from '#models/user_profile'
 import ProductReview from '#models/product_review'
+import { ApiProperty } from '@foadonis/openapi/decorators'
 
 export default class User extends compose(AppBaseModel, withAuthFinder(hash)) {
   static accessTokens = DbAccessTokensProvider.forModel(User)
   declare currentAccessToken?: AccessToken
 
   @column({ isPrimary: true })
+  @ApiProperty()
   declare id: number
 
   @column()
+  @ApiProperty()
   declare phoneNumber: string
 
   @column({ serializeAs: null })
   declare password: string
 
   @column()
+  @ApiProperty()
   declare fullName: string
 
   @column()
+  @ApiProperty()
   declare role: string
 
   @hasMany(() => Order)

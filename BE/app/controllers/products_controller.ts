@@ -3,6 +3,7 @@ import { inject } from '@adonisjs/core'
 import ProductService from '#services/product_service'
 import { createProductValidator, updateProductValidator } from '#validators/product'
 import { Pagination } from '#enums/pagination'
+import { ApiOperation } from '@foadonis/openapi/decorators'
 
 @inject()
 export default class ProductsController {
@@ -11,6 +12,7 @@ export default class ProductsController {
   /**
    * GET /api/v1/admin/products
    */
+  @ApiOperation({ summary: 'Admin - Get all products (Paginated)' })
   async index({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -33,6 +35,7 @@ export default class ProductsController {
   /**
    * GET /api/v1/products
    */
+  @ApiOperation({ summary: 'Client - Get products' })
   async clientIndex({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -60,6 +63,7 @@ export default class ProductsController {
   /**
    * POST /api/v1/admin/products
    */
+  @ApiOperation({ summary: 'Admin - Create a new product' })
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createProductValidator)
     const userId = auth.user?.id
@@ -74,6 +78,7 @@ export default class ProductsController {
   /**
    * GET /api/v1/admin/products/:id
    */
+  @ApiOperation({ summary: 'Admin - Get product by ID' })
   async show({ params, response }: HttpContext) {
     const product = await this.productService.findById(params.id)
     return response.json({
@@ -85,6 +90,7 @@ export default class ProductsController {
   /**
    * GET /api/v1/products/:id
    */
+  @ApiOperation({ summary: 'Client - Get product details' })
   async clientShow({ params, response }: HttpContext) {
     // Client dùng chung endpoint lấy chi tiết bằng ID
     const product = await this.productService.findByIdForClient(params.id)
@@ -97,6 +103,7 @@ export default class ProductsController {
   /**
    * PUT /api/v1/admin/products/:id
    */
+  @ApiOperation({ summary: 'Admin - Update product' })
   async update({ params, request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(updateProductValidator)
     const userId = auth.user?.id
@@ -111,6 +118,7 @@ export default class ProductsController {
   /**
    * DELETE /api/v1/admin/products/:id
    */
+  @ApiOperation({ summary: 'Admin - Delete product' })
   async destroy({ params, response, auth }: HttpContext) {
     const userId = auth.user?.id
     await this.productService.delete(params.id, userId)

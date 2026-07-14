@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import MasterDataService from '#services/master_data_service'
 import { HttpStatus } from '#enums/http_status'
+import { ApiOperation } from '@foadonis/openapi/decorators'
 
 @inject()
 export default class MasterDataController {
@@ -10,6 +11,7 @@ export default class MasterDataController {
   /**
    * GET /api/v1/master-data/divisions/version
    */
+  @ApiOperation({ summary: 'Get current administrative divisions version' })
   async getDivisionsVersion({ response }: HttpContext) {
     const version = await this.masterDataService.getDivisionsVersion()
     return response.ok({
@@ -23,6 +25,7 @@ export default class MasterDataController {
   /**
    * GET /api/v1/master-data/divisions
    */
+  @ApiOperation({ summary: 'Get all administrative divisions (tree)' })
   async getDivisions({ request, response }: HttpContext) {
     const currentVersion = await this.masterDataService.getDivisionsVersion()
 

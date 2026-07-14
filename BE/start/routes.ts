@@ -8,12 +8,16 @@
 */
 
 import router from '@adonisjs/core/services/router'
+import openapi from '@foadonis/openapi/services/main'
 
 router.get('/', () => {
   return { hello: 'world' }
 })
 
 import { middleware } from '#start/kernel'
+
+// OpenAPI Swagger Docs
+openapi.registerRoutes('/docs').use(middleware.swaggerAuth())
 
 router
   .group(() => {

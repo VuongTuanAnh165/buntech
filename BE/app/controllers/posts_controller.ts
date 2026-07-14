@@ -4,6 +4,7 @@ import PostService from '#services/post_service'
 import { createPostValidator, updatePostValidator } from '#validators/post'
 import { HttpStatus } from '#enums/http_status'
 import { Pagination } from '#enums/pagination'
+import { ApiOperation } from '@foadonis/openapi/decorators'
 
 @inject()
 export default class PostsController {
@@ -12,6 +13,7 @@ export default class PostsController {
   /**
    * Public API: Get all published posts
    */
+  @ApiOperation({ summary: 'Client - Get published posts' })
   async clientIndex({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -32,6 +34,7 @@ export default class PostsController {
   /**
    * Public API: Get single published post
    */
+  @ApiOperation({ summary: 'Client - Get single published post' })
   async clientShow({ params, response }: HttpContext) {
     const post = await this.postService.findById(params.id, { isPublic: true })
     return response.json({
@@ -44,6 +47,7 @@ export default class PostsController {
   /**
    * Admin API: Get all posts
    */
+  @ApiOperation({ summary: 'Admin - Get all posts' })
   async index({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
     const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
@@ -63,6 +67,7 @@ export default class PostsController {
   /**
    * Admin API: Get single post
    */
+  @ApiOperation({ summary: 'Admin - Get single post by ID' })
   async show({ params, response }: HttpContext) {
     const post = await this.postService.findById(params.id)
     return response.json({
@@ -75,6 +80,7 @@ export default class PostsController {
   /**
    * Admin API: Create new post
    */
+  @ApiOperation({ summary: 'Admin - Create a new post' })
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createPostValidator)
     const authorId = auth.user!.id // User must be authenticated
@@ -91,6 +97,7 @@ export default class PostsController {
   /**
    * Admin API: Update post
    */
+  @ApiOperation({ summary: 'Admin - Update a post' })
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updatePostValidator)
     const post = await this.postService.update(params.id, payload)
@@ -105,6 +112,7 @@ export default class PostsController {
   /**
    * Admin API: Delete post (Soft delete)
    */
+  @ApiOperation({ summary: 'Admin - Delete a post' })
   async destroy({ params, response }: HttpContext) {
     await this.postService.delete(params.id)
     return response.json({
