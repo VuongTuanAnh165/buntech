@@ -5,6 +5,7 @@
 
 export const controllers = {
   Auth: () => import('#controllers/auth_controller'),
-  Base: () => import('#controllers/base_controller'),
   MasterData: () => import('#controllers/master_data_controller'),
+  BlogCategories: () => import('#controllers/blog_categories_controller'),
+  Posts: () => import('#controllers/posts_controller'),
 }

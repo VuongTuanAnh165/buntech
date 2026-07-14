@@ -1,20 +1,17 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
-import BaseController from '#controllers/base_controller'
 import AuthService from '#services/auth_service'
 import { loginValidator, refreshValidator } from '#validators/auth_validator'
 
 @inject()
-export default class AuthController extends BaseController {
-  constructor(protected authService: AuthService) {
-    super()
-  }
+export default class AuthController {
+  constructor(protected authService: AuthService) {}
 
   /**
    * POST /api/v1/auth/login
    */
-  async login(ctx: HttpContext) {
-    const payload = await ctx.request.validateUsing(loginValidator)
+  async login({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(loginValidator)
 
     const tokens = await this.authService.login(
       payload.phoneNumber,
@@ -22,27 +19,31 @@ export default class AuthController extends BaseController {
       payload.rememberMe
     )
 
-    // Trả về theo format `data: { accessToken, refreshToken }` (Không message)
-    return this.sendSuccess(ctx.response, tokens)
+    return response.json({
+      success: true,
+      data: tokens,
+    })
   }
 
   /**
    * POST /api/v1/auth/refresh
    */
-  async refresh(ctx: HttpContext) {
-    const payload = await ctx.request.validateUsing(refreshValidator)
+  async refresh({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(refreshValidator)
 
     const token = await this.authService.refresh(payload.refreshToken)
 
-    // Trả về theo format `data: { accessToken }` (Không message)
-    return this.sendSuccess(ctx.response, token)
+    return response.json({
+      success: true,
+      data: token,
+    })
   }
 
   /**
    * GET /api/v1/auth/me
    */
-  async me(ctx: HttpContext) {
-    const user = ctx.auth.user!
+  async me({ auth, response }: HttpContext) {
+    const user = auth.user!
     await user.load((preloader) => preloader.load('profile'))
 
     const data = {
@@ -61,6 +62,9 @@ export default class AuthController extends BaseController {
         : null,
     }
 
-    return this.sendSuccess(ctx.response, data)
+    return response.json({
+      success: true,
+      data,
+    })
   }
 }
