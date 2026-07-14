@@ -121,6 +121,23 @@ export class AuthAccessTokenSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class BlogCategorySchema extends BaseModel {
+  static $columns = ['createdAt', 'description', 'id', 'name', 'slug', 'updatedAt'] as const
+  $columns = BlogCategorySchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare description: string | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare name: string
+  @column()
+  declare slug: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class CategorySchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -377,6 +394,54 @@ export class OrderSchema extends BaseModel {
   declare updatedBy: number | null
   @column()
   declare userId: number | null
+}
+
+export class PostSchema extends BaseModel {
+  static $columns = [
+    'authorId',
+    'blogCategoryId',
+    'content',
+    'createdAt',
+    'deletedAt',
+    'id',
+    'isPublished',
+    'metaDescription',
+    'metaTitle',
+    'publishedAt',
+    'slug',
+    'thumbnailUrl',
+    'title',
+    'updatedAt',
+  ] as const
+  $columns = PostSchema.$columns
+  @column()
+  declare authorId: number | null
+  @column()
+  declare blogCategoryId: number | null
+  @column()
+  declare content: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column.dateTime()
+  declare deletedAt: DateTime | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isPublished: boolean | null
+  @column()
+  declare metaDescription: string | null
+  @column()
+  declare metaTitle: string | null
+  @column.dateTime()
+  declare publishedAt: DateTime | null
+  @column()
+  declare slug: string
+  @column()
+  declare thumbnailUrl: string | null
+  @column()
+  declare title: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
 }
 
 export class ProductionLogSchema extends BaseModel {
