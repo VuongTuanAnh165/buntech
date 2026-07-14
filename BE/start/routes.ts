@@ -36,28 +36,88 @@ router
   .prefix('/api/v1')
 
 // Public Routes (Frontend Nuxt 4)
-router.group(() => {
-  // Blog Categories
-  router.get('/blog-categories', [() => import('#controllers/blog_categories_controller'), 'clientIndex'])
-  
-  // Posts
-  router.get('/posts', [() => import('#controllers/posts_controller'), 'clientIndex'])
-  router.get('/posts/:id', [() => import('#controllers/posts_controller'), 'clientShow'])
-}).prefix('/api/v1')
+router
+  .group(() => {
+    // Blog Categories
+    router.get('/blog-categories', [
+      () => import('#controllers/blog_categories_controller'),
+      'clientIndex',
+    ])
+
+    // Posts
+    router.get('/posts', [() => import('#controllers/posts_controller'), 'clientIndex'])
+    router.get('/posts/:id', [() => import('#controllers/posts_controller'), 'clientShow'])
+
+    // Categories
+    router.get('/categories', [() => import('#controllers/categories_controller'), 'clientIndex'])
+    router.get('/categories/:id', [
+      () => import('#controllers/categories_controller'),
+      'clientShow',
+    ])
+
+    // Products
+    router.get('/products', [() => import('#controllers/products_controller'), 'clientIndex'])
+    router.get('/products/:id', [() => import('#controllers/products_controller'), 'clientShow'])
+  })
+  .prefix('/api/v1')
 
 // Admin Routes (Yêu cầu Authentication)
-router.group(() => {
-  // Blog Categories CRUD
-  router.get('/admin/blog-categories', [() => import('#controllers/blog_categories_controller'), 'index'])
-  router.get('/admin/blog-categories/:id', [() => import('#controllers/blog_categories_controller'), 'show'])
-  router.post('/admin/blog-categories', [() => import('#controllers/blog_categories_controller'), 'store'])
-  router.put('/admin/blog-categories/:id', [() => import('#controllers/blog_categories_controller'), 'update'])
-  router.delete('/admin/blog-categories/:id', [() => import('#controllers/blog_categories_controller'), 'destroy'])
+router
+  .group(() => {
+    // Blog Categories CRUD
+    router.get('/admin/blog-categories', [
+      () => import('#controllers/blog_categories_controller'),
+      'index',
+    ])
+    router.get('/admin/blog-categories/:id', [
+      () => import('#controllers/blog_categories_controller'),
+      'show',
+    ])
+    router.post('/admin/blog-categories', [
+      () => import('#controllers/blog_categories_controller'),
+      'store',
+    ])
+    router.put('/admin/blog-categories/:id', [
+      () => import('#controllers/blog_categories_controller'),
+      'update',
+    ])
+    router.delete('/admin/blog-categories/:id', [
+      () => import('#controllers/blog_categories_controller'),
+      'destroy',
+    ])
 
-  // Posts CRUD
-  router.get('/admin/posts', [() => import('#controllers/posts_controller'), 'index'])
-  router.get('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'show'])
-  router.post('/admin/posts', [() => import('#controllers/posts_controller'), 'store'])
-  router.put('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'update'])
-  router.delete('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'destroy'])
-}).prefix('/api/v1').use(middleware.auth())
+    // Posts CRUD
+    router.get('/admin/posts', [() => import('#controllers/posts_controller'), 'index'])
+    router.get('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'show'])
+    router.post('/admin/posts', [() => import('#controllers/posts_controller'), 'store'])
+    router.put('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'update'])
+    router.delete('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'destroy'])
+
+    // Categories CRUD
+    router.get('/admin/categories', [() => import('#controllers/categories_controller'), 'index'])
+    router.get('/admin/categories/:id', [
+      () => import('#controllers/categories_controller'),
+      'show',
+    ])
+    router.post('/admin/categories', [() => import('#controllers/categories_controller'), 'store'])
+    router.put('/admin/categories/:id', [
+      () => import('#controllers/categories_controller'),
+      'update',
+    ])
+    router.delete('/admin/categories/:id', [
+      () => import('#controllers/categories_controller'),
+      'destroy',
+    ])
+
+    // Products CRUD
+    router.get('/admin/products', [() => import('#controllers/products_controller'), 'index'])
+    router.get('/admin/products/:id', [() => import('#controllers/products_controller'), 'show'])
+    router.post('/admin/products', [() => import('#controllers/products_controller'), 'store'])
+    router.put('/admin/products/:id', [() => import('#controllers/products_controller'), 'update'])
+    router.delete('/admin/products/:id', [
+      () => import('#controllers/products_controller'),
+      'destroy',
+    ])
+  })
+  .prefix('/api/v1')
+  .use(middleware.auth())

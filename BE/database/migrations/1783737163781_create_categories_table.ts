@@ -8,6 +8,10 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.string('name', 100).notNullable()
       table.string('slug', 100).notNullable().unique()
+      table.string('thumbnail_url').nullable()
+      table.text('description').nullable()
+      table.string('meta_title', 60).nullable()
+      table.string('meta_description', 160).nullable()
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

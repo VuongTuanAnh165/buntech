@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import drive from '@adonisjs/drive/services/main'
 import { randomUUID } from 'node:crypto'
 import type { Infer } from '@vinejs/vine/types'
-import { createPostValidator, updatePostValidator } from '#validators/post'
+import { type createPostValidator, type updatePostValidator } from '#validators/post'
 
 export type CreatePostDTO = Infer<typeof createPostValidator>
 export type UpdatePostDTO = Infer<typeof updatePostValidator>
@@ -15,6 +15,7 @@ interface GetPostListOptions {
 
 export default class PostService {
   async getList(page: number = 1, limit: number = 10, options?: GetPostListOptions) {
+    const safeLimit = Math.min(limit, 100)
     const query = Post.query()
       .select(
         'id',
@@ -39,7 +40,7 @@ export default class PostService {
       query.where('isPublished', true).andWhere('publishedAt', '<=', DateTime.now().toSQL())
     }
 
-    return await query.paginate(page, limit)
+    return await query.paginate(page, safeLimit)
   }
 
   async findById(id: number, options?: { isPublic?: boolean }) {
@@ -72,39 +73,70 @@ export default class PostService {
 
   async create(data: CreatePostDTO, authorId: number) {
     const { thumbnail, ...postData } = data
-    
+
     let thumbnailUrl: string | undefined
-    
+    let newKey: string | undefined
+
     if (thumbnail) {
-      const key = `posts/thumbnails/${randomUUID()}.${thumbnail.extname}`
-      await thumbnail.moveToDisk(key)
-      thumbnailUrl = await drive.use().getUrl(key)
+      newKey = `posts/thumbnails/${randomUUID()}.${thumbnail.extname}`
+      await thumbnail.moveToDisk(newKey)
+      thumbnailUrl = await drive.use().getUrl(newKey)
     }
-    
-    return await Post.create({ ...postData, thumbnailUrl, authorId })
+
+    try {
+      return await Post.create({ ...postData, thumbnailUrl, authorId })
+    } catch (error) {
+      if (newKey) {
+        await drive
+          .use()
+          .delete(newKey)
+          .catch(() => {})
+      }
+      throw error
+    }
   }
 
   async update(id: number, data: UpdatePostDTO) {
     const post = await this.findById(id)
     const { thumbnail, ...postData } = data
-    
+
     let thumbnailUrl: string | undefined
-    
+    let oldKeyToDelete: string | undefined
+    let newKey: string | undefined
+
     if (thumbnail) {
-      // Xóa file cũ trên disk nếu có
+      // Đánh dấu file cũ để xóa sau
       if (post.thumbnailUrl && post.thumbnailUrl.includes('posts/thumbnails/')) {
-        const oldKey = post.thumbnailUrl.substring(post.thumbnailUrl.indexOf('posts/thumbnails/'))
-        await drive.use().delete(oldKey).catch(() => {})
+        oldKeyToDelete = post.thumbnailUrl.substring(post.thumbnailUrl.indexOf('posts/thumbnails/'))
       }
 
-      const key = `posts/thumbnails/${randomUUID()}.${thumbnail.extname}`
-      await thumbnail.moveToDisk(key)
-      thumbnailUrl = await drive.use().getUrl(key)
+      newKey = `posts/thumbnails/${randomUUID()}.${thumbnail.extname}`
+      await thumbnail.moveToDisk(newKey)
+      thumbnailUrl = await drive.use().getUrl(newKey)
     }
 
-    post.merge({ ...postData, thumbnailUrl: thumbnailUrl || post.thumbnailUrl })
-    await post.save()
-    return post
+    try {
+      post.merge({ ...postData, thumbnailUrl: thumbnailUrl || post.thumbnailUrl })
+      await post.save()
+
+      // Xóa file cũ sau khi DB save thành công
+      if (oldKeyToDelete) {
+        await drive
+          .use()
+          .delete(oldKeyToDelete)
+          .catch(() => {})
+      }
+
+      return post
+    } catch (error) {
+      if (newKey) {
+        await drive
+          .use()
+          .delete(newKey)
+          .catch(() => {})
+      }
+      throw error
+    }
   }
 
   async delete(id: number) {

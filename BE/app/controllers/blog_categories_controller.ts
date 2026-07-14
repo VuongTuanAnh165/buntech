@@ -1,10 +1,7 @@
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import BlogCategoryService from '#services/blog_category_service'
-import {
-  createBlogCategoryValidator,
-  updateBlogCategoryValidator,
-} from '#validators/blog_category'
+import { createBlogCategoryValidator, updateBlogCategoryValidator } from '#validators/blog_category'
 
 @inject()
 export default class BlogCategoriesController {

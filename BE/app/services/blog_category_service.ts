@@ -1,6 +1,9 @@
 import BlogCategory from '#models/blog_category'
 import type { Infer } from '@vinejs/vine/types'
-import { createBlogCategoryValidator, updateBlogCategoryValidator } from '#validators/blog_category'
+import {
+  type createBlogCategoryValidator,
+  type updateBlogCategoryValidator,
+} from '#validators/blog_category'
 
 export type CreateBlogCategoryDTO = Infer<typeof createBlogCategoryValidator>
 export type UpdateBlogCategoryDTO = Infer<typeof updateBlogCategoryValidator>

@@ -9,10 +9,12 @@ export const createPostValidator = vine.compile(
     title: vine.string().maxLength(255),
     slug: vine.string().maxLength(255).unique({ table: 'posts', column: 'slug' }),
     blogCategoryId: vine.number(),
-    thumbnail: vine.file({
-      size: '5mb',
-      extnames: ['jpg', 'png', 'jpeg', 'webp'],
-    }).optional(),
+    thumbnail: vine
+      .file({
+        size: '5mb',
+        extnames: ['jpg', 'png', 'jpeg', 'webp'],
+      })
+      .optional(),
     content: vine.string().optional(),
     metaTitle: vine.string().maxLength(60).optional(),
     metaDescription: vine.string().maxLength(160).optional(),
@@ -30,10 +32,12 @@ export const updatePostValidator = vine.compile(
     title: vine.string().maxLength(255).optional(),
     slug: vine.string().maxLength(255).optional(),
     blogCategoryId: vine.number().optional(),
-    thumbnail: vine.file({
-      size: '5mb',
-      extnames: ['jpg', 'png', 'jpeg', 'webp'],
-    }).optional(),
+    thumbnail: vine
+      .file({
+        size: '5mb',
+        extnames: ['jpg', 'png', 'jpeg', 'webp'],
+      })
+      .optional(),
     content: vine.string().optional(),
     metaTitle: vine.string().maxLength(60).optional(),
     metaDescription: vine.string().maxLength(160).optional(),

@@ -8,4 +8,6 @@ export const controllers = {
   MasterData: () => import('#controllers/master_data_controller'),
   BlogCategories: () => import('#controllers/blog_categories_controller'),
   Posts: () => import('#controllers/posts_controller'),
+  Categories: () => import('#controllers/categories_controller'),
+  Products: () => import('#controllers/products_controller'),
 }

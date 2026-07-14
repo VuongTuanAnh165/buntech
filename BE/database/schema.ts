@@ -143,9 +143,13 @@ export class CategorySchema extends BaseModel {
     'createdAt',
     'createdBy',
     'deletedAt',
+    'description',
     'id',
+    'metaDescription',
+    'metaTitle',
     'name',
     'slug',
+    'thumbnailUrl',
     'updatedAt',
     'updatedBy',
   ] as const
@@ -156,12 +160,20 @@ export class CategorySchema extends BaseModel {
   declare createdBy: number | null
   @column.dateTime()
   declare deletedAt: DateTime | null
+  @column()
+  declare description: string | null
   @column({ isPrimary: true })
   declare id: number
+  @column()
+  declare metaDescription: string | null
+  @column()
+  declare metaTitle: string | null
   @column()
   declare name: string
   @column()
   declare slug: string
+  @column()
+  declare thumbnailUrl: string | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
   @column()
@@ -444,6 +456,33 @@ export class PostSchema extends BaseModel {
   declare updatedAt: DateTime | null
 }
 
+export class ProductImageSchema extends BaseModel {
+  static $columns = [
+    'altText',
+    'createdAt',
+    'displayOrder',
+    'fileUrl',
+    'id',
+    'productId',
+    'updatedAt',
+  ] as const
+  $columns = ProductImageSchema.$columns
+  @column()
+  declare altText: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column()
+  declare displayOrder: number | null
+  @column()
+  declare fileUrl: string
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare productId: number | null
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class ProductionLogSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -490,12 +529,18 @@ export class ProductSchema extends BaseModel {
   static $columns = [
     'basePrice',
     'categoryId',
+    'content',
     'createdAt',
     'createdBy',
     'deletedAt',
     'id',
     'isActive',
+    'metaDescription',
+    'metaTitle',
     'name',
+    'shortDescription',
+    'slug',
+    'thumbnailUrl',
     'unit',
     'updatedAt',
     'updatedBy',
@@ -505,6 +550,8 @@ export class ProductSchema extends BaseModel {
   declare basePrice: string
   @column()
   declare categoryId: number | null
+  @column()
+  declare content: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
   @column()
@@ -516,7 +563,17 @@ export class ProductSchema extends BaseModel {
   @column()
   declare isActive: boolean | null
   @column()
+  declare metaDescription: string | null
+  @column()
+  declare metaTitle: string | null
+  @column()
   declare name: string
+  @column()
+  declare shortDescription: string | null
+  @column()
+  declare slug: string
+  @column()
+  declare thumbnailUrl: string | null
   @column()
   declare unit: string
   @column.dateTime({ autoCreate: true, autoUpdate: true })
