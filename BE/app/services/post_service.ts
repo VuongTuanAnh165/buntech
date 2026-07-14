@@ -91,6 +91,12 @@ export default class PostService {
     let thumbnailUrl: string | undefined
     
     if (thumbnail) {
+      // Xóa file cũ trên disk nếu có
+      if (post.thumbnailUrl && post.thumbnailUrl.includes('posts/thumbnails/')) {
+        const oldKey = post.thumbnailUrl.substring(post.thumbnailUrl.indexOf('posts/thumbnails/'))
+        await drive.use().delete(oldKey).catch(() => {})
+      }
+
       const key = `posts/thumbnails/${randomUUID()}.${thumbnail.extname}`
       await thumbnail.moveToDisk(key)
       thumbnailUrl = await drive.use().getUrl(key)
