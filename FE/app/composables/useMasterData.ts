@@ -12,7 +12,7 @@ export const useMasterData = () => {
       const versionRes = await getDivisionsVersion()
       if (versionRes?.success && versionRes?.data?.versionHash) {
         const serverVersion = versionRes.data.versionHash
-        
+
         if (version.value !== serverVersion || !divisions.value.length) {
           // Version changed or no data, fetch new data
           const divisionsRes = await getDivisionsTree()
@@ -33,6 +33,6 @@ export const useMasterData = () => {
   return {
     version,
     divisions,
-    initSync,
+    initSync
   }
 }

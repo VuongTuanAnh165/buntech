@@ -6,7 +6,7 @@
    @nuxt/fonts tự động load font từ Google Fonts.
    ══════════════════════════════════════════════ */
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Be Vietnam Pro', system-ui, sans-serif;
 }
 
 /* ══════════════════════════════════════════════

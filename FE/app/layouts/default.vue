@@ -6,7 +6,11 @@
 </script>
 
 <template>
-  <div class="bg-default min-h-dvh">
-    <slot />
+  <div class="bg-default flex min-h-dvh flex-col">
+    <LayoutTheHeader />
+    <main class="flex-grow">
+      <slot />
+    </main>
+    <LayoutTheFooter />
   </div>
 </template>

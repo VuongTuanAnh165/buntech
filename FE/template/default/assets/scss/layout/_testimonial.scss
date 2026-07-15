@@ -16,7 +16,6 @@
 
   @media #{$xs,$md,$lg,$xl} {
     margin-right: 0px;
-
   }
 
   @media #{$xs} {
@@ -28,7 +27,6 @@
     display: block;
   }
 }
-
 
 .tp-bs-testi-img {
   z-index: 2;
@@ -82,7 +80,7 @@
   top: 50%;
   right: 0;
   z-index: -1;
-  opacity: .03;
+  opacity: 0.03;
 }
 
 .tesi-reviewer-name {
@@ -141,7 +139,6 @@
       cursor: pointer;
     }
 
-
     &.swiper-pagination-bullet-active {
       background-color: #000;
 
@@ -152,7 +149,7 @@
   }
 }
 
-// it testimonial 
+// it testimonial
 .it-testi-wraper {
   margin-bottom: -125px;
 }
@@ -227,7 +224,6 @@
   }
 }
 
-
 .tp-it-testi-active {
   margin-right: -620px;
 
@@ -241,7 +237,6 @@
 }
 
 .it-testi-navigation {
-
   @media #{$xxs} {
     display: none;
   }
@@ -259,7 +254,7 @@
   background-color: var(--tp-common-white);
   color: var(--tp-theme-vogue);
   box-shadow: 0px 16px 32px 0px rgba(0, 0, 0, 0.06);
-  @include transition(.3s);
+  @include transition(0.3s);
   border-radius: 8px;
 
   &:hover {
@@ -287,9 +282,9 @@
   color: var(--tp-common-white);
   border: 2px solid #262626;
   background-color: rgba(0, 0, 0, 0);
-  @include transition(.3s);
+  @include transition(0.3s);
   z-index: 12;
-  &::after{
+  &::after {
     content: '';
     position: absolute;
     top: 0;
@@ -304,10 +299,9 @@
   &:hover {
     color: var(--tp-common-white);
     border-color: transparent;
-    &::after{
+    &::after {
       opacity: 1;
     }
-
   }
 }
 
@@ -316,7 +310,6 @@
 }
 
 // da testi
-
 
 .da-testi-avata {
   & img {
@@ -348,7 +341,6 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-
   }
 
   &__review {
@@ -395,7 +387,6 @@
       line-height: 50px;
     }
   }
-
 }
 
 .app-testimonial {
@@ -421,7 +412,6 @@
     @media #{$xs} {
       margin-top: 20px;
     }
-
   }
 
   &__review {
@@ -454,7 +444,6 @@
   &__reviewer-name {
     font-size: 18px;
     color: var(--tp-theme-mirage);
-
   }
 
   &-icon {
@@ -480,7 +469,6 @@
       display: none;
     }
   }
-
 }
 
 .app-testi-avata {
@@ -504,19 +492,19 @@
   color: var(--tp-common-black);
   border: 2px solid rgba(0, 0, 0, 0.102);
   background-color: var(--tp-common-white);
-  @include transition(.3s);
+  @include transition(0.3s);
   z-index: 99;
 
   &:hover {
     color: var(--tp-common-white);
     background-color: var(--tp-theme-redical);
-    border-color:transparent;
+    border-color: transparent;
   }
 }
 
 .app-testi-active {
   & .swiper-slide {
-    opacity: .5;
+    opacity: 0.5;
 
     &-active {
       opacity: 1;
@@ -524,14 +512,13 @@
   }
 }
 
-
-// ptg 
+// ptg
 
 .tp-ptg-brand-item {
   display: inline-block;
   text-align: center;
   filter: grayscale(1);
-  opacity: .5;
+  opacity: 0.5;
 
   &:hover {
     filter: grayscale(0);
@@ -555,7 +542,7 @@
     border-radius: 10px;
 
     &::after {
-      content: "";
+      content: '';
       position: absolute;
       top: 2px;
       left: 2px;
@@ -565,11 +552,10 @@
       display: inline-block;
       z-index: -1;
       border-radius: 10px;
-
     }
 
     &::before {
-      content: "";
+      content: '';
       position: absolute;
       bottom: -14px;
       left: 90px;
@@ -597,7 +583,6 @@
       background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 20px;
-
     }
 
     &__review {
@@ -612,7 +597,6 @@
 }
 
 .ptg-testimonial-bg {
-
   position: absolute;
   top: 30px;
   right: 40px;
@@ -620,10 +604,8 @@
   opacity: 0.03;
   color: #151515;
   font-size: 100px;
-  opacity: .6;
+  opacity: 0.6;
 }
-
-
 
 .ptg-tesi-reviewer-name {
   & h4 {
@@ -656,10 +638,10 @@
   color: var(--tp-common-black);
   box-shadow: 0px 16px 32px 0px rgba(0, 0, 0, 0.06);
   border-radius: 8px;
-  @include transition(.3s);
-  
+  @include transition(0.3s);
+
   z-index: 1;
-  &::after{
+  &::after {
     position: absolute;
     content: '';
     top: 0;
@@ -674,7 +656,7 @@
 
   &:hover {
     color: var(--tp-common-white);
-    &::after{
+    &::after {
       opacity: 1;
     }
   }
@@ -683,7 +665,6 @@
 .ptg-testi-button-prev {
   margin-right: 80px;
 }
-
 
 .ca-tasti-button-prev,
 .ca-tasti-button-next {
@@ -697,10 +678,10 @@
   background-color: var(--tp-common-white);
   color: var(--tp-common-black);
   box-shadow: 0px 16px 32px 0px rgba(0, 0, 0, 0.06);
-  @include transition(.3s);
+  @include transition(0.3s);
   border-radius: 8px;
   z-index: 2;
-  &::after{
+  &::after {
     content: '';
     position: absolute;
     top: 0;
@@ -714,7 +695,7 @@
   }
   &:hover {
     color: var(--tp-common-white);
-    &::after{
+    &::after {
       transform: scale(1);
     }
   }
@@ -726,13 +707,13 @@
 
 .ca-testi-active {
   & .it-testimonial-box {
-    @include transition(.3s);
+    @include transition(0.3s);
     &:hover {
       background-color: black;
       & .it-testimonial-box__review {
         color: #fff;
       }
-      &::after{
+      &::after {
         border-color: #000 transparent transparent transparent;
       }
     }

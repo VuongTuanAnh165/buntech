@@ -26,7 +26,7 @@ export class ApiClient {
     const config = useRuntimeConfig()
     const token = useCookie('auth_token').value
     let toast: any = null
-    
+
     if (import.meta.client) {
       try {
         toast = useToast()
@@ -107,17 +107,17 @@ export class ApiClient {
 
           isRefreshing = true
           const originalRequest = request
-          
+
           // Lấy Nuxt App context để chạy an toàn bên trong callback async
           const nuxtApp = tryUseNuxtApp()
-          
+
           try {
             const runRefresh = async () => {
               const refreshTokenStr = useCookie('refresh_token').value
               if (!refreshTokenStr) throw new Error('No refresh token available')
 
               const refreshRes = await $fetch<ApiResponse<LoginResponse>>('/auth/refresh', {
-                baseURL: (useRuntimeConfig().public.apiBaseUrl as string),
+                baseURL: useRuntimeConfig().public.apiBaseUrl as string,
                 method: 'POST',
                 body: { refreshToken: refreshTokenStr }
               })
@@ -132,9 +132,7 @@ export class ApiClient {
             }
 
             // Gọi runRefresh bên trong context nếu có, hoặc gọi thường
-            const newToken = nuxtApp 
-              ? await nuxtApp.runWithContext(runRefresh) 
-              : await runRefresh()
+            const newToken = nuxtApp ? await nuxtApp.runWithContext(runRefresh) : await runRefresh()
 
             if (newToken) {
               refreshQueue.forEach((q) => q.resolve())
@@ -144,7 +142,7 @@ export class ApiClient {
           } catch (error) {
             refreshQueue.forEach((q) => q.reject(error))
             refreshQueue = []
-            
+
             if (nuxtApp) {
               nuxtApp.runWithContext(() => {
                 useCookie('auth_token').value = null

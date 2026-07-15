@@ -14,7 +14,7 @@ export const useAuth = () => {
       const res = await AuthService.login(payload)
       if (res.data) {
         const cookieOptions = payload.rememberMe ? { maxAge: 60 * 60 * 24 * 30 } : {}
-        
+
         // Lưu trữ Tokens vào Cookie an toàn
         useCookie('auth_token', cookieOptions).value = res.data.accessToken
         useCookie('refresh_token', cookieOptions).value = res.data.refreshToken

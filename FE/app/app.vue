@@ -2,7 +2,11 @@
 import { vi } from '@nuxt/ui/locale'
 
 await callOnce('master-data-sync', async () => {
-  await useMasterData().initSync()
+  try {
+    await useMasterData().initSync()
+  } catch (e) {
+    console.error('Lỗi khi lấy dữ liệu master-data:', e)
+  }
 })
 </script>
 

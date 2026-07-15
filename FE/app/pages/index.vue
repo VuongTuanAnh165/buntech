@@ -4,9 +4,8 @@
  * Sẽ được thay thế bằng Landing Page hoặc logic redirect phù hợp.
  */
 definePageMeta({
-  layout: false
+  layout: 'default'
 })
-
 </script>
 
 <template>

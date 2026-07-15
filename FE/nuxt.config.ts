@@ -13,8 +13,16 @@ export default defineNuxtConfig({
     '@nuxt/image',
     'pinia-plugin-persistedstate/nuxt',
     'nuxt-security',
-    '@vite-pwa/nuxt'
+    '@vite-pwa/nuxt',
+    '@nuxtjs/google-fonts'
   ],
+
+  googleFonts: {
+    families: {
+      'Be+Vietnam+Pro': [300, 400, 500, 600, 700]
+    },
+    display: 'swap'
+  },
 
   css: ['~/assets/css/main.css'],
 
