@@ -21,10 +21,10 @@
     <div class="absolute inset-0" />
 
     <!-- Container theo chuẩn login-card -->
-    <div class="z-10 w-full max-w-[450px]">
+    <div class="z-10 w-full max-w-md">
       <div class="mb-6 flex justify-center">
         <NuxtLink to="/">
-          <NuxtImg src="/images/logo.webp" alt="Logo" class="h-[50px] w-auto" format="webp" />
+          <NuxtImg src="/images/logo.webp" alt="Logo" class="h-12 w-auto" format="webp" />
         </NuxtLink>
       </div>
 
