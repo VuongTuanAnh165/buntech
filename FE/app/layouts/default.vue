@@ -7,10 +7,10 @@
 
 <template>
   <div class="bg-default flex min-h-dvh flex-col">
-    <LayoutTheHeader />
+    <LayoutsDefaultHeader />
     <main class="flex-grow">
       <slot />
     </main>
-    <LayoutTheFooter />
+    <LayoutsDefaultFooter />
   </div>
 </template>

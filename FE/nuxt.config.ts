@@ -75,8 +75,8 @@ export default defineNuxtConfig({
   },
 
   // Cấu hình Caching (SWR) cho các trang tĩnh (Landing page)
-  routeRules: {
+  routeRules: process.env.NODE_ENV === 'production' ? {
     '/': { swr: 3600 }, // Cache trang chủ 1 tiếng trên server
     '/gioi-thieu': { static: true }
-  }
+  } : {}
 })
