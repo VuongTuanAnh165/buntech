@@ -13,6 +13,10 @@ router.get('/', () => {
   return { hello: 'world' }
 })
 
+// Swagger API Documentation
+router.get('/swagger', [() => import('#controllers/swagger_controller'), 'swagger'])
+router.get('/docs', [() => import('#controllers/swagger_controller'), 'docs'])
+
 import { middleware } from '#start/kernel'
 
 router

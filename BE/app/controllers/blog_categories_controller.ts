@@ -9,7 +9,9 @@ export default class BlogCategoriesController {
   constructor(protected blogCategoryService: BlogCategoryService) {}
 
   /**
-   * Public API: Get all categories
+   * @clientIndex
+   * @description Public API: Get all categories
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategoryList[]>"}
    */
   async clientIndex({ response }: HttpContext) {
     const categories = await this.blogCategoryService.getList()
@@ -21,7 +23,9 @@ export default class BlogCategoriesController {
   }
 
   /**
-   * Admin API: Get all categories
+   * @index
+   * @description Admin API: Get all categories
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategoryList[]>"}
    */
   async index({ response }: HttpContext) {
     const categories = await this.blogCategoryService.getList()
@@ -33,7 +37,10 @@ export default class BlogCategoriesController {
   }
 
   /**
-   * Admin API: Get category by ID
+   * @show
+   * @description Admin API: Get category by ID
+   * @paramPath id - Category ID - @type(number) @required
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategoryList>"}
    */
   async show({ params, response }: HttpContext) {
     const category = await this.blogCategoryService.findById(params.id)
@@ -45,7 +52,10 @@ export default class BlogCategoriesController {
   }
 
   /**
-   * Admin API: Create new category
+   * @store
+   * @description Admin API: Create new category
+   * @requestBody <createBlogCategoryValidator>
+   * @responseBody 201 - {"success": true, "message": "string", "data": "<BlogCategory>"}
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createBlogCategoryValidator)
@@ -59,7 +69,11 @@ export default class BlogCategoriesController {
   }
 
   /**
-   * Admin API: Update category
+   * @update
+   * @description Admin API: Update category
+   * @paramPath id - Category ID - @type(number) @required
+   * @requestBody <updateBlogCategoryValidator>
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategory>"}
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateBlogCategoryValidator)
@@ -75,7 +89,10 @@ export default class BlogCategoriesController {
   }
 
   /**
-   * Admin API: Delete category
+   * @destroy
+   * @description Admin API: Delete category
+   * @paramPath id - Category ID - @type(number) @required
+   * @responseBody 200 - {"success": true, "message": "string"}
    */
   async destroy({ params, response }: HttpContext) {
     await this.blogCategoryService.delete(params.id)

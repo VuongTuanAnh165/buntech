@@ -8,7 +8,11 @@ export default class AuthController {
   constructor(protected authService: AuthService) {}
 
   /**
-   * POST /api/v1/auth/login
+   * @login
+   * @summary Đăng nhập hệ thống
+   * @description Đăng nhập bằng số điện thoại và mật khẩu
+   * @requestBody <loginValidator>
+   * @responseBody 200 - <LoginResponse>
    */
   async login({ request, response }: HttpContext) {
     const payload = await request.validateUsing(loginValidator)
@@ -21,12 +25,17 @@ export default class AuthController {
 
     return response.json({
       success: true,
+      message: 'Đăng nhập thành công',
       data: tokens,
     })
   }
 
   /**
-   * POST /api/v1/auth/refresh
+   * @refresh
+   * @summary Làm mới Access Token
+   * @description Làm mới token khi access_token hết hạn
+   * @requestBody <refreshValidator>
+   * @responseBody 200 - <RefreshResponse>
    */
   async refresh({ request, response }: HttpContext) {
     const payload = await request.validateUsing(refreshValidator)
@@ -35,12 +44,16 @@ export default class AuthController {
 
     return response.json({
       success: true,
+      message: 'Làm mới token thành công',
       data: token,
     })
   }
 
   /**
-   * GET /api/v1/auth/me
+   * @me
+   * @summary Lấy thông tin user hiện tại
+   * @description Yêu cầu truyền Bearer Token vào Header
+   * @responseBody 200 - <UserResponse>
    */
   async me({ auth, response }: HttpContext) {
     const user = auth.user!
@@ -64,6 +77,7 @@ export default class AuthController {
 
     return response.json({
       success: true,
+      message: 'Lấy thông tin người dùng thành công',
       data,
     })
   }

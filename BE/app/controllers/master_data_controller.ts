@@ -8,12 +8,15 @@ export default class MasterDataController {
   constructor(protected masterDataService: MasterDataService) {}
 
   /**
-   * GET /api/v1/master-data/divisions/version
+   * @getDivisionsVersion
+   * @description GET /api/v1/master-data/divisions/version
+   * @responseBody 200 - {"success": true, "message": "string", "data": {"versionHash": "string"}}
    */
   async getDivisionsVersion({ response }: HttpContext) {
     const version = await this.masterDataService.getDivisionsVersion()
     return response.ok({
       success: true,
+      message: 'Lấy phiên bản thành công',
       data: {
         versionHash: version,
       },
@@ -21,7 +24,10 @@ export default class MasterDataController {
   }
 
   /**
-   * GET /api/v1/master-data/divisions
+   * @getDivisions
+   * @description GET /api/v1/master-data/divisions
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"code": 1, "name": "string", "codename": "string", "division_type": "string", "phone_code": 1, "wards": [{"code": 1, "name": "string", "codename": "string", "division_type": "string"}]}]}
+   * @responseBody 304 - Not Modified
    */
   async getDivisions({ request, response }: HttpContext) {
     const currentVersion = await this.masterDataService.getDivisionsVersion()
@@ -42,6 +48,7 @@ export default class MasterDataController {
 
     return response.ok({
       success: true,
+      message: 'Lấy danh sách thành công',
       data: divisionsTree,
     })
   }

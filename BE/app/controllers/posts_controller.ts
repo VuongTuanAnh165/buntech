@@ -10,7 +10,13 @@ export default class PostsController {
   constructor(protected postService: PostService) {}
 
   /**
-   * Public API: Get all published posts
+   * @clientIndex
+   * @description Public API: Get all published posts
+   * @paramUse(sort, limit)
+   * @param page - page number - @type(number)
+   * @param limit - items per page - @type(number)
+   * @param categoryId - category ID - @type(number)
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<PostList[]>", "meta": "<PaginationMeta>"}
    */
   async clientIndex({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
@@ -21,16 +27,26 @@ export default class PostsController {
       isPublic: true,
       categoryId: categoryId ? Number(categoryId) : undefined,
     })
-
+    
+    const meta = posts.getMeta()
     return response.json({
       success: true,
       message: 'Lấy danh sách bài viết thành công',
-      data: posts,
+      data: posts.all(),
+      meta: {
+        page: meta.currentPage,
+        pageSize: meta.perPage,
+        total: meta.total,
+        totalPages: meta.lastPage,
+      },
     })
   }
 
   /**
-   * Public API: Get single published post
+   * @clientShow
+   * @description Public API: Get single published post
+   * @paramPath id - Post ID - @type(number) @required
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<PostDetail>"}
    */
   async clientShow({ params, response }: HttpContext) {
     const post = await this.postService.findById(params.id, { isPublic: true })
@@ -42,7 +58,13 @@ export default class PostsController {
   }
 
   /**
-   * Admin API: Get all posts
+   * @index
+   * @description Admin API: Get all posts
+   * @paramUse(sort, limit)
+   * @param page - page number - @type(number)
+   * @param limit - items per page - @type(number)
+   * @param categoryId - category ID - @type(number)
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<PostList[]>", "meta": "<PaginationMeta>"}
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', Pagination.DEFAULT_PAGE)
@@ -53,15 +75,25 @@ export default class PostsController {
       categoryId: categoryId ? Number(categoryId) : undefined,
     })
 
+    const meta = posts.getMeta()
     return response.json({
       success: true,
       message: 'Lấy danh sách bài viết thành công',
-      data: posts,
+      data: posts.all(),
+      meta: {
+        page: meta.currentPage,
+        pageSize: meta.perPage,
+        total: meta.total,
+        totalPages: meta.lastPage,
+      },
     })
   }
 
   /**
-   * Admin API: Get single post
+   * @show
+   * @description Admin API: Get single post
+   * @paramPath id - Post ID - @type(number) @required
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<PostDetail>"}
    */
   async show({ params, response }: HttpContext) {
     const post = await this.postService.findById(params.id)
@@ -73,7 +105,10 @@ export default class PostsController {
   }
 
   /**
-   * Admin API: Create new post
+   * @store
+   * @description Admin API: Create new post
+   * @requestBody <createPostValidator>
+   * @responseBody 201 - {"success": true, "message": "string", "data": "<Post>"}
    */
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createPostValidator)
@@ -89,7 +124,11 @@ export default class PostsController {
   }
 
   /**
-   * Admin API: Update post
+   * @update
+   * @description Admin API: Update post
+   * @paramPath id - Post ID - @type(number) @required
+   * @requestBody <updatePostValidator>
+   * @responseBody 200 - {"success": true, "message": "string", "data": "<Post>"}
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updatePostValidator)
@@ -103,7 +142,10 @@ export default class PostsController {
   }
 
   /**
-   * Admin API: Delete post (Soft delete)
+   * @destroy
+   * @description Admin API: Delete post (Soft delete)
+   * @paramPath id - Post ID - @type(number) @required
+   * @responseBody 200 - {"success": true, "message": "string"}
    */
   async destroy({ params, response }: HttpContext) {
     await this.postService.delete(params.id)
