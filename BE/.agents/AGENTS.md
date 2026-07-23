@@ -163,6 +163,7 @@ export default class OrdersController {
 17. **Idempotency**: Các API nhạy cảm (Thanh toán, Đặt hàng, Webhook) bắt buộc phải thiết kế theo chuẩn Idempotent (gọi nhiều lần không sinh ra dữ liệu trùng lặp).
 18. **Retry & Timeout**: Mọi lời gọi tới External API (axios) hoặc Queue, Mail bắt buộc phải set `timeout` (VD: 5s, không để vô hạn) và cấu hình cơ chế `Retry` tự động khi fail.
 19. **API Contract & Serialization**: Dữ liệu trả về (Response) phải tuân thủ nghiêm ngặt chuẩn định dạng FE yêu cầu (success, message, data, meta). Tuyệt đối không để rò rỉ dữ liệu nhạy cảm (`password`, `deleted_at`, `remember_token`) ra ngoài response.
+20. **Swagger API Documentation**: Khi viết Controller, LUÔN LUÔN phải bổ sung JSDoc comment để tự động sinh Swagger Docs (bằng adonis-autoswagger). Bắt buộc phải có `@summary`, `@description`, `@requestBody`, và `@responseBody` (trả về đúng chuẩn `{success, message, data}`). Không bao giờ được phép quên docs API.
 
 ---
 

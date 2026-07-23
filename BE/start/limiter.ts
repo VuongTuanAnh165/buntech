@@ -18,3 +18,7 @@ export const throttle = limiter.define('global', () => {
 export const authThrottle = limiter.define('auth', () => {
   return limiter.allowRequests(5).every('1 minute')
 })
+
+export const quickOrderThrottle = limiter.define('quick_order', () => {
+  return limiter.allowRequests(3).every('1 minute')
+})

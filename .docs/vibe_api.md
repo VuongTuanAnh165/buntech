@@ -136,17 +136,22 @@ Hiểu:
 QUY TẮC QUAN TRỌNG
 ==================================================
 
-Chỉ xử lý DUY NHẤT
+1. CHỐNG BỆNH LƯỜI ĐỌC CỦA AI:
+TRƯỚC KHI CODE: Bắt buộc phải sử dụng Tool (view_file/list_dir) để đọc thực sự nội dung của TẤT CẢ các file trong thư mục `BE\.agents\AGENTS.md` và `BE\.agents\skills`. Tuyệt đối không được đoán mò nội dung.
 
+2. KHÓA GIỚI HẠN CÔNG VIỆC:
+Chỉ được phép thực hiện ĐÚNG 1 API DUY NHẤT trong mỗi lượt trả lời. Sau khi xuất đầy đủ template Output cho 1 API đó, BẮT BUỘC phải DỪNG LẠI và chờ tôi gõ chữ "Tiếp tục" mới được làm API tiếp theo. Tuyệt đối không làm gộp 2 API cùng lúc.
+
+3. ÉP BUỘC TỰ RÀ SOÁT CODE:
+SAU KHI CODE XONG 1 API: Khoan hãy in ra Output. Bạn phải tự chạy ngầm quá trình Agentic Review: Tự kiểm tra xem có dính N+1 Query không? Đã dùng VineJS độc lập chưa? Có file upload thì đã dùng Drive chưa? Transaction có bị kẹp logic chậm không? Nếu thấy lỗi, tự động sửa ngay trong code trước khi xuất ra Output cho tôi.
+
+4. CHỈ XỬ LÝ DUY NHẤT:
 Phase hiện tại.
-
 Không làm trước.
-
 Không làm sau.
-
 Không tự ý thêm API.
-
 Không tự refactor ngoài phạm vi.
+Làm xong phải chạy npm run typecheck và npm run lint để kiểm tra
 
 ==================================================
 MỖI API PHẢI LÀM THEO QUY TRÌNH

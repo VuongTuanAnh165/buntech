@@ -23,7 +23,7 @@ if (env.get('NODE_ENV') !== 'production') {
 
 import { middleware } from '#start/kernel'
 
-import { authThrottle } from '#start/limiter'
+import { authThrottle, quickOrderThrottle } from '#start/limiter'
 
 router
   .group(() => {
@@ -84,6 +84,11 @@ router
         'store',
       ])
       .use(middleware.auth())
+
+    // Quick Order
+    router
+      .post('/orders/quick', [() => import('#controllers/public_orders_controller'), 'quickOrder'])
+      .use(quickOrderThrottle)
   })
   .prefix('/api/v1')
 
@@ -160,6 +165,109 @@ router
     ])
     router.delete('/admin/product-reviews/:id', [
       () => import('#controllers/product_reviews_controller'),
+      'destroy',
+    ])
+
+    // Users CRUD
+    router.get('/admin/users', [() => import('#controllers/users_controller'), 'index'])
+    router.get('/admin/users/:id', [() => import('#controllers/users_controller'), 'show'])
+    router.post('/admin/users', [() => import('#controllers/users_controller'), 'store'])
+    router.put('/admin/users/:id', [() => import('#controllers/users_controller'), 'update'])
+    router.delete('/admin/users/:id', [() => import('#controllers/users_controller'), 'destroy'])
+    router.put('/admin/users/:id/change-password', [
+      () => import('#controllers/users_controller'),
+      'changePassword',
+    ])
+    router.put('/admin/users/:id/profile', [
+      () => import('#controllers/users_controller'),
+      'updateProfile',
+    ])
+
+    // Addresses CRUD (Nested under users)
+    router.get('/admin/users/:userId/addresses', [
+      () => import('#controllers/addresses_controller'),
+      'index',
+    ])
+    router.get('/admin/users/:userId/addresses/:id', [
+      () => import('#controllers/addresses_controller'),
+      'show',
+    ])
+    router.post('/admin/users/:userId/addresses', [
+      () => import('#controllers/addresses_controller'),
+      'store',
+    ])
+    router.put('/admin/users/:userId/addresses/:id', [
+      () => import('#controllers/addresses_controller'),
+      'update',
+    ])
+    router.delete('/admin/users/:userId/addresses/:id', [
+      () => import('#controllers/addresses_controller'),
+      'destroy',
+    ])
+
+    // Customer Prices CRUD (Nested under users)
+    router.get('/admin/users/:userId/custom-prices', [
+      () => import('#controllers/customer_prices_controller'),
+      'index',
+    ])
+    router.post('/admin/users/:userId/custom-prices', [
+      () => import('#controllers/customer_prices_controller'),
+      'upsert',
+    ])
+    router.delete('/admin/users/:userId/custom-prices/:productId', [
+      () => import('#controllers/customer_prices_controller'),
+      'destroy',
+    ])
+
+    // Finance & Transactions
+    router.get('/admin/transactions', [
+      () => import('#controllers/transactions_controller'),
+      'index',
+    ])
+    router.post('/admin/transactions/pay-debt', [
+      () => import('#controllers/transactions_controller'),
+      'payDebt',
+    ])
+    router.get('/admin/finance/debt-summary', [
+      () => import('#controllers/transactions_controller'),
+      'debtSummary',
+    ])
+
+    // Admin Orders (M5)
+    router.get('/admin/orders', [() => import('#controllers/admin_orders_controller'), 'index'])
+    router.get('/admin/orders/:id', [() => import('#controllers/admin_orders_controller'), 'show'])
+    router.post('/admin/orders', [() => import('#controllers/admin_orders_controller'), 'store'])
+    router.patch('/admin/orders/batch-assign', [
+      () => import('#controllers/admin_orders_controller'),
+      'batchAssign',
+    ])
+    router.patch('/admin/orders/:id/status', [
+      () => import('#controllers/admin_orders_controller'),
+      'updateStatus',
+    ])
+
+    // Upload API
+    router.post('/admin/upload', [() => import('#controllers/uploads_controller'), 'store'])
+
+    // System Configs CRUD
+    router.get('/admin/system-configs', [
+      () => import('#controllers/system_configs_controller'),
+      'index',
+    ])
+    router.get('/admin/system-configs/:id', [
+      () => import('#controllers/system_configs_controller'),
+      'show',
+    ])
+    router.post('/admin/system-configs', [
+      () => import('#controllers/system_configs_controller'),
+      'store',
+    ])
+    router.put('/admin/system-configs/:id', [
+      () => import('#controllers/system_configs_controller'),
+      'update',
+    ])
+    router.delete('/admin/system-configs/:id', [
+      () => import('#controllers/system_configs_controller'),
       'destroy',
     ])
   })
