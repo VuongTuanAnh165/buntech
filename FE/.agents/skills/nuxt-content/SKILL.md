@@ -37,10 +37,10 @@ export default defineContentConfig({
       type: 'page',
       source: 'docs/**',
       schema: z.object({
-        updatedAt: z.date().optional(),
-      }),
-    }),
-  },
+        updatedAt: z.date().optional()
+      })
+    })
+  }
 })
 ```
 

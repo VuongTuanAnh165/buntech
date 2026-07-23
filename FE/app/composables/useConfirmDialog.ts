@@ -32,33 +32,40 @@ const defaultOptions: ConfirmDialogOptions = {
  *   }
  * }
  */
+/**
+ * Đưa resolvePromise ra ngoài module scope (Global Singleton).
+ * Lý do: Nếu để bên trong export const useConfirmDialog, mỗi lần một component gọi useConfirmDialog(),
+ * nó sẽ tạo ra một closure resolvePromise riêng biệt.
+ * Khi Component A gọi confirm(), nó set resolvePromise A. Khi BaseConfirmDialog gọi handleConfirm(),
+ * nó invoke resolvePromise B (lúc này đang null), khiến promise của Component A bị treo vô thời hạn (Memory Leak).
+ */
+let globalResolvePromise: ((value: boolean) => void) | null = null
+
 export const useConfirmDialog = () => {
   const isOpen = useState<boolean>('confirm-dialog-open', () => false)
   const options = useState<ConfirmDialogOptions>('confirm-dialog-options', () => ({
     ...defaultOptions
   }))
 
-  let resolvePromise: ((value: boolean) => void) | null = null
-
   const confirm = (opts?: Partial<ConfirmDialogOptions>): Promise<boolean> => {
     options.value = { ...defaultOptions, ...opts }
     isOpen.value = true
 
     return new Promise<boolean>((resolve) => {
-      resolvePromise = resolve
+      globalResolvePromise = resolve
     })
   }
 
   const handleConfirm = () => {
     isOpen.value = false
-    resolvePromise?.(true)
-    resolvePromise = null
+    globalResolvePromise?.(true)
+    globalResolvePromise = null
   }
 
   const handleCancel = () => {
     isOpen.value = false
-    resolvePromise?.(false)
-    resolvePromise = null
+    globalResolvePromise?.(false)
+    globalResolvePromise = null
   }
 
   return {

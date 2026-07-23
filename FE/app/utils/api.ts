@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-extraneous-class */
-import type { FetchOptions, ResponseType } from 'ofetch'
+// No any allowed
+import type { FetchOptions, ResponseType, FetchContext } from 'ofetch'
 import { defu } from 'defu'
 import { HttpStatus } from '~/enums/http'
 import type { ApiResponse } from '~/types/api'
@@ -8,241 +7,289 @@ import type { LoginResponse } from '~/types/auth'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
-// Biến cục bộ để quản lý hàng đợi (Queue) Refresh Token
-let isRefreshing = false
-let refreshQueue: Array<{ resolve: (value?: any) => void; reject: (reason?: any) => void }> = []
+type CustomFetchOptions<R extends ResponseType = 'json'> = FetchOptions<R>
 
-/**
- * Lớp API Client tổng quát, cung cấp các phương thức như axios nhưng dùng $fetch.
- * Hỗ trợ tự động Refresh Token, AbortController và Custom Response Type (Blob, JSON...).
- */
-export class ApiClient {
-  private static async request<T, R extends ResponseType = 'json'>(
-    method: HttpMethod,
-    url: string,
-    data?: any,
-    opts?: FetchOptions<R>
-  ): Promise<T> {
-    const config = useRuntimeConfig()
-    const token = useCookie('auth_token').value
-    let toast: any = null
+// --- REFRESH STATE ---
+type RefreshResolve = (value?: string) => void
+type RefreshReject = (reason?: unknown) => void
+type RefreshQueueItem = { resolve: RefreshResolve; reject: RefreshReject }
 
-    if (import.meta.client) {
-      try {
-        toast = useToast()
-      } catch {
-        // Bỏ qua nếu không có context
+interface RefreshState {
+  isRefreshing: boolean
+  queue: RefreshQueueItem[]
+}
+
+const ssrStateMap = new WeakMap<object, RefreshState>()
+const clientState: RefreshState = { isRefreshing: false, queue: [] }
+
+function getRefreshState(): RefreshState {
+  if (import.meta.client) return clientState
+  const nuxtApp = tryUseNuxtApp()
+  if (nuxtApp) {
+    let state = ssrStateMap.get(nuxtApp)
+    if (!state) {
+      state = { isRefreshing: false, queue: [] }
+      ssrStateMap.set(nuxtApp, state)
+    }
+    return state
+  }
+  return { isRefreshing: false, queue: [] }
+}
+
+// --- HTTP INTERCEPTOR ---
+function onRequest<R extends ResponseType>(
+  options: CustomFetchOptions<R>,
+  token: string | null | undefined
+) {
+  if (token) {
+    options.headers = new Headers(options.headers || {})
+    options.headers.set('Authorization', `Bearer ${token}`)
+  }
+}
+
+function onResponse<R extends ResponseType>(response: unknown, _options: CustomFetchOptions<R>) {
+  const res = response as { status: number; _data?: Record<string, unknown> }
+  if (import.meta.client) {
+    if (res.status >= HttpStatus.OK && res.status < HttpStatus.MULTIPLE_CHOICES) {
+      const message = res._data?.message as string | undefined
+      if (message) {
+        tryUseNuxtApp()?.callHook('app:toast', {
+          title: 'Thành công',
+          description: message,
+          color: 'success'
+        })
       }
     }
+  }
+}
 
-    const defaultOptions: FetchOptions<R> = {
-      baseURL: config.public.apiBaseUrl as string,
+async function onError<R extends ResponseType>(
+  context: FetchContext & { options: CustomFetchOptions<R> }
+) {
+  const { response } = context
+  if (!response) return
+  const res = response as { status: number; _data?: Record<string, unknown> }
+
+  // 1. Validate Errors (422)
+  if (res.status === HttpStatus.UNPROCESSABLE_ENTITY) {
+    const errors = res._data?.errors as Record<string, string | string[]> | undefined
+    if (errors && res._data) {
+      res._data.validationErrors = Object.entries(errors).map(([key, messages]) => ({
+        path: key,
+        message: Array.isArray(messages) ? messages[0] : messages
+      }))
+    }
+    return
+  }
+
+  if (import.meta.client) {
+    if (res.status !== HttpStatus.UNAUTHORIZED) {
+      const message =
+        (res._data?.message as string) || 'Có lỗi xảy ra từ máy chủ, vui lòng thử lại.'
+      tryUseNuxtApp()?.callHook('app:toast', {
+        title: 'Thất bại',
+        description: message,
+        color: 'error'
+      })
+    }
+  }
+}
+
+async function handleUnauthorizedRetry<T, R extends ResponseType>(
+  requestUrl: string,
+  options: CustomFetchOptions<R>
+): Promise<T> {
+  const state = getRefreshState()
+
+  if (state.isRefreshing) {
+    return new Promise<string | undefined>((resolve, reject) => {
+      state.queue.push({ resolve, reject })
+    }).then((newToken) => {
+      if (newToken) {
+        options.headers = new Headers(options.headers || {})
+        options.headers.set('Authorization', `Bearer ${newToken}`)
+      }
+      return $fetch<T>(requestUrl, options as Parameters<typeof $fetch>[1])
+    })
+  }
+
+  state.isRefreshing = true
+  const nuxtApp = tryUseNuxtApp()
+
+  try {
+    const runRefresh = async () => {
+      const refreshTokenStr = useCookie('refresh_token').value
+      if (!refreshTokenStr) throw new Error('No refresh token available')
+
+      const refreshRes = await $fetch<ApiResponse<LoginResponse>>('/auth/refresh', {
+        baseURL: useRuntimeConfig().public.apiBaseUrl as string,
+        method: 'POST',
+        body: { refreshToken: refreshTokenStr }
+      })
+
+      const newToken = refreshRes.data?.accessToken
+      if (newToken) {
+        const isProd = process.env.NODE_ENV === 'production'
+        useCookie('auth_token', { secure: isProd, sameSite: 'lax' }).value = newToken
+        options.headers = new Headers(options.headers || {})
+        options.headers.set('Authorization', `Bearer ${newToken}`)
+      }
+      return newToken
+    }
+
+    const newToken = nuxtApp ? await nuxtApp.runWithContext(runRefresh) : await runRefresh()
+
+    if (newToken) {
+      state.queue.forEach((q) => q.resolve(newToken))
+      state.queue = []
+      return $fetch<T>(requestUrl, options as Parameters<typeof $fetch>[1])
+    }
+    throw new Error('Làm mới token thất bại')
+  } catch (error) {
+    state.queue.forEach((q) => q.reject(error))
+    state.queue = []
+
+    if (nuxtApp) {
+      nuxtApp.runWithContext(() => {
+        const isProd = process.env.NODE_ENV === 'production'
+        const cookieOptions = { secure: isProd, sameSite: 'lax' as const }
+        useCookie('auth_token', cookieOptions).value = null
+        useCookie('refresh_token', cookieOptions).value = null
+        navigateTo('/login')
+      })
+    }
+    throw error
+  } finally {
+    state.isRefreshing = false
+  }
+}
+
+// --- API CLIENT CORE ---
+async function request<T, R extends ResponseType = 'json'>(
+  method: HttpMethod,
+  url: string,
+  data?: unknown,
+  opts?: FetchOptions<R>
+): Promise<T> {
+  const config = useRuntimeConfig()
+  const token = useCookie('auth_token').value
+
+  const defaultOptions: CustomFetchOptions<R> = {
+    baseURL: config.public.apiBaseUrl as string,
+    method,
+    onRequest: ({ options }) => onRequest(options as CustomFetchOptions, token),
+    onResponse: ({ response, options }) => onResponse(response, options as CustomFetchOptions),
+    onResponseError: (context) => onError(context as FetchContext & { options: CustomFetchOptions })
+  }
+
+  if (data) {
+    if (method === 'GET' || method === 'DELETE') {
+      defaultOptions.query = data
+    } else {
+      defaultOptions.body = data
+    }
+  }
+  const mergedOptions = defu(opts, defaultOptions) as CustomFetchOptions<R>
+
+  try {
+    return await $fetch<T>(url, mergedOptions as Parameters<typeof $fetch>[1])
+  } catch (error: unknown) {
+    const fetchError = error as
+      { response?: { status?: number }; message?: string } | null | undefined
+
+    // Xử lý riêng lỗi 401 Unauthorized để refresh token
+    if (fetchError?.response?.status === HttpStatus.UNAUTHORIZED) {
+      return handleUnauthorizedRetry<T, R>(url, mergedOptions)
+    }
+
+    // Structured Logging cho các lỗi còn lại
+    const logData = {
+      level: 'ERROR',
+      type: 'API_FETCH_ERROR',
       method,
-      onRequest({ options }) {
-        if (toast) {
-          ;(options as any).toast = toast
-        }
-        if (token) {
-          options.headers = new Headers(options.headers || {})
-          options.headers.set('Authorization', `Bearer ${token}`)
-        }
-      },
-      onResponse({ response, options }) {
-        if (import.meta.client) {
-          const toastRef = (options as any).toast
-          if (
-            toastRef &&
-            response.status >= HttpStatus.OK &&
-            response.status < HttpStatus.MULTIPLE_CHOICES
-          ) {
-            const message = response._data?.message
-            if (message) {
-              toastRef.add({ title: 'Thành công', description: message, color: 'success' })
-            }
-          }
-        }
-      },
-      onRequestError({ error }) {
-        console.error('[API Request Error]', error)
-      },
-      async onResponseError(context) {
-        const { request, response, options } = context
-        console.error(`[API Response Error] ${response.status} at ${request}`)
-
-        // 1. Xử lý lỗi Validate (HTTP 422) từ Backend
-        if (response.status === HttpStatus.UNPROCESSABLE_ENTITY) {
-          // Trích xuất mảng lỗi validation từ BE: { errors: { email: ['...'] } }
-          const errors = response._data?.errors
-          if (errors) {
-            const formattedErrors = Object.entries(errors).map(([key, messages]) => ({
-              path: key,
-              message: Array.isArray(messages) ? messages[0] : messages
-            }))
-            // Gắn mảng lỗi định dạng chuẩn Nuxt UI vào object response._data
-            response._data.validationErrors = formattedErrors
-          }
-          // Không hiển thị Toast cho 422 vì lỗi sẽ được bôi đỏ trên từng ô Input
-          return
-        }
-
-        if (import.meta.client) {
-          const toast = (options as any).toast
-          // Không bắn Toast lỗi ngay nếu là 401 vì ta đang có logic Refresh Token ngầm
-          if (toast && response.status !== HttpStatus.UNAUTHORIZED) {
-            const message = response._data?.message || 'Có lỗi xảy ra từ máy chủ, vui lòng thử lại.'
-            toast.add({ title: 'Thất bại', description: message, color: 'error' })
-          }
-        }
-
-        // 2. CƠ CHẾ TỰ ĐỘNG REFRESH TOKEN KHI GẶP LỖI UNAUTHORIZED
-        if (response.status === HttpStatus.UNAUTHORIZED) {
-          // Nếu đang có tiến trình refresh token chạy rồi, ta đưa request này vào Queue chờ
-          if (isRefreshing) {
-            return new Promise((resolve, reject) => {
-              refreshQueue.push({ resolve, reject })
-            }).then(() => {
-              return $fetch(request as string, options as any)
-            })
-          }
-
-          isRefreshing = true
-          const originalRequest = request
-
-          // Lấy Nuxt App context để chạy an toàn bên trong callback async
-          const nuxtApp = tryUseNuxtApp()
-
-          try {
-            const runRefresh = async () => {
-              const refreshTokenStr = useCookie('refresh_token').value
-              if (!refreshTokenStr) throw new Error('No refresh token available')
-
-              const refreshRes = await $fetch<ApiResponse<LoginResponse>>('/auth/refresh', {
-                baseURL: useRuntimeConfig().public.apiBaseUrl as string,
-                method: 'POST',
-                body: { refreshToken: refreshTokenStr }
-              })
-
-              const newToken = refreshRes.data?.accessToken
-              if (newToken) {
-                useCookie('auth_token').value = newToken
-                options.headers = new Headers(options.headers || {})
-                options.headers.set('Authorization', `Bearer ${newToken}`)
-              }
-              return newToken
-            }
-
-            // Gọi runRefresh bên trong context nếu có, hoặc gọi thường
-            const newToken = nuxtApp ? await nuxtApp.runWithContext(runRefresh) : await runRefresh()
-
-            if (newToken) {
-              refreshQueue.forEach((q) => q.resolve())
-              refreshQueue = []
-              return $fetch(originalRequest as string, options as any)
-            }
-          } catch (error) {
-            refreshQueue.forEach((q) => q.reject(error))
-            refreshQueue = []
-
-            if (nuxtApp) {
-              nuxtApp.runWithContext(() => {
-                useCookie('auth_token').value = null
-                useCookie('refresh_token').value = null
-                navigateTo('/login')
-              })
-            }
-          } finally {
-            isRefreshing = false
-          }
-        }
-      }
+      url,
+      status: fetchError?.response?.status || 'UNKNOWN',
+      message: fetchError?.message || String(error),
+      timestamp: new Date().toISOString()
     }
 
-    // Tự động phân loại body/query
-    if (data) {
-      if (method === 'GET' || method === 'DELETE') {
-        defaultOptions.query = data
-      } else {
-        if (data instanceof FormData) {
-          defaultOptions.body = data
-        } else {
-          defaultOptions.body = data
-        }
-      }
+    if (import.meta.server) {
+      console.error(JSON.stringify(logData))
+    } else {
+      console.error('[API_FETCH_ERROR]', logData)
     }
 
-    // Tiến hành gọi API bằng cấu trúc đã merged
-    return $fetch<T>(url, defu(opts, defaultOptions) as any)
+    throw error
   }
+}
 
-  // Khai báo Generics R để hỗ trợ tải file Blob/ArrayBuffer thay vì ép cứng JSON
-  static get<T = any, R extends ResponseType = 'json'>(
+// --- API EXPORTS ---
+export const ApiClient = {
+  get<T = unknown, R extends ResponseType = 'json'>(
     url: string,
-    query?: Record<string, any>,
+    query?: Record<string, unknown>,
     opts?: FetchOptions<R>
   ) {
-    return this.request<T, R>('GET', url, query, opts)
-  }
+    return request<T, R>('GET', url, query, opts)
+  },
 
-  static post<T = any, R extends ResponseType = 'json'>(
+  post<T = unknown, R extends ResponseType = 'json'>(
     url: string,
-    body?: any,
+    body?: unknown,
     opts?: FetchOptions<R>
   ) {
-    return this.request<T, R>('POST', url, body, opts)
-  }
+    return request<T, R>('POST', url, body, opts)
+  },
 
-  static put<T = any, R extends ResponseType = 'json'>(
+  put<T = unknown, R extends ResponseType = 'json'>(
     url: string,
-    body?: any,
+    body?: unknown,
     opts?: FetchOptions<R>
   ) {
-    return this.request<T, R>('PUT', url, body, opts)
-  }
+    return request<T, R>('PUT', url, body, opts)
+  },
 
-  static patch<T = any, R extends ResponseType = 'json'>(
+  patch<T = unknown, R extends ResponseType = 'json'>(
     url: string,
-    body?: any,
+    body?: unknown,
     opts?: FetchOptions<R>
   ) {
-    return this.request<T, R>('PATCH', url, body, opts)
-  }
+    return request<T, R>('PATCH', url, body, opts)
+  },
 
-  static del<T = any, R extends ResponseType = 'json'>(
+  del<T = unknown, R extends ResponseType = 'json'>(
     url: string,
-    query?: Record<string, any>,
+    query?: Record<string, unknown>,
     opts?: FetchOptions<R>
   ) {
-    return this.request<T, R>('DELETE', url, query, opts)
-  }
+    return request<T, R>('DELETE', url, query, opts)
+  },
 
-  /**
-   * CƠ CHẾ UPLOAD FILE VỚI TIẾN TRÌNH (Progress Bar)
-   * Sử dụng lõi XMLHttpRequest thay vì fetch để bắt được sự kiện % upload.
-   */
-  static upload<T = any>(
+  upload<T = unknown>(
     url: string,
     fileData: FormData,
     onProgress?: (percent: number) => void
   ): Promise<T> {
     return new Promise((resolve, reject) => {
+      if (!import.meta.client) {
+        return reject(new Error('Upload file chỉ được thực hiện trên trình duyệt (Client-side)'))
+      }
+
       const config = useRuntimeConfig()
       const token = useCookie('auth_token').value
       const xhr = new XMLHttpRequest()
 
       const fullUrl = url.startsWith('http') ? url : `${config.public.apiBaseUrl}${url}`
-
       xhr.open('POST', fullUrl, true)
 
       if (token) {
         xhr.setRequestHeader('Authorization', `Bearer ${token}`)
       }
 
-      // Lắng nghe tiến trình upload
       if (xhr.upload && onProgress) {
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            onProgress(percent)
+            onProgress(Math.round((event.loaded / event.total) * 100))
           }
         }
       }
@@ -252,7 +299,7 @@ export class ApiClient {
           try {
             resolve(JSON.parse(xhr.responseText))
           } catch {
-            resolve(xhr.responseText as any)
+            resolve(xhr.responseText as unknown as T)
           }
         } else {
           reject({ status: xhr.status, responseText: xhr.responseText })
@@ -260,7 +307,6 @@ export class ApiClient {
       }
 
       xhr.onerror = () => reject(new Error('Network Error during upload'))
-
       xhr.send(fileData)
     })
   }

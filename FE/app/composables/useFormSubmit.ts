@@ -12,27 +12,27 @@
  *   onSuccess: () => navigateTo('/admin/customers')
  * })
  */
+interface SubmitOptions {
+  /** Tin nhắn toast khi thành công (nếu API không trả message). */
+  successMessage?: string
+  /** Callback sau khi submit thành công. */
+  onSuccess?: () => void | Promise<void>
+  /** Callback khi có lỗi. */
+  onError?: (error: unknown) => void
+  /** Có reset form sau khi thành công không? Mặc định: false */
+  resetAfterSuccess?: boolean
+  /** Ref của FormWrapper để tự động hiển thị lỗi 422 */
+  formRef?: Ref<
+    | {
+        setErrors: (errors: { path: string; message: string }[]) => void
+        clearErrors: () => void
+      }
+    | undefined
+  >
+}
+
 export const useFormSubmit = () => {
   const isSubmitting = ref(false)
-
-  interface SubmitOptions {
-    /** Tin nhắn toast khi thành công (nếu API không trả message). */
-    successMessage?: string
-    /** Callback sau khi submit thành công. */
-    onSuccess?: () => void | Promise<void>
-    /** Callback khi có lỗi. */
-    onError?: (error: unknown) => void
-    /** Có reset form sau khi thành công không? Mặc định: false */
-    resetAfterSuccess?: boolean
-    /** Ref của FormWrapper để tự động hiển thị lỗi 422 */
-    formRef?: Ref<
-      | {
-          setErrors: (errors: { path: string; message: string }[]) => void
-          clearErrors: () => void
-        }
-      | undefined
-    >
-  }
 
   /**
    * Wrap hàm submit với loading state + error handling.

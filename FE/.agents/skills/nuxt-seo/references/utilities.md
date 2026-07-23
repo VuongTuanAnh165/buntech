@@ -9,8 +9,8 @@ Automatic canonical URLs based on site config.
 ```ts
 export default defineNuxtConfig({
   seoUtils: {
-    canonicalQueryWhitelist: ['page', 'sort'],  // Keep these query params
-    redirectToCanonicalSiteUrl: true  // 301 to canonical domain
+    canonicalQueryWhitelist: ['page', 'sort'], // Keep these query params
+    redirectToCanonicalSiteUrl: true // 301 to canonical domain
   }
 })
 ```
@@ -105,10 +105,10 @@ Build-time validation of links.
 ```ts
 export default defineNuxtConfig({
   linkChecker: {
-    failOnError: true,  // Default: fail build on errors
+    failOnError: true, // Default: fail build on errors
     exclude: ['/api/**'],
     skipInspections: ['missing-hash'],
-    report: { html: true }  // Generate HTML report
+    report: { html: true } // Generate HTML report
   }
 })
 ```
@@ -180,7 +180,7 @@ Enforce consistent URLs:
 ```ts
 export default defineNuxtConfig({
   site: {
-    trailingSlash: false  // Redirect /blog/ to /blog
+    trailingSlash: false // Redirect /blog/ to /blog
   }
 })
 ```

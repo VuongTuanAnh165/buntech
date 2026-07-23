@@ -74,9 +74,7 @@ const emit = defineEmits<{ update: [value: number] }>()
 </script>
 
 <template>
-  <button @click="emit('update', count + 1)">
-    Count: {{ count }}
-  </button>
+  <button @click="emit('update', count + 1)">Count: {{ count }}</button>
 </template>
 ```
 

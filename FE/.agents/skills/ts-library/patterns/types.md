@@ -54,9 +54,11 @@ export type UserId = Brand<string, 'UserId'>
 export type PostId = Brand<string, 'PostId'>
 
 // Can't mix them up
-function getUser(id: UserId) { /* ... */ }
-getUser('abc' as UserId)  // OK
-getUser('abc' as PostId)  // Error!
+function getUser(id: UserId) {
+  /* ... */
+}
+getUser('abc' as UserId) // OK
+getUser('abc' as PostId) // Error!
 ```
 
 ## Type Accumulation (Builders)
@@ -72,7 +74,7 @@ interface ProcedureBuilder<TContext, TInput, TOutput> {
 
 // Types flow through the chain
 const proc = builder
-  .input(z.object({ id: z.string() }))  // TInput = { id: string }
+  .input(z.object({ id: z.string() })) // TInput = { id: string }
   .output(z.object({ name: z.string() })) // TOutput = { name: string }
   .query(({ input }) => ({ name: input.id }))
 ```
@@ -85,9 +87,7 @@ Allow users to extend library types:
 // Library code
 export interface Register {}
 
-export type DefaultError = Register extends { defaultError: infer E }
-  ? E
-  : Error
+export type DefaultError = Register extends { defaultError: infer E } ? E : Error
 
 // User code
 declare module 'my-lib' {
@@ -142,9 +142,7 @@ Return readable error messages:
 ```typescript
 type TypeError<Message extends string> = { __error: Message }
 
-type ValidateInput<T> = T extends string
-  ? T
-  : TypeError<'Input must be a string'>
+type ValidateInput<T> = T extends string ? T : TypeError<'Input must be a string'>
 
 // Shows: Type 'TypeError<"Input must be a string">' is not assignable...
 ```

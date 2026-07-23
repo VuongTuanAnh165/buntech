@@ -1,31 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { UseFetchOptions } from 'nuxt/app'
 import { defu } from 'defu'
 import { hash } from 'ohash'
 import { HttpStatus } from '~/enums/http'
 
+type CustomUseFetchOptions<T> = UseFetchOptions<T>
+
 /**
  * Hàm gọi API tổng quát trên SSR. Khắc phục lỗi Cache Collision và tự động chuyển tiếp Cookie.
  */
-export function useApi<T>(url: string, opts: UseFetchOptions<T> = {}) {
+export function useApi<T>(url: string, opts: CustomUseFetchOptions<T> = {}) {
   const config = useRuntimeConfig()
 
   // 1. FIX LỖI CACHE COLLISION TRÊN SSR
   // Băm chuỗi URL kết hợp với query và method để tạo ra Key cache riêng biệt cho mỗi Request
   const uniqueKey = hash([url, opts.query, opts.body, opts.method])
 
-  const defaultOptions: UseFetchOptions<T> = {
+  const defaultOptions: CustomUseFetchOptions<T> = {
     baseURL: config.public.apiBaseUrl as string,
     key: uniqueKey,
     onRequest({ options }) {
-      if (import.meta.client) {
-        try {
-          ;(options as any).toast = useToast()
-        } catch {
-          // Bỏ qua nếu mất context
-        }
-      }
-
       if (import.meta.server) {
         // 2. CHUYỂN TIẾP COOKIE KHI CHẠY SSR
         // Đảm bảo Server của Nuxt mang theo Cookie của User khi gửi request sang Server Backend
@@ -43,17 +36,16 @@ export function useApi<T>(url: string, opts: UseFetchOptions<T> = {}) {
         }
       }
     },
-    onResponse({ response, options }) {
+    onResponse({ response, options: _options }) {
       if (import.meta.client) {
-        const toast = (options as any).toast
-        if (
-          toast &&
-          response.status >= HttpStatus.OK &&
-          response.status < HttpStatus.MULTIPLE_CHOICES
-        ) {
-          const message = (response._data as any)?.message
+        if (response.status >= HttpStatus.OK && response.status < HttpStatus.MULTIPLE_CHOICES) {
+          const message = (response._data as Record<string, unknown>)?.message as string | undefined
           if (message) {
-            toast.add({ title: 'Thành công', description: message, color: 'success' })
+            tryUseNuxtApp()?.callHook('app:toast', {
+              title: 'Thành công',
+              description: message,
+              color: 'success'
+            })
           }
         }
       }
@@ -61,47 +53,59 @@ export function useApi<T>(url: string, opts: UseFetchOptions<T> = {}) {
     onRequestError({ error }) {
       console.error('[useApi Request Error]', error)
     },
-    onResponseError({ request, response, options }) {
+    onResponseError({ request, response, options: _options }) {
       console.error(`[useApi Response Error] ${response.status} at ${request}`)
       if (import.meta.client) {
-        const toast = (options as any).toast
-        if (toast && response.status !== HttpStatus.UNAUTHORIZED) {
+        if (response.status !== HttpStatus.UNAUTHORIZED) {
           // 401 sẽ do api.ts xử lý refresh token
           const message =
-            (response._data as any)?.message || 'Có lỗi xảy ra từ máy chủ, vui lòng thử lại.'
-          toast.add({ title: 'Thất bại', description: message, color: 'error' })
+            ((response._data as Record<string, unknown>)?.message as string) ||
+            'Có lỗi xảy ra từ máy chủ, vui lòng thử lại.'
+          tryUseNuxtApp()?.callHook('app:toast', {
+            title: 'Thất bại',
+            description: message,
+            color: 'error'
+          })
         }
       }
     }
   }
 
-  return useFetch<T>(url, defu(opts, defaultOptions) as any)
+  return useFetch<T>(url, defu(opts, defaultOptions) as Parameters<typeof useFetch<T>>[1])
 }
 
 /**
  * Các Helper function giúp gọi nhanh SSR tương ứng với các HTTP Methods
  */
 
-export const useApiGet = <T = any>(
+export const useApiGet = <T = unknown>(
   url: string,
-  query?: Record<string, any>,
-  opts?: UseFetchOptions<T>
+  query?: Record<string, unknown>,
+  opts?: CustomUseFetchOptions<T>
 ) => {
-  return useApi<T>(url, { method: 'GET', query, ...opts } as any)
+  return useApi<T>(url, { method: 'GET', query, ...opts })
 }
 
-export const useApiPost = <T = any>(url: string, body?: any, opts?: UseFetchOptions<T>) => {
-  return useApi<T>(url, { method: 'POST', body, ...opts } as any)
-}
-
-export const useApiPut = <T = any>(url: string, body?: any, opts?: UseFetchOptions<T>) => {
-  return useApi<T>(url, { method: 'PUT', body, ...opts } as any)
-}
-
-export const useApiDelete = <T = any>(
+export const useApiPost = <T = unknown>(
   url: string,
-  query?: Record<string, any>,
-  opts?: UseFetchOptions<T>
+  body?: Record<string, unknown> | FormData | string | null,
+  opts?: CustomUseFetchOptions<T>
 ) => {
-  return useApi<T>(url, { method: 'DELETE', query, ...opts } as any)
+  return useApi<T>(url, { method: 'POST', body, ...opts })
+}
+
+export const useApiPut = <T = unknown>(
+  url: string,
+  body?: Record<string, unknown> | FormData | string | null,
+  opts?: CustomUseFetchOptions<T>
+) => {
+  return useApi<T>(url, { method: 'PUT', body, ...opts })
+}
+
+export const useApiDelete = <T = unknown>(
+  url: string,
+  query?: Record<string, unknown>,
+  opts?: CustomUseFetchOptions<T>
+) => {
+  return useApi<T>(url, { method: 'DELETE', query, ...opts })
 }

@@ -40,7 +40,7 @@ const { data: products, status, error } = await useFetch('/api/products')
 
 useSeoMeta({
   title: 'Products',
-  description: 'Browse the product catalog.',
+  description: 'Browse the product catalog.'
 })
 </script>
 

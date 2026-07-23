@@ -16,7 +16,7 @@ import { defineConfig } from 'tsdown'
 export default defineConfig({
   entry: 'src/index.ts',
   dts: true,
-  exports: true,
+  exports: true
 })
 ```
 
@@ -28,12 +28,12 @@ import { defineConfig } from 'tsdown'
 export default defineConfig([
   {
     entry: 'src/node.ts',
-    platform: 'node',
+    platform: 'node'
   },
   {
     entry: 'src/browser.ts',
-    platform: 'browser',
-  },
+    platform: 'browser'
+  }
 ])
 ```
 
@@ -42,33 +42,30 @@ export default defineConfig([
 ```ts
 // Single entry
 defineConfig({
-  entry: 'src/index.ts',
+  entry: 'src/index.ts'
 })
 
 // Multiple entries
 defineConfig({
-  entry: ['src/entry1.ts', 'src/entry2.ts'],
+  entry: ['src/entry1.ts', 'src/entry2.ts']
 })
 
 // Entry aliases → dist/main.js, dist/utils.js
 defineConfig({
   entry: {
     main: 'src/index.ts',
-    utils: 'src/utils.ts',
-  },
+    utils: 'src/utils.ts'
+  }
 })
 
 // Glob patterns
 defineConfig({
-  entry: 'src/**/*.ts',
+  entry: 'src/**/*.ts'
 })
 
 // Mixed array and object entries
 defineConfig({
-  entry: [
-    'src/index.ts',
-    { cli: 'src/cli.ts' },
-  ],
+  entry: ['src/index.ts', { cli: 'src/cli.ts' }]
 })
 ```
 
@@ -177,7 +174,7 @@ defineConfig({
   format: 'esm',
   dts: true,
   exports: true,
-  target: 'es2020',
+  target: 'es2020'
 })
 ```
 
@@ -188,7 +185,7 @@ defineConfig({
   entry: 'src/index.ts',
   format: ['esm', 'cjs'],
   dts: true,
-  exports: true,
+  exports: true
 })
 ```
 
@@ -200,7 +197,7 @@ defineConfig({
   format: 'esm',
   platform: 'node',
   dts: true,
-  shims: true,  // __dirname, __filename in ESM
+  shims: true // __dirname, __filename in ESM
 })
 ```
 
@@ -211,6 +208,6 @@ defineConfig({
   entry: 'src/index.ts',
   format: ['esm', 'iife'],
   platform: 'browser',
-  minify: true,
+  minify: true
 })
 ```

@@ -13,7 +13,7 @@ export default defineNuxtConfig({
       repo: 'your-repo',
       branch: 'main',
       rootDir: 'docs',
-      private: true,
+      private: true
     },
     editor: {
       components: {
@@ -21,19 +21,19 @@ export default defineNuxtConfig({
         exclude: ['content/prose/**'],
         groups: [
           { label: 'Content', include: ['content*'] },
-          { label: 'Landing', include: ['landing*'] },
+          { label: 'Landing', include: ['landing*'] }
         ],
-        ungrouped: 'include',
+        ungrouped: 'include'
       },
       iconLibraries: ['lucide'],
       commands: {
-        exclude: ['video'],
-      },
+        exclude: ['video']
+      }
     },
     git: {
-      commit: { messagePrefix: 'content:' },
-    },
-  },
+      commit: { messagePrefix: 'content:' }
+    }
+  }
 })
 ```
 
@@ -82,11 +82,11 @@ export default defineContentConfig({
         cover: property(z.string()).editor({ input: 'media' }),
         icon: property(z.string()).editor({
           input: 'icon',
-          iconLibraries: ['lucide'],
-        }),
-      }),
-    }),
-  },
+          iconLibraries: ['lucide']
+        })
+      })
+    })
+  }
 })
 ```
 

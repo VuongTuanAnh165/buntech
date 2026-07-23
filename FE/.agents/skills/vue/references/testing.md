@@ -171,12 +171,12 @@ vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({
     params: { id: '123' },
     query: { filter: 'active' },
-    path: '/users/123',
+    path: '/users/123'
   })),
   useRouter: vi.fn(() => ({
     push: vi.fn(),
-    replace: vi.fn(),
-  })),
+    replace: vi.fn()
+  }))
 }))
 
 it('uses route params', () => {
@@ -192,7 +192,7 @@ import { useRoute } from 'vue-router'
 
 it('handles different routes', () => {
   vi.mocked(useRoute).mockReturnValue({
-    params: { id: '456' },
+    params: { id: '456' }
   } as any)
 
   const wrapper = mount(UserPage)
@@ -210,8 +210,8 @@ import { flushPromises, mount } from '@vue/test-utils'
 it('renders async content', async () => {
   const wrapper = mount(AsyncComponent, {
     global: {
-      stubs: { Suspense: false }, // Don't stub Suspense
-    },
+      stubs: { Suspense: false } // Don't stub Suspense
+    }
   })
 
   // Wait for async setup to complete
@@ -228,9 +228,9 @@ it('teleports modal content', () => {
   const wrapper = mount(Modal, {
     global: {
       stubs: {
-        teleport: true, // Stub teleport to render inline
-      },
-    },
+        teleport: true // Stub teleport to render inline
+      }
+    }
   })
 
   expect(wrapper.text()).toContain('Modal content')

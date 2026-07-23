@@ -27,14 +27,11 @@ export default defineContentConfig({
         sku: z.string(),
         category: z.string(),
         price: z.number(),
-        image: property(z.string()).editor({ input: 'media' }),
+        image: property(z.string()).editor({ input: 'media' })
       }),
-      indexes: [
-        { columns: ['category', 'price'] },
-        { columns: ['sku'], unique: true },
-      ],
-    }),
-  },
+      indexes: [{ columns: ['category', 'price'] }, { columns: ['sku'], unique: true }]
+    })
+  }
 })
 ```
 
@@ -86,14 +83,14 @@ export default defineContentConfig({
     docs_en: defineCollection({
       type: 'page',
       source: { include: 'en/**', prefix: '/' },
-      schema: common,
+      schema: common
     }),
     docs_fr: defineCollection({
       type: 'page',
       source: { include: 'fr/**', prefix: '/fr' },
-      schema: common,
-    }),
-  },
+      schema: common
+    })
+  }
 })
 ```
 

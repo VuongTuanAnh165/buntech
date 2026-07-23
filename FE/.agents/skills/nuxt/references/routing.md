@@ -25,7 +25,7 @@ Use the compile-time `definePageMeta` macro inside a page:
 definePageMeta({
   layout: 'dashboard',
   middleware: ['auth'],
-  validate: route => typeof route.params.id === 'string',
+  validate: (route) => typeof route.params.id === 'string'
 })
 </script>
 ```

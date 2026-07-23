@@ -15,9 +15,7 @@ export default defineNuxtConfig({
     // Block non-SEO bots (reduces server load)
     blockNonSeoBots: true,
     // Custom rules
-    groups: [
-      { userAgent: '*', disallow: ['/admin'] }
-    ]
+    groups: [{ userAgent: '*', disallow: ['/admin'] }]
   }
 })
 ```
@@ -32,9 +30,9 @@ useRobotsRule('noindex, nofollow')
 useRobotsRule({
   noindex: true,
   nofollow: true,
-  noai: true,           // Block AI training
-  noimageai: true,      // Block AI image training
-  'max-snippet': 150,   // Preview controls
+  noai: true, // Block AI training
+  noimageai: true, // Block AI image training
+  'max-snippet': 150, // Preview controls
   'max-image-preview': 'large'
 })
 ```
@@ -89,14 +87,17 @@ import type { SitemapUrlInput } from '#sitemap/types'
 
 export default defineSitemapEventHandler(async () => {
   const posts = await $fetch('/api/posts')
-  return posts.map(post => ({
-    loc: post.path,
-    lastmod: post.updatedAt,
-    // Image sitemap
-    images: [{ loc: post.image, title: post.title }],
-    // Video sitemap
-    videos: [{ content_loc: post.videoUrl, title: post.title }]
-  } satisfies SitemapUrlInput))
+  return posts.map(
+    (post) =>
+      ({
+        loc: post.path,
+        lastmod: post.updatedAt,
+        // Image sitemap
+        images: [{ loc: post.image, title: post.title }],
+        // Video sitemap
+        videos: [{ content_loc: post.videoUrl, title: post.title }]
+      }) satisfies SitemapUrlInput
+  )
 })
 ```
 

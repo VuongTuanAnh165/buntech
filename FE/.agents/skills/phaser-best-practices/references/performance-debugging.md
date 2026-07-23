@@ -48,7 +48,7 @@ Pool when spawn / despawn is frequent enough to create churn.
 this.bullets = this.physics.add.group({
   classType: Phaser.Physics.Arcade.Image,
   maxSize: 100
-});
+})
 ```
 
 ```ts
@@ -143,16 +143,16 @@ Only add the collisions the game needs.
 Good:
 
 ```ts
-this.physics.add.collider(this.player, this.groundLayer);
-this.physics.add.collider(this.enemies, this.groundLayer);
-this.physics.add.overlap(this.player, this.pickups, this.onPickup, undefined, this);
+this.physics.add.collider(this.player, this.groundLayer)
+this.physics.add.collider(this.enemies, this.groundLayer)
+this.physics.add.overlap(this.player, this.pickups, this.onPickup, undefined, this)
 ```
 
 Bad:
 
 ```ts
-this.physics.add.collider(this.enemies, this.enemies);
-this.physics.add.collider(this.pickups, this.pickups);
+this.physics.add.collider(this.enemies, this.enemies)
+this.physics.add.collider(this.pickups, this.pickups)
 ```
 
 Only enable broad collision matrices when the mechanic genuinely needs them.
@@ -160,8 +160,8 @@ Only enable broad collision matrices when the mechanic genuinely needs them.
 ### Disable or recycle inactive bodies
 
 ```ts
-enemy.body!.enable = false;
-enemy.setActive(false).setVisible(false);
+enemy.body!.enable = false
+enemy.setActive(false).setVisible(false)
 ```
 
 For projectile-heavy games, disable bodies immediately when the object leaves play.
@@ -217,7 +217,7 @@ groundLayer.renderDebug(this.add.graphics(), {
   tileColor: null,
   collidingTileColor: new Phaser.Display.Color(255, 0, 0, 100),
   faceColor: new Phaser.Display.Color(0, 255, 0, 255)
-});
+})
 ```
 
 ### Runtime inspection

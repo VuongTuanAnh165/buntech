@@ -33,27 +33,26 @@ const CATEGORIES: Record<string, string> = {
   data: 'Data',
   navigation: 'Navigation',
   overlay: 'Overlay',
-  layout: 'Layout',
+  layout: 'Layout'
 }
 
 // Version mapping for components introduced after v4.0
 const VERSION_MAP: Record<string, string> = {
-  'empty': 'v4.1+',
+  empty: 'v4.1+',
   'scroll-area': 'v4.3+',
   'input-date': 'v4.2+',
   'input-time': 'v4.2+',
-  'editor': 'v4.3+',
+  editor: 'v4.3+',
   'editor-drag-handle': 'v4.3+',
   'editor-emoji-menu': 'v4.3+',
   'editor-mention-menu': 'v4.3+',
   'editor-suggestion-menu': 'v4.3+',
-  'editor-toolbar': 'v4.3+',
+  'editor-toolbar': 'v4.3+'
 }
 
-function parseYamlFrontmatter(content: string): { frontmatter: Record<string, any>, body: string } {
+function parseYamlFrontmatter(content: string): { frontmatter: Record<string, any>; body: string } {
   const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)
-  if (!match)
-    return { frontmatter: {}, body: content }
+  if (!match) return { frontmatter: {}, body: content }
 
   const frontmatter: Record<string, any> = {}
   const yamlContent = match[1]
@@ -71,8 +70,7 @@ function parseYamlFrontmatter(content: string): { frontmatter: Record<string, an
   // Parse links for Reka UI reference
   if (yamlContent.includes('reka-ui.com')) {
     const rekaMatch = yamlContent.match(/to:\s*(https:\/\/reka-ui\.com[^\n]+)/)
-    if (rekaMatch)
-      frontmatter.rekaLink = rekaMatch[1]
+    if (rekaMatch) frontmatter.rekaLink = rekaMatch[1]
   }
 
   return { frontmatter, body: match[2] }
@@ -80,7 +78,10 @@ function parseYamlFrontmatter(content: string): { frontmatter: Record<string, an
 
 function generateComponentFile(name: string, meta: ComponentMeta, body: string): string {
   const lines: string[] = []
-  const displayName = name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+  const displayName = name
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join('')
 
   lines.push(`# ${displayName}`)
   lines.push('')
@@ -97,7 +98,9 @@ function generateComponentFile(name: string, meta: ComponentMeta, body: string):
   if (propMentions && propMentions.length > 0) {
     lines.push('## Key Props')
     lines.push('')
-    const uniqueProps = [...new Set(propMentions.map(m => m.match(/`(\w+)`/)?.[1]).filter(Boolean))]
+    const uniqueProps = [
+      ...new Set(propMentions.map((m) => m.match(/`(\w+)`/)?.[1]).filter(Boolean))
+    ]
     for (const prop of uniqueProps.slice(0, 10)) {
       // Find the description after the prop mention
       const propRegex = new RegExp(`Use the \`${prop}\` prop ([^.]+\\.?)`)
@@ -121,9 +124,27 @@ function generateComponentFile(name: string, meta: ComponentMeta, body: string):
   const slotPattern = /`#(\w+)`\{?/g
   const slotMatches = [...body.matchAll(slotPattern)]
   if (slotMatches.length > 0) {
-    const validSlots = ['default', 'content', 'header', 'body', 'footer', 'title', 'description', 'leading', 'trailing', 'icon', 'label', 'close', 'trigger', 'actions', 'item', 'empty']
-    const uniqueSlots = [...new Set(slotMatches.map(m => m[1]))]
-      .filter(s => validSlots.includes(s))
+    const validSlots = [
+      'default',
+      'content',
+      'header',
+      'body',
+      'footer',
+      'title',
+      'description',
+      'leading',
+      'trailing',
+      'icon',
+      'label',
+      'close',
+      'trigger',
+      'actions',
+      'item',
+      'empty'
+    ]
+    const uniqueSlots = [...new Set(slotMatches.map((m) => m[1]))].filter((s) =>
+      validSlots.includes(s)
+    )
     if (uniqueSlots.length > 0) {
       lines.push('## Slots')
       lines.push('')
@@ -146,10 +167,11 @@ async function main() {
   rmSync(TMP_DIR, { recursive: true, force: true })
   console.log('Cloning nuxt/ui (sparse checkout)...')
   try {
-    execSync(`git clone --depth 1 --filter=blob:none --sparse ${REPO_URL} ${TMP_DIR}`, { stdio: 'inherit' })
+    execSync(`git clone --depth 1 --filter=blob:none --sparse ${REPO_URL} ${TMP_DIR}`, {
+      stdio: 'inherit'
+    })
     execSync(`git sparse-checkout set ${DOCS_PATH}`, { cwd: TMP_DIR, stdio: 'inherit' })
-  }
-  catch {
+  } catch {
     console.error(`\nFailed to clone ${REPO_URL}. Check network/GitHub status.`)
     process.exit(1)
   }
@@ -160,7 +182,7 @@ async function main() {
 
   console.log('Generating Nuxt UI component docs...')
 
-  const files = readdirSync(NUXT_UI_DOCS).filter(f => f.endsWith('.md') && f !== '0.index.md')
+  const files = readdirSync(NUXT_UI_DOCS).filter((f) => f.endsWith('.md') && f !== '0.index.md')
   const components: ComponentMeta[] = []
 
   for (const file of files) {
@@ -173,7 +195,7 @@ async function main() {
       description: frontmatter.description || '',
       category: frontmatter.category || 'other',
       rekaLink: frontmatter.rekaLink,
-      version: VERSION_MAP[name],
+      version: VERSION_MAP[name]
     }
     components.push(meta)
 
@@ -187,7 +209,9 @@ async function main() {
   const index: string[] = []
   index.push('# Components')
   index.push('')
-  index.push('> Auto-generated from Nuxt UI docs. Run `npx tsx skills/nuxt-ui/scripts/generate-components.ts` to update.')
+  index.push(
+    '> Auto-generated from Nuxt UI docs. Run `npx tsx skills/nuxt-ui/scripts/generate-components.ts` to update.'
+  )
   index.push('')
   index.push('> **For headless primitives (API, accessibility):** see `reka-ui` skill')
   index.push('')
@@ -196,8 +220,7 @@ async function main() {
   const byCategory: Record<string, ComponentMeta[]> = {}
   for (const comp of components) {
     const cat = CATEGORIES[comp.category] || 'Other'
-    if (!byCategory[cat])
-      byCategory[cat] = []
+    if (!byCategory[cat]) byCategory[cat] = []
     byCategory[cat].push(comp)
   }
 
@@ -206,13 +229,18 @@ async function main() {
     let maxComp = 'Component'.length
     let maxDesc = 'Description'.length
     for (const comp of comps) {
-      const displayName = comp.name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+      const displayName = comp.name
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join('')
       const link = `[${displayName}](components/${comp.name}.md)`
-      if (link.length > maxComp)
-        maxComp = link.length
-      const desc = hasVersionCol ? comp.description : (comp.version ? `${comp.description} (${comp.version})` : comp.description)
-      if (desc.length > maxDesc)
-        maxDesc = desc.length
+      if (link.length > maxComp) maxComp = link.length
+      const desc = hasVersionCol
+        ? comp.description
+        : comp.version
+          ? `${comp.description} (${comp.version})`
+          : comp.description
+      if (desc.length > maxDesc) maxDesc = desc.length
     }
     return { maxComp, maxDesc }
   }
@@ -226,20 +254,23 @@ async function main() {
     if (hasVersionCol) {
       index.push(`| ${'Component'.padEnd(maxComp)} | ${'Description'.padEnd(maxDesc)} | Version |`)
       index.push(`| ${'-'.repeat(maxComp)} | ${'-'.repeat(maxDesc)} | ------- |`)
-    }
-    else {
+    } else {
       index.push(`| ${'Component'.padEnd(maxComp)} | ${'Description'.padEnd(maxDesc)} |`)
       index.push(`| ${'-'.repeat(maxComp)} | ${'-'.repeat(maxDesc)} |`)
     }
 
     for (const comp of comps.sort((a, b) => a.name.localeCompare(b.name))) {
-      const displayName = comp.name.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('')
+      const displayName = comp.name
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join('')
       const link = `[${displayName}](components/${comp.name}.md)`
       if (hasVersionCol) {
         const desc = comp.version ? `${comp.description} (${comp.version})` : comp.description
-        index.push(`| ${link.padEnd(maxComp)} | ${desc.padEnd(maxDesc)} | ${(comp.version || '').padEnd(7)} |`)
-      }
-      else {
+        index.push(
+          `| ${link.padEnd(maxComp)} | ${desc.padEnd(maxDesc)} | ${(comp.version || '').padEnd(7)} |`
+        )
+      } else {
         const desc = comp.version ? `${comp.description} (${comp.version})` : comp.description
         index.push(`| ${link.padEnd(maxComp)} | ${desc.padEnd(maxDesc)} |`)
       }

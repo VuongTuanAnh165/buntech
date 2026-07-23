@@ -79,7 +79,7 @@ create() {
 If the tileset uses spacing or margin, pass those values in `addTilesetImage`.
 
 ```ts
-const terrain = map.addTilesetImage('terrain', 'terrain', 32, 32, 1, 2);
+const terrain = map.addTilesetImage('terrain', 'terrain', 32, 32, 1, 2)
 ```
 
 ## Collision setup
@@ -87,14 +87,14 @@ const terrain = map.addTilesetImage('terrain', 'terrain', 32, 32, 1, 2);
 Prefer collision by tile property where possible. It survives art changes better than raw index ranges.
 
 ```ts
-ground.setCollisionByProperty({ collides: true });
-this.physics.add.collider(this.player, ground);
+ground.setCollisionByProperty({ collides: true })
+this.physics.add.collider(this.player, ground)
 ```
 
 Use index-based collision when the map export or tileset metadata is too simple for properties:
 
 ```ts
-ground.setCollisionBetween(1, 64);
+ground.setCollisionBetween(1, 64)
 ```
 
 Use tile callbacks for hazards or triggers when that reads better than large collider callbacks.
@@ -104,15 +104,18 @@ Use tile callbacks for hazards or triggers when that reads better than large col
 Use object layers for spawn points and designer-authored metadata.
 
 ```ts
-const spawn = map.findObject('SpawnPoints', (obj) => obj.name === 'player-start');
-this.player = this.physics.add.sprite(spawn!.x!, spawn!.y!, 'player');
+const spawn = map.findObject('SpawnPoints', (obj) => obj.name === 'player-start')
+this.player = this.physics.add.sprite(spawn!.x!, spawn!.y!, 'player')
 ```
 
 Read custom properties from Tiled objects with a helper:
 
 ```ts
-function getObjectProp<T>(obj: { properties?: Array<{ name: string; value: unknown }> }, name: string): T | undefined {
-  return obj.properties?.find((p) => p.name === name)?.value as T | undefined;
+function getObjectProp<T>(
+  obj: { properties?: Array<{ name: string; value: unknown }> },
+  name: string
+): T | undefined {
+  return obj.properties?.find((p) => p.name === name)?.value as T | undefined
 }
 ```
 
@@ -129,21 +132,21 @@ Use object layers for:
 ### Follow camera
 
 ```ts
-this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
-this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+this.cameras.main.startFollow(this.player, true, 0.12, 0.12)
+this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
+this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
 ```
 
 ### Deadzone for larger worlds
 
 ```ts
-this.cameras.main.setDeadzone(160, 90);
+this.cameras.main.setDeadzone(160, 90)
 ```
 
 ### Pixel-art camera rounding
 
 ```ts
-this.cameras.main.roundPixels = true;
+this.cameras.main.roundPixels = true
 ```
 
 Use this when pixel art shimmers during follow movement.
@@ -203,8 +206,8 @@ Use Phaser's unified pointer system for mouse and touch.
 
 ```ts
 this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-  this.spawnPing(pointer.worldX, pointer.worldY);
-});
+  this.spawnPing(pointer.worldX, pointer.worldY)
+})
 ```
 
 Touch-friendly patterns:
@@ -282,8 +285,8 @@ Prefer Phaser timers and tweens over ad hoc `setTimeout`.
 
 ```ts
 this.time.delayedCall(1200, () => {
-  this.spawnWave();
-});
+  this.spawnWave()
+})
 ```
 
 ### Tween example
@@ -295,7 +298,7 @@ this.tweens.add({
   duration: 400,
   yoyo: true,
   repeat: -1
-});
+})
 ```
 
 Track timers or tweens that must be canceled on scene shutdown.

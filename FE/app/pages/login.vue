@@ -33,14 +33,12 @@ const togglePassword = () => {
 const formRef = ref()
 
 // Lấy hàm handleSubmit từ useFormSubmit
-const { handleSubmit } = useFormSubmit()
+const { handleSubmit, isSubmitting } = useFormSubmit()
 
 // Bọc logic API trong handleSubmit để tự động bắt lỗi API 422
 const onSubmit = handleSubmit(
-  async (event: FormSubmitEvent<unknown>) => {
-    // FormWrapper emit ra nguyên event của Nuxt UI (FormSubmitEvent<unknown>)
-    // nên payload thực tế nằm ở event.data, ta cần ép kiểu về LoginPayload
-    await login(event.data as import('~/types/auth').LoginPayload)
+  async (event: FormSubmitEvent<Schema>) => {
+    await login(event.data)
   },
   {
     formRef
@@ -75,6 +73,7 @@ const socialProviders = [
       :schema="schema"
       :state="state"
       form-class="space-y-4"
+      :loading="isSubmitting"
       @submit="onSubmit"
     >
       <UFormField label="Số điện thoại" name="phoneNumber">
@@ -126,7 +125,7 @@ const socialProviders = [
       </div>
 
       <!-- Tận dụng slot actions của FormWrapper (vừa bổ sung) để custom nút submit -->
-      <template #actions="{ isSubmitting }">
+      <template #actions>
         <div class="mt-5">
           <UButton
             type="submit"

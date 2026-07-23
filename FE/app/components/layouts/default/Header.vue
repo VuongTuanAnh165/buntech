@@ -82,18 +82,35 @@ const currentUser = computed(() => currentUserData.value?.data)
 
         <!-- Right Actions (Desktop) -->
         <div class="hidden items-center gap-4 md:flex">
-          <UButton v-if="!currentUser" variant="outline" color="neutral" to="/login">Đăng nhập</UButton>
+          <UButton v-if="!currentUser" variant="outline" color="neutral" to="/login"
+            >Đăng nhập</UButton
+          >
           <NuxtLink v-else to="/profile" class="flex items-center">
-             <UAvatar :src="currentUser.profile?.avatarUrl || undefined" icon="i-lucide-user" alt="Avatar" size="sm" />
+            <UAvatar
+              :src="currentUser.profile?.avatarUrl || undefined"
+              icon="i-lucide-user"
+              alt="Avatar"
+              size="sm"
+            />
           </NuxtLink>
           <UButton>Đặt hàng ngay</UButton>
         </div>
 
         <!-- Right Actions (Mobile: Cart & Profile only) -->
         <div class="flex items-center gap-2 md:hidden">
-          <UButton icon="i-lucide-shopping-cart" color="neutral" variant="ghost" aria-label="Mua ngay" />
+          <UButton
+            icon="i-lucide-shopping-cart"
+            color="neutral"
+            variant="ghost"
+            aria-label="Mua ngay"
+          />
           <NuxtLink v-if="currentUser" to="/profile" class="ml-2 flex items-center">
-            <UAvatar :src="currentUser.profile?.avatarUrl || undefined" icon="i-lucide-user" alt="Avatar" size="sm" />
+            <UAvatar
+              :src="currentUser.profile?.avatarUrl || undefined"
+              icon="i-lucide-user"
+              alt="Avatar"
+              size="sm"
+            />
           </NuxtLink>
           <NuxtLink v-else to="/login" class="ml-2 flex items-center">
             <UAvatar icon="i-lucide-user" alt="Default Avatar" size="sm" />
@@ -104,22 +121,44 @@ const currentUser = computed(() => currentUserData.value?.data)
   </header>
 
   <!-- Mobile Bottom Navigation (Visible only on < md) -->
-  <nav class="safe-area-bottom border-muted bg-background fixed right-0 bottom-0 left-0 z-50 border-t md:hidden">
+  <nav
+    class="safe-area-bottom border-muted bg-background fixed right-0 bottom-0 left-0 z-50 border-t md:hidden"
+  >
     <div class="flex h-16 items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
-      <NuxtLink to="/" class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors" active-class="text-primary">
-         <UIcon name="i-lucide-home" class="h-6 w-6" />
+      <NuxtLink
+        to="/"
+        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
+        active-class="text-primary"
+      >
+        <UIcon name="i-lucide-home" class="h-6 w-6" />
       </NuxtLink>
-      <NuxtLink to="/gioi-thieu" class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors" active-class="text-primary">
-         <UIcon name="i-lucide-users" class="h-6 w-6" />
+      <NuxtLink
+        to="/gioi-thieu"
+        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
+        active-class="text-primary"
+      >
+        <UIcon name="i-lucide-users" class="h-6 w-6" />
       </NuxtLink>
-      <NuxtLink to="/don-vi-ban-buon" class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors" active-class="text-primary">
-         <UIcon name="i-lucide-building" class="h-6 w-6" />
+      <NuxtLink
+        to="/don-vi-ban-buon"
+        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
+        active-class="text-primary"
+      >
+        <UIcon name="i-lucide-building" class="h-6 w-6" />
       </NuxtLink>
-      <NuxtLink to="/san-pham" class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors" active-class="text-primary">
-         <UIcon name="i-lucide-package" class="h-6 w-6" />
+      <NuxtLink
+        to="/san-pham"
+        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
+        active-class="text-primary"
+      >
+        <UIcon name="i-lucide-package" class="h-6 w-6" />
       </NuxtLink>
-      <NuxtLink to="/tin-tuc" class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors" active-class="text-primary">
-         <UIcon name="i-lucide-newspaper" class="h-6 w-6" />
+      <NuxtLink
+        to="/tin-tuc"
+        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
+        active-class="text-primary"
+      >
+        <UIcon name="i-lucide-newspaper" class="h-6 w-6" />
       </NuxtLink>
     </div>
   </nav>

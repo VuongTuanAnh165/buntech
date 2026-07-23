@@ -1,9 +1,10 @@
 import withNuxt from './.nuxt/eslint.config.mjs'
 
-export default withNuxt({
-  ignores: ['template/**'],
-  // Tùy chỉnh thêm các rules eslint nếu cần tại đây
-  rules: {
-    // ...
+export default withNuxt(
+  {
+    ignores: ['.agents/**', 'all_*.txt']
+  },
+  {
+    rules: {}
   }
-})
+)

@@ -84,9 +84,7 @@ emit('close')
     <template #header>
       <h2>Title</h2>
     </template>
-    <template #default>
-      Content
-    </template>
+    <template #default> Content </template>
   </Card>
 </template>
 ```
@@ -103,7 +101,7 @@ const title = defineModel<string>()
 </script>
 
 <template>
-  <input v-model="title">
+  <input v-model="title" />
 </template>
 ```
 
@@ -120,7 +118,7 @@ const [title, modifiers] = defineModel<string>({
       return value.charAt(0).toUpperCase() + value.slice(1)
     }
     return value
-  },
+  }
 })
 </script>
 ```
@@ -199,7 +197,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <input ref="my-input">
+  <input ref="my-input" />
 </template>
 ```
 
@@ -278,7 +276,7 @@ const id = useId() // Stable across server/client renders
 
 <template>
   <label :for="id">Name</label>
-  <input :id="id">
+  <input :id="id" />
 </template>
 ```
 

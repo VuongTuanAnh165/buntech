@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends Record<string, unknown>">
 /**
  * Form Wrapper — bọc chuẩn pattern UForm + Zod + Submit.
  *
@@ -19,14 +19,14 @@
  *   </UFormField>
  * </BaseFormWrapper>
  */
-import type { ZodType } from 'zod'
+import type { ZodTypeAny } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 
 interface Props {
   /** Zod schema để validate */
-  schema: ZodType
+  schema: ZodTypeAny
   /** Reactive state của form */
-  state: Record<string, unknown>
+  state: Partial<T>
   /** Label nút Submit */
   submitLabel?: string
   /** Label nút Cancel (ẩn nếu không truyền) */
@@ -37,46 +37,33 @@ interface Props {
   showCancel?: boolean
   /** Disabled toàn bộ form */
   disabled?: boolean
+  /** Hiển thị trạng thái loading */
+  loading?: boolean
   /** Form layout class */
   formClass?: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   submitLabel: 'Lưu',
   cancelLabel: 'Hủy',
   submitIcon: 'i-lucide-check',
   showCancel: true,
   disabled: false,
+  loading: false,
   formClass: 'space-y-4'
 })
 
 const emit = defineEmits<{
-  submit: [data: FormSubmitEvent<unknown>]
+  submit: [event: FormSubmitEvent<T>]
   cancel: []
 }>()
 
-const isSubmitting = ref(false)
-
 const onSubmit = async (event: FormSubmitEvent<unknown>) => {
-  if (isSubmitting.value) return
-  isSubmitting.value = true
-  try {
-    emit('submit', event)
-  } finally {
-    // Để component cha tự set isSubmitting = false khi API call xong
-    // thông qua expose hoặc watch. Ở đây set timeout phòng trường hợp
-    // component cha không xử lý.
-    setTimeout(() => {
-      isSubmitting.value = false
-    }, 5000)
-  }
+  if (props.loading) return
+  emit('submit', event as unknown as FormSubmitEvent<T>)
 }
 
 const formRef = ref()
-
-const stopSubmitting = () => {
-  isSubmitting.value = false
-}
 
 const setErrors = (errors: { path: string; message: string }[]) => {
   if (formRef.value) {
@@ -90,7 +77,7 @@ const clearErrors = () => {
   }
 }
 
-defineExpose({ isSubmitting, stopSubmitting, setErrors, clearErrors })
+defineExpose({ setErrors, clearErrors })
 </script>
 
 <template>
@@ -99,22 +86,22 @@ defineExpose({ isSubmitting, stopSubmitting, setErrors, clearErrors })
     <slot />
 
     <!-- Actions -->
-    <slot name="actions" :is-submitting="isSubmitting">
+    <slot name="actions" :is-submitting="loading">
       <div class="flex items-center justify-end gap-3 pt-4">
         <UButton
           v-if="showCancel"
           :label="cancelLabel"
           color="neutral"
           variant="outline"
-          :disabled="isSubmitting"
+          :disabled="loading"
           @click="emit('cancel')"
         />
         <UButton
           type="submit"
           :label="submitLabel"
           :icon="submitIcon"
-          :loading="isSubmitting"
-          :disabled="disabled || isSubmitting"
+          :loading="loading"
+          :disabled="disabled || loading"
         />
       </div>
     </slot>

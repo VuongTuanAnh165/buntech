@@ -74,17 +74,17 @@ export default defineNuxtConfig({
         highlight: {
           themes: {
             default: 'github-light',
-            dark: 'github-dark',
+            dark: 'github-dark'
           },
-          langs: ['ts', 'vue', 'bash'],
-        },
-      },
+          langs: ['ts', 'vue', 'bash']
+        }
+      }
     },
     renderer: {
       alias: { a: 'DocsLink' },
-      anchorLinks: { h2: true, h3: true },
-    },
-  },
+      anchorLinks: { h2: true, h3: true }
+    }
+  }
 })
 ```
 

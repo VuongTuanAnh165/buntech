@@ -37,7 +37,7 @@ const x = useMotionValue(0)
 const springX = useSpring(x, {
   stiffness: 100,
   damping: 10,
-  mass: 1,
+  mass: 1
 })
 
 // springX follows x with spring physics
@@ -144,14 +144,17 @@ const scale = useTransform(scrollYProgress, [0, 1], [0.8, 1])
 ### Scroll Offset Options
 
 ```ts
-offset: ['start end', 'end start']
-// First: target position relative to container
-// Second: container position relative to viewport
+offset: ['start end', 'end start'][
+  // First: target position relative to container
+  // Second: container position relative to viewport
 
-// Common patterns:
-['start end', 'end start']     // Element enters bottom, exits top
-['start start', 'end start']   // Pin at top while scrolling
-['center center', 'end start'] // Centered animation
+  // Common patterns:
+  ('start end', 'end start')
+] // Element enters bottom, exits top
+[
+  ('start start', 'end start')
+] // Pin at top while scrolling
+[('center center', 'end start')] // Centered animation
 ```
 
 ## useInView
@@ -212,12 +215,12 @@ import { animate } from 'motion-v'
 const controls = animate(0, 100, {
   duration: 0.5,
   onUpdate: (latest) => console.log(latest),
-  onComplete: () => console.log('done'),
+  onComplete: () => console.log('done')
 })
 
 // Control animation
 controls.stop()
-controls.time = 0.25  // Seek to 25%
+controls.time = 0.25 // Seek to 25%
 
 // Animate motion value
 const x = useMotionValue(0)
@@ -229,7 +232,7 @@ animate(
   { x: 100, y: 100 },
   {
     duration: 1,
-    onUpdate: ({ x, y }) => console.log(x, y),
+    onUpdate: ({ x, y }) => console.log(x, y)
   }
 )
 ```
@@ -242,19 +245,27 @@ import { animate, stagger } from 'motion-v'
 // Animate elements in sequence
 const elements = document.querySelectorAll('.item')
 
-animate(elements, { opacity: 1, y: 0 }, {
-  delay: stagger(0.1),  // 0.1s between each
-  duration: 0.5,
-})
+animate(
+  elements,
+  { opacity: 1, y: 0 },
+  {
+    delay: stagger(0.1), // 0.1s between each
+    duration: 0.5
+  }
+)
 
 // Custom stagger
-animate(elements, { opacity: 1 }, {
-  delay: stagger(0.1, {
-    start: 0.5,           // Start delay
-    from: 'center',       // 'first' | 'last' | 'center' | number
-    ease: 'easeOut',
-  }),
-})
+animate(
+  elements,
+  { opacity: 1 },
+  {
+    delay: stagger(0.1, {
+      start: 0.5, // Start delay
+      from: 'center', // 'first' | 'last' | 'center' | number
+      ease: 'easeOut'
+    })
+  }
+)
 ```
 
 ## useVelocity

@@ -1,3 +1,5 @@
+import { watchDebounced } from '@vueuse/core'
+
 /**
  * Composable kết hợp Search + Filter + Sort + Pagination cho Table.
  * Debounced search, auto-reset page khi thay đổi filter, sync URL.
@@ -22,16 +24,15 @@ export const useTableFilters = <F extends Record<string, unknown> = Record<strin
   const pagination = usePagination()
 
   // --- Debounce Search (300ms) ---
-  let searchTimeout: ReturnType<typeof setTimeout> | null = null
-
-  watch(searchQuery, (val) => {
-    if (searchTimeout) clearTimeout(searchTimeout)
-    searchTimeout = setTimeout(() => {
+  watchDebounced(
+    searchQuery,
+    (val) => {
       debouncedSearch.value = val
       pagination.resetPage()
       syncToUrl()
-    }, 300)
-  })
+    },
+    { debounce: 300 }
+  )
 
   // --- Auto-reset page khi filter thay đổi ---
   watch(

@@ -38,10 +38,13 @@ toast.add({
   icon: 'i-heroicons-check', // Left icon
   avatar: { src: '...' }, // Avatar instead of icon
   timeout: 5000, // Auto-dismiss (0 = never)
-  actions: [{ // Action buttons
-    label: 'Undo',
-    click: () => {}
-  }],
+  actions: [
+    {
+      // Action buttons
+      label: 'Undo',
+      click: () => {}
+    }
+  ],
   callback: () => {} // Called on dismiss
 })
 ```
@@ -147,9 +150,7 @@ const isOpen = ref(false)
   <UButton @click="isOpen = true">Open Slideover</UButton>
 
   <USlideover v-model:open="isOpen" title="Settings" side="right">
-    <div class="p-4">
-      Settings content...
-    </div>
+    <div class="p-4">Settings content...</div>
   </USlideover>
 </template>
 ```
@@ -181,9 +182,7 @@ const isOpen = ref(false)
   <UButton @click="isOpen = true">Open Drawer</UButton>
 
   <UDrawer v-model:open="isOpen">
-    <div class="p-4">
-      Drawer content...
-    </div>
+    <div class="p-4">Drawer content...</div>
   </UDrawer>
 </template>
 ```
@@ -267,10 +266,13 @@ const items = [
 ```vue
 <script setup>
 const items = [
-  { label: 'New', children: [
-    { label: 'File', click: () => {} },
-    { label: 'Folder', click: () => {} }
-  ]},
+  {
+    label: 'New',
+    children: [
+      { label: 'File', click: () => {} },
+      { label: 'Folder', click: () => {} }
+    ]
+  },
   { label: 'Delete' }
 ]
 </script>
@@ -296,30 +298,28 @@ Search-driven command menu (Fuse.js powered).
 <script setup>
 const isOpen = ref(false)
 
-const groups = [{
-  key: 'actions',
-  label: 'Actions',
-  items: [
-    { label: 'New file', icon: 'i-heroicons-document-plus', click: () => {} },
-    { label: 'New folder', icon: 'i-heroicons-folder-plus', click: () => {} }
-  ]
-}, {
-  key: 'navigation',
-  label: 'Navigation',
-  items: [
-    { label: 'Home', to: '/' },
-    { label: 'Settings', to: '/settings' }
-  ]
-}]
+const groups = [
+  {
+    key: 'actions',
+    label: 'Actions',
+    items: [
+      { label: 'New file', icon: 'i-heroicons-document-plus', click: () => {} },
+      { label: 'New folder', icon: 'i-heroicons-folder-plus', click: () => {} }
+    ]
+  },
+  {
+    key: 'navigation',
+    label: 'Navigation',
+    items: [
+      { label: 'Home', to: '/' },
+      { label: 'Settings', to: '/settings' }
+    ]
+  }
+]
 </script>
 
 <template>
-  <UCommandPalette
-    v-model:open="isOpen"
-    :groups="groups"
-    placeholder="Search..."
-    size="md"
-  />
+  <UCommandPalette v-model:open="isOpen" :groups="groups" placeholder="Search..." size="md" />
 </template>
 ```
 
@@ -340,7 +340,9 @@ const groups = [{
 ```vue
 <script setup>
 defineShortcuts({
-  meta_k: () => { isOpen.value = true }
+  meta_k: () => {
+    isOpen.value = true
+  }
 })
 </script>
 ```

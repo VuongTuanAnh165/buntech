@@ -109,7 +109,10 @@ const users = await db.select().from(schema.users)
 const user = await db.query.users.findFirst({ where: eq(schema.users.id, 1) })
 
 // Insert
-const [newUser] = await db.insert(schema.users).values({ name: 'John', email: 'john@example.com' }).returning()
+const [newUser] = await db
+  .insert(schema.users)
+  .values({ name: 'John', email: 'john@example.com' })
+  .returning()
 
 // Update
 await db.update(schema.users).set({ name: 'Jane' }).where(eq(schema.users.id, 1))
@@ -190,7 +193,11 @@ const result = await blob.put('path/file.txt', body, {
 const file = await blob.get('path/file.txt') // Returns Blob or null
 
 // List
-const { blobs, cursor, hasMore, folders } = await blob.list({ prefix: 'uploads/', limit: 10, folded: true })
+const { blobs, cursor, hasMore, folders } = await blob.list({
+  prefix: 'uploads/',
+  limit: 10,
+  folded: true
+})
 
 // Serve (with proper headers)
 return blob.serve(event, 'path/file.txt')
@@ -252,12 +259,15 @@ Response and function caching.
 ### Route Handler Caching
 
 ```ts
-export default cachedEventHandler((event) => {
-  return { data: 'cached', date: new Date().toISOString() }
-}, {
-  maxAge: 60 * 60, // 1 hour
-  getKey: event => event.path
-})
+export default cachedEventHandler(
+  (event) => {
+    return { data: 'cached', date: new Date().toISOString() }
+  },
+  {
+    maxAge: 60 * 60, // 1 hour
+    getKey: (event) => event.path
+  }
+)
 ```
 
 ### Function Caching
@@ -402,7 +412,11 @@ Enable experimental WebSocket:
 
 ```ts
 // nuxt.config.ts
-nitro: { experimental: { websocket: true } }
+nitro: {
+  experimental: {
+    websocket: true
+  }
+}
 ```
 
 ```ts

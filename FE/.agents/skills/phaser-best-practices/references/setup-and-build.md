@@ -87,7 +87,7 @@ Use the smallest structure that cleanly supports the current scope.
 ### Baseline Arcade config
 
 ```ts
-import Phaser from 'phaser';
+import Phaser from 'phaser'
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -107,7 +107,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   }
-};
+}
 ```
 
 ### Matter config
@@ -129,7 +129,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   }
-};
+}
 ```
 
 ### Pixel-art config
@@ -151,7 +151,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   }
-};
+}
 ```
 
 ## Scale and renderer decisions
@@ -244,8 +244,8 @@ Two safe patterns:
 Use this for larger asset libraries or files referenced by string paths:
 
 ```ts
-this.load.image('player', 'assets/player.png');
-this.load.audio('bgm', ['assets/music.ogg', 'assets/music.mp3']);
+this.load.image('player', 'assets/player.png')
+this.load.audio('bgm', ['assets/music.ogg', 'assets/music.mp3'])
 ```
 
 ### 2. Imported bundled assets
@@ -266,17 +266,17 @@ Choose one approach consistently per asset family.
 
 ```ts
 // src/main.ts
-import Phaser from 'phaser';
-import { gameConfig } from './game/config/game-config';
-import { BootScene } from './game/scenes/BootScene';
-import { MenuScene } from './game/scenes/MenuScene';
-import { GameScene } from './game/scenes/GameScene';
-import { UIScene } from './game/scenes/UIScene';
+import Phaser from 'phaser'
+import { gameConfig } from './game/config/game-config'
+import { BootScene } from './game/scenes/BootScene'
+import { MenuScene } from './game/scenes/MenuScene'
+import { GameScene } from './game/scenes/GameScene'
+import { UIScene } from './game/scenes/UIScene'
 
 new Phaser.Game({
   ...gameConfig,
   scene: [BootScene, MenuScene, GameScene, UIScene]
-});
+})
 ```
 
 ## Validation checklist

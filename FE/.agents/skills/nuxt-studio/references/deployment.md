@@ -9,9 +9,9 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       routes: ['/'],
-      crawlLinks: true,
-    },
-  },
+      crawlLinks: true
+    }
+  }
 })
 ```
 
@@ -27,9 +27,9 @@ export default defineNuxtConfig({
       owner: 'your-org',
       repo: 'docs',
       branch: process.env.NUXT_STUDIO_BRANCH || 'content-preview',
-      rootDir: 'apps/docs',
-    },
-  },
+      rootDir: 'apps/docs'
+    }
+  }
 })
 ```
 

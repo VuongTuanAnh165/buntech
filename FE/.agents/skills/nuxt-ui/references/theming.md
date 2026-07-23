@@ -173,11 +173,13 @@ export default defineAppConfig({
           md: { base: 'px-6 py-3' }
         }
       },
-      compoundVariants: [{
-        color: 'neutral',
-        variant: 'outline',
-        class: { base: 'ring-2' }
-      }],
+      compoundVariants: [
+        {
+          color: 'neutral',
+          variant: 'outline',
+          class: { base: 'ring-2' }
+        }
+      ],
       defaultVariants: {
         color: 'neutral',
         variant: 'outline'
@@ -221,7 +223,9 @@ export default {
 ```ts
 ui: {
   button: {
-    slots: { base: 'font-bold' }  // ✅ Match slots structure
+    slots: {
+      base: 'font-bold'
+    } // ✅ Match slots structure
   }
 }
 ```
@@ -242,7 +246,7 @@ export default {
 ```ts
 ui: {
   container: {
-    base: 'max-w-lg'  // ✅ Match flat structure
+    base: 'max-w-lg' // ✅ Match flat structure
   }
 }
 ```
@@ -253,14 +257,16 @@ ui: {
 // ❌ WRONG - Don't use slots for flat-base components
 ui: {
   container: {
-    slots: { base: 'max-w-lg' }  // TypeScript error!
+    slots: {
+      base: 'max-w-lg'
+    } // TypeScript error!
   }
 }
 
 // ❌ WRONG - Don't use flat for slots-based components
 ui: {
   button: {
-    base: 'font-bold'  // Won't work correctly
+    base: 'font-bold' // Won't work correctly
   }
 }
 ```
@@ -309,8 +315,10 @@ colorMode.preference = 'dark' // 'light', 'dark', 'system'
 ```
 
 ```vue
-<UColorModeButton /> <!-- Toggle button -->
-<UColorModeSelect /> <!-- Dropdown select -->
+<UColorModeButton />
+<!-- Toggle button -->
+<UColorModeSelect />
+<!-- Dropdown select -->
 ```
 
 ## Best Practices

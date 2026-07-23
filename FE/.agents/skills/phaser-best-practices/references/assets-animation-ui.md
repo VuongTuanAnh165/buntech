@@ -43,7 +43,7 @@ Choose the asset container deliberately.
 - no animation or slicing is required
 
 ```ts
-this.load.image('background-forest', 'assets/images/background-forest.png');
+this.load.image('background-forest', 'assets/images/background-forest.png')
 ```
 
 ### Use a spritesheet when
@@ -56,7 +56,7 @@ this.load.image('background-forest', 'assets/images/background-forest.png');
 this.load.spritesheet('player-run', 'assets/sprites/player-run.png', {
   frameWidth: 32,
   frameHeight: 32
-});
+})
 ```
 
 ### Use an atlas when
@@ -66,7 +66,7 @@ this.load.spritesheet('player-run', 'assets/sprites/player-run.png', {
 - export tooling already produces a texture atlas
 
 ```ts
-this.load.atlas('game-atlas', 'assets/atlases/game.png', 'assets/atlases/game.json');
+this.load.atlas('game-atlas', 'assets/atlases/game.png', 'assets/atlases/game.json')
 ```
 
 Rule of thumb:
@@ -95,7 +95,7 @@ this.load.spritesheet('wood-panel', 'assets/ui/wood-panel.png', {
   frameWidth: 144,
   frameHeight: 144,
   spacing: 8
-});
+})
 ```
 
 ### Example with margin and spacing
@@ -106,7 +106,7 @@ this.load.spritesheet('icons', 'assets/ui/icons.png', {
   frameHeight: 32,
   margin: 4,
   spacing: 2
-});
+})
 ```
 
 If the sheet dimensions do not divide cleanly, stop and re-measure.
@@ -122,7 +122,7 @@ if (!this.anims.exists('player-run')) {
     frames: this.anims.generateFrameNumbers('player-run', { start: 0, end: 5 }),
     frameRate: 12,
     repeat: -1
-  });
+  })
 }
 ```
 
@@ -142,9 +142,9 @@ Only switch animations when the state changed. Do not spam `.play()` with differ
 
 ```ts
 if (this.player.body!.velocity.x !== 0) {
-  this.player.anims.play('player-run', true);
+  this.player.anims.play('player-run', true)
 } else {
-  this.player.anims.play('player-idle', true);
+  this.player.anims.play('player-idle', true)
 }
 ```
 
@@ -153,9 +153,9 @@ if (this.player.body!.velocity.x !== 0) {
 ```ts
 this.player.on(Phaser.Animations.Events.ANIMATION_COMPLETE, (anim) => {
   if (anim.key === 'enemy-die') {
-    this.player.destroy();
+    this.player.destroy()
   }
-});
+})
 ```
 
 ## Aseprite support
@@ -163,13 +163,9 @@ this.player.on(Phaser.Animations.Events.ANIMATION_COMPLETE, (anim) => {
 If the asset pipeline uses Aseprite JSON exports, create animations from the exported data instead of hand-writing every frame list.
 
 ```ts
-this.load.aseprite(
-  'hero',
-  'assets/sprites/hero.png',
-  'assets/sprites/hero.json'
-);
+this.load.aseprite('hero', 'assets/sprites/hero.png', 'assets/sprites/hero.json')
 
-this.anims.createFromAseprite('hero');
+this.anims.createFromAseprite('hero')
 ```
 
 Use Aseprite-driven animations when the animation tags in the art tool already describe the desired behavior.
@@ -208,19 +204,8 @@ Prefer the built-in game object first.
 ### NineSlice
 
 ```ts
-const panel = this.add.nineslice(
-  320,
-  180,
-  'ui-panels',
-  'paper-panel',
-  420,
-  260,
-  24,
-  24,
-  24,
-  24
-);
-panel.setOrigin(0.5);
+const panel = this.add.nineslice(320, 180, 'ui-panels', 'paper-panel', 420, 260, 24, 24, 24, 24)
+panel.setOrigin(0.5)
 ```
 
 ### ThreeSlice
@@ -228,18 +213,7 @@ panel.setOrigin(0.5);
 Create a 3-slice by setting top and bottom slice heights to zero:
 
 ```ts
-const ribbon = this.add.nineslice(
-  320,
-  80,
-  'ui-panels',
-  'banner',
-  300,
-  48,
-  18,
-  18,
-  0,
-  0
-);
+const ribbon = this.add.nineslice(320, 80, 'ui-panels', 'banner', 300, 48, 18, 18, 0, 0)
 ```
 
 Use built-in slicing when the art is genuinely slice-friendly. Do not jump to custom canvas composition first.
@@ -275,18 +249,18 @@ export const SCENES = {
   Menu: 'MenuScene',
   Game: 'GameScene',
   UI: 'UIScene'
-} as const;
+} as const
 
 export const TEX = {
   Player: 'player',
   Atlas: 'game-atlas',
   PaperPanel: 'paper-panel'
-} as const;
+} as const
 
 export const ANIMS = {
   PlayerIdle: 'player-idle',
   PlayerRun: 'player-run'
-} as const;
+} as const
 ```
 
 This reduces typo bugs and improves refactor safety.

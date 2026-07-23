@@ -3,8 +3,8 @@ name: phaser-best-practices
 description: Builds and refactors Phaser 3 browser games. Use for creating a new Phaser project, adding scenes, entities, physics, UI, tilemaps, animations, input, audio, camera, or for fixing Phaser-specific bugs and performance problems.
 compatibility: Intended for Phaser 3 JavaScript or TypeScript projects. New-project scaffolding assumes Node.js/npm or an existing browser bundler.
 metadata:
-  phaser-major: "3"
-  skill-type: "framework"
+  phaser-major: '3'
+  skill-type: 'framework'
 ---
 
 # Building Phaser Games

@@ -352,3 +352,28 @@ Dự án này sử dụng **Capacitor** để đóng gói thành ứng dụng iO
 
 - **Kiểm tra Lỗi (Typecheck & Linting):** Phải chạy lệnh `npm run typecheck` và `npm run lint` để kiểm tra. Nếu phát hiện bất kỳ lỗi (errors) hoặc cảnh báo (warnings) nào từ TypeScript hay ESLint, bắt buộc phải sửa chữa triệt để.
 - **Đồng bộ Format Code:** Luôn chạy lệnh `npm run format` (tích hợp sẵn Prettier) để tự động căn chỉnh lại format file, dọn dẹp syntax thừa, và chuẩn hóa thứ tự sắp xếp class của Tailwind CSS trên toàn bộ dự án.
+
+---
+
+## 16. TƯ DUY "PRINCIPAL ARCHITECT" & QUY LUẬT TỰ TIẾN HÓA (The Generalized Masterpiece Framework)
+
+Để đảm bảo source code Frontend **luôn luôn** là một Kiệt tác (Masterpiece) trước mọi biến động và yêu cầu tính năng trong tương lai, mọi AI Agent BẮT BUỘC phải cài đặt tư duy (Mindset) tổng quát sau đây vào mọi dòng code sinh ra:
+
+### A. Lập Trình Phòng Thủ Tuyệt Đối (Defensive Programming by Default)
+AI tuyệt đối không được giả định rằng API Backend luôn trả về đúng dữ liệu, trình duyệt của User luôn xịn, hoặc môi trường SSR giống hệt Client.
+- **Data & Types (Boundary Defense):** Không bao giờ tin tưởng mù quáng vào cấu trúc JSON từ API. Luôn bọc Nullable (`??`, `?.`), sử dụng Optional Chaining ở template để chống crash UI trắng trang. Ép kiểu tường minh và tuyệt đối nói **KHÔNG** với `any` hay `@ts-expect-error`.
+- **Memory & Rendering (SPA Resilience):** Ứng dụng SPA chạy lâu dài trên trình duyệt rất dễ bị tràn RAM (Memory Leak). Luôn dọn dẹp (cleanup) các `EventListener`, `setInterval` trong hook `onUnmounted`. Tránh render hàng nghìn DOM elements cùng lúc (hãy dùng Pagination hoặc Virtual Scroll).
+- **SSR Integrity & Hydration:** Phòng thủ tuyệt đối lỗi **Cross-Request State Pollution** (Rò rỉ dữ liệu phiên đăng nhập giữa các user trên Server) bằng cách không bao giờ dùng biến global. Chống lỗi **Hydration Mismatch** bằng cách cảnh giác với `window`, `document` và bọc `<ClientOnly>` ở những component gọi Native API / Browser API.
+
+### B. Nguyên Tắc "Không Tin Tưởng Mã Cũ" (Zero-Trust Legacy Code)
+- Khi User yêu cầu sửa một UI Component hay trang, AI không được "mù quáng" nhét thêm code vào.
+- Hãy quét toàn bộ cây Component (từ Parent -> Children) và luồng State (Pinia). Nếu phát hiện Component cũ đang phình to (God Component), Props Drilling quá sâu, hoặc CSS Tailwind lặp lại quá nhiều, AI **có trách nhiệm** cảnh báo và đề xuất chẻ nhỏ (Refactor) thành các Reusable Components trước khi xây tính năng mới lên trên.
+
+### C. Cơ Chế Tự Học & Tự Cập Nhật (Self-Evolution)
+- Tài liệu này (`AGENTS.md`) là bộ não sống của dự án. Nếu trong quá trình code, AI vấp phải một **lỗi kiến trúc SSR mới**, tìm ra một **bug tiềm ẩn đặc thù của dự án**, hoặc đúc kết được một **Best Practice mới** của Vue 3.5 / Nuxt 4 tối ưu hơn, AI **PHẢI CHỦ ĐỘNG ĐỀ XUẤT** cập nhật quy luật đó vào file `AGENTS.md`.
+- Mục tiêu: Không một AI nào ở phiên làm việc sau được phép lặp lại sai lầm kiến trúc của AI ở phiên làm việc trước.
+
+### D. Tiêu Chuẩn Phê Duyệt Cuối Cùng (The Final Gatekeeper)
+Trước khi báo cáo "Hoàn thành" với User, AI phải tự hỏi mình 1 câu duy nhất:
+> *"Nếu trang web này được load trên một chiếc điện thoại 3G đời cũ, màn hình tai thỏ, liệu nó có bị giật lag không? Giao diện có vỡ nát không? Cục JavaScript tải về có nặng hàng Megabytes không? Và dữ liệu nhạy cảm có vô tình bị lộ ra mã nguồn (View Source) do lỗi SSR không?"*
+Nếu có bất kỳ sự chần chừ nào, AI phải tự động quay lại bước Refactor!

@@ -44,9 +44,9 @@ export default defineNuxtConfig({
       external: true,
       maxFileSize: 10 * 1024 * 1024,
       allowedTypes: ['image/*', 'video/*'],
-      prefix: 'studio',
-    },
-  },
+      prefix: 'studio'
+    }
+  }
 })
 ```
 

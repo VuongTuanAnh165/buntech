@@ -9,9 +9,9 @@ export default defineNuxtConfig({
   content: {
     database: {
       type: 'sqlite',
-      filename: '.data/content/contents.sqlite',
-    },
-  },
+      filename: '.data/content/contents.sqlite'
+    }
+  }
 })
 ```
 
@@ -28,12 +28,12 @@ export default defineNuxtConfig({
   content: {
     database: {
       type: 'd1',
-      bindingName: 'CONTENT_DB',
+      bindingName: 'CONTENT_DB'
     },
     experimental: {
-      sqliteConnector: 'native',
-    },
-  },
+      sqliteConnector: 'native'
+    }
+  }
 })
 ```
 
@@ -48,27 +48,27 @@ export default defineNuxtConfig({
       markdown: {
         toc: { depth: 3, searchDepth: 2 },
         remarkPlugins: {
-          'remark-gfm': {},
+          'remark-gfm': {}
         },
         rehypePlugins: {
           'rehype-external-links': {
             target: '_blank',
-            rel: ['noopener', 'noreferrer'],
-          },
+            rel: ['noopener', 'noreferrer']
+          }
         },
         highlight: {
           themes: { default: 'github-light', dark: 'github-dark' },
-          langs: ['ts', 'vue', 'bash'],
-        },
+          langs: ['ts', 'vue', 'bash']
+        }
       },
-      csv: { json: true, delimiter: ',' },
+      csv: { json: true, delimiter: ',' }
     },
     renderer: {
       alias: { a: 'DocsLink' },
-      anchorLinks: { h2: true, h3: true },
+      anchorLinks: { h2: true, h3: true }
     },
-    watch: { enabled: true },
-  },
+    watch: { enabled: true }
+  }
 })
 ```
 

@@ -139,7 +139,7 @@ ui({
   },
   ui: {
     colors: { primary: 'green' }, // Runtime color config
-    button: { /* theme overrides */ }
+    button: {/* theme overrides */}
   }
 })
 ```

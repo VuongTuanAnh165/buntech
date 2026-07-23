@@ -10,14 +10,14 @@ export default defineNuxtConfig({
   runtimeConfig: {
     apiSecret: '',
     public: {
-      apiBase: '/api',
-    },
+      apiBase: '/api'
+    }
   },
   routeRules: {
     '/': { prerender: true },
     '/admin/**': { ssr: false },
-    '/old': { redirect: '/new' },
-  },
+    '/old': { redirect: '/new' }
+  }
 })
 ```
 

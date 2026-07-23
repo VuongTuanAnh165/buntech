@@ -26,9 +26,7 @@ The builder supports `where`, `andWhere`, `orWhere`, `order`, `select`, `skip`, 
 ```ts
 const posts = await queryCollection('blog')
   .where('published', '=', true)
-  .andWhere(group => group
-    .where('date', '>', '2026-01-01')
-    .where('category', '=', 'news'))
+  .andWhere((group) => group.where('date', '>', '2026-01-01').where('category', '=', 'news'))
   .all()
 ```
 
@@ -48,17 +46,11 @@ Extend `../.nuxt/tsconfig.server.json` from `server/tsconfig.json` when server-s
 ## Navigation and surroundings
 
 ```ts
-const navigation = await queryCollectionNavigation('docs', [
-  'title',
-  'description',
-  'icon',
-])
+const navigation = await queryCollectionNavigation('docs', ['title', 'description', 'icon'])
 
-const [previous, next] = await queryCollectionItemSurroundings(
-  'docs',
-  route.path,
-  { fields: ['title', 'description'] },
-)
+const [previous, next] = await queryCollectionItemSurroundings('docs', route.path, {
+  fields: ['title', 'description']
+})
 ```
 
 Navigation reads page paths plus `.navigation.yml` metadata. Surroundings returns a two-item tuple, with `null` at either boundary.
@@ -71,7 +63,7 @@ Navigation reads page paths plus `.navigation.yml` metadata. Surroundings return
 const { data: sections } = await useAsyncData('docs-search', () => {
   return queryCollectionSearchSections('docs', {
     ignoredTags: ['style', 'script'],
-    extraFields: ['description'],
+    extraFields: ['description']
   })
 })
 ```

@@ -8,8 +8,7 @@ Route middleware runs during application navigation. Put named middleware in `ap
 export default defineNuxtRouteMiddleware(async (to) => {
   const session = useSession()
 
-  if (!session.value && to.path !== '/login')
-    return navigateTo('/login')
+  if (!session.value && to.path !== '/login') return navigateTo('/login')
 })
 ```
 
@@ -27,13 +26,13 @@ Nuxt scans top-level files in `app/plugins/`. Use `.client` or `.server` suffixe
 export default defineNuxtPlugin({
   name: 'analytics',
   parallel: true,
-  setup () {
+  setup() {
     const analytics = createAnalyticsClient()
 
     return {
-      provide: { analytics },
+      provide: { analytics }
     }
-  },
+  }
 })
 ```
 
@@ -51,10 +50,10 @@ Register app hooks in an object-syntax plugin when they are part of plugin setup
 export default defineNuxtPlugin({
   name: 'navigation-metrics',
   hooks: {
-    'page:finish' () {
+    'page:finish'() {
       recordPageReady()
-    },
-  },
+    }
+  }
 })
 ```
 

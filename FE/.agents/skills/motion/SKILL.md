@@ -43,7 +43,7 @@ pnpm add motion-v @vueuse/nuxt
 ```ts
 // nuxt.config.ts - Nuxt 3 setup
 export default defineNuxtConfig({
-  modules: ['motion-v/nuxt'],
+  modules: ['motion-v/nuxt']
 })
 ```
 

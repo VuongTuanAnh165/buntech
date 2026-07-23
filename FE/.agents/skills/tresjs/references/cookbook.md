@@ -37,12 +37,7 @@ import { TresCanvas } from '@tresjs/core'
 
 <template>
   <TresCanvas>
-    <TresPerspectiveCamera
-      :position="[5, 5, 5]"
-      :fov="45"
-      :near="0.1"
-      :far="1000"
-    />
+    <TresPerspectiveCamera :position="[5, 5, 5]" :fov="45" :near="0.1" :far="1000" />
     <OrbitControls
       enable-damping
       :damping-factor="0.05"
@@ -101,11 +96,7 @@ import { TresCanvas } from '@tresjs/core'
     <!-- Scene with emissive materials for bloom -->
     <TresMesh>
       <TresSphereGeometry :args="[1, 32, 32]" />
-      <TresMeshStandardMaterial
-        color="#ff6600"
-        :emissive="0xff6600"
-        :emissive-intensity="2"
-      />
+      <TresMeshStandardMaterial color="#ff6600" :emissive="0xff6600" :emissive-intensity="2" />
     </TresMesh>
 
     <TresAmbientLight :intensity="0.2" />

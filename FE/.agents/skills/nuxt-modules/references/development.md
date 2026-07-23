@@ -23,7 +23,7 @@ export default defineNuxtModule<ModuleOptions>({
     prefix: 'My'
   },
   hooks: {
-    'app:error': err => console.error(err)
+    'app:error': (err) => console.error(err)
   },
   moduleDependencies: {
     '@nuxtjs/tailwindcss': {
@@ -106,8 +106,8 @@ import { addVitePlugin, addWebpackPlugin } from '@nuxt/kit'
 export default defineNuxtModule({
   async setup() {
     // Lazy-load only the bundler plugin needed
-    addVitePlugin(() => import('my-plugin/vite').then(r => r.default()))
-    addWebpackPlugin(() => import('my-plugin/webpack').then(r => r.default()))
+    addVitePlugin(() => import('my-plugin/vite').then((r) => r.default()))
+    addWebpackPlugin(() => import('my-plugin/webpack').then((r) => r.default()))
   }
 })
 ```
@@ -182,7 +182,7 @@ export default defineNuxtModule({
 
 ```ts
 // runtime/server/api/users.ts
-import { helper } from '#server/utils/helper'  // Clean imports
+import { helper } from '#server/utils/helper' // Clean imports
 ```
 
 ## Runtime Config
@@ -318,7 +318,7 @@ export default defineNuxtModule({
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
-  tailwindcss: false  // Disable the module
+  tailwindcss: false // Disable the module
 })
 ```
 

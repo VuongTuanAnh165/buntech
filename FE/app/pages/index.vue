@@ -1,13 +1,14 @@
 <script setup lang="ts">
 /**
- * Trang chủ tạm — Redirect về admin dashboard.
- * Sẽ được thay thế bằng Landing Page hoặc logic redirect phù hợp.
+ * Trang chủ tạm — Redirect về trang đăng nhập / admin.
+ * (Sẽ được thay thế bằng Landing Page sau này)
  */
 definePageMeta({
-  layout: 'default'
+  middleware: [
+    function () {
+      const token = useCookie('auth_token')
+      return navigateTo(token.value ? '/admin' : '/login')
+    }
+  ]
 })
 </script>
-
-<template>
-  <div>hello world</div>
-</template>

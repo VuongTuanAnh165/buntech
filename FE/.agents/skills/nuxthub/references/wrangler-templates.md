@@ -13,7 +13,13 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "my-app",
   "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [{ "binding": "DB", "database_name": "my-app-db", "database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" }]
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "my-app-db",
+      "database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    }
+  ]
 }
 ```
 
@@ -24,7 +30,13 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "my-app",
   "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [{ "binding": "DB", "database_name": "my-app-db", "database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "my-app-db",
+      "database_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    }
+  ],
   "kv_namespaces": [
     { "binding": "KV", "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" },
     { "binding": "CACHE", "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }
@@ -41,10 +53,10 @@ Enable logging to track performance and debug issues:
 {
   "observability": {
     "logs": {
-      "enabled": true,          // Enable log collection
-      "head_sampling_rate": 1,  // Sample rate 0-1 (1 = 100% of requests)
-      "invocation_logs": true,  // Log function invocations
-      "persist": true           // Persist logs to storage
+      "enabled": true, // Enable log collection
+      "head_sampling_rate": 1, // Sample rate 0-1 (1 = 100% of requests)
+      "invocation_logs": true, // Log function invocations
+      "persist": true // Persist logs to storage
     }
   }
 }
@@ -60,12 +72,14 @@ Specify migrations table and directory:
 
 ```jsonc
 {
-  "d1_databases": [{
-    "binding": "DB",
-    "database_id": "<id>",
-    "migrations_table": "_hub_migrations",
-    "migrations_dir": ".output/server/db/migrations/"
-  }]
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_id": "<id>",
+      "migrations_table": "_hub_migrations",
+      "migrations_dir": ".output/server/db/migrations/"
+    }
+  ]
 }
 ```
 
@@ -105,10 +119,14 @@ npx wrangler r2 bucket create my-app-bucket
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "my-app",
   "compatibility_flags": ["nodejs_compat"],
-  "d1_databases": [{ "binding": "DB", "database_name": "my-app-db-prod", "database_id": "prod-db-id" }],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "my-app-db-prod", "database_id": "prod-db-id" }
+  ],
   "env": {
     "staging": {
-      "d1_databases": [{ "binding": "DB", "database_name": "my-app-db-staging", "database_id": "staging-db-id" }]
+      "d1_databases": [
+        { "binding": "DB", "database_name": "my-app-db-staging", "database_id": "staging-db-id" }
+      ]
     }
   }
 }

@@ -21,7 +21,7 @@ import { z } from 'zod'
 
 const ProductInput = z.object({
   name: z.string().min(1),
-  price: z.number().nonnegative(),
+  price: z.number().nonnegative()
 })
 
 export default defineEventHandler(async (event) => {

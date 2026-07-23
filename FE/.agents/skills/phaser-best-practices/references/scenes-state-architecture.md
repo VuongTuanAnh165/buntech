@@ -71,7 +71,7 @@ Choose the smallest state-sharing mechanism that fits.
 Use for one-time transitions:
 
 ```ts
-this.scene.start('GameOverScene', { score: this.score, timeMs: this.elapsedMs });
+this.scene.start('GameOverScene', { score: this.score, timeMs: this.elapsedMs })
 ```
 
 Best for:
@@ -86,10 +86,10 @@ Best for:
 Use for small game-wide state:
 
 ```ts
-this.registry.set('musicEnabled', true);
-this.registry.set('coins', 42);
+this.registry.set('musicEnabled', true)
+this.registry.set('coins', 42)
 
-const coins = this.registry.get('coins');
+const coins = this.registry.get('coins')
 ```
 
 Best for:
@@ -125,10 +125,10 @@ Use events for decoupled notifications:
 
 ```ts
 // UIScene
-this.game.events.emit('hud:toggle-minimap', true);
+this.game.events.emit('hud:toggle-minimap', true)
 
 // GameScene
-this.game.events.on('hud:toggle-minimap', this.onToggleMinimap, this);
+this.game.events.on('hud:toggle-minimap', this.onToggleMinimap, this)
 ```
 
 If you attach cross-scene listeners, add cleanup on shutdown / destroy.
@@ -174,11 +174,11 @@ A dedicated UI scene usually scales better than baking HUD into the gameplay sce
 
 ```ts
 // In GameScene.create()
-this.scene.launch('UIScene', { ownerScene: 'GameScene' });
+this.scene.launch('UIScene', { ownerScene: 'GameScene' })
 
 // In UIScene.create(data)
-this.ownerSceneKey = data.ownerScene;
-this.game.events.on('score:changed', this.onScoreChanged, this);
+this.ownerSceneKey = data.ownerScene
+this.game.events.on('score:changed', this.onScoreChanged, this)
 ```
 
 Use a UI scene when you need:
@@ -196,26 +196,26 @@ Do not invent a `shutdown()` scene method and assume Phaser will call it. Regist
 
 ```ts
 export class GameScene extends Phaser.Scene {
-  private onResizeBound?: () => void;
+  private onResizeBound?: () => void
 
   create() {
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.onShutdown, this);
-    this.events.once(Phaser.Scenes.Events.DESTROY, this.onDestroy, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.onShutdown, this)
+    this.events.once(Phaser.Scenes.Events.DESTROY, this.onDestroy, this)
 
     this.onResizeBound = () => {
       // layout logic
-    };
+    }
 
-    this.scale.on(Phaser.Scale.Events.RESIZE, this.onResizeBound);
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.onResizeBound)
   }
 
   private onShutdown() {
     if (this.onResizeBound) {
-      this.scale.off(Phaser.Scale.Events.RESIZE, this.onResizeBound);
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.onResizeBound)
     }
 
-    this.time.removeAllEvents();
-    this.tweens.killAll();
+    this.time.removeAllEvents()
+    this.tweens.killAll()
   }
 
   private onDestroy() {
@@ -245,38 +245,38 @@ These are common sources of bugs:
 
 ```ts
 export class GameScene extends Phaser.Scene {
-  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private player!: Phaser.Physics.Arcade.Sprite;
-  private level = 1;
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
+  private player!: Phaser.Physics.Arcade.Sprite
+  private level = 1
 
   constructor() {
-    super('GameScene');
+    super('GameScene')
   }
 
   init(data: { level?: number }) {
-    this.level = data.level ?? 1;
+    this.level = data.level ?? 1
   }
 
   preload() {
-    this.load.image('player', 'assets/player.png');
+    this.load.image('player', 'assets/player.png')
   }
 
   create() {
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.onShutdown, this);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.onShutdown, this)
 
-    this.player = this.physics.add.sprite(64, 64, 'player');
-    this.cursors = this.input.keyboard!.createCursorKeys();
+    this.player = this.physics.add.sprite(64, 64, 'player')
+    this.cursors = this.input.keyboard!.createCursorKeys()
   }
 
   update(_: number, delta: number) {
-    const speed = 180;
-    this.player.setVelocity(0);
+    const speed = 180
+    this.player.setVelocity(0)
 
-    if (this.cursors.left.isDown) this.player.setVelocityX(-speed);
-    else if (this.cursors.right.isDown) this.player.setVelocityX(speed);
+    if (this.cursors.left.isDown) this.player.setVelocityX(-speed)
+    else if (this.cursors.right.isDown) this.player.setVelocityX(speed)
 
     // Delegate deeper logic elsewhere once the scene grows
-    this.updateWorld(delta);
+    this.updateWorld(delta)
   }
 
   private updateWorld(delta: number) {

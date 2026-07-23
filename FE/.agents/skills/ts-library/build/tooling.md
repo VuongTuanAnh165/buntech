@@ -24,7 +24,7 @@ export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm', 'cjs'],
   dts: true,
-  clean: true,
+  clean: true
 })
 ```
 
@@ -35,7 +35,7 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/cli.ts', 'src/utils.ts'],
   format: ['esm', 'cjs'],
   dts: true,
-  external: ['vue', 'vite'],
+  external: ['vue', 'vite']
 })
 ```
 
@@ -43,11 +43,11 @@ export default defineConfig({
 
 ```typescript
 export default defineConfig({
-  entry: ['src/*.ts'],          // Glob all entries
+  entry: ['src/*.ts'], // Glob all entries
   format: ['esm', 'cjs'],
   dts: true,
-  exports: true,                // Auto-generate package.json exports
-  attw: { profile: 'esm-only' }, // Type checking profile
+  exports: true, // Auto-generate package.json exports
+  attw: { profile: 'esm-only' } // Type checking profile
 })
 ```
 
@@ -58,17 +58,17 @@ export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm', 'cjs'],
   dts: {
-    resolve: ['@antfu/utils'],  // Inline specific deps in declarations
+    resolve: ['@antfu/utils'] // Inline specific deps in declarations
   },
   external: ['vue'],
   define: {
-    __DEV__: 'false',
+    __DEV__: 'false'
   },
   hooks: {
     'build:done': async () => {
       // Post-build tasks
-    },
-  },
+    }
+  }
 })
 ```
 
@@ -88,8 +88,8 @@ export default defineBuildConfig({
   entries: ['src/index'],
   declaration: true,
   rollup: {
-    emitCJS: true,
-  },
+    emitCJS: true
+  }
 })
 ```
 
@@ -103,8 +103,8 @@ export default defineBuildConfig({
   rollup: {
     emitCJS: true,
     inlineDependencies: true,
-    dts: { respectExternal: true },
-  },
+    dts: { respectExternal: true }
+  }
 })
 ```
 
@@ -114,7 +114,7 @@ export default defineBuildConfig({
 
 ```typescript
 export default defineConfig({
-  format: ['esm'],
+  format: ['esm']
 })
 ```
 
@@ -122,7 +122,7 @@ export default defineConfig({
 
 ```typescript
 export default defineConfig({
-  format: ['esm', 'cjs'],
+  format: ['esm', 'cjs']
 })
 ```
 
@@ -131,7 +131,7 @@ export default defineConfig({
 ```typescript
 export default defineConfig([
   { format: ['esm', 'cjs'], dts: true },
-  { format: 'iife', globalName: 'MyLib', minify: true },
+  { format: 'iife', globalName: 'MyLib', minify: true }
 ])
 ```
 
@@ -145,8 +145,8 @@ export default defineConfig({
     __DEV__: `(process.env.NODE_ENV !== 'production')`,
     __TEST__: 'false',
     __BROWSER__: 'true',
-    __VERSION__: JSON.stringify(pkg.version),
-  },
+    __VERSION__: JSON.stringify(pkg.version)
+  }
 })
 ```
 
@@ -173,8 +173,8 @@ export default defineConfig({
   hooks: {
     'build:done': async () => {
       // Patch CJS files if needed
-    },
-  },
+    }
+  }
 })
 ```
 

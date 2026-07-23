@@ -16,8 +16,8 @@ export default defineConfig({
   test: {
     include: ['test/**/*.test.ts'],
     testTimeout: 30_000,
-    reporters: 'dot',
-  },
+    reporters: 'dot'
+  }
 })
 ```
 
@@ -30,9 +30,9 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.ts'],
       exclude: ['src/types.ts'],
-      reporter: ['text', 'lcovonly', 'html'],
-    },
-  },
+      reporter: ['text', 'lcovonly', 'html']
+    }
+  }
 })
 ```
 
@@ -47,14 +47,14 @@ export default defineConfig({
       'packages/*/vitest.config.ts',
       {
         extends: './vitest.config.ts',
-        test: { name: 'unit', environment: 'node' },
+        test: { name: 'unit', environment: 'node' }
       },
       {
         extends: './vitest.config.ts',
-        test: { name: 'browser', browser: { enabled: true } },
-      },
-    ],
-  },
+        test: { name: 'browser', browser: { enabled: true } }
+      }
+    ]
+  }
 })
 ```
 
@@ -89,7 +89,7 @@ it('transform is idempotent', async () => {
   expect(pass1).toMatchSnapshot()
 
   const pass2 = (await transform(pass1))?.code ?? pass1
-  expect(pass2).toBe(pass1)  // Should not change
+  expect(pass2).toBe(pass1) // Should not change
 })
 ```
 
@@ -101,8 +101,8 @@ Test TypeScript types:
 // vitest.config.ts
 export default defineConfig({
   test: {
-    typecheck: { enabled: true },
-  },
+    typecheck: { enabled: true }
+  }
 })
 ```
 
@@ -150,7 +150,7 @@ Add to tsdown config:
 
 ```typescript
 export default defineConfig({
-  attw: { profile: 'esm-only' },  // or 'node16'
+  attw: { profile: 'esm-only' } // or 'node16'
 })
 ```
 
@@ -173,7 +173,7 @@ export default defineConfig({
 import { vi } from 'vitest'
 
 vi.mock('fs', () => ({
-  readFileSync: vi.fn(() => 'mocked content'),
+  readFileSync: vi.fn(() => 'mocked content')
 }))
 
 // Spy on method
@@ -191,11 +191,9 @@ import { defineConfig } from 'vitest/config'
 import MyPlugin from './src/vite'
 
 export default defineConfig({
-  plugins: [
-    MyPlugin({ /* options */ }),
-  ],
+  plugins: [MyPlugin({/* options */})],
   test: {
-    include: ['test/**/*.test.ts'],
-  },
+    include: ['test/**/*.test.ts']
+  }
 })
 ```

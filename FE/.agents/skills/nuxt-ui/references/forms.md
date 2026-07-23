@@ -58,13 +58,7 @@ const options = [
 </script>
 
 <template>
-  <USelectMenu
-    v-model="selected"
-    :options="options"
-    searchable
-    clear
-    placeholder="Select user"
-  >
+  <USelectMenu v-model="selected" :options="options" searchable clear placeholder="Select user">
     <template #option="{ option }">
       <UAvatar v-bind="option.avatar" size="xs" />
       <span>{{ option.label }}</span>

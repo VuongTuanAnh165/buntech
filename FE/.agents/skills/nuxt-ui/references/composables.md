@@ -90,32 +90,35 @@ async function confirmDelete() {
 Define keyboard shortcuts.
 
 ```ts
-defineShortcuts({
-  // Single key
-  escape: () => closeModal(),
+defineShortcuts(
+  {
+    // Single key
+    escape: () => closeModal(),
 
-  // Modifier + key (meta = Cmd on Mac, Ctrl on Windows)
-  meta_k: () => openSearch(),
-  meta_shift_p: () => openCommandPalette(),
+    // Modifier + key (meta = Cmd on Mac, Ctrl on Windows)
+    meta_k: () => openSearch(),
+    meta_shift_p: () => openCommandPalette(),
 
-  // Ctrl specific
-  ctrl_s: () => save(),
+    // Ctrl specific
+    ctrl_s: () => save(),
 
-  // Alt/Option
-  alt_n: () => newItem(),
+    // Alt/Option
+    alt_n: () => newItem(),
 
-  // Arrow keys
-  arrowup: () => navigateUp(),
-  arrowdown: () => navigateDown(),
+    // Arrow keys
+    arrowup: () => navigateUp(),
+    arrowdown: () => navigateDown(),
 
-  // With condition
-  meta_enter: {
-    handler: () => submit(),
-    whenever: [isFormValid]
+    // With condition
+    meta_enter: {
+      handler: () => submit(),
+      whenever: [isFormValid]
+    }
+  },
+  {
+    layoutIndependent: true // Ignore keyboard layout (v4.3+)
   }
-}, {
-  layoutIndependent: true // Ignore keyboard layout (v4.3+)
-})
+)
 ```
 
 ### Shortcut Syntax
@@ -175,11 +178,7 @@ const { activeId } = useScrollspy({ ids: sections })
 
 <template>
   <nav>
-    <a
-      v-for="id in sections"
-      :href="`#${id}`"
-      :class="{ 'font-bold': activeId === id }"
-    >
+    <a v-for="id in sections" :href="`#${id}`" :class="{ 'font-bold': activeId === id }">
       {{ id }}
     </a>
   </nav>

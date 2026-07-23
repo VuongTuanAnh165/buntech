@@ -16,13 +16,7 @@ Core package for building 3D scenes with Vue components.
 | `preset`           | `'realistic' \| 'low'`     | -                       | Quality presets                   |
 
 ```vue
-<TresCanvas
-  shadows
-  alpha
-  clear-color="#1a1a2e"
-  :tone-mapping="NoToneMapping"
-  window-size
->
+<TresCanvas shadows alpha clear-color="#1a1a2e" :tone-mapping="NoToneMapping" window-size>
   <!-- scene -->
 </TresCanvas>
 ```
@@ -61,13 +55,19 @@ onBeforeRender(({ delta, elapsed }) => {
 Render priority (lower = earlier):
 
 ```ts
-onBeforeRender(({ delta }) => {
-  // physics update
-}, { priority: -1 })
+onBeforeRender(
+  ({ delta }) => {
+    // physics update
+  },
+  { priority: -1 }
+)
 
-onBeforeRender(({ delta }) => {
-  // animation update
-}, { priority: 0 })
+onBeforeRender(
+  ({ delta }) => {
+    // animation update
+  },
+  { priority: 0 }
+)
 ```
 
 ### useGraph
@@ -95,7 +95,12 @@ import { TextureLoader, CubeTextureLoader } from 'three'
 const texture = await useLoader(TextureLoader, '/texture.jpg')
 
 const cubeTexture = await useLoader(CubeTextureLoader, [
-  '/px.jpg', '/nx.jpg', '/py.jpg', '/ny.jpg', '/pz.jpg', '/nz.jpg'
+  '/px.jpg',
+  '/nx.jpg',
+  '/py.jpg',
+  '/ny.jpg',
+  '/pz.jpg',
+  '/nz.jpg'
 ])
 ```
 
@@ -119,11 +124,11 @@ Event payload:
 
 ```ts
 function onClick(event) {
-  event.object      // The mesh that was clicked
-  event.point       // THREE.Vector3 intersection point
-  event.distance    // Distance from camera
-  event.uv          // UV coordinates
-  event.face        // Intersected face
+  event.object // The mesh that was clicked
+  event.point // THREE.Vector3 intersection point
+  event.distance // Distance from camera
+  event.uv // UV coordinates
+  event.face // Intersected face
   event.stopPropagation() // Stop event bubbling
 }
 ```

@@ -13,7 +13,7 @@ const page = ref(1)
 const { data, status, error, execute, clear } = await useFetch('/api/products', {
   query: { page },
   immediate: false,
-  watch: false,
+  watch: false
 })
 </script>
 ```
@@ -25,7 +25,7 @@ const { data, status, error, execute, clear } = await useFetch('/api/products', 
 Give reusable `useAsyncData` wrappers an explicit stable key. Calls sharing a key also share state, so keep their handler and structural options consistent.
 
 ```ts
-export function useCatalog () {
+export function useCatalog() {
   return useAsyncData('catalog', (_nuxtApp, { signal }) => {
     return $fetch('/api/catalog', { signal })
   })

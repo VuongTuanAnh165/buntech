@@ -13,12 +13,10 @@ export default defineNuxtConfig({
       }
     },
     'content:file:afterParse'(ctx) {
-      const words = typeof ctx.file.body === 'string'
-        ? ctx.file.body.trim().split(/\s+/).length
-        : 0
+      const words = typeof ctx.file.body === 'string' ? ctx.file.body.trim().split(/\s+/).length : 0
       ctx.content.readingTime = Math.ceil(words / 180)
-    },
-  },
+    }
+  }
 })
 ```
 
@@ -37,7 +35,7 @@ export default defineTransformer({
   extensions: ['.md'],
   transform(file) {
     return { ...file, title: `${file.title} · Docs` }
-  },
+  }
 })
 ```
 
@@ -45,9 +43,9 @@ export default defineTransformer({
 export default defineNuxtConfig({
   content: {
     build: {
-      transformers: ['~~/transformers/title-suffix'],
-    },
-  },
+      transformers: ['~~/transformers/title-suffix']
+    }
+  }
 })
 ```
 
@@ -65,7 +63,7 @@ const releases = defineCollectionSource({
   },
   async getItem(key) {
     return await $fetch(`https://example.com/releases/${key}`)
-  },
+  }
 })
 
 export default defineContentConfig({
@@ -73,9 +71,9 @@ export default defineContentConfig({
     releases: defineCollection({
       type: 'data',
       source: releases,
-      schema: z.object({ title: z.string(), publishedAt: z.string() }),
-    }),
-  },
+      schema: z.object({ title: z.string(), publishedAt: z.string() })
+    })
+  }
 })
 ```
 

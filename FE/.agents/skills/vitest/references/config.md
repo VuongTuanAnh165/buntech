@@ -11,7 +11,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     // test options
-  },
+  }
 })
 ```
 
@@ -25,8 +25,8 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'jsdom',
-  },
+    environment: 'jsdom'
+  }
 })
 ```
 
@@ -36,9 +36,12 @@ Merge configs:
 import { defineConfig, mergeConfig } from 'vitest/config'
 import viteConfig from './vite.config'
 
-export default mergeConfig(viteConfig, defineConfig({
-  test: { environment: 'jsdom' },
-}))
+export default mergeConfig(
+  viteConfig,
+  defineConfig({
+    test: { environment: 'jsdom' }
+  })
+)
 ```
 
 ## Common Options
@@ -46,8 +49,8 @@ export default mergeConfig(viteConfig, defineConfig({
 ```ts
 defineConfig({
   test: {
-    globals: true,                    // Enable global APIs without imports
-    environment: 'node',              // 'node', 'jsdom', 'happy-dom'
+    globals: true, // Enable global APIs without imports
+    environment: 'node', // 'node', 'jsdom', 'happy-dom'
     setupFiles: ['./tests/setup.ts'], // Run before each test file
     include: ['**/*.{test,spec}.{js,ts,jsx,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**'],
@@ -55,21 +58,21 @@ defineConfig({
     hookTimeout: 10000,
     watch: true,
     coverage: {
-      provider: 'v8',                 // or 'istanbul'
+      provider: 'v8', // or 'istanbul'
       reporter: ['text', 'html'],
-      include: ['src/**/*.ts'],
+      include: ['src/**/*.ts']
     },
-    isolate: true,                    // Each file in separate process
-    fileParallelism: true,            // Run test files in parallel
-    pool: 'threads',                  // 'threads', 'forks', 'vmThreads'
+    isolate: true, // Each file in separate process
+    fileParallelism: true, // Run test files in parallel
+    pool: 'threads', // 'threads', 'forks', 'vmThreads'
     poolOptions: {
-      threads: { maxThreads: 4, minThreads: 1 },
+      threads: { maxThreads: 4, minThreads: 1 }
     },
     clearMocks: true,
     restoreMocks: true,
     retry: 0,
-    bail: 0,
-  },
+    bail: 0
+  }
 })
 ```
 
@@ -78,7 +81,7 @@ defineConfig({
 ```ts
 export default defineConfig(({ mode }) => ({
   plugins: mode === 'test' ? [] : [myPlugin()],
-  test: { /* options */ },
+  test: {/* options */}
 }))
 ```
 
@@ -93,18 +96,18 @@ defineConfig({
         test: {
           name: 'unit',
           include: ['tests/unit/**/*.test.ts'],
-          environment: 'node',
-        },
+          environment: 'node'
+        }
       },
       {
         test: {
           name: 'integration',
           include: ['tests/integration/**/*.test.ts'],
-          environment: 'jsdom',
-        },
-      },
-    ],
-  },
+          environment: 'jsdom'
+        }
+      }
+    ]
+  }
 })
 ```
 

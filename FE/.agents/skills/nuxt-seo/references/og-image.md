@@ -59,9 +59,11 @@ defineProps<{ title: string; author: string }>()
 </script>
 
 <template>
-  <div class="w-full h-full flex flex-col justify-center items-center bg-gradient-to-br from-blue-500 to-purple-600 p-12">
-    <h1 class="text-6xl font-bold text-white text-center">{{ title }}</h1>
-    <p class="text-2xl text-white/80 mt-4">By {{ author }}</p>
+  <div
+    class="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-12"
+  >
+    <h1 class="text-center text-6xl font-bold text-white">{{ title }}</h1>
+    <p class="mt-4 text-2xl text-white/80">By {{ author }}</p>
   </div>
 </template>
 ```
@@ -102,7 +104,7 @@ export default defineNuxtConfig({
       component: 'NuxtSeo',
       width: 1200,
       height: 600,
-      cacheMaxAgeSeconds: 60 * 60 * 24 * 3  // 3 days
+      cacheMaxAgeSeconds: 60 * 60 * 24 * 3 // 3 days
     },
     // For static sites
     zeroRuntime: true
@@ -128,8 +130,7 @@ With `asSeoCollection()` (see main SKILL.md):
 ```vue
 <script setup>
 const { data: page } = await useAsyncData(() => queryCollection('posts').path(route.path).first())
-if (page.value?.ogImage)
-  defineOgImage(page.value.ogImage)
+if (page.value?.ogImage) defineOgImage(page.value.ogImage)
 </script>
 ```
 

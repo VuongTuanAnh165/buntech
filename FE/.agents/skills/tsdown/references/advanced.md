@@ -16,8 +16,8 @@ import SomeRollupPlugin from 'some-rollup-plugin'
 defineConfig({
   plugins: [
     UnpluginVue({ isProduction: true }),
-    SomeRollupPlugin() as any,  // Type cast for Rollup plugins
-  ],
+    SomeRollupPlugin() as any // Type cast for Rollup plugins
+  ]
 })
 ```
 
@@ -32,9 +32,9 @@ defineConfig({
         if (id.endsWith('.txt')) {
           return `export default ${JSON.stringify(code)}`
         }
-      },
-    },
-  ],
+      }
+    }
+  ]
 })
 ```
 
@@ -57,8 +57,8 @@ defineConfig({
     'build:done': async (context) => {
       await generateDocs()
       console.log('Build complete!')
-    },
-  },
+    }
+  }
 })
 
 // Function syntax
@@ -67,7 +67,7 @@ defineConfig({
     hooks.hook('build:prepare', () => {
       console.log('Starting...')
     })
-  },
+  }
 })
 ```
 
@@ -81,7 +81,7 @@ await build({
   format: ['esm', 'cjs'],
   outDir: 'dist',
   dts: true,
-  exports: true,
+  exports: true
 })
 ```
 
@@ -90,7 +90,7 @@ Multiple builds:
 ```ts
 await build([
   { entry: ['src/node.ts'], platform: 'node', outDir: 'dist/node' },
-  { entry: ['src/browser.ts'], platform: 'browser', outDir: 'dist/browser' },
+  { entry: ['src/browser.ts'], platform: 'browser', outDir: 'dist/browser' }
 ])
 ```
 
@@ -104,12 +104,12 @@ defineConfig({
     cwd: './custom-directory',
     resolve: {
       mainFields: ['module', 'main'],
-      alias: { '@': './src' },
+      alias: { '@': './src' }
     },
     transform: {
-      jsx: 'react',
-    },
-  },
+      jsx: 'react'
+    }
+  }
 })
 ```
 
@@ -122,7 +122,7 @@ defineConfig({
       options.cwd = './cjs-specific'
     }
     return options
-  },
+  }
 })
 ```
 
@@ -131,8 +131,8 @@ defineConfig({
 ```ts
 defineConfig({
   outputOptions: {
-    legalComments: 'inline',  // Preserve license headers
-  },
+    legalComments: 'inline' // Preserve license headers
+  }
 })
 ```
 
@@ -145,7 +145,7 @@ defineConfig({
       options.legalComments = 'inline'
     }
     return options
-  },
+  }
 })
 ```
 
@@ -199,9 +199,9 @@ Validates `package.json` exports configuration:
 
 ```ts
 defineConfig({
-  publint: true,  // Enable
-  publint: 'warning',  // Set severity: 'warning' | 'error' | 'suggestion'
-  publint: 'ci-only',  // Run only in CI
+  publint: true, // Enable
+  publint: 'warning', // Set severity: 'warning' | 'error' | 'suggestion'
+  publint: 'ci-only' // Run only in CI
 })
 ```
 
@@ -216,11 +216,11 @@ Validates TypeScript declarations across module resolutions:
 ```ts
 defineConfig({
   attw: {
-    profile: 'strict',  // 'strict' | 'node16' | 'esm-only'
-    level: 'error',     // 'warn' | 'error'
-    ignoreRules: ['false-cjs', 'named-exports'],
+    profile: 'strict', // 'strict' | 'node16' | 'esm-only'
+    level: 'error', // 'warn' | 'error'
+    ignoreRules: ['false-cjs', 'named-exports']
   },
-  attw: 'ci-only',  // Run only in CI
+  attw: 'ci-only' // Run only in CI
 })
 ```
 
@@ -245,7 +245,7 @@ Rolldown devtools for debugging:
 ```ts
 defineConfig({
   devtools: {
-    ui: true,  // Enable UI (renamed from debug.devtools)
-  },
+    ui: true // Enable UI (renamed from debug.devtools)
+  }
 })
 ```

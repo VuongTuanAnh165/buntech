@@ -34,7 +34,7 @@ cart.getTotal()
 
 expect(spy).toHaveBeenCalled()
 spy.mockReturnValue(200)
-spy.mockRestore()  // Restore original
+spy.mockRestore() // Restore original
 
 // Spy on getter/setter
 vi.spyOn(obj, 'prop', 'get').mockReturnValue('value')
@@ -45,7 +45,7 @@ vi.spyOn(obj, 'prop', 'get').mockReturnValue('value')
 ```ts
 // vi.mock is hoisted to top of file
 vi.mock('./api', () => ({
-  fetchUser: vi.fn(() => ({ id: 1, name: 'Mock' })),
+  fetchUser: vi.fn(() => ({ id: 1, name: 'Mock' }))
 }))
 
 import { fetchUser } from './api'
@@ -62,7 +62,7 @@ vi.mock('./utils', async (importOriginal) => {
   const actual = await importOriginal()
   return {
     ...actual,
-    specificFunction: vi.fn(),
+    specificFunction: vi.fn()
   }
 })
 ```
@@ -75,7 +75,7 @@ vi.mock('./calculator', { spy: true })
 import { add } from './calculator'
 
 test('spy on module', () => {
-  const result = add(1, 2)  // Real implementation
+  const result = add(1, 2) // Real implementation
   expect(result).toBe(3)
   expect(add).toHaveBeenCalledWith(1, 2)
 })
@@ -120,7 +120,7 @@ await vi.dynamicImportSettled()
 const mockFn = vi.hoisted(() => vi.fn())
 
 vi.mock('./module', () => ({
-  getData: mockFn,
+  getData: mockFn
 }))
 
 test('hoisted mock', () => {
@@ -132,8 +132,12 @@ test('hoisted mock', () => {
 ## Mock Timers
 
 ```ts
-beforeEach(() => { vi.useFakeTimers() })
-afterEach(() => { vi.useRealTimers() })
+beforeEach(() => {
+  vi.useFakeTimers()
+})
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 test('timers', () => {
   const fn = vi.fn()
@@ -148,7 +152,7 @@ test('timers', () => {
 vi.runAllTimers()
 vi.runOnlyPendingTimers()
 vi.advanceTimersToNextTimer()
-vi.advanceTimersToNextFrame()  // requestAnimationFrame
+vi.advanceTimersToNextFrame() // requestAnimationFrame
 vi.clearAllTimers()
 vi.getTimerCount()
 
@@ -162,18 +166,19 @@ await vi.runAllTimersAsync()
 ```ts
 vi.setSystemTime(new Date('2024-01-01'))
 expect(new Date().getFullYear()).toBe(2024)
-vi.useRealTimers()  // Restore
+vi.useRealTimers() // Restore
 
-vi.getMockedSystemTime()  // Get mocked date
-vi.getRealSystemTime()    // Get real time (ms)
+vi.getMockedSystemTime() // Get mocked date
+vi.getRealSystemTime() // Get real time (ms)
 ```
 
 ## Mock Globals & Environment
 
 ```ts
-vi.stubGlobal('fetch', vi.fn(() =>
-  Promise.resolve({ json: () => ({ data: 'mock' }) })
-))
+vi.stubGlobal(
+  'fetch',
+  vi.fn(() => Promise.resolve({ json: () => ({ data: 'mock' }) }))
+)
 vi.unstubAllGlobals()
 
 vi.stubEnv('API_KEY', 'test-key')
@@ -190,16 +195,16 @@ const mocked = vi.mockObject(original)
 mocked.method.mockReturnValue('mocked')
 
 const spied = vi.mockObject(original, { spy: true })
-spied.method()  // 'real'
+spied.method() // 'real'
 expect(spied.method).toHaveBeenCalled()
 ```
 
 ## Clearing Mocks
 
 ```ts
-fn.mockClear()       // Clear call history
-fn.mockReset()       // Clear history + implementation
-fn.mockRestore()     // Restore original (for spies)
+fn.mockClear() // Clear call history
+fn.mockReset() // Clear history + implementation
+fn.mockRestore() // Restore original (for spies)
 
 vi.clearAllMocks()
 vi.resetAllMocks()
@@ -215,23 +220,23 @@ defineConfig({
     mockReset: true,
     restoreMocks: true,
     unstubEnvs: true,
-    unstubGlobals: true,
-  },
+    unstubGlobals: true
+  }
 })
 ```
 
 ## Waiting Utilities
 
 ```ts
-await vi.waitFor(async () => {
-  const el = document.querySelector('.loaded')
-  expect(el).toBeTruthy()
-}, { timeout: 5000, interval: 100 })
-
-const element = await vi.waitUntil(
-  () => document.querySelector('.loaded'),
-  { timeout: 5000 }
+await vi.waitFor(
+  async () => {
+    const el = document.querySelector('.loaded')
+    expect(el).toBeTruthy()
+  },
+  { timeout: 5000, interval: 100 }
 )
+
+const element = await vi.waitUntil(() => document.querySelector('.loaded'), { timeout: 5000 })
 ```
 
 ## TypeScript Helper

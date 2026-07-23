@@ -186,10 +186,10 @@ Animation when element enters viewport:
 
 ```ts
 interface ViewportOptions {
-  once?: boolean       // Animate only first time (default: false)
-  amount?: number | 'some' | 'all'  // Visibility threshold (default: 'some')
-  margin?: string      // Rootmargin (e.g., '-100px')
-  root?: Element       // Scroll container (default: window)
+  once?: boolean // Animate only first time (default: false)
+  amount?: number | 'some' | 'all' // Visibility threshold (default: 'some')
+  margin?: string // Rootmargin (e.g., '-100px')
+  root?: Element // Scroll container (default: window)
 }
 ```
 
@@ -208,9 +208,12 @@ Automatically animate layout changes:
 Layout modes:
 
 ```vue
-<motion.div layout />           <!-- Animate position and size -->
-<motion.div layout="position" /> <!-- Position only -->
-<motion.div layout="size" />     <!-- Size only -->
+<motion.div layout />
+<!-- Animate position and size -->
+<motion.div layout="position" />
+<!-- Position only -->
+<motion.div layout="size" />
+<!-- Size only -->
 ```
 
 ### layoutId - Shared Element Transitions
@@ -219,7 +222,7 @@ Animate between components with matching layoutId:
 
 ```vue
 <script setup>
-const selected = ref<string | null>(null)
+const selected = (ref < string) | (null > null)
 </script>
 
 <template>
@@ -233,11 +236,7 @@ const selected = ref<string | null>(null)
   </div>
 
   <AnimatePresence>
-    <motion.div
-      v-if="selected"
-      :layoutId="selected"
-      class="expanded"
-    />
+    <motion.div v-if="selected" :layoutId="selected" class="expanded" />
   </AnimatePresence>
 </template>
 ```
@@ -272,7 +271,7 @@ Configure animation behavior:
     type: 'spring',
     stiffness: 100,
     damping: 10,
-    mass: 1,
+    mass: 1
   }"
 />
 ```
@@ -326,7 +325,7 @@ Configure animation behavior:
   :animate="{ x: 100, opacity: 1 }"
   :transition="{
     x: { type: 'spring', stiffness: 100 },
-    opacity: { duration: 0.2 },
+    opacity: { duration: 0.2 }
   }"
 />
 ```
@@ -355,9 +354,12 @@ import { motion, AnimatePresence } from 'motion-v'
 ### Mode Options
 
 ```vue
-<AnimatePresence mode="sync" />   <!-- Default: animate simultaneously -->
-<AnimatePresence mode="wait" />   <!-- Wait for exit before enter -->
-<AnimatePresence mode="popLayout" /> <!-- Pop exiting from layout flow -->
+<AnimatePresence mode="sync" />
+<!-- Default: animate simultaneously -->
+<AnimatePresence mode="wait" />
+<!-- Wait for exit before enter -->
+<AnimatePresence mode="popLayout" />
+<!-- Pop exiting from layout flow -->
 ```
 
 ## Events

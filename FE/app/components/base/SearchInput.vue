@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watchDebounced } from '@vueuse/core'
 /**
  * Search Input — input tìm kiếm có debounce tích hợp.
  *
@@ -15,7 +16,7 @@ interface Props {
   icon?: string
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   placeholder: 'Tìm kiếm...',
   debounce: 300,
   icon: 'i-lucide-search'
@@ -24,7 +25,6 @@ withDefaults(defineProps<Props>(), {
 const model = defineModel<string>({ default: '' })
 
 const localValue = ref(model.value)
-let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 watch(model, (newVal) => {
   // Sync từ ngoài vào (reset, v.v.)
@@ -33,12 +33,16 @@ watch(model, (newVal) => {
   }
 })
 
+watchDebounced(
+  localValue,
+  (value) => {
+    model.value = value
+  },
+  { debounce: props.debounce }
+)
+
 const onInput = (value: string) => {
   localValue.value = value
-  if (debounceTimer) clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
-    model.value = value
-  }, 300)
 }
 
 const clear = () => {

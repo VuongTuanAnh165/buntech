@@ -221,7 +221,9 @@ Three workflows for complete CI/CD:
 
 ```ts
 meta: {
-  compatibility: { nuxt: '>=3.0.0' }
+  compatibility: {
+    nuxt: '>=3.0.0'
+  }
 }
 ```
 

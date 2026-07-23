@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ApiClient } from '~/utils/api'
 import type { ApiResponse } from '~/types/api'
 
@@ -9,5 +8,5 @@ export const getDivisionsVersion = () => {
 }
 
 export const getDivisionsTree = () => {
-  return ApiClient.get<ApiResponse<any[]>>('/master-data/divisions')
+  return ApiClient.get<ApiResponse<unknown[]>>('/master-data/divisions')
 }

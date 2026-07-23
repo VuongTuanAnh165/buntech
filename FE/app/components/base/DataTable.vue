@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 /**
  * DataTable — Bọc UTable + Pagination + Empty + Loading.
  * Component chuẩn cho tất cả trang danh sách trong Admin.
@@ -24,11 +24,9 @@ import type { TableColumn } from '@nuxt/ui'
 
 interface Props {
   /** Dữ liệu hiển thị */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any[]
+  data: T[]
   /** Cấu hình cột */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  columns: TableColumn<any>[]
+  columns: TableColumn<T>[]
   /** Trạng thái loading */
   loading?: boolean
   /** Tổng số bản ghi (cho pagination) */

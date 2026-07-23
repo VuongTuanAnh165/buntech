@@ -73,7 +73,7 @@ definePageMeta({ auth: 'guest' })
 export default defineNuxtConfig({
   auth: {
     redirects: {
-      login: '/login',    // Where to redirect unauthenticated users
+      login: '/login', // Where to redirect unauthenticated users
       guest: '/dashboard' // Where to redirect logged-in users from guest pages
     }
   }

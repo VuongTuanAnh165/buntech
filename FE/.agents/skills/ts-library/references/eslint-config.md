@@ -25,11 +25,11 @@ export default antfu()
 import antfu from '@antfu/eslint-config'
 
 export default antfu({
-  type: 'lib',        // 'lib' for libraries, 'app' for applications
+  type: 'lib', // 'lib' for libraries, 'app' for applications
   ignores: ['**/fixtures', '**/dist'],
   stylistic: { indent: 2, quotes: 'single' },
-  typescript: true,   // Auto-detected
-  vue: true,          // Auto-detected
+  typescript: true, // Auto-detected
+  vue: true // Auto-detected
 })
 ```
 
@@ -52,8 +52,8 @@ For files ESLint doesn't handle natively:
 ```js
 export default antfu({
   formatters: {
-    css: true,      // Prettier for CSS/LESS/SCSS
-    html: true,     // Prettier for HTML
+    css: true, // Prettier for CSS/LESS/SCSS
+    html: true, // Prettier for HTML
     markdown: 'prettier' // or 'dprint'
   }
 })
@@ -65,10 +65,7 @@ export default antfu({
 ### Global
 
 ```js
-export default antfu(
-  { /* config options */ },
-  { rules: { 'style/semi': ['error', 'never'] } }
-)
+export default antfu({/* config options */}, { rules: { 'style/semi': ['error', 'never'] } })
 ```
 
 ### Per-integration
@@ -76,7 +73,7 @@ export default antfu(
 ```js
 export default antfu({
   vue: { overrides: { 'vue/operator-linebreak': ['error', 'before'] } },
-  typescript: { overrides: { 'ts/consistent-type-definitions': ['error', 'interface'] } },
+  typescript: { overrides: { 'ts/consistent-type-definitions': ['error', 'interface'] } }
 })
 ```
 
@@ -98,7 +95,7 @@ export default antfu({
 
 ```js
 export default antfu({
-  typescript: { tsconfigPath: 'tsconfig.json' },
+  typescript: { tsconfigPath: 'tsconfig.json' }
 })
 ```
 
@@ -108,7 +105,10 @@ export default antfu({
 {
   "prettier.enable": false,
   "editor.formatOnSave": false,
-  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit", "source.organizeImports": "never" },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
+  },
   "eslint.rules.customizations": [
     { "rule": "style/*", "severity": "off", "fixable": true },
     { "rule": "format/*", "severity": "off", "fixable": true },

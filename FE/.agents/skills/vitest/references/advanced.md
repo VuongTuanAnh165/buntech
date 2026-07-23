@@ -9,9 +9,9 @@ defineConfig({
   test: {
     environment: 'jsdom',
     environmentOptions: {
-      jsdom: { url: 'http://localhost' },
-    },
-  },
+      jsdom: { url: 'http://localhost' }
+    }
+  }
 })
 ```
 
@@ -40,9 +40,9 @@ defineConfig({
   test: {
     projects: [
       { test: { name: 'unit', include: ['tests/unit/**'], environment: 'node' } },
-      { test: { name: 'dom', include: ['tests/dom/**'], environment: 'jsdom' } },
-    ],
-  },
+      { test: { name: 'dom', include: ['tests/dom/**'], environment: 'jsdom' } }
+    ]
+  }
 })
 ```
 
@@ -58,9 +58,11 @@ export default <Environment>{
   setup() {
     globalThis.myGlobal = 'value'
     return {
-      teardown() { delete globalThis.myGlobal },
+      teardown() {
+        delete globalThis.myGlobal
+      }
     }
-  },
+  }
 }
 ```
 
@@ -105,8 +107,8 @@ expectTypeOf(greet).returns.toBeString()
 expectTypeOf(greet).parameter(0).toBeString()
 
 // Equality
-expectTypeOf<B>().toMatchTypeOf<A>()     // Subset matching
-expectTypeOf<A>().toEqualTypeOf<B>()     // Exact match
+expectTypeOf<B>().toMatchTypeOf<A>() // Subset matching
+expectTypeOf<A>().toEqualTypeOf<B>() // Exact match
 expectTypeOf<A>().not.toEqualTypeOf<B>()
 
 // Nullable
@@ -121,7 +123,7 @@ import { assertType } from 'vitest'
 // @ts-expect-error - should fail type check
 assertType<string>(result)
 
-assertType<User | null>(result)  // Correct
+assertType<User | null>(result) // Correct
 ```
 
 Run: `vitest typecheck` or `vitest --typecheck`
@@ -132,16 +134,16 @@ Run: `vitest typecheck` or `vitest --typecheck`
 defineConfig({
   test: {
     projects: [
-      'packages/*',  // Glob for package configs
+      'packages/*', // Glob for package configs
       {
         test: {
           name: 'unit',
           include: ['tests/unit/**/*.test.ts'],
-          environment: 'node',
-        },
-      },
-    ],
-  },
+          environment: 'node'
+        }
+      }
+    ]
+  }
 })
 ```
 
@@ -154,11 +156,11 @@ defineConfig({
       {
         test: {
           name: 'staging',
-          provide: { apiUrl: 'https://staging.api.com' },
-        },
-      },
-    ],
-  },
+          provide: { apiUrl: 'https://staging.api.com' }
+        }
+      }
+    ]
+  }
 })
 
 // In tests
@@ -183,10 +185,10 @@ defineConfig({
   test: {
     browser: {
       enabled: true,
-      name: 'chromium',  // or 'firefox', 'webkit'
-      provider: 'playwright',
-    },
-  },
+      name: 'chromium', // or 'firefox', 'webkit'
+      provider: 'playwright'
+    }
+  }
 })
 ```
 
@@ -199,9 +201,9 @@ defineConfig({
     // Or with options
     css: {
       include: /\.module\.css$/,
-      modules: { classNameStrategy: 'non-scoped' },
-    },
-  },
+      modules: { classNameStrategy: 'non-scoped' }
+    }
+  }
 })
 ```
 
@@ -214,10 +216,10 @@ defineConfig({
   test: {
     server: {
       deps: {
-        inline: ['problematic-package'],
-      },
-    },
-  },
+        inline: ['problematic-package']
+      }
+    }
+  }
 })
 ```
 
@@ -226,8 +228,8 @@ defineConfig({
 ```ts
 defineConfig({
   test: {
-    globalSetup: ['./tests/global-setup.ts'],
-  },
+    globalSetup: ['./tests/global-setup.ts']
+  }
 })
 
 // tests/global-setup.ts
@@ -246,7 +248,7 @@ import { bench, describe } from 'vitest'
 
 describe('sort', () => {
   bench('native', () => {
-    [1, 5, 4, 2, 3].sort((a, b) => a - b)
+    ;[1, 5, 4, 2, 3].sort((a, b) => a - b)
   })
 
   bench('lodash', () => {

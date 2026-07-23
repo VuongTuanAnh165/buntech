@@ -75,7 +75,7 @@ Available in `defineServerAuth()` callback:
 ```ts
 interface ServerAuthContext {
   runtimeConfig: RuntimeConfig
-  db?: DrizzleDatabase  // When NuxtHub enabled
+  db?: DrizzleDatabase // When NuxtHub enabled
 }
 ```
 
@@ -137,6 +137,6 @@ interface AuthUser {
 ```ts
 // Fully typed
 await requireUserSession(event, {
-  user: { role: 'admin' }  // TypeScript knows valid fields
+  user: { role: 'admin' } // TypeScript knows valid fields
 })
 ```

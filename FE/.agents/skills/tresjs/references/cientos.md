@@ -224,9 +224,9 @@ Font format: typeface.json (generate at gero3.github.io/facetype.js)
 HTML overlay in 3D space:
 
 ```vue
-<Html :position="[0, 2, 0]" center transform>
+<html :position="[0, 2, 0]" center transform>
   <div class="label">Hello World</div>
-</Html>
+</html>
 ```
 
 ### Billboard

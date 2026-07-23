@@ -42,7 +42,7 @@ const y = useTransform(scrollYProgress, [0, 1], [0, -200])
 ```vue
 <!-- Progress bar -->
 <motion.div
-  class="fixed top-0 left-0 right-0 h-1 bg-blue-500 origin-left"
+  class="fixed top-0 right-0 left-0 h-1 origin-left bg-blue-500"
   :style="{ scaleX: scrollYProgress }"
 />
 ```
@@ -54,7 +54,7 @@ const y = useTransform(scrollYProgress, [0, 1], [0, -200])
 <motion.div
   :layoutId="`card-${id}`"
   @click="expanded = !expanded"
-  :class="expanded ? 'w-full h-64' : 'w-32 h-32'"
+  :class="expanded ? 'h-64 w-full' : 'h-32 w-32'"
 />
 ```
 
@@ -161,10 +161,7 @@ const words = text.split(' ')
 
 ```vue
 <!-- Morphing shapes -->
-<motion.path
-  :animate="{ d: isCircle ? circlePath : squarePath }"
-  :transition="{ duration: 0.5 }"
-/>
+<motion.path :animate="{ d: isCircle ? circlePath : squarePath }" :transition="{ duration: 0.5 }" />
 ```
 
 ### Background Effects
@@ -184,11 +181,7 @@ function handleMouse(e: MouseEvent) {
 }
 </script>
 
-<motion.div
-  :style="{ background }"
-  @mousemove="handleMouse"
-  class="fixed inset-0"
-/>
+<motion.div :style="{ background }" @mousemove="handleMouse" class="fixed inset-0" />
 ```
 
 ### Page Transitions

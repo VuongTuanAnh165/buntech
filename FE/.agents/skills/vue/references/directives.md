@@ -61,12 +61,12 @@ const myDirective = {
 
 ```ts
 interface DirectiveBinding<T = any> {
-  value: T           // v-my-dir="value"
-  oldValue: T        // Previous value (beforeUpdate/updated only)
-  arg?: string       // v-my-dir:arg
-  modifiers: Record<string, boolean>  // v-my-dir.foo.bar → { foo: true, bar: true }
-  instance: ComponentPublicInstance   // Component using the directive
-  dir: ObjectDirective               // Directive definition object
+  value: T // v-my-dir="value"
+  oldValue: T // Previous value (beforeUpdate/updated only)
+  arg?: string // v-my-dir:arg
+  modifiers: Record<string, boolean> // v-my-dir.foo.bar → { foo: true, bar: true }
+  instance: ComponentPublicInstance // Component using the directive
+  dir: ObjectDirective // Directive definition object
 }
 ```
 
@@ -134,7 +134,7 @@ Pass multiple values:
 ```ts
 const vDemo = (el: HTMLElement, binding: DirectiveBinding<{ color: string; text: string }>) => {
   console.log(binding.value.color) // 'white'
-  console.log(binding.value.text)  // 'hello'
+  console.log(binding.value.text) // 'hello'
 }
 ```
 

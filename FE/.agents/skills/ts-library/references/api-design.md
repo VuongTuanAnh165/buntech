@@ -20,7 +20,7 @@ function resolveOptions(options: Options = {}): ResolvedOptions {
     verbose: options.verbose ?? false,
     include: options.include ?? ['**/*'],
     exclude: options.exclude ?? ['node_modules'],
-    root: process.cwd(),
+    root: process.cwd()
   }
 }
 ```
@@ -37,8 +37,12 @@ export function createContext(options: Options = {}) {
   return {
     options: resolved,
     filter,
-    transform(code: string, id: string) { /* ... */ },
-    async scanDirs() { /* ... */ },
+    transform(code: string, id: string) {
+      /* ... */
+    },
+    async scanDirs() {
+      /* ... */
+    }
   }
 }
 
@@ -63,7 +67,9 @@ export function createBuilder<TContext = unknown>() {
     output<T>(schema: T): Builder<TContext, unknown, T> {
       return this as any
     },
-    build(): Procedure<TContext> { /* ... */ },
+    build(): Procedure<TContext> {
+      /* ... */
+    }
   }
 }
 
@@ -98,11 +104,15 @@ export default createUnplugin<Options>((options) => {
 
     // Bundler-specific hooks
     vite: {
-      configResolved(config) { /* Vite-specific */ },
+      configResolved(config) {
+        /* Vite-specific */
+      }
     },
     webpack(compiler) {
-      compiler.hooks.watchRun.tap('my-plugin', () => { /* ... */ })
-    },
+      compiler.hooks.watchRun.tap('my-plugin', () => {
+        /* ... */
+      })
+    }
   }
 })
 ```
@@ -126,9 +136,15 @@ Defer bundler-specific code until accessed:
 ```typescript
 export function createPlugin<T>(factory: PluginFactory<T>) {
   return {
-    get vite() { return getVitePlugin(factory) },
-    get webpack() { return getWebpackPlugin(factory) },
-    get rollup() { return getRollupPlugin(factory) },
+    get vite() {
+      return getVitePlugin(factory)
+    },
+    get webpack() {
+      return getWebpackPlugin(factory)
+    },
+    get rollup() {
+      return getRollupPlugin(factory)
+    }
   }
 }
 ```
@@ -146,7 +162,7 @@ function resolveOptions(options: Options) {
   return {
     vue: options.vue ?? isPackageExists('vue'),
     react: options.react ?? isPackageExists('react'),
-    typescript: options.typescript ?? isPackageExists('typescript'),
+    typescript: options.typescript ?? isPackageExists('typescript')
   }
 }
 ```
@@ -167,7 +183,7 @@ export interface ResolverObject {
 export function ElementPlusResolver(): Resolver[] {
   return [
     { type: 'component', resolve: (name) => resolveComponent(name) },
-    { type: 'directive', resolve: (name) => resolveDirective(name) },
+    { type: 'directive', resolve: (name) => resolveDirective(name) }
   ]
 }
 ```

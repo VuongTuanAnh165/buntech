@@ -65,9 +65,7 @@
     "rootDir": "src"
   },
   "include": ["src"],
-  "references": [
-    { "path": "../utils" }
-  ]
+  "references": [{ "path": "../utils" }]
 }
 ```
 
@@ -107,8 +105,8 @@ Let build tool generate declarations:
 ```typescript
 // tsdown.config.ts
 export default defineConfig({
-  dts: true,                    // Generate .d.ts
-  dts: { resolve: ['@antfu/utils'] }  // Inline specific types
+  dts: true, // Generate .d.ts
+  dts: { resolve: ['@antfu/utils'] } // Inline specific types
 })
 ```
 
@@ -117,8 +115,8 @@ Or with unbuild:
 ```typescript
 // build.config.ts
 export default defineBuildConfig({
-  declaration: 'node16',        // For Node.js compatibility
-  declaration: true,            // For bundler resolution
+  declaration: 'node16', // For Node.js compatibility
+  declaration: true // For bundler resolution
 })
 ```
 

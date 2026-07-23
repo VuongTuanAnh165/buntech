@@ -33,18 +33,18 @@ Arcade is the workhorse for most Phaser 3 gameplay.
 ### Standard player setup
 
 ```ts
-this.player = this.physics.add.sprite(96, 96, 'player');
-this.player.setCollideWorldBounds(true);
-this.player.setDrag(1200, 0);
-this.player.setMaxVelocity(220, 500);
+this.player = this.physics.add.sprite(96, 96, 'player')
+this.player.setCollideWorldBounds(true)
+this.player.setDrag(1200, 0)
+this.player.setMaxVelocity(220, 500)
 ```
 
 ### Colliders and overlaps
 
 ```ts
-this.physics.add.collider(this.player, this.groundLayer);
-this.physics.add.collider(this.player, this.enemies, this.onPlayerHitEnemy, undefined, this);
-this.physics.add.overlap(this.player, this.coins, this.onPlayerCollectCoin, undefined, this);
+this.physics.add.collider(this.player, this.groundLayer)
+this.physics.add.collider(this.player, this.enemies, this.onPlayerHitEnemy, undefined, this)
+this.physics.add.overlap(this.player, this.coins, this.onPlayerCollectCoin, undefined, this)
 ```
 
 Use:
@@ -80,8 +80,8 @@ update() {
 Match bodies to gameplay, not to raw sprite dimensions:
 
 ```ts
-this.player.body!.setSize(18, 28, true);
-this.player.body!.setOffset(7, 4);
+this.player.body!.setSize(18, 28, true)
+this.player.body!.setOffset(7, 4)
 ```
 
 Tight bodies usually feel better than full-sprite hitboxes.
@@ -93,19 +93,19 @@ Use Matter when the simulation itself is part of the design.
 ### Minimal sprite setup
 
 ```ts
-this.player = this.matter.add.sprite(200, 120, 'player');
-this.player.setFixedRotation();
-this.player.setFriction(0.05);
-this.player.setBounce(0);
+this.player = this.matter.add.sprite(200, 120, 'player')
+this.player.setFixedRotation()
+this.player.setFriction(0.05)
+this.player.setBounce(0)
 ```
 
 ### Bodies and constraints
 
 ```ts
-const crate = this.matter.add.rectangle(400, 300, 48, 48);
-const anchor = this.matter.add.circle(400, 80, 10, { isStatic: true });
+const crate = this.matter.add.rectangle(400, 300, 48, 48)
+const anchor = this.matter.add.circle(400, 80, 10, { isStatic: true })
 
-this.matter.add.constraint(anchor, crate, 180, 0.8);
+this.matter.add.constraint(anchor, crate, 180, 0.8)
 ```
 
 Use Matter for:
@@ -123,12 +123,15 @@ Prefer composition over inheritance for most gameplay objects.
 
 ```ts
 class Health {
-  constructor(public hp: number, public maxHp: number) {}
+  constructor(
+    public hp: number,
+    public maxHp: number
+  ) {}
   damage(amount: number) {
-    this.hp = Math.max(0, this.hp - amount);
+    this.hp = Math.max(0, this.hp - amount)
   }
   get dead() {
-    return this.hp <= 0;
+    return this.hp <= 0
   }
 }
 
@@ -139,16 +142,16 @@ class ArcadeMover {
   ) {}
 
   moveX(dir: -1 | 0 | 1) {
-    this.sprite.setVelocityX(dir * this.speed);
+    this.sprite.setVelocityX(dir * this.speed)
   }
 }
 
 class Enemy {
-  readonly health = new Health(30, 30);
-  readonly mover: ArcadeMover;
+  readonly health = new Health(30, 30)
+  readonly mover: ArcadeMover
 
   constructor(readonly sprite: Phaser.Physics.Arcade.Sprite) {
-    this.mover = new ArcadeMover(sprite, 70);
+    this.mover = new ArcadeMover(sprite, 70)
   }
 }
 ```
@@ -164,10 +167,10 @@ Use composition when:
 Use a state machine when entity behavior is becoming branch-heavy.
 
 ```ts
-type EnemyState = 'idle' | 'patrol' | 'chase' | 'stunned' | 'dead';
+type EnemyState = 'idle' | 'patrol' | 'chase' | 'stunned' | 'dead'
 
 class EnemyBrain {
-  private state: EnemyState = 'idle';
+  private state: EnemyState = 'idle'
 
   constructor(private readonly enemy: Phaser.Physics.Arcade.Sprite) {}
 
@@ -175,25 +178,25 @@ class EnemyBrain {
     switch (this.state) {
       case 'idle':
         if (Phaser.Math.Distance.Between(this.enemy.x, this.enemy.y, player.x, player.y) < 180) {
-          this.state = 'chase';
+          this.state = 'chase'
         }
-        break;
+        break
       case 'chase':
-        this.enemy.setVelocityX(player.x < this.enemy.x ? -80 : 80);
-        break;
+        this.enemy.setVelocityX(player.x < this.enemy.x ? -80 : 80)
+        break
       case 'stunned':
       case 'dead':
-        this.enemy.setVelocityX(0);
-        break;
+        this.enemy.setVelocityX(0)
+        break
     }
   }
 
   stun() {
-    this.state = 'stunned';
+    this.state = 'stunned'
   }
 
   die() {
-    this.state = 'dead';
+    this.state = 'dead'
   }
 }
 ```

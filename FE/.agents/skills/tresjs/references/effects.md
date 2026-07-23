@@ -140,11 +140,7 @@ Advanced bloom:
 Camera focus blur:
 
 ```vue
-<DepthOfFieldPmndrs
-  :focus-distance="0.5"
-  :focus-range="0.1"
-  :bokeh-scale="2"
-/>
+<DepthOfFieldPmndrs :focus-distance="0.5" :focus-range="0.1" :bokeh-scale="2" />
 ```
 
 | Prop                 | Description                     | Default |
@@ -159,11 +155,7 @@ Camera focus blur:
 Digital glitch:
 
 ```vue
-<GlitchPmndrs
-  :delay="[1.5, 3.5]"
-  :duration="[0.6, 1.0]"
-  :strength="[0.3, 1.0]"
-/>
+<GlitchPmndrs :delay="[1.5, 3.5]" :duration="[0.6, 1.0]" :strength="[0.3, 1.0]" />
 ```
 
 | Prop       | Description                                  | Default      |

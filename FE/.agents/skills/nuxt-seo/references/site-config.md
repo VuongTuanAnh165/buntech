@@ -8,12 +8,12 @@ Foundation module providing shared configuration for all SEO modules.
 // nuxt.config.ts
 export default defineNuxtConfig({
   site: {
-    url: 'https://example.com',       // Required for absolute URLs
-    name: 'My Site',                  // Site name (used in titles, schema)
-    description: 'Site description',  // Default meta description
-    defaultLocale: 'en',              // Default language
-    indexable: true,                  // Allow search engine indexing
-    trailingSlash: false,             // URL trailing slash preference
+    url: 'https://example.com', // Required for absolute URLs
+    name: 'My Site', // Site name (used in titles, schema)
+    description: 'Site description', // Default meta description
+    defaultLocale: 'en', // Default language
+    indexable: true, // Allow search engine indexing
+    trailingSlash: false // URL trailing slash preference
   }
 })
 ```
@@ -65,12 +65,12 @@ Automatically integrates with `@nuxtjs/i18n`:
 export default defineNuxtConfig({
   site: {
     url: 'https://example.com',
-    defaultLocale: 'en',
+    defaultLocale: 'en'
   },
   i18n: {
     locales: [
       { code: 'en', language: 'en-US' },
-      { code: 'fr', language: 'fr-FR' },
+      { code: 'fr', language: 'fr-FR' }
     ]
   }
 })

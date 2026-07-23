@@ -28,7 +28,7 @@ export default defineNuxtConfig({
 
   // --- Cấu hình Pinia Persisted State ---
   piniaPluginPersistedstate: {
-    storage: 'localStorage',
+    storage: 'cookies',
     cookieOptions: {
       sameSite: 'lax',
       secure: true
@@ -38,7 +38,7 @@ export default defineNuxtConfig({
   // --- Cấu hình Security ---
   security: {
     headers: {
-      contentSecurityPolicy: false, // Tắt CSP mặc định ở dev
+      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false, // Bật CSP ở prod (undefined để dùng mặc định), tắt ở dev
       xXSSProtection: '1; mode=block',
       xFrameOptions: 'DENY',
       strictTransportSecurity: {
@@ -75,8 +75,14 @@ export default defineNuxtConfig({
   },
 
   // Cấu hình Caching (SWR) cho các trang tĩnh (Landing page)
-  routeRules: process.env.NODE_ENV === 'production' ? {
-    '/': { swr: 3600 }, // Cache trang chủ 1 tiếng trên server
-    '/gioi-thieu': { static: true }
-  } : {}
+  routeRules:
+    process.env.NODE_ENV === 'production'
+      ? {
+          '/': { swr: 3600 }, // Cache trang chủ 1 tiếng trên server
+          '/gioi-thieu': { static: true },
+          '/admin': { redirect: '/admin/customers' }
+        }
+      : {
+          '/admin': { redirect: '/admin/customers' }
+        }
 })
