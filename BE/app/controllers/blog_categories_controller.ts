@@ -76,9 +76,9 @@ export default class BlogCategoriesController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategory>"}
    */
   async update({ params, request, response }: HttpContext) {
-    const payload = await request.validateUsing(updateBlogCategoryValidator)
-    // Here we should ideally check for slug uniqueness manually since we skipped it in validator for updates
-    // But for simplicity of this execution we merge the data.
+    const payload = await request.validateUsing(updateBlogCategoryValidator, {
+      meta: { categoryId: Number(params.id) },
+    })
     const category = await this.blogCategoryService.update(params.id, payload)
 
     return response.json({

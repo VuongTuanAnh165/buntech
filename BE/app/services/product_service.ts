@@ -8,6 +8,7 @@ import db from '@adonisjs/lucid/services/db'
 import logger from '@adonisjs/core/services/logger'
 import FileUploadService from '#services/file_upload_service'
 import { inject } from '@adonisjs/core'
+import type { MultipartFile } from '@adonisjs/core/bodyparser'
 
 type CreateProductDTO = Infer<typeof createProductValidator>
 type UpdateProductDTO = Infer<typeof updateProductValidator>
@@ -15,6 +16,57 @@ type UpdateProductDTO = Infer<typeof updateProductValidator>
 @inject()
 export default class ProductService {
   constructor(protected fileUploadService: FileUploadService) {}
+
+  /**
+   * Helper: Xử lý upload ảnh Thumbnail mới và lấy key ảnh cũ để xóa
+   */
+  private async handleThumbnail(thumbnail: MultipartFile, oldUrl?: string | null) {
+    const result = { url: '', newKey: '', oldKeyToDelete: undefined as string | undefined }
+    if (oldUrl) {
+      const oldThumbKey = this.fileUploadService.extractKeyFromUrl(oldUrl, 'products/thumbnails')
+      if (oldThumbKey) result.oldKeyToDelete = oldThumbKey
+    }
+    const uploadResult = await this.fileUploadService.upload(thumbnail, 'products/thumbnails')
+    result.url = uploadResult.url
+    result.newKey = uploadResult.key
+    return result
+  }
+
+  /**
+   * Helper: Xử lý upload thư viện ảnh Gallery mới
+   */
+  private async handleGalleryUpload(images: MultipartFile[], startOrder: number = 1) {
+    const result = {
+      newKeys: [] as string[],
+      records: [] as Array<{ fileUrl: string; displayOrder: number }>,
+    }
+    const uploadResults = await this.fileUploadService.uploadMany(images, 'products/gallery')
+    let order = startOrder
+    for (const res of uploadResults) {
+      result.newKeys.push(res.key)
+      result.records.push({ fileUrl: res.url, displayOrder: order++ })
+    }
+    return result
+  }
+
+  /**
+   * Helper: Tìm các key của ảnh cũ chuẩn bị xóa
+   */
+  private async getOldGalleryKeysToDelete(productId: number, deletedImageIds: number[]) {
+    const oldKeys: string[] = []
+    const imagesToDelete = await ProductImage.query()
+      .where('productId', productId)
+      .whereIn('id', deletedImageIds)
+
+    for (const img of imagesToDelete) {
+      const oldGalleryKey = this.fileUploadService.extractKeyFromUrl(
+        img.fileUrl,
+        'products/gallery'
+      )
+      if (oldGalleryKey) oldKeys.push(oldGalleryKey)
+    }
+    return oldKeys
+  }
 
   /**
    * Admin: Phân trang danh sách sản phẩm
@@ -98,22 +150,19 @@ export default class ProductService {
 
     let thumbnailUrl: string | undefined
     const newFileKeys: string[] = []
-    const imageRecordsData: Array<{ fileUrl: string; displayOrder: number }> = []
+    let imageRecordsData: Array<{ fileUrl: string; displayOrder: number }> = []
 
     // 1. Upload ALL files BEFORE transaction
     if (thumbnail) {
-      const uploadResult = await this.fileUploadService.upload(thumbnail, 'products/thumbnails')
-      thumbnailUrl = uploadResult.url
-      newFileKeys.push(uploadResult.key)
+      const thumb = await this.handleThumbnail(thumbnail)
+      thumbnailUrl = thumb.url
+      newFileKeys.push(thumb.newKey)
     }
 
     if (images && images.length > 0) {
-      const uploadResults = await this.fileUploadService.uploadMany(images, 'products/gallery')
-      let order = 1
-      for (const res of uploadResults) {
-        newFileKeys.push(res.key)
-        imageRecordsData.push({ fileUrl: res.url, displayOrder: order++ })
-      }
+      const gallery = await this.handleGalleryUpload(images)
+      newFileKeys.push(...gallery.newKeys)
+      imageRecordsData = gallery.records
     }
 
     const trx = await db.transaction()
@@ -160,31 +209,20 @@ export default class ProductService {
     let thumbnailUrl: string | undefined
     const newFileKeys: string[] = []
     const oldKeysToDelete: string[] = []
-    const imageRecordsData: Array<{ fileUrl: string; displayOrder: number }> = []
+    let imageRecordsData: Array<{ fileUrl: string; displayOrder: number }> = []
 
     // 1. Upload New Thumbnail
     if (thumbnail) {
-      const oldThumbKey = this.fileUploadService.extractKeyFromUrl(
-        product.thumbnailUrl,
-        'products/thumbnails'
-      )
-      if (oldThumbKey) oldKeysToDelete.push(oldThumbKey)
-
-      const uploadResult = await this.fileUploadService.upload(thumbnail, 'products/thumbnails')
-      thumbnailUrl = uploadResult.url
-      newFileKeys.push(uploadResult.key)
+      const thumb = await this.handleThumbnail(thumbnail, product.thumbnailUrl)
+      thumbnailUrl = thumb.url
+      newFileKeys.push(thumb.newKey)
+      if (thumb.oldKeyToDelete) oldKeysToDelete.push(thumb.oldKeyToDelete)
     }
 
     // 2. Query old images to delete BEFORE transaction so we can get their keys
     if (deletedImageIds && deletedImageIds.length > 0) {
-      const imagesToDelete = await ProductImage.query()
-        .where('productId', product.id)
-        .whereIn('id', deletedImageIds)
-
-      for (const img of imagesToDelete) {
-        const oldGalleryKey = this.fileUploadService.extractKeyFromUrl(img.fileUrl, 'products/gallery')
-        if (oldGalleryKey) oldKeysToDelete.push(oldGalleryKey)
-      }
+      const oldKeys = await this.getOldGalleryKeysToDelete(product.id, deletedImageIds)
+      oldKeysToDelete.push(...oldKeys)
     }
 
     // 3. Upload New Gallery Images
@@ -193,13 +231,11 @@ export default class ProductService {
         .where('productId', product.id)
         .orderBy('displayOrder', 'desc')
         .first()
-      let order = maxOrderRecord?.displayOrder ? maxOrderRecord.displayOrder + 1 : 1
+      const startOrder = maxOrderRecord?.displayOrder ? maxOrderRecord.displayOrder + 1 : 1
 
-      const uploadResults = await this.fileUploadService.uploadMany(images, 'products/gallery')
-      for (const res of uploadResults) {
-        newFileKeys.push(res.key)
-        imageRecordsData.push({ fileUrl: res.url, displayOrder: order++ })
-      }
+      const gallery = await this.handleGalleryUpload(images, startOrder)
+      newFileKeys.push(...gallery.newKeys)
+      imageRecordsData = gallery.records
     }
 
     const trx = await db.transaction()
@@ -227,7 +263,7 @@ export default class ProductService {
         await ProductImage.createMany(records, { client: trx })
       }
 
-      if (imageOrders) {
+      if (imageOrders && imageOrders.length > 0) {
         for (const item of imageOrders) {
           await ProductImage.query({ client: trx })
             .where('id', item.id)

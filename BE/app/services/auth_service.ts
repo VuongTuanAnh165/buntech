@@ -33,7 +33,7 @@ export default class AuthService {
       )
     }
 
-    let createdAccessTokenId: string | number | undefined
+    let createdAccessTokenId: string | number | BigInt | undefined
 
     const trx = await db.transaction()
     try {

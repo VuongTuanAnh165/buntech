@@ -67,7 +67,7 @@ export default class PostService {
       )
       .where('id', id)
       .preload('category')
-      .preload('author', (q) => q.select('id', 'fullName', 'avatarUrl'))
+      .preload('author', (q) => q.select('id', 'fullName'))
 
     if (options?.isPublic) {
       query.where('isPublished', true).andWhere('publishedAt', '<=', DateTime.now().toSQL())
@@ -109,7 +109,10 @@ export default class PostService {
 
     if (thumbnail) {
       // Đánh dấu file cũ để xóa sau
-      oldKeyToDelete = this.fileUploadService.extractKeyFromUrl(post.thumbnailUrl, 'posts/thumbnails')
+      oldKeyToDelete = this.fileUploadService.extractKeyFromUrl(
+        post.thumbnailUrl,
+        'posts/thumbnails'
+      )
 
       const uploadResult = await this.fileUploadService.upload(thumbnail, 'posts/thumbnails')
       thumbnailUrl = uploadResult.url

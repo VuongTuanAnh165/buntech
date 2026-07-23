@@ -4,6 +4,7 @@ import PostService from '#services/post_service'
 import { createPostValidator, updatePostValidator } from '#validators/post'
 import { HttpStatus } from '#enums/http_status'
 import { Pagination } from '#enums/pagination'
+import { paginationValidator } from '#validators/pagination'
 
 @inject()
 export default class PostsController {
@@ -19,15 +20,19 @@ export default class PostsController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<PostList[]>", "meta": "<PaginationMeta>"}
    */
   async clientIndex({ request, response }: HttpContext) {
-    const page = request.input('page', Pagination.DEFAULT_PAGE)
-    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
+
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
     const categoryId = request.input('categoryId')
 
-    const posts = await this.postService.getList(page, limit, {
+    const posts = await this.postService.getList(pageNum, limitNum, {
       isPublic: true,
       categoryId: categoryId ? Number(categoryId) : undefined,
     })
-    
+
     const meta = posts.getMeta()
     return response.json({
       success: true,
@@ -67,11 +72,15 @@ export default class PostsController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<PostList[]>", "meta": "<PaginationMeta>"}
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', Pagination.DEFAULT_PAGE)
-    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
+
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
     const categoryId = request.input('categoryId')
 
-    const posts = await this.postService.getList(page, limit, {
+    const posts = await this.postService.getList(pageNum, limitNum, {
       categoryId: categoryId ? Number(categoryId) : undefined,
     })
 

@@ -5,7 +5,7 @@ import { HttpStatus } from '#enums/http_status'
 type ApiError = Error & {
   status?: number
   code?: string
-  messages?: any
+  messages?: Record<string, string> | unknown[]
   name?: string
   errorCode?: string
 }
@@ -33,7 +33,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
       const formattedErrors: Record<string, string[]> = {}
 
       if (Array.isArray(err.messages)) {
-        err.messages.forEach((msg: Record<string, string>) => {
+        err.messages.forEach((msg: any) => {
           if (!formattedErrors[msg.field]) {
             formattedErrors[msg.field] = []
           }
@@ -63,7 +63,16 @@ export default class HttpExceptionHandler extends ExceptionHandler {
       return ctx.response.status(err.status || HttpStatus.BAD_REQUEST).json(payload)
     }
 
-    // 3. Các lỗi API khác
+    // 3. Lỗi Database: Unique Constraint Violation (PostgreSQL / MySQL)
+    if (err.code === '23505' || err.code === 'ER_DUP_ENTRY') {
+      return ctx.response.status(HttpStatus.CONFLICT).json({
+        success: false,
+        message: 'Dữ liệu này đã tồn tại trong hệ thống',
+        errorCode: 'UNIQUE_CONSTRAINT_VIOLATION',
+      })
+    }
+
+    // 4. Các lỗi API khác
     if (ctx.request.accepts(['json'])) {
       return ctx.response.status(err.status || HttpStatus.INTERNAL_SERVER_ERROR).json({
         success: false,

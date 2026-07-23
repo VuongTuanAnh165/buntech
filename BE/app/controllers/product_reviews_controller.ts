@@ -8,6 +8,7 @@ import {
 } from '#validators/product_review'
 import { HttpStatus } from '#enums/http_status'
 import { Pagination } from '#enums/pagination'
+import { paginationValidator } from '#validators/pagination'
 
 @inject()
 export default class ProductReviewsController {
@@ -23,10 +24,14 @@ export default class ProductReviewsController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductReviewClientList[]>", "meta": "<PaginationMeta>"}
    */
   async clientIndex({ params, request, response }: HttpContext) {
-    const page = request.input('page', Pagination.DEFAULT_PAGE)
-    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
 
-    const reviews = await this.productReviewService.clientList(params.id, page, limit)
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const reviews = await this.productReviewService.clientList(params.id, pageNum, limitNum)
 
     const meta = reviews.getMeta()
     return response.json({
@@ -71,10 +76,14 @@ export default class ProductReviewsController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductReviewAdminList[]>", "meta": "<PaginationMeta>"}
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', Pagination.DEFAULT_PAGE)
-    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
 
-    const reviews = await this.productReviewService.adminList(page, limit)
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const reviews = await this.productReviewService.adminList(pageNum, limitNum)
 
     const meta = reviews.getMeta()
     return response.json({

@@ -3,6 +3,7 @@ import { inject } from '@adonisjs/core'
 import CategoryService from '#services/category_service'
 import { createCategoryValidator, updateCategoryValidator } from '#validators/category'
 import { Pagination } from '#enums/pagination'
+import { paginationValidator } from '#validators/pagination'
 
 @inject()
 export default class CategoriesController {
@@ -17,10 +18,14 @@ export default class CategoriesController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<CategoryAdminList[]>", "meta": "<PaginationMeta>"}
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', Pagination.DEFAULT_PAGE)
-    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
 
-    const categories = await this.categoryService.paginate(page, limit)
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const categories = await this.categoryService.paginate(pageNum, limitNum)
 
     const meta = categories.getMeta()
     return response.json({
@@ -106,7 +111,9 @@ export default class CategoriesController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<Category>"}
    */
   async update({ params, request, response, auth }: HttpContext) {
-    const payload = await request.validateUsing(updateCategoryValidator)
+    const payload = await request.validateUsing(updateCategoryValidator, {
+      meta: { categoryId: Number(params.id) },
+    })
     const userId = auth.user?.id
     const category = await this.categoryService.update(params.id, payload, userId)
 

@@ -21,12 +21,7 @@ export default class InitializeBouncerMiddleware {
       policies
     ).setContainerResolver(ctx.containerResolver)
 
-    /**
-     * Share bouncer helpers with Edge templates.
-     */
-    if ('view' in ctx) {
-      ctx.view.share(ctx.bouncer.edgeHelpers)
-    }
+    // (Đã xóa đoạn chia sẻ bouncer helpers với Edge templates do dự án là API Backend không có tính năng View)
 
     return next()
   }

@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import ProductService from '#services/product_service'
 import { createProductValidator, updateProductValidator } from '#validators/product'
+import { paginationValidator } from '#validators/pagination'
 import { Pagination } from '#enums/pagination'
 
 @inject()
@@ -17,10 +18,14 @@ export default class ProductsController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductAdminList[]>", "meta": "<PaginationMeta>"}
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', Pagination.DEFAULT_PAGE)
-    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
 
-    const products = await this.productService.paginate(page, limit)
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const products = await this.productService.paginate(pageNum, limitNum)
     const meta = products.getMeta()
 
     return response.json({
@@ -46,13 +51,17 @@ export default class ProductsController {
    * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductClientList[]>", "meta": "<PaginationMeta>"}
    */
   async clientIndex({ request, response }: HttpContext) {
-    const page = request.input('page', Pagination.DEFAULT_PAGE)
-    const limit = request.input('limit', Pagination.DEFAULT_LIMIT)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
+
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
     const categoryId = request.input('categoryId')
 
     const products = await this.productService.clientList(
-      page,
-      limit,
+      pageNum,
+      limitNum,
       categoryId ? Number(categoryId) : undefined
     )
     const meta = products.getMeta()

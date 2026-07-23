@@ -5,10 +5,69 @@ import crypto from 'node:crypto'
 import logger from '@adonisjs/core/services/logger'
 import { DateTime } from 'luxon'
 
+interface DivisionTreeItem {
+  code: number
+  name: string
+  codename: string
+  division_type: string
+  phone_code?: number | null
+  districts?: Omit<DivisionTreeItem, 'districts' | 'wards' | 'phone_code'>[]
+  wards?: Omit<DivisionTreeItem, 'districts' | 'wards' | 'phone_code'>[]
+}
+
+interface DivisionUpsert {
+  code: number
+  parentCode: number | null
+  name: string
+  codename: string
+  divisionType: string
+  phoneCode: number | null
+  level: string
+}
+
 export default class MasterDataService {
+  private readonly MAX_RETRIES = 3
+  private readonly TIMEOUT_MS = 5000
+
   // In-Memory cache for divisions tree
-  private cachedTree: any = null
+  private cachedTree: DivisionTreeItem[] | null = null
   private cachedVersion: string | null = null
+
+  /**
+   * Helper function to fetch API with Timeout and Retry mechanism
+   */
+  private async fetchWithRetry(url: string, retries = 3, timeoutMs = 5000): Promise<unknown> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+      try {
+        const response = await fetch(url, { signal: controller.signal })
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch API: ${response.statusText}`)
+        }
+        return await response.json()
+      } catch (error) {
+        clearTimeout(timeoutId)
+        const isTimeout = error instanceof Error && error.name === 'AbortError'
+
+        logger.warn(
+          { attempt, url, isTimeout, error: error instanceof Error ? error.message : error },
+          'Fetch open-api failed'
+        )
+
+        if (attempt === retries) {
+          throw new Error(
+            `Failed to fetch after ${retries} attempts: ${error instanceof Error ? error.message : String(error)}`
+          )
+        }
+
+        // Exponential backoff: 1s, 2s, 3s...
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt))
+      }
+    }
+  }
 
   /**
    * Đồng bộ đơn vị hành chính từ provinces.open-api.vn
@@ -17,15 +76,15 @@ export default class MasterDataService {
     logger.info('Starting sync for Administrative Divisions')
 
     // Fetch data from OpenAPI (depth=2: Province & District/Ward)
-    let rawData: any
+    let rawData: DivisionTreeItem[]
     try {
-      const response = await fetch('https://provinces.open-api.vn/api/v2/?depth=2')
-      if (!response.ok) {
-        throw new Error(`Failed to fetch API: ${response.statusText}`)
-      }
-      rawData = await response.json()
+      rawData = (await this.fetchWithRetry(
+        'https://provinces.open-api.vn/api/v2/?depth=2',
+        this.MAX_RETRIES,
+        this.TIMEOUT_MS
+      )) as DivisionTreeItem[]
     } catch (error) {
-      logger.error({ err: error }, 'Failed to fetch divisions from open-api')
+      logger.error({ err: error }, 'Failed to fetch divisions from open-api completely')
       throw error
     }
 
@@ -50,7 +109,7 @@ export default class MasterDataService {
 
     // Process data
     const newCodes = new Set<number>()
-    const itemsToUpsert: any[] = []
+    const itemsToUpsert: DivisionUpsert[] = []
 
     for (const province of rawData) {
       newCodes.add(province.code)
@@ -60,7 +119,7 @@ export default class MasterDataService {
         name: province.name,
         codename: province.codename,
         divisionType: province.division_type,
-        phoneCode: province.phone_code,
+        phoneCode: province.phone_code ?? null,
         level: 'province',
       })
 
@@ -200,8 +259,8 @@ export default class MasterDataService {
     const divisions = await AdministrativeDivision.query().orderBy('code', 'asc')
 
     // Build tree on RAM (avoid N+1 query)
-    const provinceMap = new Map<number, any>()
-    const tree: any[] = []
+    const provinceMap = new Map<number, DivisionTreeItem>()
+    const tree: DivisionTreeItem[] = []
 
     // 1. Gắn các province
     for (const div of divisions) {
@@ -224,6 +283,9 @@ export default class MasterDataService {
       if (div.level === 'ward' && div.parentCode) {
         const parent = provinceMap.get(div.parentCode)
         if (parent) {
+          if (!parent.wards) {
+            parent.wards = []
+          }
           parent.wards.push({
             code: div.code,
             name: div.name,

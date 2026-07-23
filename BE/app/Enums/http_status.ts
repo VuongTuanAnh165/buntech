@@ -7,6 +7,7 @@ export enum HttpStatus {
   UNAUTHORIZED = 401, // Lỗi chưa xác thực (chưa đăng nhập hoặc token hết hạn)
   FORBIDDEN = 403, // Lỗi không có quyền truy cập (thiếu quyền)
   NOT_FOUND = 404, // Không tìm thấy tài nguyên
+  CONFLICT = 409, // Lỗi xung đột dữ liệu (Trùng lặp Unique Constraint)
   UNPROCESSABLE_ENTITY = 422, // Lỗi dữ liệu đầu vào (Validation error)
   INTERNAL_SERVER_ERROR = 500, // Lỗi nội bộ máy chủ (Exception/Bug)
 }

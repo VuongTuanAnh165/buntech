@@ -75,15 +75,22 @@ export const updateProductValidator = vine.compile(
 
     // Update display orders: [{"id": 1, "order": 2}]
     imageOrders: vine
-      .string()
-      .optional()
-      .transform((value) => {
-        if (!value) return undefined
-        try {
-          return JSON.parse(value) as Array<{ id: number; order: number }>
-        } catch (error) {
-          return undefined
+      .array(
+        vine.object({
+          id: vine.number(),
+          order: vine.number(),
+        })
+      )
+      .parse((value: unknown) => {
+        if (typeof value === 'string') {
+          try {
+            return JSON.parse(value)
+          } catch {
+            return value
+          }
         }
-      }),
+        return value
+      })
+      .optional(),
   })
 )

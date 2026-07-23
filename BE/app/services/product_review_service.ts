@@ -3,6 +3,7 @@ import ProductReviewImage from '#models/product_review_image'
 import Product from '#models/product'
 import OrderItem from '#models/order_item'
 import db from '@adonisjs/lucid/services/db'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import { Pagination } from '#enums/pagination'
 import type { Infer } from '@vinejs/vine/types'
 import {
@@ -32,7 +33,7 @@ export default class ProductReviewService {
     return await ProductReview.query()
       .where('productId', productId)
       .where('isApproved', true)
-      .preload('user', (q) => q.select('id', 'fullName')) // Assuming avatarUrl is in UserProfile, let's just select fullName for now
+      .preload('user', (q) => q.select('id', 'fullName'))
       .preload('images', (q) => q.select('fileUrl'))
       .select('id', 'rating', 'content', 'createdAt', 'userId', 'hasPurchased', 'replyContent')
       .orderBy('createdAt', 'desc')
@@ -180,7 +181,7 @@ export default class ProductReviewService {
   /**
    * Helper: Recalculate product average rating and total reviews
    */
-  private async recalculateRating(productId: number, trx: any) {
+  private async recalculateRating(productId: number, trx: TransactionClientContract) {
     // Get aggregate
     const result = await trx.rawQuery(
       'SELECT COUNT(id) as total, AVG(rating) as average FROM product_reviews WHERE product_id = ? AND is_approved = true AND deleted_at IS NULL',

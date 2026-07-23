@@ -13,16 +13,26 @@ router.get('/', () => {
   return { hello: 'world' }
 })
 
-// Swagger API Documentation
-router.get('/swagger', [() => import('#controllers/swagger_controller'), 'swagger'])
-router.get('/docs', [() => import('#controllers/swagger_controller'), 'docs'])
+// Swagger API Documentation (Only available in non-production environments)
+import env from '#start/env'
+
+if (env.get('NODE_ENV') !== 'production') {
+  router.get('/swagger', [() => import('#controllers/swagger_controller'), 'swagger'])
+  router.get('/docs', [() => import('#controllers/swagger_controller'), 'docs'])
+}
 
 import { middleware } from '#start/kernel'
 
+import { authThrottle } from '#start/limiter'
+
 router
   .group(() => {
-    router.post('/auth/login', [() => import('#controllers/auth_controller'), 'login'])
-    router.post('/auth/refresh', [() => import('#controllers/auth_controller'), 'refresh'])
+    router
+      .post('/auth/login', [() => import('#controllers/auth_controller'), 'login'])
+      .use(authThrottle)
+    router
+      .post('/auth/refresh', [() => import('#controllers/auth_controller'), 'refresh'])
+      .use(authThrottle)
     router
       .get('/auth/me', [() => import('#controllers/auth_controller'), 'me'])
       .use(middleware.auth())
