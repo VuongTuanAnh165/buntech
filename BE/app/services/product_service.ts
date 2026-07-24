@@ -145,7 +145,7 @@ export default class ProductService {
   /**
    * Tạo mới sản phẩm
    */
-  async create(data: CreateProductDTO, userId?: number) {
+  async create(data: CreateProductDTO, userId: number) {
     const { thumbnail, images, ...productData } = data
 
     let thumbnailUrl: string | undefined
@@ -202,7 +202,7 @@ export default class ProductService {
   /**
    * Cập nhật sản phẩm
    */
-  async update(id: number, data: UpdateProductDTO, userId?: number) {
+  async update(id: number, data: UpdateProductDTO, userId: number) {
     const product = await Product.findOrFail(id)
     const { thumbnail, images, deletedImageIds, imageOrders, ...productData } = data
 
@@ -264,12 +264,13 @@ export default class ProductService {
       }
 
       if (imageOrders && imageOrders.length > 0) {
-        for (const item of imageOrders) {
-          await ProductImage.query({ client: trx })
+        const updatePromises = imageOrders.map((item) =>
+          ProductImage.query({ client: trx })
             .where('id', item.id)
             .where('productId', product.id)
             .update({ displayOrder: item.order })
-        }
+        )
+        await Promise.all(updatePromises)
       }
 
       await trx.commit()
@@ -294,12 +295,10 @@ export default class ProductService {
   /**
    * Xóa mềm sản phẩm
    */
-  async delete(id: number, userId?: number) {
+  async delete(id: number, userId: number) {
     const product = await Product.findOrFail(id)
     product.deletedAt = DateTime.now()
-    if (userId) {
-      product.updatedBy = userId
-    }
+    product.updatedBy = userId
     await product.save()
   }
 }

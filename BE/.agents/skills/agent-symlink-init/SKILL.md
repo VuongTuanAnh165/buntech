@@ -1,6 +1,6 @@
 ---
 name: agent-symlink-init
-description: "Initialize or migrate agent-skill symlinks in any repository. Use when a project needs `.claude/skills` linked to `.agents/skills`, `AGENTS.md` linked to `CLAUDE.md`, migration away from `.ruler`-based AI rules, or removal of legacy `sync-llm-skills` copy/sync setups. Trigger on requests about Claude/Codex skill symlinks, AGENTS/CLAUDE symlinks, `.claude/skills` setup, replacing copied skill folders with symlinks, or cleaning old ruler/sync automation."
+description: 'Initialize or migrate agent-skill symlinks in any repository. Use when a project needs `.claude/skills` linked to `.agents/skills`, `AGENTS.md` linked to `CLAUDE.md`, migration away from `.ruler`-based AI rules, or removal of legacy `sync-llm-skills` copy/sync setups. Trigger on requests about Claude/Codex skill symlinks, AGENTS/CLAUDE symlinks, `.claude/skills` setup, replacing copied skill folders with symlinks, or cleaning old ruler/sync automation.'
 metadata:
   author: Adonis
 ---

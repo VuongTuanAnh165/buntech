@@ -63,7 +63,7 @@ export default class CategoriesController {
    */
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createCategoryValidator)
-    const userId = auth.user?.id
+    const userId = auth.user!.id
     const category = await this.categoryService.create(payload, userId)
 
     return response.created({
@@ -114,7 +114,7 @@ export default class CategoriesController {
     const payload = await request.validateUsing(updateCategoryValidator, {
       meta: { categoryId: Number(params.id) },
     })
-    const userId = auth.user?.id
+    const userId = auth.user!.id
     const category = await this.categoryService.update(params.id, payload, userId)
 
     return response.json({
@@ -131,7 +131,7 @@ export default class CategoriesController {
    * @responseBody 200 - {"success": true, "message": "string"}
    */
   async destroy({ params, response, auth }: HttpContext) {
-    const userId = auth.user?.id
+    const userId = auth.user!.id
     await this.categoryService.delete(params.id, userId)
     return response.json({
       success: true,

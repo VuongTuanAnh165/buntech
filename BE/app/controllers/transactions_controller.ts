@@ -10,7 +10,7 @@ export default class TransactionsController {
   /**
    * @summary Danh sách giao dịch
    * @description Lấy danh sách Sổ cái các khoản thu chi/công nợ
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": []}}
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"id": 1, "userId": 1, "amount": "10000", "type": "PAYMENT", "paymentMethod": "CASH", "referenceCode": "string", "transactionDate": "string", "createdAt": "string"}]}}
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)

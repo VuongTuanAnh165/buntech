@@ -17,7 +17,7 @@ This skill currently scaffolds App Router only. Use this document to guide futur
 ## Compatibility Constraints
 
 1. Preserve existing CLI options:
-`--mode`, `--locales`, `--default-locale`, `--source-locale`.
+   `--mode`, `--locales`, `--default-locale`, `--source-locale`.
 2. Keep incremental `web/package.json` merge behavior unchanged.
 3. Avoid breaking App Router default path and generated file paths.
 

@@ -13,6 +13,7 @@ pnpm --filter @your/web run i18n:compile
 ```
 
 目标：
+
 1. `extract` 把最新文案落到 `po`。
 2. `translate` 明确缺失项。
 3. `compile` 生成 `mjs` 并刷新 manifest。
@@ -27,6 +28,7 @@ pnpm --filter @your/web run i18n:compile
 ```
 
 说明：
+
 1. 不强制再跑 extract，但如果怀疑词条漂移可补跑 extract。
 2. `compile` 是把翻译变成运行时可加载产物的关键步骤。
 
@@ -68,6 +70,7 @@ pnpm --filter @your/web run i18n:check
 ```
 
 说明：
+
 1. `i18n:check` 等价于 `i18n:translate -- --strict`，发现任何目标语言 `msgstr` 为空即非零退出。
 2. 适用于 CI 管线或发布前门禁，确保所有文案均已翻译。
 3. 只读操作，不会修改任何 `po` 文件。

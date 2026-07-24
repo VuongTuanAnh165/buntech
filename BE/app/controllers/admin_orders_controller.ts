@@ -14,7 +14,7 @@ export default class AdminOrdersController {
   /**
    * @summary Danh sách đơn hàng (Admin)
    * @description Lấy danh sách toàn bộ đơn hàng trong hệ thống
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": []}}
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"id": 1, "userId": 1, "driverId": 2, "totalAmount": "string", "status": "string", "createdAt": "string", "user": {"id": 1, "fullName": "string", "phoneNumber": "string"}, "driver": {"id": 2, "fullName": "string", "phoneNumber": "string"}}]}}
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -39,6 +39,7 @@ export default class AdminOrdersController {
   /**
    * @summary Chi tiết đơn hàng
    * @paramPath id - ID đơn hàng
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "user": {"id": 1, "fullName": "string", "phoneNumber": "string"}, "driver": {"id": 2, "fullName": "string", "phoneNumber": "string"}, "items": [{"id": 1, "orderId": 1, "productId": 1, "quantity": 10, "unitPrice": "string", "product": {"id": 1, "name": "string", "unit": "string", "basePrice": "string"}}]}}
    */
   async show({ params, response }: HttpContext) {
     const order = await this.adminOrderService.getOrder(params.id)
@@ -53,7 +54,7 @@ export default class AdminOrdersController {
    * @summary Tạo đơn hàng (Admin)
    * @description Tạo đơn hàng cho khách sỉ, hệ thống tự động quét và áp dụng bảng giá riêng (CustomerPrice) nếu có.
    * @requestBody {"userId": 1, "shippingAddressId": 1, "note": "Giao gấp", "items": [{"productId": 1, "quantity": 10}]}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {}}
+   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"id": 1, "userId": 1, "shippingAddressId": 1, "source": "string", "status": "string", "totalAmount": "string"}}
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createAdminOrderValidator)

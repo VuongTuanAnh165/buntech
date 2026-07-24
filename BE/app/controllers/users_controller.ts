@@ -16,7 +16,7 @@ export default class UsersController {
    * @summary Danh sách User
    * @description Lấy danh sách người dùng (chỉ dành cho Admin)
    * @paramUse(sortable, filterable)
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"id": 1, "fullName": "string", "role": "string"}]}}
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"id": 1, "fullName": "string", "phoneNumber": "string", "role": "string", "createdAt": "string", "profile": {"userId": 1, "avatarUrl": "string", "storeName": "string", "debtLimit": "string", "currentDebt": "string"}}]}}
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -36,7 +36,7 @@ export default class UsersController {
    * @summary Tạo User
    * @description Tạo người dùng mới và profile rỗng (chỉ dành cho Admin)
    * @requestBody {"phoneNumber": "string", "password": "password", "fullName": "string", "role": "ADMIN|DRIVER|WHOLESALE|RETAIL|GUEST"}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"id": 1, "fullName": "string", "role": "string"}}
+   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"id": 1, "fullName": "string", "phoneNumber": "string", "role": "string"}}
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createUserValidator)
@@ -54,7 +54,7 @@ export default class UsersController {
    * @summary Chi tiết User
    * @description Lấy thông tin chi tiết một người dùng
    * @paramPath id - ID người dùng
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "fullName": "string"}}
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "fullName": "string", "phoneNumber": "string", "role": "string", "createdAt": "string", "profile": {"userId": 1, "avatarUrl": "string", "storeName": "string", "debtLimit": "string", "currentDebt": "string"}}}
    */
   async show({ params, response }: HttpContext) {
     const user = await this.userService.getUser(params.id)
@@ -71,7 +71,7 @@ export default class UsersController {
    * @description Cập nhật thông tin (tên, role) của người dùng
    * @paramPath id - ID người dùng
    * @requestBody {"fullName": "string", "role": "string"}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1}}
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "fullName": "string", "phoneNumber": "string", "role": "string"}}
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateUserValidator)

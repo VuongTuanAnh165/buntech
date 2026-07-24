@@ -10,16 +10,12 @@ Using macros like `t` at module level won't react to locale changes:
 
 ```jsx
 // ❌ WRONG - This won't update when locale changes
-import { t } from "@lingui/core/macro";
+import { t } from '@lingui/core/macro'
 
-const COLORS = [
-  t`Red`,
-  t`Green`,
-  t`Blue`
-];
+const COLORS = [t`Red`, t`Green`, t`Blue`]
 
 function ColorList() {
-  return COLORS.map(color => <div>{color}</div>);
+  return COLORS.map((color) => <div>{color}</div>)
 }
 ```
 
@@ -31,22 +27,19 @@ Use the `msg` macro for lazy translations:
 
 ```jsx
 // ✅ CORRECT - Use msg for module-level messages
-import { msg } from "@lingui/core/macro";
-import { useLingui } from "@lingui/react";
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 
-const COLORS = [
-  msg`Red`,
-  msg`Green`,
-  msg`Blue`
-];
+const COLORS = [msg`Red`, msg`Green`, msg`Blue`]
 
 function ColorList() {
-  const { _ } = useLingui();
-  return COLORS.map(color => <div>{_(color)}</div>);
+  const { _ } = useLingui()
+  return COLORS.map((color) => <div>{_(color)}</div>)
 }
 ```
 
 **Key points**:
+
 - `msg` creates a message descriptor, not the final string
 - Use `_()` or `i18n._()` to translate the descriptor at render time
 - Messages will update when locale changes
@@ -57,14 +50,14 @@ If you need the messages in a React component:
 
 ```jsx
 // ✅ Also correct - define in component
-import { useLingui } from "@lingui/react/macro";
+import { useLingui } from '@lingui/react/macro'
 
 function ColorList() {
-  const { t } = useLingui();
-  
-  const colors = [t`Red`, t`Green`, t`Blue`];
-  
-  return colors.map(color => <div>{color}</div>);
+  const { t } = useLingui()
+
+  const colors = [t`Red`, t`Green`, t`Blue`]
+
+  return colors.map((color) => <div>{color}</div>)
 }
 ```
 
@@ -76,17 +69,13 @@ A common mistake is expecting English to have a `zero` plural form:
 
 ```jsx
 // ❌ WRONG - English doesn't have 'zero' form
-<Plural
-  value={count}
-  zero="No messages"
-  one="1 message"
-  other="# messages"
-/>
+<Plural value={count} zero="No messages" one="1 message" other="# messages" />
 ```
 
 **Result**: When `count = 0`, this displays `"0 messages"`, not `"No messages"`.
 
 **Why**: English plural rules only have two forms:
+
 - `one`: Used when value is exactly 1
 - `other`: Used for everything else (0, 2, 3, ...)
 
@@ -96,15 +85,11 @@ Use the `_N` syntax for exact number matches:
 
 ```jsx
 // ✅ CORRECT - Use _0 for exact match
-<Plural
-  value={count}
-  _0="No messages"
-  one="# message"
-  other="# messages"
-/>
+<Plural value={count} _0="No messages" one="# message" other="# messages" />
 ```
 
 **How it works**:
+
 - `_0` matches exactly 0 (takes precedence over plural forms)
 - `one` matches exactly 1 (plural form)
 - `other` matches everything else (plural form)
@@ -143,21 +128,21 @@ A common mistake when using React hooks:
 
 ```jsx
 // ❌ WRONG - i18n reference is stable
-import { useLingui } from "@lingui/react";
-import { msg } from "@lingui/core/macro";
-import { useMemo } from "react";
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
+import { useMemo } from 'react'
 
-const welcomeMessage = msg`Welcome!`;
+const welcomeMessage = msg`Welcome!`
 
 function MyComponent() {
-  const { i18n } = useLingui();
-  
+  const { i18n } = useLingui()
+
   const welcome = useMemo(
     () => i18n._(welcomeMessage),
     [i18n] // i18n reference doesn't change!
-  );
-  
-  return <div>{welcome}</div>;
+  )
+
+  return <div>{welcome}</div>
 }
 ```
 
@@ -169,21 +154,21 @@ The easiest solution is to use the macro version of `useLingui`:
 
 ```jsx
 // ✅ CORRECT - Macro version provides 't' that changes
-import { useLingui } from "@lingui/react/macro";
-import { msg } from "@lingui/core/macro";
-import { useMemo } from "react";
+import { useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import { useMemo } from 'react'
 
-const welcomeMessage = msg`Welcome!`;
+const welcomeMessage = msg`Welcome!`
 
 function MyComponent() {
-  const { t } = useLingui();
-  
+  const { t } = useLingui()
+
   const welcome = useMemo(
     () => t(welcomeMessage),
     [t] // t reference changes with locale
-  );
-  
-  return <div>{welcome}</div>;
+  )
+
+  return <div>{welcome}</div>
 }
 ```
 
@@ -193,28 +178,29 @@ The runtime `useLingui` provides a `_` function that changes with locale:
 
 ```jsx
 // ✅ Also correct - underscore function changes
-import { useLingui } from "@lingui/react";
-import { msg } from "@lingui/core/macro";
-import { useMemo } from "react";
+import { useLingui } from '@lingui/react'
+import { msg } from '@lingui/core/macro'
+import { useMemo } from 'react'
 
 // Define message descriptor outside component
-const welcomeMessage = msg`Welcome!`;
+const welcomeMessage = msg`Welcome!`
 
 function MyComponent() {
-  const { _ } = useLingui();
-  
+  const { _ } = useLingui()
+
   const welcome = useMemo(
     () => _(welcomeMessage),
     [_] // _ reference changes with locale
-  );
-  
-  return <div>{welcome}</div>;
+  )
+
+  return <div>{welcome}</div>
 }
 ```
 
 ### When Memoization Matters
 
 You typically need to consider this when:
+
 - Using `useMemo` or `useCallback` with translations
 - Creating refs or derived state from translated messages
 - Passing translations to third-party components
@@ -242,12 +228,12 @@ Extract the value to a named variable first:
 
 ```jsx
 // ✅ GOOD - Variable has meaningful name
-const userName = user.name.toUpperCase();
-<Trans>Hello {userName}</Trans>
+const userName = user.name.toUpperCase()
+;<Trans>Hello {userName}</Trans>
 // Extracted as: "Hello {userName}"
 
-const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
-<Trans>Total: {totalPrice}</Trans>
+const totalPrice = items.reduce((sum, item) => sum + item.price, 0)
+;<Trans>Total: {totalPrice}</Trans>
 // Extracted as: "Total: {totalPrice}"
 ```
 
@@ -257,11 +243,11 @@ Even simple method calls should be extracted:
 
 ```jsx
 // ❌ BAD
-<Trans>Welcome {currentUser.getName()}</Trans>
+;<Trans>Welcome {currentUser.getName()}</Trans>
 
 // ✅ GOOD
-const userName = currentUser.getName();
-<Trans>Welcome {userName}</Trans>
+const userName = currentUser.getName()
+;<Trans>Welcome {userName}</Trans>
 ```
 
 ### ESLint Rule
@@ -270,11 +256,9 @@ Enable the Lingui ESLint plugin to catch these automatically:
 
 ```js
 // eslint.config.js (flat config)
-import pluginLingui from "eslint-plugin-lingui";
+import pluginLingui from 'eslint-plugin-lingui'
 
-export default [
-  pluginLingui.configs["flat/recommended"],
-];
+export default [pluginLingui.configs['flat/recommended']]
 
 // Or configure individual rules:
 // "lingui/no-expression-in-message": "error"
@@ -288,14 +272,14 @@ Components using Lingui hooks or components without `I18nProvider`:
 
 ```jsx
 // ❌ WRONG - No I18nProvider
-import { Trans } from "@lingui/react/macro";
+import { Trans } from '@lingui/react/macro'
 
 function App() {
   return (
     <div>
       <Trans>Hello</Trans>
     </div>
-  );
+  )
 }
 ```
 
@@ -307,11 +291,11 @@ Always wrap your app with `I18nProvider`:
 
 ```jsx
 // ✅ CORRECT
-import { I18nProvider } from "@lingui/react";
-import { i18n } from "@lingui/core";
+import { I18nProvider } from '@lingui/react'
+import { i18n } from '@lingui/core'
 
-i18n.load("en", messages);
-i18n.activate("en");
+i18n.load('en', messages)
+i18n.activate('en')
 
 function App() {
   return (
@@ -320,7 +304,7 @@ function App() {
         <Trans>Hello</Trans>
       </div>
     </I18nProvider>
-  );
+  )
 }
 ```
 
@@ -330,13 +314,13 @@ Place `I18nProvider` as high as possible in your component tree:
 
 ```jsx
 // App entry point
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <I18nProvider i18n={i18n}>
       <App />
     </I18nProvider>
   </React.StrictMode>
-);
+)
 ```
 
 ## Incorrect Import Paths (v5+)
@@ -347,7 +331,7 @@ Using old import paths from Lingui v4:
 
 ```jsx
 // ❌ WRONG in v5
-import { t, Trans } from "@lingui/macro";
+import { t, Trans } from '@lingui/macro'
 ```
 
 ### The Solution
@@ -356,15 +340,17 @@ Use split imports in v5:
 
 ```jsx
 // ✅ CORRECT in v5
-import { t } from "@lingui/core/macro";
-import { Trans } from "@lingui/react/macro";
+import { t } from '@lingui/core/macro'
+import { Trans } from '@lingui/react/macro'
 ```
 
 **Macro imports**:
+
 - `@lingui/core/macro` - Core macros (t, msg, plural, select, etc.)
 - `@lingui/react/macro` - React macros (Trans, Plural, Select, useLingui)
 
 **Runtime imports**:
+
 - `@lingui/core` - Core runtime (i18n object, setupI18n)
 - `@lingui/react` - React runtime (I18nProvider, Trans component, useLingui)
 
@@ -379,10 +365,10 @@ In App Router / RSC projects, initializing locale only in a root layout can stil
 export async function generateMetadata({ params }) {
   return {
     title: t({
-      id: "layout.title",
-      message: "My App",
+      id: 'layout.title',
+      message: 'My App',
     }),
-  };
+  }
 }
 ```
 
@@ -405,14 +391,14 @@ Typical error:
 ```tsx
 // ✅ SAFER
 export function initLingui(locale: AppLocale) {
-  const i18n = getI18nInstance(locale);
-  i18n.activate(locale);
-  setI18n(i18n);
-  return i18n;
+  const i18n = getI18nInstance(locale)
+  i18n.activate(locale)
+  setI18n(i18n)
+  return i18n
 }
 
 export async function Page({ params }: { params: Promise<{ lang: string }> }) {
-  const locale = await initPageLingui(params);
+  const locale = await initPageLingui(params)
   // render...
 }
 ```
@@ -436,9 +422,9 @@ In React Native, translations render as strings by default, causing errors:
 Configure `defaultComponent` in `I18nProvider`:
 
 ```jsx
-import { Text } from "react-native";
+import { Text } from 'react-native'
 
-<I18nProvider i18n={i18n} defaultComponent={Text}>
+;<I18nProvider i18n={i18n} defaultComponent={Text}>
   <App />
 </I18nProvider>
 ```
@@ -446,9 +432,9 @@ import { Text } from "react-native";
 Or use the `component` prop on individual components:
 
 ```jsx
-import { Text } from "react-native";
+import { Text } from 'react-native'
 
-<Trans component={Text}>Hello</Trans>
+;<Trans component={Text}>Hello</Trans>
 ```
 
 ## Summary

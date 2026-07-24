@@ -26,26 +26,30 @@ round: 2
 # Review Intake
 
 ## Scope reviewed
-- staged diff for apps/api/cart-handler.ts and apps/api/__tests__/cart-handler.test.ts
+
+- staged diff for apps/api/cart-handler.ts and apps/api/**tests**/cart-handler.test.ts
 - branch feat/cart-patch
 - repository: /home/user/example-repo
 
 ## Verification
+
 - read apps/api/cart-handler.ts (lines 1-30) this session
-- read apps/api/__tests__/cart-handler.test.ts (lines 1-25) this session
+- read apps/api/**tests**/cart-handler.test.ts (lines 1-25) this session
 - ran `tsc --noEmit` (passed)
 
 ## Inferred Goal
+
 - Add PATCH /api/cart endpoint to update item quantity. (inferred from diff)
 - Validate input shapes (itemId required, quantity non-negative integer). (inferred from diff)
-
 
 # Review Findings
 
 ## Scope reviewed
+
 staged diff for apps/api/cart-handler.ts and tests, branch feat/cart-patch.
 
 ## Verification
+
 - ran tsc --noEmit (passed)
 - read source + tests this session
 
@@ -66,36 +70,37 @@ staged diff for apps/api/cart-handler.ts and tests, branch feat/cart-patch.
   Suggested fix: rename to `cartItem`
 
 - [P3] Comment-only test assertion
-  File: apps/api/__tests__/cart-handler.test.ts:18
+  File: apps/api/**tests**/cart-handler.test.ts:18
   Evidence: third test body is only a comment, no expect() call
   Source: verified from code
   Impact: test does nothing
   Suggested fix: implement the assertion
 
 ## Verdict
-BLOCKED
 
+BLOCKED
 
 # Fix Handoff
 
 ## Scope
+
 - Repository: /home/user/example-repo
 - Branch: feat/cart-patch
-- Files affected: apps/api/cart-handler.ts, apps/api/__tests__/cart-handler.test.ts
+- Files affected: apps/api/cart-handler.ts, apps/api/**tests**/cart-handler.test.ts
 - Non-goals: do not change PATCH route shape or response envelope
 
 ## Validated Findings To Fix
 
-| ID | Severity | Verdict | Original finding | Evidence | Target files/lines | Required fix | Acceptance check |
-|---|---|---|---|---|---|---|---|
-| F1 | P1 | valid | quantity=0 should delete the cart item, not store quantity=0 | apps/api/cart-handler.ts:18 | apps/api/cart-handler.ts:18-22 | branch on quantity===0 and call db.cartItem.delete; otherwise keep update path | new test "quantity=0 deletes the item" passes |
-| F2 | P3 | valid | Variable name `item` shadows | apps/api/cart-handler.ts:14 | apps/api/cart-handler.ts:14-22 | rename `item` → `cartItem` | tsc --noEmit still passes |
-| F3 | P3 | valid | Comment-only test assertion | apps/api/__tests__/cart-handler.test.ts:18 | apps/api/__tests__/cart-handler.test.ts:14-20 | implement the missing expect() | test runs and asserts |
+| ID  | Severity | Verdict | Original finding                                             | Evidence                                   | Target files/lines                            | Required fix                                                                   | Acceptance check                              |
+| --- | -------- | ------- | ------------------------------------------------------------ | ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| F1  | P1       | valid   | quantity=0 should delete the cart item, not store quantity=0 | apps/api/cart-handler.ts:18                | apps/api/cart-handler.ts:18-22                | branch on quantity===0 and call db.cartItem.delete; otherwise keep update path | new test "quantity=0 deletes the item" passes |
+| F2  | P3       | valid   | Variable name `item` shadows                                 | apps/api/cart-handler.ts:14                | apps/api/cart-handler.ts:14-22                | rename `item` → `cartItem`                                                     | tsc --noEmit still passes                     |
+| F3  | P3       | valid   | Comment-only test assertion                                  | apps/api/**tests**/cart-handler.test.ts:18 | apps/api/**tests**/cart-handler.test.ts:14-20 | implement the missing expect()                                                 | test runs and asserts                         |
 
 ## Feedback Not To Fix
 
 | Claim | Why rejected / downgraded | Evidence |
-|---|---|---|
+| ----- | ------------------------- | -------- |
 
 (no rejected feedback in this example)
 
@@ -109,16 +114,17 @@ BLOCKED
 - Runtime checks: new "quantity=0 deletes the item" test passes
 - Docs/tests to update: add the new test
 
-
 # Fix Completion
 
 ## Fix Conclusion
+
 - Overall status: 1/3 fixed (F1 fixed; F2, F3 deferred this round)
 - Scope changed: apps/api/cart-handler.ts
 - Verification: vitest run (new quantity=0 test passes)
 - Re-review focus: F1; F2/F3 still open
 
 ## Fix Scope
+
 - Repository: /home/user/example-repo
 - Branch: feat/cart-patch
 - Files changed: apps/api/cart-handler.ts
@@ -128,19 +134,19 @@ BLOCKED
 
 (8 columns verbatim from Fix Handoff above. No 9th Notes column needed in round 1.)
 
-| ID | Severity | Verdict | Original finding | Evidence | Target files/lines | Required fix | Acceptance check |
-|---|---|---|---|---|---|---|---|
-| F1 | P1 | valid | quantity=0 should delete the cart item, not store quantity=0 | apps/api/cart-handler.ts:18 | apps/api/cart-handler.ts:18-22 | branch on quantity===0 and call db.cartItem.delete; otherwise keep update path | new test "quantity=0 deletes the item" passes |
-| F2 | P3 | valid | Variable name `item` shadows | apps/api/cart-handler.ts:14 | apps/api/cart-handler.ts:14-22 | rename `item` → `cartItem` | tsc --noEmit still passes |
-| F3 | P3 | valid | Comment-only test assertion | apps/api/__tests__/cart-handler.test.ts:18 | apps/api/__tests__/cart-handler.test.ts:14-20 | implement the missing expect() | test runs and asserts |
+| ID  | Severity | Verdict | Original finding                                             | Evidence                                   | Target files/lines                            | Required fix                                                                   | Acceptance check                              |
+| --- | -------- | ------- | ------------------------------------------------------------ | ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| F1  | P1       | valid   | quantity=0 should delete the cart item, not store quantity=0 | apps/api/cart-handler.ts:18                | apps/api/cart-handler.ts:18-22                | branch on quantity===0 and call db.cartItem.delete; otherwise keep update path | new test "quantity=0 deletes the item" passes |
+| F2  | P3       | valid   | Variable name `item` shadows                                 | apps/api/cart-handler.ts:14                | apps/api/cart-handler.ts:14-22                | rename `item` → `cartItem`                                                     | tsc --noEmit still passes                     |
+| F3  | P3       | valid   | Comment-only test assertion                                  | apps/api/**tests**/cart-handler.test.ts:18 | apps/api/**tests**/cart-handler.test.ts:14-20 | implement the missing expect()                                                 | test runs and asserts                         |
 
 ## Finding Status
 
-| Finding ID | Claimed status | Files changed | Verification |
-|---|---|---|---|
-| F1 | resolved | apps/api/cart-handler.ts | vitest pass |
-| F2 | not changed | — | deferred this round |
-| F3 | not changed | — | deferred this round |
+| Finding ID | Claimed status | Files changed            | Verification        |
+| ---------- | -------------- | ------------------------ | ------------------- |
+| F1         | resolved       | apps/api/cart-handler.ts | vitest pass         |
+| F2         | not changed    | —                        | deferred this round |
+| F3         | not changed    | —                        | deferred this round |
 
 ## Changes Made
 
@@ -161,23 +167,24 @@ BLOCKED
 - Reassess F1 against the snapshot row, not Claimed status
 - F2/F3 remain open for round 2
 
-
 # Re-review
 
 ## Scope
+
 Scoped re-review of round 1 fix for F1.
 
 ## Verification
+
 - read apps/api/cart-handler.ts this session
 - ran vitest
 
 ## Prior Findings Reassessment
 
-| Finding ID | Original finding (verbatim from snapshot) | Verdict | Evidence | Notes |
-|---|---|---|---|---|
-| F1 | quantity=0 should delete the cart item, not store quantity=0 | resolved | apps/api/cart-handler.ts:18-22 added delete branch | tested |
-| F2 | Variable name `item` shadows | not resolved | unchanged | deferred |
-| F3 | Comment-only test assertion | not resolved | unchanged | deferred |
+| Finding ID | Original finding (verbatim from snapshot)                    | Verdict      | Evidence                                           | Notes    |
+| ---------- | ------------------------------------------------------------ | ------------ | -------------------------------------------------- | -------- |
+| F1         | quantity=0 should delete the cart item, not store quantity=0 | resolved     | apps/api/cart-handler.ts:18-22 added delete branch | tested   |
+| F2         | Variable name `item` shadows                                 | not resolved | unchanged                                          | deferred |
+| F3         | Comment-only test assertion                                  | not resolved | unchanged                                          | deferred |
 
 ## New Findings Introduced By Fix
 
@@ -189,44 +196,46 @@ Scoped re-review of round 1 fix for F1.
 - Not checked: integration with checkout flow
 
 ## Verdict
-PASS_WITH_CONCERNS
 
+PASS_WITH_CONCERNS
 
 # Fix Completion (round 2)
 
 ## Fix Conclusion
+
 - Overall status: 2/2 remaining concerns fixed (F2, F3)
-- Scope changed: apps/api/cart-handler.ts, apps/api/__tests__/cart-handler.test.ts
+- Scope changed: apps/api/cart-handler.ts, apps/api/**tests**/cart-handler.test.ts
 - Not changed: F1 was already resolved in round 1
 - Verification: vitest run (all tests pass, no shadows)
 - Re-review focus: F2 rename callers, F3 test now asserts
 
 ## Fix Scope
+
 - Repository: /home/user/example-repo
 - Branch: feat/cart-patch
-- Files changed: apps/api/cart-handler.ts, apps/api/__tests__/cart-handler.test.ts
+- Files changed: apps/api/cart-handler.ts, apps/api/**tests**/cart-handler.test.ts
 - Findings addressed: F2, F3
 
 ## Original Findings Snapshot
 
 (8 columns strictly verbatim from the round-1 Fix Handoff. An optional 9th Notes column was appended by the fixer to record round-1 vs round-2 status — the original 8 columns diff to zero against the Fix Handoff above.)
 
-| ID | Severity | Verdict | Original finding | Evidence | Target files/lines | Required fix | Acceptance check | Notes |
-|---|---|---|---|---|---|---|---|---|
-| F2 | P3 | valid | Variable name `item` shadows | apps/api/cart-handler.ts:14 | apps/api/cart-handler.ts:14-22 | rename `item` → `cartItem` | tsc --noEmit still passes | round 2 focus |
-| F3 | P3 | valid | Comment-only test assertion | apps/api/__tests__/cart-handler.test.ts:18 | apps/api/__tests__/cart-handler.test.ts:14-20 | implement the missing expect() | test runs and asserts | round 2 focus |
+| ID  | Severity | Verdict | Original finding             | Evidence                                   | Target files/lines                            | Required fix                   | Acceptance check          | Notes         |
+| --- | -------- | ------- | ---------------------------- | ------------------------------------------ | --------------------------------------------- | ------------------------------ | ------------------------- | ------------- |
+| F2  | P3       | valid   | Variable name `item` shadows | apps/api/cart-handler.ts:14                | apps/api/cart-handler.ts:14-22                | rename `item` → `cartItem`     | tsc --noEmit still passes | round 2 focus |
+| F3  | P3       | valid   | Comment-only test assertion  | apps/api/**tests**/cart-handler.test.ts:18 | apps/api/**tests**/cart-handler.test.ts:14-20 | implement the missing expect() | test runs and asserts     | round 2 focus |
 
 ## Finding Status
 
-| Finding ID | Claimed status | Files changed | Verification |
-|---|---|---|---|
-| F2 | resolved | apps/api/cart-handler.ts | tsc passes, no shadow warning |
-| F3 | resolved | apps/api/__tests__/cart-handler.test.ts | test now calls expect() |
+| Finding ID | Claimed status | Files changed                           | Verification                  |
+| ---------- | -------------- | --------------------------------------- | ----------------------------- |
+| F2         | resolved       | apps/api/cart-handler.ts                | tsc passes, no shadow warning |
+| F3         | resolved       | apps/api/**tests**/cart-handler.test.ts | test now calls expect()       |
 
 ## Changes Made
 
 - apps/api/cart-handler.ts: renamed `item` → `cartItem` (3 callsites)
-- apps/api/__tests__/cart-handler.test.ts: implemented missing happy-path assertion
+- apps/api/**tests**/cart-handler.test.ts: implemented missing happy-path assertion
 
 ## Verification
 
@@ -235,25 +244,27 @@ PASS_WITH_CONCERNS
 - Blocked checks: none
 
 ## Deferred Out-of-Scope
-(none)
 
+(none)
 
 # Re-review (round 2)
 
 ## Scope
+
 Scoped re-review of round 2 fix for F2, F3.
 
 ## Verification
+
 - read apps/api/cart-handler.ts (renamed locals)
-- read apps/api/__tests__/cart-handler.test.ts (new expect)
+- read apps/api/**tests**/cart-handler.test.ts (new expect)
 - ran vitest
 
 ## Prior Findings Reassessment
 
-| Finding ID | Original finding (verbatim from snapshot) | Verdict | Evidence | Notes |
-|---|---|---|---|---|
-| F2 | Variable name `item` shadows | resolved | apps/api/cart-handler.ts:14-22 uses `cartItem` | clean rename |
-| F3 | Comment-only test assertion | resolved | apps/api/__tests__/cart-handler.test.ts:14-20 has expect() | asserts shape and call |
+| Finding ID | Original finding (verbatim from snapshot) | Verdict  | Evidence                                                   | Notes                  |
+| ---------- | ----------------------------------------- | -------- | ---------------------------------------------------------- | ---------------------- |
+| F2         | Variable name `item` shadows              | resolved | apps/api/cart-handler.ts:14-22 uses `cartItem`             | clean rename           |
+| F3         | Comment-only test assertion               | resolved | apps/api/**tests**/cart-handler.test.ts:14-20 has expect() | asserts shape and call |
 
 ## New Findings Introduced By Fix
 
@@ -265,6 +276,7 @@ Scoped re-review of round 2 fix for F2, F3.
 - Not checked: integration
 
 ## Verdict
+
 PASS
 ```
 

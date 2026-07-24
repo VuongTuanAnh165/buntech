@@ -87,7 +87,7 @@ export default class ProductsController {
    */
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createProductValidator)
-    const userId = auth.user?.id
+    const userId = auth.user!.id
     const product = await this.productService.create(payload, userId)
 
     return response.created({
@@ -137,7 +137,7 @@ export default class ProductsController {
    */
   async update({ params, request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(updateProductValidator)
-    const userId = auth.user?.id
+    const userId = auth.user!.id
     const product = await this.productService.update(params.id, payload, userId)
 
     return response.json({
@@ -154,7 +154,7 @@ export default class ProductsController {
    * @responseBody 200 - {"success": true, "message": "string"}
    */
   async destroy({ params, response, auth }: HttpContext) {
-    const userId = auth.user?.id
+    const userId = auth.user!.id
     await this.productService.delete(params.id, userId)
     return response.json({
       success: true,

@@ -2,6 +2,8 @@ import Transaction from '#models/transaction'
 import UserProfile from '#models/user_profile'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
+import { Pagination } from '#enums/pagination'
+import { TransactionType } from '#enums/transaction_type'
 
 export default class TransactionService {
   /**
@@ -9,10 +11,21 @@ export default class TransactionService {
    */
   async getTransactions(
     page: number = 1,
-    limit: number = 20,
+    limit: number = Pagination.DEFAULT_LIMIT,
     filters?: { userId?: number; type?: string }
   ) {
-    const query = Transaction.query().orderBy('created_at', 'desc')
+    const query = Transaction.query()
+      .select(
+        'id',
+        'user_id',
+        'amount',
+        'type',
+        'payment_method',
+        'reference_code',
+        'transaction_date',
+        'created_at'
+      )
+      .orderBy('created_at', 'desc')
 
     if (filters?.userId) {
       query.where('user_id', filters.userId)
@@ -21,7 +34,8 @@ export default class TransactionService {
       query.where('type', filters.type)
     }
 
-    return query.paginate(page, limit)
+    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
+    return query.paginate(page, safeLimit)
   }
 
   /**
@@ -39,6 +53,7 @@ export default class TransactionService {
     return await db.transaction(async (trx) => {
       // 1. Lock UserProfile row for update to prevent Race Condition
       const profile = await UserProfile.query({ client: trx })
+        .select('id', 'user_id', 'current_debt')
         .where('user_id', data.userId)
         .forUpdate() // CRITICAL: Row-level lock
         .firstOrFail()
@@ -57,7 +72,7 @@ export default class TransactionService {
       const transaction = new Transaction()
       transaction.userId = data.userId
       transaction.amount = data.amount.toString()
-      transaction.type = 'PAYMENT'
+      transaction.type = TransactionType.PAYMENT
       transaction.paymentMethod = data.paymentMethod
       transaction.referenceCode = data.referenceCode || null
       transaction.transactionDate = data.transactionDate

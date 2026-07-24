@@ -53,7 +53,7 @@ export default class CategoryService {
   /**
    * Tạo mới
    */
-  async create(data: CreateCategoryDTO, userId?: number) {
+  async create(data: CreateCategoryDTO, userId: number) {
     const { thumbnail, ...categoryData } = data
     let thumbnailUrl: string | undefined
     let newKey: string | undefined
@@ -85,7 +85,7 @@ export default class CategoryService {
   /**
    * Cập nhật
    */
-  async update(id: number, data: UpdateCategoryDTO, userId?: number) {
+  async update(id: number, data: UpdateCategoryDTO, userId: number) {
     const category = await this.findById(id)
     const { thumbnail, ...categoryData } = data
 
@@ -129,12 +129,10 @@ export default class CategoryService {
   /**
    * Xóa (Soft Delete)
    */
-  async delete(id: number, userId?: number) {
+  async delete(id: number, userId: number) {
     const category = await this.findById(id)
     category.deletedAt = DateTime.now()
-    if (userId) {
-      category.updatedBy = userId
-    }
+    category.updatedBy = userId
     await category.save()
   }
 }

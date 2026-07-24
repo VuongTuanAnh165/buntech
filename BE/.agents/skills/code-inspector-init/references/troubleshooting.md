@@ -13,14 +13,14 @@
 
 ## 症状对照表
 
-| 症状 | 高概率原因 | 检查点 | 处理建议 |
-| --- | --- | --- | --- |
-| 按快捷键没有遮罩 | 快捷键冲突 / 插件未启用 | 看控制台提示；检查 `hotKeys` | 改成 `['metaKey','shiftKey']` 或其他组合 |
-| 有遮罩但点击不跳 IDE | IDE 启动配置不匹配 | 检查 `launchType`、`openIn`、`editor` | 默认先用 `launchType: 'exec'` |
-| 跳转到了错误文件 | 路径映射不正确 | 检查 `mappings` 规则与实际路径 | 先移除 `mappings` 验证，再逐条加回 |
-| 某些组件无法定位 | 编译过滤过严 | 检查 `include/exclude` | 放宽匹配范围再逐步收敛 |
-| `.env.local` 已配置但不生效 | 环境文件未加载或拼写错误 | 检查变量名、重启 dev server | 确保键为 `CODE_INSPECTOR=true` |
-| 偶发失败或无响应 | server 端口冲突 | 查看是否有端口占用 | 显式设置 `port` 为未占用端口 |
+| 症状                        | 高概率原因               | 检查点                                | 处理建议                                 |
+| --------------------------- | ------------------------ | ------------------------------------- | ---------------------------------------- |
+| 按快捷键没有遮罩            | 快捷键冲突 / 插件未启用  | 看控制台提示；检查 `hotKeys`          | 改成 `['metaKey','shiftKey']` 或其他组合 |
+| 有遮罩但点击不跳 IDE        | IDE 启动配置不匹配       | 检查 `launchType`、`openIn`、`editor` | 默认先用 `launchType: 'exec'`            |
+| 跳转到了错误文件            | 路径映射不正确           | 检查 `mappings` 规则与实际路径        | 先移除 `mappings` 验证，再逐条加回       |
+| 某些组件无法定位            | 编译过滤过严             | 检查 `include/exclude`                | 放宽匹配范围再逐步收敛                   |
+| `.env.local` 已配置但不生效 | 环境文件未加载或拼写错误 | 检查变量名、重启 dev server           | 确保键为 `CODE_INSPECTOR=true`           |
+| 偶发失败或无响应            | server 端口冲突          | 查看是否有端口占用                    | 显式设置 `port` 为未占用端口             |
 
 ## WebStorm / JetBrains 专项
 
@@ -32,21 +32,21 @@
 
 ```ts
 codeInspectorPlugin({
-  bundler: "vite",
+  bundler: 'vite',
   needEnvInspector: true,
-  launchType: "exec",
-  openIn: "reuse",
-});
+  launchType: 'exec',
+  openIn: 'reuse',
+})
 ```
 
 ## 端口冲突处理
 
 ```ts
 codeInspectorPlugin({
-  bundler: "turbopack",
+  bundler: 'turbopack',
   needEnvInspector: true,
   port: 5688,
-});
+})
 ```
 
 ## 最小回归用例

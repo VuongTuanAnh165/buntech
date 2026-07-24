@@ -8,7 +8,7 @@ This file contains additional code examples and common patterns for CSS and Tail
 
 ```jsx
 // components/Button.jsx
-import { cva, cx } from 'class-variance-authority';
+import { cva, cx } from 'class-variance-authority'
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2',
@@ -36,7 +36,7 @@ const buttonVariants = cva(
       size: 'md',
     },
   }
-);
+)
 
 export function Button({ variant, size, disabled, className, children, ...props }) {
   return (
@@ -47,7 +47,7 @@ export function Button({ variant, size, disabled, className, children, ...props 
     >
       {children}
     </button>
-  );
+  )
 }
 ```
 
@@ -59,34 +59,28 @@ const Card = ({ children, className = '' }) => (
   <div className={`rounded-lg border border-gray-200 bg-white shadow-sm ${className}`}>
     {children}
   </div>
-);
+)
 
 const CardHeader = ({ children, className = '' }) => (
-  <div className={`border-b border-gray-200 px-6 py-4 ${className}`}>
-    {children}
-  </div>
-);
+  <div className={`border-b border-gray-200 px-6 py-4 ${className}`}>{children}</div>
+)
 
 const CardBody = ({ children, className = '' }) => (
-  <div className={`px-6 py-4 ${className}`}>
-    {children}
-  </div>
-);
+  <div className={`px-6 py-4 ${className}`}>{children}</div>
+)
 
 const CardFooter = ({ children, className = '' }) => (
-  <div className={`border-t border-gray-200 px-6 py-4 ${className}`}>
-    {children}
-  </div>
-);
+  <div className={`border-t border-gray-200 px-6 py-4 ${className}`}>{children}</div>
+)
 
-Card.Header = CardHeader;
-Card.Body = CardBody;
-Card.Footer = CardFooter;
+Card.Header = CardHeader
+Card.Body = CardBody
+Card.Footer = CardFooter
 
-export { Card };
+export { Card }
 
 // Usage
-<Card>
+;<Card>
   <Card.Header>
     <h2 className="text-xl font-semibold">Card Title</h2>
   </Card.Header>
@@ -155,7 +149,7 @@ function Dashboard() {
         </div>
       </main>
     </div>
-  );
+  )
 }
 ```
 
@@ -163,7 +157,7 @@ function Dashboard() {
 
 ```jsx
 function AppLayout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -186,36 +180,26 @@ function AppLayout({ children }) {
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center justify-between px-4">
             <h1 className="text-xl font-bold">Logo</h1>
-            <button
-              className="lg:hidden"
-              onClick={() => setSidebarOpen(false)}
-            >
+            <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
               ✕
             </button>
           </div>
-          <nav className="flex-1 space-y-1 px-2 py-4">
-            {/* Navigation items */}
-          </nav>
+          <nav className="flex-1 space-y-1 px-2 py-4">{/* Navigation items */}</nav>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex h-16 items-center border-b border-gray-200 bg-white px-4">
-          <button
-            className="lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
+          <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             ☰
           </button>
           <h2 className="ml-4 text-xl font-semibold lg:ml-0">Page Title</h2>
         </header>
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
-  );
+  )
 }
 ```
 
@@ -225,19 +209,18 @@ function AppLayout({ children }) {
 
 ```jsx
 function ContactForm() {
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
+  const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
 
   return (
     <form className="mx-auto max-w-lg space-y-6">
       {/* Text Input */}
       <div>
-        <label
-          htmlFor="name"
-          className="block text-sm font-medium text-gray-700"
-        >
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
           Name
-          <span className="text-red-500" aria-label="required">*</span>
+          <span className="text-red-500" aria-label="required">
+            *
+          </span>
         </label>
         <input
           type="text"
@@ -250,9 +233,10 @@ function ContactForm() {
           className={`
             mt-1 block w-full rounded-md border px-3 py-2 shadow-sm
             focus:outline-none focus:ring-2 focus:ring-offset-2
-            ${errors.name && touched.name
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+            ${
+              errors.name && touched.name
+                ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
             }
           `}
           onBlur={() => setTouched({ ...touched, name: true })}
@@ -312,7 +296,7 @@ function ContactForm() {
         Send Message
       </Button>
     </form>
-  );
+  )
 }
 ```
 
@@ -330,7 +314,7 @@ function FadeIn({ children, delay = 0 }) {
     >
       {children}
     </div>
-  );
+  )
 }
 
 // tailwind.config.js
@@ -353,16 +337,14 @@ module.exports = {
       },
     },
   },
-};
+}
 ```
 
 ### Loading Skeleton
 
 ```jsx
 function Skeleton({ className = '' }) {
-  return (
-    <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />
-  );
+  return <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />
 }
 
 function CardSkeleton() {
@@ -374,7 +356,7 @@ function CardSkeleton() {
         <Skeleton className="h-4 w-5/6" />
       </Card.Body>
     </Card>
-  );
+  )
 }
 ```
 
@@ -398,29 +380,29 @@ module.exports = {
       },
     },
   },
-};
+}
 ```
 
 ```jsx
 // Dark mode toggle component
 function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = stored === 'dark' || (!stored && prefersDark);
+    const stored = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const shouldBeDark = stored === 'dark' || (!stored && prefersDark)
 
-    setIsDark(shouldBeDark);
-    document.documentElement.classList.toggle('dark', shouldBeDark);
-  }, []);
+    setIsDark(shouldBeDark)
+    document.documentElement.classList.toggle('dark', shouldBeDark)
+  }, [])
 
   const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    document.documentElement.classList.toggle('dark', newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-  };
+    const newTheme = !isDark
+    setIsDark(newTheme)
+    document.documentElement.classList.toggle('dark', newTheme)
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light')
+  }
 
   return (
     <button
@@ -430,7 +412,7 @@ function ThemeToggle() {
     >
       {isDark ? '☀️' : '🌙'}
     </button>
-  );
+  )
 }
 ```
 
@@ -438,13 +420,15 @@ function ThemeToggle() {
 // Component with dark mode styles
 function Card({ children }) {
   return (
-    <div className="
+    <div
+      className="
       rounded-lg border bg-white shadow-sm
       dark:border-gray-700 dark:bg-gray-800
-    ">
+    "
+    >
       {children}
     </div>
-  );
+  )
 }
 ```
 
@@ -453,16 +437,16 @@ function Card({ children }) {
 ### Code Splitting with Dynamic Imports
 
 ```jsx
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react'
 
-const HeavyComponent = lazy(() => import('./HeavyComponent'));
+const HeavyComponent = lazy(() => import('./HeavyComponent'))
 
 function App() {
   return (
     <Suspense fallback={<CardSkeleton />}>
       <HeavyComponent />
     </Suspense>
-  );
+  )
 }
 ```
 
@@ -488,12 +472,12 @@ module.exports = {
       pattern: /bg-(red|green|blue)-(400|500|600)/,
     },
   ],
-};
+}
 ```
 
 ```css
 /* v4: app.css (CSS-first) */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-brand-primary: #1d4ed8;
@@ -510,11 +494,11 @@ module.exports = {
 
 ```javascript
 // tailwind.config.js
-const plugin = require('tailwindcss/plugin');
+const plugin = require('tailwindcss/plugin')
 
 module.exports = {
   plugins: [
-    plugin(function({ addUtilities }) {
+    plugin(function ({ addUtilities }) {
       addUtilities({
         '.text-balance': {
           'text-wrap': 'balance',
@@ -529,10 +513,10 @@ module.exports = {
         '.content-auto': {
           'content-visibility': 'auto',
         },
-      });
+      })
     }),
   ],
-};
+}
 ```
 
 This examples file complements the main SKILL.md with practical implementations and real-world patterns.

@@ -32,32 +32,25 @@ export default class SystemConfigsController {
    * @summary Tạo cấu hình mới
    * @description Thêm một key-value cấu hình hệ thống
    * @requestBody {"key": "string", "value": "string", "description": "string"}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string"}}
+   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string", "description": "string", "createdAt": "string", "updatedAt": "string"}}
    * @responseBody 400 - {"success": false, "message": "Lỗi validate hoặc key đã tồn tại"}
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createSystemConfigValidator)
 
-    try {
-      const config = await this.systemConfigService.createConfig(payload)
-      return response.created({
-        success: true,
-        message: 'Tạo cấu hình hệ thống thành công',
-        data: config,
-      })
-    } catch (error: any) {
-      return response.badRequest({
-        success: false,
-        message: error.message || 'Lỗi khi tạo cấu hình',
-      })
-    }
+    const config = await this.systemConfigService.createConfig(payload)
+    return response.created({
+      success: true,
+      message: 'Tạo cấu hình hệ thống thành công',
+      data: config,
+    })
   }
 
   /**
    * @summary Chi tiết cấu hình
    * @description Lấy chi tiết một cấu hình hệ thống theo key
    * @paramPath id - Key của cấu hình
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string"}}
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string", "description": "string"}}
    * @responseBody 404 - {"success": false, "message": "Không tìm thấy cấu hình"}
    */
   async show({ params, response }: HttpContext) {
@@ -75,7 +68,7 @@ export default class SystemConfigsController {
    * @description Thay đổi giá trị của cấu hình hiện tại
    * @paramPath id - Key của cấu hình
    * @requestBody {"value": "string", "description": "string"}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string"}}
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string", "description": "string"}}
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateSystemConfigValidator)

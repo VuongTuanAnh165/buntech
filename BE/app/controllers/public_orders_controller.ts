@@ -26,28 +26,21 @@ export default class PublicOrdersController {
       })
     }
 
-    try {
-      const order = await this.publicOrderService.createQuickOrder({
-        fullName: payload.fullName,
-        phoneNumber: payload.phoneNumber,
-        address: payload.address,
-        note: payload.note,
-        items: payload.items,
-      })
+    const order = await this.publicOrderService.createQuickOrder({
+      fullName: payload.fullName,
+      phoneNumber: payload.phoneNumber,
+      address: payload.address,
+      note: payload.note,
+      items: payload.items,
+    })
 
-      return response.created({
-        success: true,
-        message: 'Đặt hàng thành công. Chúng tôi sẽ liên hệ với bạn sớm nhất.',
-        data: {
-          orderId: order.id,
-          totalAmount: order.totalAmount,
-        },
-      })
-    } catch (error: any) {
-      return response.badRequest({
-        success: false,
-        message: error.message || 'Có lỗi xảy ra khi đặt hàng',
-      })
-    }
+    return response.created({
+      success: true,
+      message: 'Đặt hàng thành công. Chúng tôi sẽ liên hệ với bạn sớm nhất.',
+      data: {
+        orderId: order.id,
+        totalAmount: order.totalAmount,
+      },
+    })
   }
 }

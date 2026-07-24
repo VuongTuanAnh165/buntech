@@ -18,7 +18,7 @@ pnpm add -D code-inspector-plugin
 
 ```js
 // next.config.js
-const { codeInspectorPlugin } = require("code-inspector-plugin");
+const { codeInspectorPlugin } = require('code-inspector-plugin')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -26,37 +26,37 @@ const nextConfig = {
     if (dev) {
       config.plugins.push(
         codeInspectorPlugin({
-          bundler: "webpack",
+          bundler: 'webpack',
           needEnvInspector: true,
         })
-      );
+      )
     }
-    return config;
+    return config
   },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
 ```
 
 ### Next.js 15.0.x ~ 15.2.x（experimental turbo）
 
 ```ts
 // next.config.ts
-import type { NextConfig } from "next";
-import { codeInspectorPlugin } from "code-inspector-plugin";
+import type { NextConfig } from 'next'
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 const nextConfig: NextConfig = {
   experimental: {
     turbo: {
       rules: codeInspectorPlugin({
-        bundler: "turbopack",
+        bundler: 'turbopack',
         needEnvInspector: true,
       }),
     },
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
 ```
 
 ### Next.js >= 15.3.x（包含 16，turbopack）
@@ -65,44 +65,44 @@ export default nextConfig;
 
 ```ts
 // next.config.ts
-import type { NextConfig } from "next";
-import { codeInspectorPlugin } from "code-inspector-plugin";
+import type { NextConfig } from 'next'
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 const nextConfig: NextConfig = {
   turbopack: {
     rules: codeInspectorPlugin({
-      bundler: "turbopack",
-      hotKeys: ["altKey"],
+      bundler: 'turbopack',
+      hotKeys: ['altKey'],
     }),
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
 ```
 
 ### Next.js 异步配置（适配已有复杂插件链）
 
 ```ts
 // next.config.ts
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 export default async function nextConfig() {
-  const isDev = process.env.NODE_ENV === "development";
-  let turbopack: NextConfig["turbopack"] | undefined;
+  const isDev = process.env.NODE_ENV === 'development'
+  let turbopack: NextConfig['turbopack'] | undefined
 
   if (isDev) {
-    const { codeInspectorPlugin } = await import("code-inspector-plugin");
+    const { codeInspectorPlugin } = await import('code-inspector-plugin')
     turbopack = {
       rules: codeInspectorPlugin({
-        bundler: "turbopack",
+        bundler: 'turbopack',
         needEnvInspector: true,
       }),
-    };
+    }
   }
 
   return {
     ...(turbopack ? { turbopack } : {}),
-  } satisfies NextConfig;
+  } satisfies NextConfig
 }
 ```
 
@@ -110,125 +110,125 @@ export default async function nextConfig() {
 
 ```ts
 // vite.config.ts
-import { defineConfig } from "vite";
-import { codeInspectorPlugin } from "code-inspector-plugin";
+import { defineConfig } from 'vite'
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default defineConfig({
   plugins: [
     codeInspectorPlugin({
-      bundler: "vite",
+      bundler: 'vite',
       needEnvInspector: true,
     }),
   ],
-});
+})
 ```
 
 ## Webpack
 
 ```js
 // webpack.config.js
-const { codeInspectorPlugin } = require("code-inspector-plugin");
+const { codeInspectorPlugin } = require('code-inspector-plugin')
 
 module.exports = {
   plugins: [
     codeInspectorPlugin({
-      bundler: "webpack",
+      bundler: 'webpack',
       needEnvInspector: true,
     }),
   ],
-};
+}
 ```
 
 ## Rspack
 
 ```js
 // rspack.config.js
-const { codeInspectorPlugin } = require("code-inspector-plugin");
+const { codeInspectorPlugin } = require('code-inspector-plugin')
 
 module.exports = {
   plugins: [
     codeInspectorPlugin({
-      bundler: "rspack",
+      bundler: 'rspack',
       needEnvInspector: true,
     }),
   ],
-};
+}
 ```
 
 ## Rsbuild
 
 ```js
 // rsbuild.config.js
-const { codeInspectorPlugin } = require("code-inspector-plugin");
+const { codeInspectorPlugin } = require('code-inspector-plugin')
 
 module.exports = {
   tools: {
     rspack: {
       plugins: [
         codeInspectorPlugin({
-          bundler: "rspack",
+          bundler: 'rspack',
           needEnvInspector: true,
         }),
       ],
     },
   },
-};
+}
 ```
 
 ## Esbuild
 
 ```js
 // esbuild.config.js
-const esbuild = require("esbuild");
-const { codeInspectorPlugin } = require("code-inspector-plugin");
+const esbuild = require('esbuild')
+const { codeInspectorPlugin } = require('code-inspector-plugin')
 
 esbuild.build({
-  entryPoints: ["src/main.ts"],
+  entryPoints: ['src/main.ts'],
   bundle: true,
-  outfile: "dist/main.js",
+  outfile: 'dist/main.js',
   plugins: [
     codeInspectorPlugin({
-      bundler: "esbuild",
-      dev: () => process.env.NODE_ENV === "development",
+      bundler: 'esbuild',
+      dev: () => process.env.NODE_ENV === 'development',
       needEnvInspector: true,
     }),
   ],
-});
+})
 ```
 
 ## Mako
 
 ```ts
 // .umirc.ts
-import { defineConfig } from "umi";
-import { codeInspectorPlugin } from "code-inspector-plugin";
+import { defineConfig } from 'umi'
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default defineConfig({
   mako: {
     plugins: [
       codeInspectorPlugin({
-        bundler: "mako",
+        bundler: 'mako',
         needEnvInspector: true,
       }),
     ],
   },
-});
+})
 ```
 
 ## Umi（webpack）
 
 ```ts
 // .umirc.ts
-import { defineConfig } from "umi";
-import { codeInspectorPlugin } from "code-inspector-plugin";
+import { defineConfig } from 'umi'
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default defineConfig({
   chainWebpack(memo) {
     memo
-      .plugin("code-inspector-plugin")
-      .use(codeInspectorPlugin({ bundler: "webpack", needEnvInspector: true }));
+      .plugin('code-inspector-plugin')
+      .use(codeInspectorPlugin({ bundler: 'webpack', needEnvInspector: true }))
   },
-});
+})
 ```
 
 ## Nuxt
@@ -237,52 +237,48 @@ export default defineConfig({
 
 ```ts
 // nuxt.config.ts
-import { codeInspectorPlugin } from "code-inspector-plugin";
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default defineNuxtConfig({
   vite: {
-    plugins: [
-      codeInspectorPlugin({ bundler: "vite", needEnvInspector: true }),
-    ],
+    plugins: [codeInspectorPlugin({ bundler: 'vite', needEnvInspector: true })],
   },
-});
+})
 ```
 
 ### Nuxt 2.x
 
 ```js
 // nuxt.config.js
-import { codeInspectorPlugin } from "code-inspector-plugin";
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default {
   build: {
     extend(config) {
-      config.plugins.push(
-        codeInspectorPlugin({ bundler: "webpack", needEnvInspector: true })
-      );
-      return config;
+      config.plugins.push(codeInspectorPlugin({ bundler: 'webpack', needEnvInspector: true }))
+      return config
     },
   },
-};
+}
 ```
 
 ## Astro
 
 ```js
 // astro.config.mjs
-import { defineConfig } from "astro/config";
-import { codeInspectorPlugin } from "code-inspector-plugin";
+import { defineConfig } from 'astro/config'
+import { codeInspectorPlugin } from 'code-inspector-plugin'
 
 export default defineConfig({
   vite: {
     plugins: [
       codeInspectorPlugin({
-        bundler: "vite",
+        bundler: 'vite',
         needEnvInspector: true,
       }),
     ],
   },
-});
+})
 ```
 
 ## .env.local 示例

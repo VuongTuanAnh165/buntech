@@ -24,14 +24,14 @@ Import from these packages:
 
 ```jsx
 // React macros (recommended)
-import { Trans, Plural, Select, useLingui } from "@lingui/react/macro";
+import { Trans, Plural, Select, useLingui } from '@lingui/react/macro'
 
 // Core macros for vanilla JS
-import { t, msg, plural, select } from "@lingui/core/macro";
+import { t, msg, plural, select } from '@lingui/core/macro'
 
 // Runtime (rarely used directly)
-import { I18nProvider } from "@lingui/react";
-import { i18n } from "@lingui/core";
+import { I18nProvider } from '@lingui/react'
+import { i18n } from '@lingui/core'
 ```
 
 ## Setup I18nProvider
@@ -39,19 +39,15 @@ import { i18n } from "@lingui/core";
 Wrap your application with `I18nProvider`:
 
 ```jsx
-import { I18nProvider } from "@lingui/react";
-import { i18n } from "@lingui/core";
-import { messages } from "./locales/en/messages";
+import { I18nProvider } from '@lingui/react'
+import { i18n } from '@lingui/core'
+import { messages } from './locales/en/messages'
 
-i18n.load("en", messages);
-i18n.activate("en");
+i18n.load('en', messages)
+i18n.activate('en')
 
 function App() {
-  return (
-    <I18nProvider i18n={i18n}>
-      {/* Your app */}
-    </I18nProvider>
-  );
+  return <I18nProvider i18n={i18n}>{/* Your app */}</I18nProvider>
 }
 ```
 
@@ -85,21 +81,21 @@ import { Trans } from "@lingui/react/macro";
 For strings outside JSX (attributes, alerts, function calls):
 
 ```jsx
-import { useLingui } from "@lingui/react/macro";
+import { useLingui } from '@lingui/react/macro'
 
 function MyComponent() {
-  const { t } = useLingui();
+  const { t } = useLingui()
 
   const handleClick = () => {
-    alert(t`Action completed!`);
-  };
+    alert(t`Action completed!`)
+  }
 
   return (
     <div>
       <img src="..." alt={t`Image description`} />
       <button onClick={handleClick}>{t`Click me`}</button>
     </div>
-  );
+  )
 }
 ```
 
@@ -119,13 +115,13 @@ When using Lingui in Next.js App Router with server components:
 Example:
 
 ```tsx
-import { setI18n } from "@lingui/react/server";
+import { setI18n } from '@lingui/react/server'
 
 export function initLingui(locale: AppLocale) {
-  const i18n = getI18nInstance(locale);
-  i18n.activate(locale);
-  setI18n(i18n);
-  return i18n;
+  const i18n = getI18nInstance(locale)
+  i18n.activate(locale)
+  setI18n(i18n)
+  return i18n
 }
 ```
 
@@ -134,22 +130,20 @@ export function initLingui(locale: AppLocale) {
 When you need to define messages at module level or in arrays/objects:
 
 ```jsx
-import { msg } from "@lingui/core/macro";
-import { useLingui } from "@lingui/react";
+import { msg } from '@lingui/core/macro'
+import { useLingui } from '@lingui/react'
 
 // Module-level constants
 const STATUSES = {
   active: msg`Active`,
   inactive: msg`Inactive`,
   pending: msg`Pending`,
-};
+}
 
 function StatusList() {
-  const { _ } = useLingui();
-  
-  return Object.entries(STATUSES).map(([key, message]) => (
-    <div key={key}>{_(message)}</div>
-  ));
+  const { _ } = useLingui()
+
+  return Object.entries(STATUSES).map(([key, message]) => <div key={key}>{_(message)}</div>)
 }
 ```
 
@@ -160,13 +154,9 @@ function StatusList() {
 Use the `Plural` macro for quantity-dependent messages:
 
 ```jsx
-import { Plural } from "@lingui/react/macro";
+import { Plural } from '@lingui/react/macro'
 
-<Plural 
-  value={messageCount}
-  one="You have # message"
-  other="You have # messages"
-/>
+;<Plural value={messageCount} one="You have # message" other="You have # messages" />
 ```
 
 The `#` placeholder is replaced with the actual value.
@@ -176,12 +166,7 @@ The `#` placeholder is replaced with the actual value.
 Use `_N` syntax for exact number matches (takes precedence over plural forms):
 
 ```jsx
-<Plural
-  value={count}
-  _0="No messages"
-  one="One message"
-  other="# messages"
-/>
+<Plural value={count} _0="No messages" one="One message" other="# messages" />
 ```
 
 ### With Variables and Components
@@ -205,17 +190,13 @@ Combine with `Trans` for complex messages:
 Use `i18n.date()` and `i18n.number()` for locale-aware formatting:
 
 ```jsx
-import { useLingui } from "@lingui/react/macro";
+import { useLingui } from '@lingui/react/macro'
 
 function MyComponent() {
-  const { i18n } = useLingui();
-  const lastLogin = new Date();
-  
-  return (
-    <Trans>
-      Last login: {i18n.date(lastLogin)}
-    </Trans>
-  );
+  const { i18n } = useLingui()
+  const lastLogin = new Date()
+
+  return <Trans>Last login: {i18n.date(lastLogin)}</Trans>
 }
 ```
 
@@ -255,19 +236,19 @@ Add context for translators:
 Basic `lingui.config.js`:
 
 ```js
-import { defineConfig } from "@lingui/cli";
+import { defineConfig } from '@lingui/cli'
 
 export default defineConfig({
-  sourceLocale: "en",
-  locales: ["en", "es", "fr", "de"],
+  sourceLocale: 'en',
+  locales: ['en', 'es', 'fr', 'de'],
   catalogs: [
     {
-      path: "<rootDir>/src/locales/{locale}/messages",
-      include: ["src"],
-      exclude: ["**/node_modules/**"],
+      path: '<rootDir>/src/locales/{locale}/messages',
+      include: ['src'],
+      exclude: ['**/node_modules/**'],
     },
   ],
-});
+})
 ```
 
 For detailed configuration patterns, see [configuration.md](references/configuration.md).
@@ -280,10 +261,10 @@ Prefer macros over runtime components. Macros are compiled at build time, reduci
 
 ```jsx
 // ✅ Good - uses macro
-import { Trans } from "@lingui/react/macro";
+import { Trans } from '@lingui/react/macro'
 
 // ❌ Avoid - runtime only
-import { Trans } from "@lingui/react";
+import { Trans } from '@lingui/react'
 ```
 
 ### Keep Messages Simple
@@ -292,12 +273,12 @@ Avoid complex expressions in messages - they'll be replaced with placeholders:
 
 ```jsx
 // ❌ Bad - loses context
-<Trans>Hello {user.name.toUpperCase()}</Trans>
+;<Trans>Hello {user.name.toUpperCase()}</Trans>
 // Extracted as: "Hello {0}"
 
 // ✅ Good - clear variable name
-const userName = user.name.toUpperCase();
-<Trans>Hello {userName}</Trans>
+const userName = user.name.toUpperCase()
+;<Trans>Hello {userName}</Trans>
 // Extracted as: "Hello {userName}"
 ```
 
@@ -307,11 +288,13 @@ Choose the right tool:
 
 ```jsx
 // ✅ For JSX content
-<h1><Trans>Welcome</Trans></h1>
+;<h1>
+  <Trans>Welcome</Trans>
+</h1>
 
 // ✅ For string values
-const { t } = useLingui();
-<img alt={t`Profile picture`} />
+const { t } = useLingui()
+;<img alt={t`Profile picture`} />
 ```
 
 ### Don't Use Macros at Module Level
@@ -320,12 +303,12 @@ Macros need component context - use `msg` instead:
 
 ```jsx
 // ❌ Bad - won't work
-import { t } from "@lingui/core/macro";
-const LABELS = [t`Red`, t`Green`, t`Blue`];
+import { t } from '@lingui/core/macro'
+const LABELS = [t`Red`, t`Green`, t`Blue`]
 
 // ✅ Good - use msg for lazy translation
-import { msg } from "@lingui/core/macro";
-const LABELS = [msg`Red`, msg`Green`, msg`Blue`];
+import { msg } from '@lingui/core/macro'
+const LABELS = [msg`Red`, msg`Green`, msg`Blue`]
 ```
 
 ### Use the ESLint Plugin
@@ -338,11 +321,9 @@ npm install --save-dev eslint-plugin-lingui
 
 ```js
 // eslint.config.js
-import pluginLingui from "eslint-plugin-lingui";
+import pluginLingui from 'eslint-plugin-lingui'
 
-export default [
-  pluginLingui.configs["flat/recommended"],
-];
+export default [pluginLingui.configs['flat/recommended']]
 ```
 
 ## Common Patterns
@@ -350,34 +331,34 @@ export default [
 ### Dynamic Locale Switching
 
 ```jsx
-import { i18n } from "@lingui/core";
+import { i18n } from '@lingui/core'
 
 async function changeLocale(locale) {
-  const { messages } = await import(`./locales/${locale}/messages`);
-  i18n.load(locale, messages);
-  i18n.activate(locale);
+  const { messages } = await import(`./locales/${locale}/messages`)
+  i18n.load(locale, messages)
+  i18n.activate(locale)
 }
 ```
 
 ### Loading Catalogs Dynamically
 
 ```jsx
-import { useEffect } from "react";
-import { i18n } from "@lingui/core";
+import { useEffect } from 'react'
+import { i18n } from '@lingui/core'
 
 function loadCatalog(locale) {
-  return import(`./locales/${locale}/messages`);
+  return import(`./locales/${locale}/messages`)
 }
 
 function App() {
   useEffect(() => {
-    loadCatalog("en").then(catalog => {
-      i18n.load("en", catalog.messages);
-      i18n.activate("en");
-    });
-  }, []);
-  
-  return <I18nProvider i18n={i18n}>{/* ... */}</I18nProvider>;
+    loadCatalog('en').then((catalog) => {
+      i18n.load('en', catalog.messages)
+      i18n.activate('en')
+    })
+  }, [])
+
+  return <I18nProvider i18n={i18n}>{/* ... */}</I18nProvider>
 }
 ```
 
@@ -386,19 +367,19 @@ function App() {
 When using memoization, use the `t` function from the macro version:
 
 ```jsx
-import { useLingui } from "@lingui/react/macro";
-import { msg } from "@lingui/core/macro";
-import { useMemo } from "react";
+import { useLingui } from '@lingui/react/macro'
+import { msg } from '@lingui/core/macro'
+import { useMemo } from 'react'
 
-const welcomeMessage = msg`Welcome!`;
+const welcomeMessage = msg`Welcome!`
 
 function MyComponent() {
-  const { t } = useLingui(); // Macro version - reference changes with locale
-  
+  const { t } = useLingui() // Macro version - reference changes with locale
+
   // ✅ Safe - t reference updates with locale
-  const message = useMemo(() => t(welcomeMessage), [t]);
-  
-  return <div>{message}</div>;
+  const message = useMemo(() => t(welcomeMessage), [t])
+
+  return <div>{message}</div>
 }
 ```
 

@@ -1,4 +1,7 @@
 export enum TransactionType {
   ORDER_PAYMENT = 'order_payment', // Giao dịch thanh toán trực tiếp cho một đơn hàng cụ thể
   DEBT_PAYMENT = 'debt_payment', // Giao dịch khách hàng trả tiền công nợ gộp chung
+  ORDER_CHARGE = 'order_charge', // Ghi nợ đơn hàng
+  PAYMENT = 'payment', // Thanh toán
+  DEBT_RECORD = 'debt_record', // Ghi nhận nợ
 }

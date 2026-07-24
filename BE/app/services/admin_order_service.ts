@@ -1,20 +1,29 @@
 import Order from '#models/order'
 import OrderItem from '#models/order_item'
-import Product from '#models/product'
-import CustomerPrice from '#models/customer_price'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
+import { OrderSource } from '#enums/order_source'
+import { OrderStatus } from '#enums/order_status'
+import { Pagination } from '#enums/pagination'
+import { inject } from '@adonisjs/core'
+import OrderCalculatorService from '#services/order_calculator_service'
 
+@inject()
 export default class AdminOrderService {
+  constructor(protected orderCalculator: OrderCalculatorService) {}
   /**
    * Lấy danh sách Order (Admin)
    */
   async getOrders(
     page: number = 1,
-    limit: number = 20,
+    limit: number = Pagination.DEFAULT_LIMIT,
     filters?: { status?: string; userId?: number; driverId?: number }
   ) {
-    const query = Order.query().preload('user').preload('driver').orderBy('created_at', 'desc')
+    const query = Order.query()
+      .select('id', 'user_id', 'driver_id', 'total_amount', 'status', 'created_at')
+      .preload('user', (q) => q.select('id', 'full_name', 'phone_number'))
+      .preload('driver', (q) => q.select('id', 'full_name', 'phone_number'))
+      .orderBy('created_at', 'desc')
 
     if (filters?.status) {
       query.where('status', filters.status)
@@ -26,7 +35,8 @@ export default class AdminOrderService {
       query.where('driver_id', filters.driverId)
     }
 
-    return query.paginate(page, limit)
+    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
+    return query.paginate(page, safeLimit)
   }
 
   /**
@@ -35,10 +45,25 @@ export default class AdminOrderService {
   async getOrder(id: number) {
     return Order.query()
       .where('id', id)
-      .preload('user')
-      .preload('driver')
+      .select(
+        'id',
+        'user_id',
+        'driver_id',
+        'shipping_address_id',
+        'total_amount',
+        'status',
+        'note',
+        'delivery_date',
+        'created_at',
+        'updated_at'
+      )
+      .preload('user', (q) => q.select('id', 'full_name', 'phone_number'))
+      .preload('driver', (q) => q.select('id', 'full_name', 'phone_number'))
       .preload('items', (q) => {
-        q.preload('product')
+        q.select('id', 'order_id', 'product_id', 'quantity', 'unit_price').preload(
+          'product',
+          (pq) => pq.select('id', 'name', 'unit', 'base_price')
+        )
       })
       .firstOrFail()
   }
@@ -53,47 +78,18 @@ export default class AdminOrderService {
     deliveryDate?: Date
     items: Array<{ productId: number; quantity: number }>
   }) {
-    // 1. Fetch Products
-    const productIds = data.items.map((i) => i.productId)
-    const products = await Product.query().whereIn('id', productIds)
-
-    // 2. Fetch Custom Prices for this User
-    const customPrices = await CustomerPrice.query()
-      .where('user_id', data.userId)
-      .whereIn('product_id', productIds)
-
-    let totalAmount = 0
-    const orderItemsData: Array<{ productId: number; quantity: number; unitPrice: number }> = []
-
-    for (const item of data.items) {
-      const product = products.find((p) => p.id === item.productId)
-
-      if (!product || !product.isActive) {
-        throw new Error(`Sản phẩm ID ${item.productId} không tồn tại hoặc đã ngừng bán`)
-      }
-
-      // 3. Determine Price (Priority: CustomerPrice > BasePrice)
-      const customPrice = customPrices.find((cp) => cp.productId === item.productId)
-      const unitPrice = customPrice
-        ? Number.parseFloat(customPrice.customPrice)
-        : Number.parseFloat(product.basePrice)
-
-      totalAmount += unitPrice * item.quantity
-
-      orderItemsData.push({
-        productId: product.id,
-        quantity: item.quantity,
-        unitPrice: unitPrice,
-      })
-    }
+    const { totalAmount, orderItemsData } = await this.orderCalculator.calculateOrder(
+      data.items,
+      data.userId
+    )
 
     // 4. DB Transaction
     return await db.transaction(async (trx) => {
       const order = new Order()
       order.userId = data.userId
       order.shippingAddressId = data.shippingAddressId
-      order.source = 'ADMIN'
-      order.status = 'PENDING'
+      order.source = OrderSource.ADMIN
+      order.status = OrderStatus.PENDING
       order.totalAmount = totalAmount.toString()
       order.note = data.note || null
       order.deliveryDate = data.deliveryDate
@@ -103,15 +99,13 @@ export default class AdminOrderService {
       order.useTransaction(trx)
       await order.save()
 
-      for (const itemData of orderItemsData) {
-        const orderItem = new OrderItem()
-        orderItem.orderId = order.id
-        orderItem.productId = itemData.productId
-        orderItem.quantity = itemData.quantity
-        orderItem.unitPrice = itemData.unitPrice
-        orderItem.useTransaction(trx)
-        await orderItem.save()
-      }
+      const itemsToCreate = orderItemsData.map((itemData) => ({
+        orderId: order.id,
+        productId: itemData.productId,
+        quantity: itemData.quantity,
+        unitPrice: itemData.unitPrice,
+      }))
+      await OrderItem.createMany(itemsToCreate, { client: trx })
 
       return order
     })
@@ -128,7 +122,10 @@ export default class AdminOrderService {
       paymentStatus?: string
     }
   ) {
-    const order = await Order.findOrFail(orderId)
+    const order = await Order.query()
+      .select('id', 'status', 'delivery_status', 'payment_status')
+      .where('id', orderId)
+      .firstOrFail()
     order.merge(data)
     await order.save()
     return order
@@ -142,19 +139,27 @@ export default class AdminOrderService {
     orders: Array<{ orderId: number; routeOrder: number }>
   ) {
     return await db.transaction(async (trx) => {
-      for (const item of orders) {
-        const order = await Order.query({ client: trx }).where('id', item.orderId).firstOrFail()
+      const orderIds = orders.map((o) => o.orderId)
+      const existingOrders = await Order.query({ client: trx })
+        .select('id', 'driver_id', 'route_order', 'status')
+        .whereIn('id', orderIds)
+
+      const updatePromises = existingOrders.map((order) => {
+        const matchingInput = orders.find((o) => o.orderId === order.id)
+        if (!matchingInput) return Promise.resolve()
 
         order.driverId = driverId
-        order.routeOrder = item.routeOrder
+        order.routeOrder = matchingInput.routeOrder
+
         // Status might move from PENDING/PROCESSING to DELIVERING
-        if (order.status === 'PENDING' || order.status === 'PROCESSING') {
-          order.status = 'DELIVERING'
+        if (order.status === OrderStatus.PENDING || order.status === OrderStatus.PROCESSING) {
+          order.status = OrderStatus.DELIVERING
         }
 
         order.useTransaction(trx)
-        await order.save()
-      }
+        return order.save()
+      })
+      await Promise.all(updatePromises)
     })
   }
 }

@@ -54,24 +54,25 @@ git status --short --branch
 根据分析结果生成符合规范的提交信息。
 
 **消息格式：**
+
 ```
 type(scope): subject
 ```
 
 **允许的类型和对应 emoji：**
 
-| 类型 | Emoji | 说明 | 示例 |
-|------|-------|------|------|
-| feat | ✨ | 新功能 | `✨ feat: add user authentication` |
-| fix | 🐛 | Bug 修复 | `🐛 fix: resolve login timeout` |
-| docs | 📝 | 文档变更 | `📝 docs: update API documentation` |
-| style | 🎨 | 代码风格 | `🎨 style: format code with prettier` |
-| refactor | ♻️ | 代码重构 | `♻️ refactor: extract common utils` |
-| perf | ⚡️ | 性能优化 | `⚡️ perf: optimize database queries` |
-| test | ✅ | 测试相关 | `✅ test: add unit tests for auth` |
-| build | 🏗️ | 构建系统 | `🏗️ build: update webpack config` |
-| ci | 👷 | CI 配置 | `👷 ci: add GitHub Actions workflow` |
-| chore | 🔧 | 其他变更 | `🔧 chore: update dependencies` |
+| 类型     | Emoji | 说明     | 示例                                  |
+| -------- | ----- | -------- | ------------------------------------- |
+| feat     | ✨    | 新功能   | `✨ feat: add user authentication`    |
+| fix      | 🐛    | Bug 修复 | `🐛 fix: resolve login timeout`       |
+| docs     | 📝    | 文档变更 | `📝 docs: update API documentation`   |
+| style    | 🎨    | 代码风格 | `🎨 style: format code with prettier` |
+| refactor | ♻️    | 代码重构 | `♻️ refactor: extract common utils`   |
+| perf     | ⚡️    | 性能优化 | `⚡️ perf: optimize database queries`  |
+| test     | ✅    | 测试相关 | `✅ test: add unit tests for auth`    |
+| build    | 🏗️    | 构建系统 | `🏗️ build: update webpack config`     |
+| ci       | 👷    | CI 配置  | `👷 ci: add GitHub Actions workflow`  |
+| chore    | 🔧    | 其他变更 | `🔧 chore: update dependencies`       |
 
 ### 4. 执行提交
 
@@ -136,6 +137,7 @@ git log -1 --oneline
 ## 参考资源
 
 详细的提交规范和项目配置，参考：
+
 - **`references/ignore-vs-commit.md`** - 忽略 vs 提交门禁（`.gitignore` 与 stage 决策）
 - **`references/commit-convention.md`** - 完整的提交规范文档
 - **`references/commit-examples.md`** - 提交信息示例

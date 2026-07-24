@@ -171,6 +171,7 @@ function Button({ children, variant = 'primary' }) {
 ```
 
 **When to use @apply**:
+
 - ✅ Truly duplicated utility patterns across multiple components
 - ✅ Creating base resets or normalizations
 - ❌ NOT for single-use component styles
@@ -185,10 +186,7 @@ Use version-appropriate configuration patterns and keep design tokens centralize
 ```javascript
 // tailwind.config.js
 module.exports = {
-  content: [
-    './src/**/*.{js,jsx,ts,tsx}',
-    './public/index.html',
-  ],
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   theme: {
     extend: {
       colors: {
@@ -199,8 +197,8 @@ module.exports = {
         },
       },
       spacing: {
-        '128': '32rem',
-        '144': '36rem',
+        128: '32rem',
+        144: '36rem',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -209,18 +207,18 @@ module.exports = {
     },
   },
   plugins: [],
-};
+}
 ```
 
 **v4 (CSS-first):**
 
 ```css
 /* app.css */
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --color-brand-primary: #1DA1F2;
-  --color-brand-secondary: #14171A;
+  --color-brand-primary: #1da1f2;
+  --color-brand-secondary: #14171a;
   --font-sans: Inter, system-ui, sans-serif;
 }
 
@@ -229,6 +227,7 @@ module.exports = {
 ```
 
 **Benefits for both versions**:
+
 - Team uses consistent tokens
 - No random values scattered in code
 - Single source of truth for design updates
@@ -269,7 +268,7 @@ Define component variants explicitly rather than accepting arbitrary classes:
 
 ```jsx
 // ❌ BAD: Arbitrary classes via props (override conflicts)
-<Button className="bg-red-500" />
+;<Button className="bg-red-500" />
 
 // ✅ GOOD: Predefined variants
 const Button = ({ variant = 'primary', size = 'md', children }) => {
@@ -278,24 +277,26 @@ const Button = ({ variant = 'primary', size = 'md', children }) => {
     secondary: 'bg-gray-600 hover:bg-gray-700 text-white',
     danger: 'bg-red-600 hover:bg-red-700 text-white',
     ghost: 'bg-transparent hover:bg-gray-100 text-gray-700',
-  };
+  }
 
   const sizes = {
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2 text-base',
     lg: 'px-6 py-3 text-lg',
-  };
+  }
 
   return (
-    <button className={`
+    <button
+      className={`
       rounded-lg font-medium transition-colors
       ${variants[variant]}
       ${sizes[size]}
-    `}>
+    `}
+    >
       {children}
     </button>
-  );
-};
+  )
+}
 ```
 
 ### 9. Accessibility Requirements
@@ -337,7 +338,7 @@ module.exports = {
     './components/**/*.{js,jsx,ts,tsx}',
     // Add all paths where Tailwind classes exist in v3 projects
   ],
-};
+}
 
 // v4: automatic source detection by default.
 // Use @source when classes are generated outside default scan roots.
@@ -366,6 +367,7 @@ npm install -D eslint-plugin-tailwindcss
 ### 12. Common Tailwind Pitfalls
 
 **Class Soup Problem**:
+
 ```jsx
 // ❌ BAD: Unreadable
 <div className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">
@@ -375,6 +377,7 @@ npm install -D eslint-plugin-tailwindcss
 ```
 
 **Missing Accessibility**:
+
 ```jsx
 // ❌ BAD
 <div className="cursor-pointer" onClick={handleClick}>Click</div>
@@ -384,10 +387,11 @@ npm install -D eslint-plugin-tailwindcss
 ```
 
 **Bundle Bloat**:
+
 ```javascript
 // ❌ BAD: Empty or wrong content paths
 module.exports = {
-  content: [],  // Nothing gets scanned!
+  content: [], // Nothing gets scanned!
 }
 
 // ✅ GOOD
@@ -427,42 +431,62 @@ styles/
 
 ```css
 /* Block */
-.card {}
+.card {
+}
 
 /* Element */
-.card__header {}
-.card__body {}
-.card__footer {}
+.card__header {
+}
+.card__body {
+}
+.card__footer {
+}
 
 /* Modifier */
-.card--featured {}
-.card--compact {}
-.card__header--large {}
+.card--featured {
+}
+.card--compact {
+}
+.card__header--large {
+}
 ```
 
 **SMACSS Alternative**:
 
 ```css
 /* Base */
-body, h1, p {}
+body,
+h1,
+p {
+}
 
 /* Layout */
-.l-header {}
-.l-sidebar {}
-.l-main {}
+.l-header {
+}
+.l-sidebar {
+}
+.l-main {
+}
 
 /* Module/Component */
-.card {}
-.button {}
+.card {
+}
+.button {
+}
 
 /* State */
-.is-active {}
-.is-hidden {}
-.is-loading {}
+.is-active {
+}
+.is-hidden {
+}
+.is-loading {
+}
 
 /* Theme */
-.theme-dark {}
-.theme-light {}
+.theme-dark {
+}
+.theme-light {
+}
 ```
 
 ### 3. Property Ordering (Concentric CSS)
@@ -494,7 +518,7 @@ body, h1, p {}
   /* Backgrounds */
   background-color: #fff;
   background-image: url('...');
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   /* Typography */
   font-family: 'Inter', sans-serif;
@@ -516,11 +540,11 @@ body, h1, p {}
 ```css
 :root {
   /* Colors */
-  --color-primary: #1DA1F2;
-  --color-secondary: #14171A;
-  --color-accent: #F91880;
-  --color-background: #FFFFFF;
-  --color-text: #0F1419;
+  --color-primary: #1da1f2;
+  --color-secondary: #14171a;
+  --color-accent: #f91880;
+  --color-background: #ffffff;
+  --color-text: #0f1419;
   --color-text-secondary: #536471;
 
   /* Spacing */
@@ -553,8 +577,8 @@ body, h1, p {}
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: #000000;
-    --color-text: #E7E9EA;
-    --color-text-secondary: #71767B;
+    --color-text: #e7e9ea;
+    --color-text-secondary: #71767b;
   }
 }
 
@@ -572,27 +596,36 @@ body, h1, p {}
 
 ```css
 /* ❌ BAD: Overly specific */
-header nav ul li a.active {}
+header nav ul li a.active {
+}
 
 /* ✅ GOOD: Low specificity */
-.nav-link.is-active {}
+.nav-link.is-active {
+}
 
 /* ❌ BAD: Nested too deep */
-article.main .content .sidebar p.intro {}
+article.main .content .sidebar p.intro {
+}
 
 /* ✅ GOOD: Flat and specific */
-.sidebar-intro {}
+.sidebar-intro {
+}
 
 /* ❌ BAD: Element + class (unnecessarily specific) */
-div.card {}
-p.description {}
+div.card {
+}
+p.description {
+}
 
 /* ✅ GOOD: Class only */
-.card {}
-.description {}
+.card {
+}
+.description {
+}
 ```
 
 **Specificity Tips**:
+
 - Keep specificity as low as possible
 - Prefer class selectors over ID selectors
 - Avoid `!important` (except for utility classes)
@@ -601,6 +634,7 @@ p.description {}
 ### 6. Modern Layout Techniques
 
 **Flexbox**:
+
 ```css
 .flex-container {
   display: flex;
@@ -617,6 +651,7 @@ p.description {}
 ```
 
 **CSS Grid**:
+
 ```css
 .grid-container {
   display: grid;
@@ -628,20 +663,29 @@ p.description {}
 .layout {
   display: grid;
   grid-template-areas:
-    "header header header"
-    "sidebar main main"
-    "footer footer footer";
+    'header header header'
+    'sidebar main main'
+    'footer footer footer';
   grid-template-columns: 250px 1fr 1fr;
   gap: 20px;
 }
 
-.header { grid-area: header; }
-.sidebar { grid-area: sidebar; }
-.main { grid-area: main; }
-.footer { grid-area: footer; }
+.header {
+  grid-area: header;
+}
+.sidebar {
+  grid-area: sidebar;
+}
+.main {
+  grid-area: main;
+}
+.footer {
+  grid-area: footer;
+}
 ```
 
 **Container Queries (2024)**:
+
 ```css
 .container {
   container-type: inline-size;
@@ -694,16 +738,20 @@ p.description {}
 ```
 
 **Common Breakpoints**:
+
 ```css
 /* Mobile: 0-639px (default) */
 /* Tablet: 640px-1023px */
-@media (min-width: 640px) {}
+@media (min-width: 640px) {
+}
 
 /* Desktop: 1024px-1279px */
-@media (min-width: 1024px) {}
+@media (min-width: 1024px) {
+}
 
 /* Large: 1280px+ */
-@media (min-width: 1280px) {}
+@media (min-width: 1280px) {
+}
 ```
 
 ### 8. Avoiding Code Repetition
@@ -744,7 +792,9 @@ p.description {}
 
 ```css
 /* Modern CSS Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -757,26 +807,46 @@ html {
 
 body {
   line-height: 1.5;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
-img, picture, video, canvas, svg {
+img,
+picture,
+video,
+canvas,
+svg {
   display: block;
   max-width: 100%;
 }
 
-input, button, textarea, select {
+input,
+button,
+textarea,
+select {
   font: inherit;
 }
 
-p, h1, h2, h3, h4, h5, h6 {
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   overflow-wrap: break-word;
 }
 ```
 
 Or use [normalize.css](https://necolas.github.io/normalize.css/):
+
 ```html
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+/>
 ```
 
 ### 10. Comments and Documentation
@@ -831,14 +901,22 @@ module.exports = {
 <head>
   <!-- Inline critical CSS for above-the-fold content -->
   <style>
-    body { margin: 0; font-family: sans-serif; }
-    .header { background: #fff; height: 60px; }
-    .hero { min-height: 100vh; }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+    .header {
+      background: #fff;
+      height: 60px;
+    }
+    .hero {
+      min-height: 100vh;
+    }
   </style>
 
   <!-- Load remaining CSS asynchronously -->
-  <link rel="preload" href="main.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="main.css"></noscript>
+  <link rel="preload" href="main.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href="main.css" /></noscript>
 </head>
 ```
 
@@ -850,7 +928,7 @@ module.exports = {
   width: 100px;
   height: 100px;
   top: 100px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
 /* ✅ CHEAPER: Only triggers composite */
@@ -861,6 +939,7 @@ module.exports = {
 ```
 
 **Performance Tiers**:
+
 - ⚡ Cheapest: `opacity`, `transform`, `filter`
 - ⚠️ Moderate: color, background-color
 - 🐌 Expensive: width, height, padding, margin, border
@@ -910,6 +989,7 @@ module.exports = {
 ```
 
 **Tools**:
+
 - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - Browser DevTools (Chrome, Firefox have built-in checkers)
 
@@ -951,6 +1031,7 @@ button:focus-visible {
 ```
 
 Usage:
+
 ```html
 <button>
   <span class="sr-only">Close modal</span>
@@ -987,9 +1068,7 @@ npm install -D autoprefixer
 ```javascript
 // postcss.config.js
 module.exports = {
-  plugins: [
-    require('autoprefixer')
-  ]
+  plugins: [require('autoprefixer')],
 }
 ```
 
@@ -998,7 +1077,7 @@ module.exports = {
 ```css
 /* Modern feature with fallback */
 .element {
-  background-color: #1DA1F2; /* Fallback */
+  background-color: #1da1f2; /* Fallback */
   background-color: oklch(59.69% 0.217 237.04); /* Modern */
 }
 
@@ -1022,6 +1101,7 @@ Always verify on [Can I Use](https://caniuse.com/) before using new features.
 Avoid hardcoding percentages in guidance docs because support changes over time.
 
 Current recommendation:
+
 - Use modern features by default only when target browsers are explicitly supported by your product matrix.
 - Add fallbacks (or progressive enhancement) for features like `:has()` and subgrid when compatibility is uncertain.
 
@@ -1046,7 +1126,7 @@ Current recommendation:
   }
 
   &:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 }
 ```
@@ -1128,50 +1208,100 @@ Current recommendation:
 ## Common Mistakes and Solutions
 
 ### Mistake 1: Fighting Specificity Wars
+
 ```css
 /* ❌ BAD */
-.button { color: blue; }
-.button.primary { color: white !important; }
-.header .button { color: red !important; }
+.button {
+  color: blue;
+}
+.button.primary {
+  color: white !important;
+}
+.header .button {
+  color: red !important;
+}
 
 /* ✅ GOOD */
-.button { color: blue; }
-.button--primary { color: white; }
-.header-button { color: red; }
+.button {
+  color: blue;
+}
+.button--primary {
+  color: white;
+}
+.header-button {
+  color: red;
+}
 ```
 
 ### Mistake 2: Not Using Variables
+
 ```css
 /* ❌ BAD */
-.header { background: #1DA1F2; }
-.button { background: #1DA1F2; }
-.link { color: #1DA1F2; }
+.header {
+  background: #1da1f2;
+}
+.button {
+  background: #1da1f2;
+}
+.link {
+  color: #1da1f2;
+}
 
 /* ✅ GOOD */
-:root { --color-primary: #1DA1F2; }
-.header { background: var(--color-primary); }
-.button { background: var(--color-primary); }
-.link { color: var(--color-primary); }
+:root {
+  --color-primary: #1da1f2;
+}
+.header {
+  background: var(--color-primary);
+}
+.button {
+  background: var(--color-primary);
+}
+.link {
+  color: var(--color-primary);
+}
 ```
 
 ### Mistake 3: Ignoring Mobile
+
 ```css
 /* ❌ BAD: Desktop-first */
-.container { width: 1200px; padding: 40px; }
-@media (max-width: 768px) { .container { width: 100%; padding: 20px; } }
+.container {
+  width: 1200px;
+  padding: 40px;
+}
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    padding: 20px;
+  }
+}
 
 /* ✅ GOOD: Mobile-first */
-.container { width: 100%; padding: 20px; }
-@media (min-width: 768px) { .container { width: 1200px; padding: 40px; } }
+.container {
+  width: 100%;
+  padding: 20px;
+}
+@media (min-width: 768px) {
+  .container {
+    width: 1200px;
+    padding: 40px;
+  }
+}
 ```
 
 ### Mistake 4: Over-Nesting
+
 ```css
 /* ❌ BAD */
-.nav ul li a span.icon { /* ... */ }
+.nav ul li a span.icon {
+  /* ... */
+}
 
 /* ✅ GOOD */
-.nav-icon { /* ... */ }
+.nav-icon {
+  /* ... */
+}
 ```
 
 ---
@@ -1179,6 +1309,7 @@ Current recommendation:
 ## Tools and Resources
 
 ### Essential Tools
+
 - **Prettier + Tailwind Plugin**: Auto-format class ordering
 - **ESLint + Tailwind Plugin**: Lint Tailwind classes
 - **Autoprefixer**: Auto-add vendor prefixes
@@ -1186,12 +1317,14 @@ Current recommendation:
 - **Can I Use**: Check browser support
 
 ### Testing Tools
+
 - **WebAIM Contrast Checker**: Color contrast
 - **WAVE**: Accessibility testing
 - **Lighthouse**: Performance and accessibility audit
 - **BrowserStack**: Cross-browser testing
 
 ### Documentation
+
 - [MDN CSS Reference](https://developer.mozilla.org/en-US/docs/Web/CSS)
 - [Tailwind CSS Docs](https://tailwindcss.com/docs)
 - [CSS-Tricks](https://css-tricks.com/)
@@ -1218,6 +1351,7 @@ When providing CSS/Tailwind guidance:
 8. **Suggest tools**: Recommend automation where possible
 
 Always prioritize:
+
 - ✅ Maintainability and readability
 - ✅ Performance and bundle size
 - ✅ Accessibility compliance

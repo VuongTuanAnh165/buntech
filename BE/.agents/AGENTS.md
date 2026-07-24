@@ -261,20 +261,26 @@ Bắt đầu từ thời điểm này, tất cả các AI Agents phải áp dụ
 Để đảm bảo source code **luôn luôn** là một Kiệt tác (Masterpiece) trước mọi biến động và yêu cầu tính năng trong tương lai, mọi AI Agent BẮT BUỘC phải cài đặt tư duy (Mindset) tổng quát sau đây vào mọi dòng code sinh ra:
 
 ### A. Lập Trình Phòng Thủ Tuyệt Đối (Defensive Programming by Default)
+
 AI tuyệt đối không được giả định rằng môi trường, dữ liệu đầu vào, hoặc thư viện bên ngoài là hoàn hảo.
+
 - **Dữ liệu & Kiểu (Data & Types):** Không bao giờ tin tưởng `any`. Luôn ép kiểu tường minh, luôn bọc Nullable (`??`, `?.`), và validate 100% dữ liệu ở rìa hệ thống (Boundary). Bất cứ lúc nào nghi ngờ, hãy ép TS bắt lỗi ở Compile-time thay vì Runtime.
 - **Tài nguyên (Resources & Concurrency):** Luôn lường trước kịch bản **hàng triệu request đồng thời**. Không bao giờ dùng vòng lặp vô hạn, không chọc DB trong loop (N+1), không bao bọc Promise.all bừa bãi trong Transaction gây Deadlock, và luôn cấp Timeout cho mọi kết nối ra ngoài.
 - **Bảo toàn Hệ thống (System Integrity):** Không bao giờ sử dụng các API can thiệp file tĩnh/mã nguồn ở Runtime (VD: `fs.readFile` đọc source code) trên Production.
 
 ### B. Nguyên Tắc "Không Tin Tưởng Mã Cũ" (Zero-Trust Legacy Code)
+
 - Khi User yêu cầu sửa một file, AI không được "mù quáng" làm theo mà bỏ qua bối cảnh.
 - Hãy quét toàn bộ luồng thực thi (từ Route -> Controller -> Service -> Model -> Database). Nếu phát hiện mã cũ vi phạm Clean Code, SOLID, hoặc Performance, AI **có trách nhiệm** cảnh báo ngay lập tức và đề xuất Refactor trước khi xây đắp thêm tính năng mới lên trên nền móng yếu.
 
 ### C. Cơ Chế Tự Học & Tự Cập Nhật (Self-Evolution)
+
 - Tài liệu này (`AGENTS.md`) là bộ não sống. Nếu trong quá trình code, AI vấp phải một **lỗi kiến trúc mới**, một **bug tiềm ẩn đặc thù của dự án**, hoặc tìm ra một **Best Practice mới** tối ưu hơn, AI **PHẢI CHỦ ĐỘNG ĐỀ XUẤT** cập nhật quy luật đó vào file `AGENTS.md`.
 - Mục tiêu: Không một AI nào ở phiên làm việc sau được phép lặp lại sai lầm của AI ở phiên làm việc trước.
 
 ### D. Tiêu Chuẩn Phê Duyệt Cuối Cùng (The Final Gatekeeper)
+
 Trước khi báo cáo "Hoàn thành" với User, AI phải tự hỏi 1 câu duy nhất:
-> *"Nếu đoạn code này được Deploy thẳng lên Production của một hệ thống Enterprise với 100,000 CCU, nó có sập không? Có rò rỉ dữ liệu không? Có bị phình RAM không?"*
-Nếu có bất kỳ sự chần chừ nào, AI phải tự động quay lại bước Refactor.
+
+> _"Nếu đoạn code này được Deploy thẳng lên Production của một hệ thống Enterprise với 100,000 CCU, nó có sập không? Có rò rỉ dữ liệu không? Có bị phình RAM không?"_
+> Nếu có bất kỳ sự chần chừ nào, AI phải tự động quay lại bước Refactor.

@@ -7,22 +7,23 @@ Essential patterns for `lingui.config.js` (or `.ts`).
 The minimal configuration:
 
 ```js
-import { defineConfig } from "@lingui/cli";
+import { defineConfig } from '@lingui/cli'
 
 export default defineConfig({
-  sourceLocale: "en",
-  locales: ["en", "es", "fr", "de"],
+  sourceLocale: 'en',
+  locales: ['en', 'es', 'fr', 'de'],
   catalogs: [
     {
-      path: "<rootDir>/src/locales/{locale}/messages",
-      include: ["src"],
-      exclude: ["**/node_modules/**"],
+      path: '<rootDir>/src/locales/{locale}/messages',
+      include: ['src'],
+      exclude: ['**/node_modules/**'],
     },
   ],
-});
+})
 ```
 
 **Key fields**:
+
 - `sourceLocale` - Your source code's language (usually "en")
 - `locales` - Array of BCP-47 locale codes
 - `catalogs` - Where to find/store message catalogs
@@ -34,13 +35,14 @@ export default defineConfig({
 ```js
 catalogs: [
   {
-    path: "src/locales/{locale}/messages",
-    include: ["src"],
+    path: 'src/locales/{locale}/messages',
+    include: ['src'],
   },
 ]
 ```
 
 **Structure**:
+
 ```
 src/locales/
 ├── en/messages.po
@@ -55,13 +57,14 @@ For large projects where you want to split translations:
 ```js
 catalogs: [
   {
-    path: "src/{name}/locales/{locale}",
-    include: ["src/{name}/"],
+    path: 'src/{name}/locales/{locale}',
+    include: ['src/{name}/'],
   },
 ]
 ```
 
 **Structure**:
+
 ```
 src/
 ├── auth/locales/en.po
@@ -72,7 +75,7 @@ src/
 Use `catalogsMergePath` to compile into single files:
 
 ```js
-catalogsMergePath: "src/locales/{locale}"
+catalogsMergePath: 'src/locales/{locale}'
 ```
 
 ## Essential Configuration Options
@@ -94,10 +97,11 @@ fallbackLocales: {
 Control the output format of compiled catalogs:
 
 ```js
-compileNamespace: "es"  // ES6 modules (default: "cjs")
+compileNamespace: 'es' // ES6 modules (default: "cjs")
 ```
 
 **Common options**:
+
 - `cjs` - CommonJS: `module.exports = {messages: {...}}`
 - `es` - ES6: `export const messages = {...}`
 - `ts` - TypeScript with type definitions
@@ -107,10 +111,11 @@ compileNamespace: "es"  // ES6 modules (default: "cjs")
 For TypeScript projects:
 
 ```js
-compileNamespace: "ts"
+compileNamespace: 'ts'
 ```
 
 Then compile with:
+
 ```bash
 lingui compile --typescript
 ```
@@ -130,7 +135,7 @@ extractorParserOptions: {
 Control catalog message order:
 
 ```js
-orderBy: "messageId"  // Options: "message", "messageId", "origin"
+orderBy: 'messageId' // Options: "message", "messageId", "origin"
 ```
 
 ## Common Issues & Solutions
@@ -144,9 +149,9 @@ orderBy: "messageId"  // Options: "message", "messageId", "origin"
 ```js
 catalogs: [
   {
-    path: "src/locales/{locale}/messages",
-    include: ["src/**/*.{js,jsx,ts,tsx}"],  // Be specific
-    exclude: ["**/*.test.*", "**/*.spec.*"],
+    path: 'src/locales/{locale}/messages',
+    include: ['src/**/*.{js,jsx,ts,tsx}'], // Be specific
+    exclude: ['**/*.test.*', '**/*.spec.*'],
   },
 ]
 ```
@@ -159,10 +164,10 @@ catalogs: [
 
 ```js
 // Config
-path: "src/locales/{locale}/messages"
+path: 'src/locales/{locale}/messages'
 
 // Import must match
-import { messages } from "./locales/en/messages";
+import { messages } from './locales/en/messages'
 ```
 
 ## Best Practices

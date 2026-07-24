@@ -33,7 +33,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
       const formattedErrors: Record<string, string[]> = {}
 
       if (Array.isArray(err.messages)) {
-        err.messages.forEach((msg: any) => {
+        ;(err.messages as { message: string; field: string }[]).forEach((msg) => {
           if (!formattedErrors[msg.field]) {
             formattedErrors[msg.field] = []
           }

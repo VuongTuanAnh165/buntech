@@ -11,6 +11,7 @@
   - `@reference`
 
 Why:
+
 - Fewer moving parts.
 - Better fit with Tailwind v4 design.
 - Easier migration and maintenance.
@@ -21,20 +22,22 @@ Use a minimal `postcss.config.mjs`:
 
 ```js
 const config = {
-  plugins: ["@tailwindcss/postcss"],
-};
+  plugins: ['@tailwindcss/postcss'],
+}
 
-export default config;
+export default config
 ```
 
 ## 3) Split style responsibilities
 
 Recommended split:
+
 - `tailwind-core.css`: imports/plugins/theme bridge
 - `globals.css`: app global entry
 - `custom.css`: project utilities and overrides
 
 Benefits:
+
 - clear ownership
 - easier migration
 - safer incremental refactor
@@ -63,6 +66,7 @@ This avoids repeating setup while keeping utilities available.
 
 `@iconify/tailwind4` only provides plugin behavior.
 Install icon set packages for real icons:
+
 - `@iconify-json/lucide`
 - `@iconify-json/mdi`
 - `@iconify-json/tabler`
@@ -81,6 +85,7 @@ For skill assets under `.agents/skills/**/assets/templates`, use `.tpl` source f
 render target files as `.css`.
 
 Why:
+
 - avoids noisy IDE CSS diagnostics on Tailwind-only directives in template assets
 - separates "template source" from "runtime output" clearly
 - keeps script behavior explicit and deterministic

@@ -32,7 +32,7 @@ Findings come first, ordered by severity.
 - [P1] Title
   File: path/to/file.ts:123
   Evidence: what the code/docs/test output shows
-  Source: verified from code  ← required
+  Source: verified from code ← required
   Impact: concrete failure mode
   Suggested fix: smallest safe change
 ```
@@ -79,10 +79,12 @@ After findings, provide exactly one verdict:
 No findings.
 
 Verification:
+
 - command: result
 - command: result
 
 Residual risk:
+
 - what was not tested or what depends on external systems
 ```
 
@@ -93,9 +95,9 @@ When validating another reviewer or team's feedback:
 ```md
 ## Feedback Validation
 
-| Claim | Verdict | Evidence | Action |
-|---|---|---|---|
-| ... | valid / partially valid / invalid / hypothesis | file:line or command output | fix / no action / needs human decision |
+| Claim | Verdict                                        | Evidence                    | Action                                 |
+| ----- | ---------------------------------------------- | --------------------------- | -------------------------------------- |
+| ...   | valid / partially valid / invalid / hypothesis | file:line or command output | fix / no action / needs human decision |
 ```
 
 Do not treat the earlier feedback as authoritative. Verify each claim independently.

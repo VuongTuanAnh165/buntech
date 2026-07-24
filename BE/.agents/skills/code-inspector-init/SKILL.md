@@ -20,43 +20,53 @@ description: Set up or migrate code-inspector-plugin across modern frontend fram
 ## Decision Tree
 
 1. 识别框架与 bundler。
+
 - 从 `package.json`、配置文件名、构建命令确认是 Next.js、Vite、Webpack、Rspack、Rsbuild、Esbuild、Mako、Umi、Nuxt、Astro 中哪一种。
 
 2. 如果是 Next.js，先判断版本区间。
+
 - `<=14.x`：使用 webpack 插件接入。
 - `15.0.x ~ 15.2.x`：使用 `experimental.turbo.rules`。
 - `>=15.3.x`（包含 16）：使用 `turbopack.rules`。
 
 3. 选择开关策略。
+
 - 默认：`needEnvInspector: true`（推荐，迁移一致性最好）。
 - Next.js `>=15.3` 主模板特例：默认 `needEnvInspector: false`，并使用 `hotKeys: ["altKey"]` 做最小接入。
 - 用户明确要求项目自定义开关时，再补充 `ENABLE_CODE_INSPECTOR` 等外层条件。
 
 4. 判断是否需要高级选项。
+
 - 只有用户明确提出需求才调整 `hotKeys`、`hideConsole`、`openIn`、`launchType`、`include/exclude`、`mappings`、`pathType`、`skipSnippets`。
 
 ## Execution Workflow
 
 1. 识别项目环境。
+
 - 确认框架、bundler、配置文件路径、是否 dev-only 配置。
 
 2. 安装依赖。
+
 - 给出单行命令：`pnpm add -D code-inspector-plugin`（如项目使用 npm/yarn，则给对应命令）。
 
 3. 注入配置。
+
 - 从 `references/bundler-recipes.md` 选择对应片段。
 - 配置中必须包含正确的 `bundler` 值。
 
 4. 设置 `.env.local`。
+
 - 仅当模板显式使用 `needEnvInspector: true` 时，添加 `CODE_INSPECTOR=true`。
 - 对 Next.js `>=15.3` 主模板（`hotKeys: ["altKey"]` + `needEnvInspector: false`）不强制配置 `.env.local`。
 
 5. 本地验证。
+
 - 启动 dev。
 - 在页面按默认组合键（多数模板为 Mac: `Option+Shift` / Windows: `Alt+Shift`；Next.js `>=15.3` 主模板为 `Option/Alt` 单键）后悬浮并点击 DOM。
 - 观察浏览器控制台提示和 IDE 跳转结果。
 
 6. 故障排查。
+
 - 出现 IDE 无法打开、快捷键无效、路径错误、端口冲突时，按 `references/troubleshooting.md` 分步排查。
 
 ## Reference Routing
@@ -71,17 +81,21 @@ description: Set up or migrate code-inspector-plugin across modern frontend fram
 输出必须严格包含以下四部分，且顺序固定：
 
 1. 改动点清单
+
 - 说明要改哪些文件、每个文件做什么。
 
 2. 可复制代码块
+
 - 给完整可用的配置片段，不给伪代码。
 - 代码块里保留英文 API 名与配置键。
 
 3. 验证命令
+
 - 提供可直接执行的单行命令。
 - 给出成功判定标准。
 
 4. 回滚说明
+
 - 说明如何移除插件配置和环境变量。
 
 ## Guardrails
