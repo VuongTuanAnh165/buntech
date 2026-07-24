@@ -34,7 +34,7 @@ export default class BlogCategoryService {
   }
 
   async delete(id: number) {
-    const category = await this.findById(id)
+    const category = await BlogCategory.query().select('id').where('id', id).firstOrFail()
     await category.delete()
   }
 }

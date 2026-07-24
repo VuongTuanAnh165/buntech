@@ -8,11 +8,12 @@ export default class DriverOrdersController {
   constructor(protected driverOrderService: DriverOrderService) {}
 
   /**
+   * @deliver
    * @summary Chốt giao hàng thành công (Tài xế)
    * @description Cập nhật đơn hàng thành DELIVERED, ghi nhận số tiền tài xế thu hộ, và tự động cập nhật Công Nợ của Khách hàng. Yêu cầu truyền `idempotencyKey` để chống double click.
    * @paramPath id - ID đơn hàng
-   * @requestBody {"paymentMethod": "CASH", "amountPaid": 500000, "deliveryNote": "Khách đưa tiền mặt", "idempotencyKey": "uuid-v4-string"}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {}}
+   * @requestBody <deliverOrderValidator>
+   * @responseBody 200 - <OrderResponse>
    */
   async deliver({ auth, params, request, response }: HttpContext) {
     const user = auth.getUserOrFail()

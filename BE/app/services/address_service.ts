@@ -7,6 +7,19 @@ export default class AddressService {
    */
   async getUserAddresses(userId: number) {
     return Address.query()
+      .select(
+        'id',
+        'user_id',
+        'recipient_name',
+        'phone_number',
+        'address_line',
+        'ward',
+        'district',
+        'province',
+        'latitude',
+        'longitude',
+        'is_default'
+      )
       .where('user_id', userId)
       .orderBy('is_default', 'desc')
       .orderBy('id', 'desc')
@@ -16,7 +29,23 @@ export default class AddressService {
    * Get a specific address
    */
   async getAddress(userId: number, addressId: number) {
-    return Address.query().where('id', addressId).where('user_id', userId).firstOrFail()
+    return Address.query()
+      .select(
+        'id',
+        'user_id',
+        'recipient_name',
+        'phone_number',
+        'address_line',
+        'ward',
+        'district',
+        'province',
+        'latitude',
+        'longitude',
+        'is_default'
+      )
+      .where('id', addressId)
+      .where('user_id', userId)
+      .firstOrFail()
   }
 
   /**
@@ -76,6 +105,7 @@ export default class AddressService {
   ) {
     return await db.transaction(async (trx) => {
       const address = await Address.query({ client: trx })
+        .select('id', 'is_default')
         .where('id', addressId)
         .where('user_id', userId)
         .firstOrFail()
@@ -103,6 +133,7 @@ export default class AddressService {
   async deleteAddress(userId: number, addressId: number) {
     return await db.transaction(async (trx) => {
       const address = await Address.query({ client: trx })
+        .select('id', 'is_default')
         .where('id', addressId)
         .where('user_id', userId)
         .firstOrFail()
@@ -115,6 +146,7 @@ export default class AddressService {
       // If we deleted the default address, promote another one to default
       if (wasDefault) {
         const nextAddress = await Address.query({ client: trx })
+          .select('id')
           .where('user_id', userId)
           .orderBy('id', 'desc')
           .first()

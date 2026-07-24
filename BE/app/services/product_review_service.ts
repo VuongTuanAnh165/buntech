@@ -47,10 +47,22 @@ export default class ProductReviewService {
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
 
     return await ProductReview.query()
+      .select(
+        'id',
+        'rating',
+        'content',
+        'created_at',
+        'user_id',
+        'product_id',
+        'is_approved',
+        'has_purchased',
+        'replied_by',
+        'reply_content'
+      )
       .preload('user', (q) => q.select('id', 'fullName'))
       .preload('product', (q) => q.select('id', 'name'))
       .preload('replier', (q) => q.select('id', 'fullName'))
-      .preload('images')
+      .preload('images', (q) => q.select('review_id', 'file_url'))
       .orderBy('createdAt', 'desc')
       .paginate(page, safeLimit)
   }
@@ -63,6 +75,7 @@ export default class ProductReviewService {
 
     // Check if user has purchased this product
     const orderItem = await OrderItem.query()
+      .select('id')
       .where('productId', productId)
       .whereHas('order', (query) => {
         query.where('userId', userId)
@@ -127,7 +140,10 @@ export default class ProductReviewService {
   async approve(id: number, data: ApproveProductReviewDTO) {
     const trx = await db.transaction()
     try {
-      const review = await ProductReview.findOrFail(id, { client: trx })
+      const review = await ProductReview.query({ client: trx })
+        .select('id', 'is_approved', 'product_id')
+        .where('id', id)
+        .firstOrFail()
       review.useTransaction(trx)
       review.isApproved = data.isApproved
       await review.save()
@@ -148,7 +164,10 @@ export default class ProductReviewService {
    * Admin: Reply to a review
    */
   async reply(id: number, adminId: number, data: ReplyProductReviewDTO) {
-    const review = await ProductReview.findOrFail(id)
+    const review = await ProductReview.query()
+      .select('id', 'reply_content', 'replied_by')
+      .where('id', id)
+      .firstOrFail()
     review.replyContent = data.replyContent
     review.repliedBy = adminId
     await review.save()
@@ -162,7 +181,10 @@ export default class ProductReviewService {
   async delete(id: number) {
     const trx = await db.transaction()
     try {
-      const review = await ProductReview.findOrFail(id, { client: trx })
+      const review = await ProductReview.query({ client: trx })
+        .select('id', 'product_id')
+        .where('id', id)
+        .firstOrFail()
       review.useTransaction(trx)
       review.deletedAt = DateTime.now()
       await review.save()
@@ -192,7 +214,10 @@ export default class ProductReviewService {
     const averageRating = result[0][0].average ? Number.parseFloat(result[0][0].average) : 0.0
 
     // Update product
-    const product = await Product.findOrFail(productId, { client: trx })
+    const product = await Product.query({ client: trx })
+      .select('id', 'total_reviews', 'average_rating')
+      .where('id', productId)
+      .firstOrFail()
     product.useTransaction(trx)
     product.totalReviews = totalReviews
     product.averageRating = String(averageRating)

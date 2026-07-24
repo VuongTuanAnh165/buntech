@@ -5,6 +5,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 export default class SwaggerController {
   /**
+   * @swagger
    * Trả về file cấu trúc API (OpenAPI spec)
    */
   async swagger({ response }: HttpContext) {
@@ -41,7 +42,6 @@ export default class SwaggerController {
           }
         }
       }
-
       for (const key in obj) {
         if (key !== 'properties') {
           fixSwaggerProperties(obj[key] as Record<string, unknown>)
@@ -227,10 +227,54 @@ export default class SwaggerController {
       }
     }
 
+    // Tự động sinh ra các Schema Wrapper (Response) cho TẤT CẢ các Schema
+    // Để Controller JSDoc có thể viết gọn: @responseBody 200 - <ModelResponse> hoặc <PaginatedModelListResponse>
+    const schemaNames = Object.keys(docs.components.schemas)
+    for (const schemaName of schemaNames) {
+      if (schemaName.endsWith('Response') || schemaName.startsWith('Paginated')) continue
+
+      // 1. Tạo ModelResponse: { success, message, data: Model }
+      const modelResponseName = `${schemaName}Response`
+      if (!docs.components.schemas[modelResponseName]) {
+        docs.components.schemas[modelResponseName] = {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            message: { type: 'string', example: 'Thành công' },
+            data: { $ref: `#/components/schemas/${schemaName}` },
+          },
+        }
+      }
+
+      // 2. Tạo PaginatedModelList: { meta: PaginationMeta, data: Model[] }
+      const paginatedListName = `Paginated${schemaName}List`
+      docs.components.schemas[paginatedListName] = {
+        type: 'object',
+        properties: {
+          meta: { $ref: '#/components/schemas/PaginationMeta' },
+          data: { type: 'array', items: { $ref: `#/components/schemas/${schemaName}` } },
+        },
+      }
+
+      // 3. Tạo PaginatedModelListResponse: { success, message, data: PaginatedModelList }
+      const paginatedListResponseName = `${paginatedListName}Response`
+      if (!docs.components.schemas[paginatedListResponseName]) {
+        docs.components.schemas[paginatedListResponseName] = {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            message: { type: 'string', example: 'Thành công' },
+            data: { $ref: `#/components/schemas/${paginatedListName}` },
+          },
+        }
+      }
+    }
+
     return response.send(docs)
   }
 
   /**
+   * @docs
    * Trả về giao diện HTML Swagger UI
    */
   async docs({ response }: HttpContext) {

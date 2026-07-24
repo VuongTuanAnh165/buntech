@@ -97,6 +97,7 @@ export default class MasterDataService {
 
     // Get the latest hash from master_data_syncs
     const lastSync = await MasterDataSync.query()
+      .select('source_hash')
       .where('type', 'administrative_division')
       .where('status', 'success')
       .orderBy('syncedAt', 'desc')
@@ -230,6 +231,7 @@ export default class MasterDataService {
    */
   public async getDivisionsVersion() {
     const lastSync = await MasterDataSync.query()
+      .select('source_hash')
       .where('type', 'administrative_division')
       .where('status', 'success')
       .orderBy('syncedAt', 'desc')
@@ -256,7 +258,9 @@ export default class MasterDataService {
     }
 
     // Load all divisions from DB
-    const divisions = await AdministrativeDivision.query().orderBy('code', 'asc')
+    const divisions = await AdministrativeDivision.query()
+      .select('code', 'name', 'codename', 'division_type', 'phone_code', 'level', 'parent_code')
+      .orderBy('code', 'asc')
 
     // Build tree on RAM (avoid N+1 query)
     const provinceMap = new Map<number, DivisionTreeItem>()

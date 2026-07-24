@@ -8,10 +8,11 @@ export default class DeviceTokensController {
   constructor(protected deviceTokenService: DeviceTokenService) {}
 
   /**
+   * @store
    * @summary Đăng ký Device Token
    * @description Driver (hoặc User) đăng ký FCM Token của thiết bị để nhận Push Notification.
-   * @requestBody {"fcmToken": "string", "deviceType": "ANDROID"}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {}}
+   * @requestBody <deviceTokenValidator>
+   * @responseBody 200 - <SuccessResponse>
    */
   async store({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()

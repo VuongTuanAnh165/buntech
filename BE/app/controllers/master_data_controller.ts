@@ -9,8 +9,9 @@ export default class MasterDataController {
 
   /**
    * @getDivisionsVersion
+   * @summary Lấy phiên bản Master Data
    * @description GET /api/v1/master-data/divisions/version
-   * @responseBody 200 - {"success": true, "message": "string", "data": {"versionHash": "string"}}
+   * @responseBody 200 - {"success": true, "message": "Lấy phiên bản thành công", "data": {"versionHash": "string"}}
    */
   async getDivisionsVersion({ response }: HttpContext) {
     const version = await this.masterDataService.getDivisionsVersion()
@@ -25,15 +26,16 @@ export default class MasterDataController {
 
   /**
    * @getDivisions
+   * @summary Lấy cây đơn vị hành chính
    * @description GET /api/v1/master-data/divisions
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"code": 1, "name": "string", "codename": "string", "division_type": "string", "phone_code": 1, "wards": [{"code": 1, "name": "string", "codename": "string", "division_type": "string"}]}]}
-   * @responseBody 304 - Not Modified
+   * @responseBody 200 - <SuccessResponse>
    */
   async getDivisions({ request, response }: HttpContext) {
     const currentVersion = await this.masterDataService.getDivisionsVersion()
 
     // Check ETag
     const ifNoneMatch = request.header('if-none-match')
+
     if (currentVersion && ifNoneMatch === currentVersion) {
       return response.status(HttpStatus.NOT_MODIFIED).send('') // Not Modified
     }
@@ -41,6 +43,7 @@ export default class MasterDataController {
     const divisionsTree = await this.masterDataService.getDivisionsTree()
 
     // Set ETag and Cache-Control
+
     if (currentVersion) {
       response.header('ETag', currentVersion)
     }

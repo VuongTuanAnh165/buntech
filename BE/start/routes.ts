@@ -1,4 +1,4 @@
-/*
+﻿/*
 |--------------------------------------------------------------------------
 | Routes file
 |--------------------------------------------------------------------------
@@ -270,7 +270,63 @@ router
       () => import('#controllers/system_configs_controller'),
       'destroy',
     ])
+
+    // Raw Materials CRUD
+    router.get('/admin/raw-materials', [
+      () => import('#controllers/raw_materials_controller'),
+      'index',
+    ])
+    router.get('/admin/raw-materials/:id', [
+      () => import('#controllers/raw_materials_controller'),
+      'show',
+    ])
+    router.post('/admin/raw-materials', [
+      () => import('#controllers/raw_materials_controller'),
+      'store',
+    ])
+    router.put('/admin/raw-materials/:id', [
+      () => import('#controllers/raw_materials_controller'),
+      'update',
+    ])
+    router.delete('/admin/raw-materials/:id', [
+      () => import('#controllers/raw_materials_controller'),
+      'destroy',
+    ])
+
+    // Inventory
+    router.post('/admin/inventory/import', [
+      () => import('#controllers/inventory_controller'),
+      'importMaterial',
+    ])
+
+    // Dashboard
+    router.get('/admin/dashboard/overview', [
+      () => import('#controllers/dashboard_controller'),
+      'overview',
+    ])
+
+    // Exports
+    router.get('/admin/exports/orders-today', [
+      () => import('#controllers/exports_controller'),
+      'exportOrdersToday',
+    ])
   })
   .prefix('/api/v1')
   .use(middleware.auth())
   .use(middleware.admin())
+
+// Driver Routes (Yêu cầu Authentication, Role: Driver - sẽ xử lý phân quyền bên trong controller/policy nếu cần, tạm thời tách khỏi admin middleware)
+router
+  .group(() => {
+    router.post('/device-tokens', [() => import('#controllers/device_tokens_controller'), 'store'])
+    router.get('/routes/today', [
+      () => import('#controllers/driver_routes_controller'),
+      'getTodayRoutes',
+    ])
+    router.patch('/orders/:id/deliver', [
+      () => import('#controllers/driver_orders_controller'),
+      'deliver',
+    ])
+  })
+  .prefix('/api/v1/driver')
+  .use(middleware.auth())

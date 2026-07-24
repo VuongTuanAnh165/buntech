@@ -6,7 +6,20 @@ export default class ExportService {
    * Tạo nội dung CSV cho danh sách đơn hàng
    */
   async exportOrdersToCsv(filters: { startDate?: DateTime; endDate?: DateTime }): Promise<string> {
-    const query = Order.query().preload('user').preload('driver').orderBy('created_at', 'desc')
+    const query = Order.query()
+      .select(
+        'id',
+        'created_at',
+        'user_id',
+        'driver_id',
+        'total_amount',
+        'status',
+        'payment_status',
+        'note'
+      )
+      .preload('user', (q) => q.select('id', 'fullName', 'phoneNumber'))
+      .preload('driver', (q) => q.select('id', 'fullName'))
+      .orderBy('created_at', 'desc')
 
     if (filters.startDate) {
       query.where('created_at', '>=', filters.startDate.toSQLDate() as string)

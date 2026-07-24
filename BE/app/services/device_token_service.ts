@@ -12,7 +12,10 @@ export default class DeviceTokenService {
     }
   ) {
     // Check if the token already exists in the system
-    let deviceToken = await DeviceToken.query().where('fcm_token', data.fcmToken).first()
+    let deviceToken = await DeviceToken.query()
+      .select('id', 'user_id', 'fcm_token', 'device_type')
+      .where('fcm_token', data.fcmToken)
+      .first()
 
     if (deviceToken) {
       // If token exists but belongs to a different user, update it

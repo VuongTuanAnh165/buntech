@@ -11,11 +11,11 @@ export default class CategoriesController {
 
   /**
    * @index
+   * @summary Danh sách danh mục (Admin)
    * @description GET /api/v1/admin/categories
-   * @paramUse(sort, limit)
-   * @param page - page number - @type(number)
-   * @param limit - items per page - @type(number)
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<CategoryAdminList[]>", "meta": "<PaginationMeta>"}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Category"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
    */
   async index({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -43,8 +43,9 @@ export default class CategoriesController {
 
   /**
    * @clientIndex
+   * @summary Danh sách danh mục (Client)
    * @description GET /api/v1/categories
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<CategoryClientList[]>"}
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Category"}]}
    */
   async clientIndex({ response }: HttpContext) {
     const categories = await this.categoryService.clientList()
@@ -57,9 +58,10 @@ export default class CategoriesController {
 
   /**
    * @store
+   * @summary Tạo danh mục mới
    * @description POST /api/v1/admin/categories
    * @requestBody <createCategoryValidator>
-   * @responseBody 201 - {"success": true, "message": "string", "data": "<Category>"}
+   * @responseBody 201 - <CategoryResponse>
    */
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createCategoryValidator)
@@ -75,9 +77,10 @@ export default class CategoriesController {
 
   /**
    * @show
+   * @summary Chi tiết danh mục (Admin)
    * @description GET /api/v1/admin/categories/:id
-   * @paramPath id - Category ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<Category>"}
+   * @paramPath id - Category ID
+   * @responseBody 200 - <CategoryResponse>
    */
   async show({ params, response }: HttpContext) {
     const category = await this.categoryService.findById(params.id)
@@ -90,9 +93,10 @@ export default class CategoriesController {
 
   /**
    * @clientShow
+   * @summary Chi tiết danh mục (Client)
    * @description GET /api/v1/categories/:id
-   * @paramPath id - Category ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<CategoryClientList>"}
+   * @paramPath id - Category ID
+   * @responseBody 200 - <CategoryResponse>
    */
   async clientShow({ params, response }: HttpContext) {
     const category = await this.categoryService.findByIdForClient(params.id)
@@ -105,10 +109,11 @@ export default class CategoriesController {
 
   /**
    * @update
+   * @summary Cập nhật danh mục
    * @description PUT /api/v1/admin/categories/:id
-   * @paramPath id - Category ID - @type(number) @required
+   * @paramPath id - Category ID
    * @requestBody <updateCategoryValidator>
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<Category>"}
+   * @responseBody 200 - <CategoryResponse>
    */
   async update({ params, request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(updateCategoryValidator, {
@@ -126,9 +131,10 @@ export default class CategoriesController {
 
   /**
    * @destroy
+   * @summary Xóa danh mục
    * @description DELETE /api/v1/admin/categories/:id
-   * @paramPath id - Category ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string"}
+   * @paramPath id - Category ID
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response, auth }: HttpContext) {
     const userId = auth.user!.id

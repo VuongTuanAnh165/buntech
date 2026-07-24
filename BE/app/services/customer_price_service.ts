@@ -8,8 +8,9 @@ export default class CustomerPriceService {
    */
   async getUserPrices(userId: number) {
     return CustomerPrice.query()
+      .select('id', 'user_id', 'product_id', 'custom_price', 'created_at')
       .where('user_id', userId)
-      .preload('product')
+      .preload('product', (q) => q.select('id', 'name', 'thumbnailUrl'))
       .orderBy('created_at', 'desc')
   }
 
@@ -24,11 +25,15 @@ export default class CustomerPriceService {
     }
   ) {
     // Check if product exists
-    const product = await Product.findOrFail(data.productId)
+    const product = await Product.query()
+      .select('id', 'name', 'thumbnail_url')
+      .where('id', data.productId)
+      .firstOrFail()
 
     return await db.transaction(async (trx) => {
       // Find existing price
       let customerPrice = await CustomerPrice.query({ client: trx })
+        .select('id', 'user_id', 'product_id', 'custom_price')
         .where('user_id', userId)
         .where('product_id', data.productId)
         .first()
@@ -57,6 +62,7 @@ export default class CustomerPriceService {
    */
   async deletePrice(userId: number, productId: number) {
     const customerPrice = await CustomerPrice.query()
+      .select('id')
       .where('user_id', userId)
       .where('product_id', productId)
       .firstOrFail()

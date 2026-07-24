@@ -8,9 +8,14 @@ export default class TransactionsController {
   constructor(protected transactionService: TransactionService) {}
 
   /**
+   * @index
    * @summary Danh sách giao dịch
    * @description Lấy danh sách Sổ cái các khoản thu chi/công nợ
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"id": 1, "userId": 1, "amount": "10000", "type": "PAYMENT", "paymentMethod": "CASH", "referenceCode": "string", "transactionDate": "string", "createdAt": "string"}]}}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @paramQuery userId - ID Khách hàng
+   * @paramQuery type - Loại giao dịch
+   * @responseBody 200 - <PaginatedTransactionListResponse>
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -31,10 +36,11 @@ export default class TransactionsController {
   }
 
   /**
+   * @payDebt
    * @summary Thanh toán nợ
    * @description Ghi nhận khách hàng trả nợ, tự động trừ vào current_debt của khách.
-   * @requestBody {"userId": 1, "amount": 1000000, "paymentMethod": "CASH"}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {}}
+   * @requestBody <payDebtValidator>
+   * @responseBody 200 - <TransactionResponse>
    */
   async payDebt({ request, response }: HttpContext) {
     const payload = await request.validateUsing(payDebtValidator)
@@ -53,9 +59,10 @@ export default class TransactionsController {
   }
 
   /**
+   * @debtSummary
    * @summary Tổng kết nợ
    * @description Xem tổng nợ toàn hệ thống và top khách hàng nợ nhiều nhất
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"totalDebt": "10000000", "topDebtors": []}}
+   * @responseBody 200 - <DebtSummaryResponse>
    */
   async debtSummary({ response }: HttpContext) {
     const summary = await this.transactionService.getDebtSummary()

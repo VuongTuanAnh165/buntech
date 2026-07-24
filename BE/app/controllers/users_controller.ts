@@ -13,10 +13,13 @@ export default class UsersController {
   constructor(protected userService: UserService) {}
 
   /**
+   * @index
    * @summary Danh sách User
    * @description Lấy danh sách người dùng (chỉ dành cho Admin)
-   * @paramUse(sortable, filterable)
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"id": 1, "fullName": "string", "phoneNumber": "string", "role": "string", "createdAt": "string", "profile": {"userId": 1, "avatarUrl": "string", "storeName": "string", "debtLimit": "string", "currentDebt": "string"}}]}}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @paramQuery role - Vai trò của người dùng
+   * @responseBody 200 - <PaginatedUserListResponse>
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -33,10 +36,11 @@ export default class UsersController {
   }
 
   /**
+   * @store
    * @summary Tạo User
    * @description Tạo người dùng mới và profile rỗng (chỉ dành cho Admin)
-   * @requestBody {"phoneNumber": "string", "password": "password", "fullName": "string", "role": "ADMIN|DRIVER|WHOLESALE|RETAIL|GUEST"}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"id": 1, "fullName": "string", "phoneNumber": "string", "role": "string"}}
+   * @requestBody <createUserValidator>
+   * @responseBody 201 - <UserResponse>
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createUserValidator)
@@ -51,10 +55,11 @@ export default class UsersController {
   }
 
   /**
+   * @show
    * @summary Chi tiết User
    * @description Lấy thông tin chi tiết một người dùng
    * @paramPath id - ID người dùng
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "fullName": "string", "phoneNumber": "string", "role": "string", "createdAt": "string", "profile": {"userId": 1, "avatarUrl": "string", "storeName": "string", "debtLimit": "string", "currentDebt": "string"}}}
+   * @responseBody 200 - <UserResponse>
    */
   async show({ params, response }: HttpContext) {
     const user = await this.userService.getUser(params.id)
@@ -67,11 +72,12 @@ export default class UsersController {
   }
 
   /**
+   * @update
    * @summary Cập nhật User
    * @description Cập nhật thông tin (tên, role) của người dùng
    * @paramPath id - ID người dùng
-   * @requestBody {"fullName": "string", "role": "string"}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "fullName": "string", "phoneNumber": "string", "role": "string"}}
+   * @requestBody <updateUserValidator>
+   * @responseBody 200 - <UserResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateUserValidator)
@@ -85,11 +91,12 @@ export default class UsersController {
   }
 
   /**
+   * @changePassword
    * @summary Đổi mật khẩu
    * @description Admin đặt lại mật khẩu cho người dùng
    * @paramPath id - ID người dùng
-   * @requestBody {"password": "new_password"}
-   * @responseBody 200 - {"success": true, "message": "Thành công"}
+   * @requestBody <changePasswordValidator>
+   * @responseBody 200 - <SuccessResponse>
    */
   async changePassword({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(changePasswordValidator)
@@ -102,10 +109,11 @@ export default class UsersController {
   }
 
   /**
+   * @destroy
    * @summary Xóa User
    * @description Xóa tài khoản người dùng
    * @paramPath id - ID người dùng
-   * @responseBody 200 - {"success": true, "message": "Thành công"}
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response }: HttpContext) {
     await this.userService.deleteUser(params.id)
@@ -116,11 +124,12 @@ export default class UsersController {
     })
   }
   /**
+   * @updateProfile
    * @summary Cập nhật Profile
    * @description Admin cập nhật hạn mức nợ (debt_limit) và thông tin cửa hàng
    * @paramPath id - ID người dùng
-   * @requestBody {"debtLimit": 10000000, "storeName": "Cửa hàng A", "zaloUserId": "string", "avatarUrl": "string"}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {}}
+   * @requestBody <updateUserProfileValidator>
+   * @responseBody 200 - <UserProfileResponse>
    */
   async updateProfile({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateUserProfileValidator)

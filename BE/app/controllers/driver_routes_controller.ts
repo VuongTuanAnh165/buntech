@@ -7,9 +7,10 @@ export default class DriverRoutesController {
   constructor(protected driverRouteService: DriverRouteService) {}
 
   /**
+   * @getTodayRoutes
    * @summary Lấy lộ trình giao hàng (Tài xế)
    * @description Lấy danh sách các đơn hàng cần giao trong ngày của tài xế đang đăng nhập. Sắp xếp tự động theo thứ tự giao hàng (routeOrder).
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": []}
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Order"}]}
    */
   async getTodayRoutes({ auth, response }: HttpContext) {
     const user = auth.getUserOrFail()

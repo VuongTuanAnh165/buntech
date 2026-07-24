@@ -11,11 +11,11 @@ export default class ProductsController {
 
   /**
    * @index
+   * @summary Danh sách sản phẩm (Admin)
    * @description GET /api/v1/admin/products
-   * @paramUse(sort, limit)
-   * @param page - page number - @type(number)
-   * @param limit - items per page - @type(number)
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductAdminList[]>", "meta": "<PaginationMeta>"}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Product"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
    */
   async index({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -43,12 +43,12 @@ export default class ProductsController {
 
   /**
    * @clientIndex
+   * @summary Danh sách sản phẩm (Client)
    * @description GET /api/v1/products
-   * @paramUse(sort, limit)
-   * @param page - page number - @type(number)
-   * @param limit - items per page - @type(number)
-   * @param categoryId - category ID - @type(number)
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductClientList[]>", "meta": "<PaginationMeta>"}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @paramQuery categoryId - ID Danh mục
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Product"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
    */
   async clientIndex({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -81,9 +81,10 @@ export default class ProductsController {
 
   /**
    * @store
+   * @summary Tạo sản phẩm
    * @description POST /api/v1/admin/products
    * @requestBody <createProductValidator>
-   * @responseBody 201 - {"success": true, "message": "string", "data": "<Product>"}
+   * @responseBody 201 - <ProductResponse>
    */
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createProductValidator)
@@ -99,9 +100,10 @@ export default class ProductsController {
 
   /**
    * @show
+   * @summary Chi tiết sản phẩm (Admin)
    * @description GET /api/v1/admin/products/:id
-   * @paramPath id - Product ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductAdminShow>"}
+   * @paramPath id - Product ID
+   * @responseBody 200 - <ProductResponse>
    */
   async show({ params, response }: HttpContext) {
     const product = await this.productService.findById(params.id)
@@ -114,9 +116,10 @@ export default class ProductsController {
 
   /**
    * @clientShow
+   * @summary Chi tiết sản phẩm (Client)
    * @description GET /api/v1/products/:id
-   * @paramPath id - Product ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<Product>"}
+   * @paramPath id - Product ID
+   * @responseBody 200 - <ProductResponse>
    */
   async clientShow({ params, response }: HttpContext) {
     // Client dùng chung endpoint lấy chi tiết bằng ID
@@ -130,10 +133,11 @@ export default class ProductsController {
 
   /**
    * @update
+   * @summary Cập nhật sản phẩm
    * @description PUT /api/v1/admin/products/:id
-   * @paramPath id - Product ID - @type(number) @required
+   * @paramPath id - Product ID
    * @requestBody <updateProductValidator>
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<Product>"}
+   * @responseBody 200 - <ProductResponse>
    */
   async update({ params, request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(updateProductValidator)
@@ -149,9 +153,10 @@ export default class ProductsController {
 
   /**
    * @destroy
+   * @summary Xóa sản phẩm
    * @description DELETE /api/v1/admin/products/:id
-   * @paramPath id - Product ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string"}
+   * @paramPath id - Product ID
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response, auth }: HttpContext) {
     const userId = auth.user!.id

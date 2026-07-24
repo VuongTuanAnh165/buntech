@@ -55,6 +55,7 @@ export default class ProductService {
   private async getOldGalleryKeysToDelete(productId: number, deletedImageIds: number[]) {
     const oldKeys: string[] = []
     const imagesToDelete = await ProductImage.query()
+      .select('file_url')
       .where('productId', productId)
       .whereIn('id', deletedImageIds)
 
@@ -124,9 +125,28 @@ export default class ProductService {
    */
   async findById(id: number) {
     return await Product.query()
+      .select(
+        'id',
+        'name',
+        'slug',
+        'base_price',
+        'unit',
+        'is_active',
+        'thumbnail_url',
+        'short_description',
+        'content',
+        'category_id',
+        'meta_title',
+        'meta_description',
+        'total_reviews',
+        'average_rating',
+        'created_at'
+      )
       .where('id', id)
       .preload('category', (q) => q.select('id', 'name'))
-      .preload('images', (q) => q.orderBy('displayOrder', 'asc'))
+      .preload('images', (q) =>
+        q.select('id', 'file_url', 'alt_text', 'display_order').orderBy('displayOrder', 'asc')
+      )
       .firstOrFail()
   }
 
@@ -135,10 +155,27 @@ export default class ProductService {
    */
   async findByIdForClient(id: number) {
     return await Product.query()
+      .select(
+        'id',
+        'name',
+        'slug',
+        'base_price',
+        'unit',
+        'thumbnail_url',
+        'short_description',
+        'content',
+        'category_id',
+        'meta_title',
+        'meta_description',
+        'total_reviews',
+        'average_rating'
+      )
       .where('id', id)
       .where('isActive', true)
       .preload('category', (q) => q.select('id', 'name', 'slug'))
-      .preload('images', (q) => q.orderBy('displayOrder', 'asc').select('id', 'fileUrl', 'altText'))
+      .preload('images', (q) =>
+        q.select('id', 'file_url', 'alt_text', 'display_order').orderBy('displayOrder', 'asc')
+      )
       .firstOrFail()
   }
 
@@ -203,7 +240,10 @@ export default class ProductService {
    * Cập nhật sản phẩm
    */
   async update(id: number, data: UpdateProductDTO, userId: number) {
-    const product = await Product.findOrFail(id)
+    const product = await Product.query()
+      .select('id', 'thumbnail_url', 'base_price', 'category_id') // minimum fields needed to avoid undefined when merging
+      .where('id', id)
+      .firstOrFail()
     const { thumbnail, images, deletedImageIds, imageOrders, ...productData } = data
 
     let thumbnailUrl: string | undefined
@@ -228,6 +268,7 @@ export default class ProductService {
     // 3. Upload New Gallery Images
     if (images && images.length > 0) {
       const maxOrderRecord = await ProductImage.query()
+        .select('display_order')
         .where('productId', product.id)
         .orderBy('displayOrder', 'desc')
         .first()
@@ -296,7 +337,7 @@ export default class ProductService {
    * Xóa mềm sản phẩm
    */
   async delete(id: number, userId: number) {
-    const product = await Product.findOrFail(id)
+    const product = await Product.query().select('id').where('id', id).firstOrFail()
     product.deletedAt = DateTime.now()
     product.updatedBy = userId
     await product.save()

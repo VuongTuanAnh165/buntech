@@ -10,6 +10,18 @@ export default class DriverRouteService {
 
     return (
       Order.query()
+        .select(
+          'id',
+          'user_id',
+          'shipping_address_id',
+          'total_amount',
+          'status',
+          'delivery_status',
+          'payment_status',
+          'route_order',
+          'delivery_date',
+          'note'
+        )
         .where('driver_id', driverId)
         // Lấy các đơn hàng có lịch giao từ hôm nay trở về trước (có thể đơn cũ chưa giao)
         .where('delivery_date', '<=', today.toSQLDate() as string)
@@ -18,10 +30,22 @@ export default class DriverRouteService {
         // Sắp xếp ưu tiên: Theo ngày giao, sau đó theo thứ tự routeOrder
         .orderBy('delivery_date', 'asc')
         .orderBy('route_order', 'asc')
-        .preload('shippingAddress')
-        .preload('user')
+        .preload('shippingAddress', (q) =>
+          q.select(
+            'id',
+            'address_line',
+            'ward',
+            'district',
+            'province',
+            'phone_number',
+            'recipient_name'
+          )
+        )
+        .preload('user', (q) => q.select('id', 'fullName', 'phoneNumber'))
         .preload('items', (q) => {
-          q.preload('product')
+          q.select('id', 'order_id', 'product_id', 'quantity').preload('product', (pq) =>
+            pq.select('id', 'name', 'thumbnailUrl')
+          )
         })
     )
   }

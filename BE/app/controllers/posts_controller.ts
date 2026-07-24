@@ -12,12 +12,12 @@ export default class PostsController {
 
   /**
    * @clientIndex
+   * @summary Danh sách bài viết (Client)
    * @description Public API: Get all published posts
-   * @paramUse(sort, limit)
-   * @param page - page number - @type(number)
-   * @param limit - items per page - @type(number)
-   * @param categoryId - category ID - @type(number)
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<PostList[]>", "meta": "<PaginationMeta>"}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @paramQuery categoryId - ID Danh mục
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Post"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
    */
   async clientIndex({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -49,9 +49,10 @@ export default class PostsController {
 
   /**
    * @clientShow
+   * @summary Chi tiết bài viết (Client)
    * @description Public API: Get single published post
-   * @paramPath id - Post ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<PostDetail>"}
+   * @paramPath id - Post ID
+   * @responseBody 200 - <PostResponse>
    */
   async clientShow({ params, response }: HttpContext) {
     const post = await this.postService.findById(params.id, { isPublic: true })
@@ -64,12 +65,12 @@ export default class PostsController {
 
   /**
    * @index
+   * @summary Danh sách bài viết (Admin)
    * @description Admin API: Get all posts
-   * @paramUse(sort, limit)
-   * @param page - page number - @type(number)
-   * @param limit - items per page - @type(number)
-   * @param categoryId - category ID - @type(number)
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<PostList[]>", "meta": "<PaginationMeta>"}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @paramQuery categoryId - ID Danh mục
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Post"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
    */
   async index({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -100,9 +101,10 @@ export default class PostsController {
 
   /**
    * @show
+   * @summary Chi tiết bài viết (Admin)
    * @description Admin API: Get single post
-   * @paramPath id - Post ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<PostDetail>"}
+   * @paramPath id - Post ID
+   * @responseBody 200 - <PostResponse>
    */
   async show({ params, response }: HttpContext) {
     const post = await this.postService.findById(params.id)
@@ -115,9 +117,10 @@ export default class PostsController {
 
   /**
    * @store
+   * @summary Tạo bài viết
    * @description Admin API: Create new post
    * @requestBody <createPostValidator>
-   * @responseBody 201 - {"success": true, "message": "string", "data": "<Post>"}
+   * @responseBody 201 - <PostResponse>
    */
   async store({ request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(createPostValidator)
@@ -134,10 +137,11 @@ export default class PostsController {
 
   /**
    * @update
+   * @summary Cập nhật bài viết
    * @description Admin API: Update post
-   * @paramPath id - Post ID - @type(number) @required
+   * @paramPath id - Post ID
    * @requestBody <updatePostValidator>
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<Post>"}
+   * @responseBody 200 - <PostResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updatePostValidator)
@@ -152,9 +156,10 @@ export default class PostsController {
 
   /**
    * @destroy
+   * @summary Xóa bài viết
    * @description Admin API: Delete post (Soft delete)
-   * @paramPath id - Post ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string"}
+   * @paramPath id - Post ID
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response }: HttpContext) {
     await this.postService.delete(params.id)

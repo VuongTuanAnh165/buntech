@@ -11,10 +11,12 @@ export default class SystemConfigsController {
   constructor(protected systemConfigService: SystemConfigService) {}
 
   /**
+   * @index
    * @summary Lấy danh sách cấu hình hệ thống
    * @description Trả về danh sách cấu hình động của hệ thống (có phân trang)
-   * @paramUse(sortable, filterable)
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"key": "string", "value": "string", "description": "string", "createdAt": "string"}]}}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng cấu hình
+   * @responseBody 200 - <PaginatedSystemConfigListResponse>
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -29,11 +31,11 @@ export default class SystemConfigsController {
   }
 
   /**
+   * @store
    * @summary Tạo cấu hình mới
    * @description Thêm một key-value cấu hình hệ thống
-   * @requestBody {"key": "string", "value": "string", "description": "string"}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string", "description": "string", "createdAt": "string", "updatedAt": "string"}}
-   * @responseBody 400 - {"success": false, "message": "Lỗi validate hoặc key đã tồn tại"}
+   * @requestBody <createSystemConfigValidator>
+   * @responseBody 201 - <SystemConfigResponse>
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createSystemConfigValidator)
@@ -47,11 +49,11 @@ export default class SystemConfigsController {
   }
 
   /**
+   * @show
    * @summary Chi tiết cấu hình
    * @description Lấy chi tiết một cấu hình hệ thống theo key
    * @paramPath id - Key của cấu hình
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string", "description": "string"}}
-   * @responseBody 404 - {"success": false, "message": "Không tìm thấy cấu hình"}
+   * @responseBody 200 - <SystemConfigResponse>
    */
   async show({ params, response }: HttpContext) {
     const config = await this.systemConfigService.getConfig(params.id)
@@ -64,11 +66,12 @@ export default class SystemConfigsController {
   }
 
   /**
+   * @update
    * @summary Cập nhật cấu hình
    * @description Thay đổi giá trị của cấu hình hiện tại
    * @paramPath id - Key của cấu hình
-   * @requestBody {"value": "string", "description": "string"}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"key": "string", "value": "string", "description": "string"}}
+   * @requestBody <updateSystemConfigValidator>
+   * @responseBody 200 - <SystemConfigResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateSystemConfigValidator)
@@ -82,10 +85,11 @@ export default class SystemConfigsController {
   }
 
   /**
+   * @destroy
    * @summary Xóa cấu hình
    * @description Xóa vĩnh viễn cấu hình hệ thống
    * @paramPath id - Key của cấu hình
-   * @responseBody 200 - {"success": true, "message": "Xóa thành công"}
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response }: HttpContext) {
     await this.systemConfigService.deleteConfig(params.id)

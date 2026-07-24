@@ -66,7 +66,7 @@ export default class PostService {
         'publishedAt'
       )
       .where('id', id)
-      .preload('category')
+      .preload('category', (q) => q.select('id', 'name', 'slug'))
       .preload('author', (q) => q.select('id', 'fullName'))
 
     if (options?.isPublic) {
@@ -139,7 +139,7 @@ export default class PostService {
   }
 
   async delete(id: number) {
-    const post = await this.findById(id)
+    const post = await Post.query().select('id').where('id', id).firstOrFail()
     post.deletedAt = DateTime.now()
     await post.save()
   }

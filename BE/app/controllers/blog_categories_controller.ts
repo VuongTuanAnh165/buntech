@@ -10,8 +10,9 @@ export default class BlogCategoriesController {
 
   /**
    * @clientIndex
+   * @summary Danh sách danh mục bài viết (Client)
    * @description Public API: Get all categories
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategoryList[]>"}
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/BlogCategory"}]}
    */
   async clientIndex({ response }: HttpContext) {
     const categories = await this.blogCategoryService.getList()
@@ -24,8 +25,9 @@ export default class BlogCategoriesController {
 
   /**
    * @index
+   * @summary Danh sách danh mục bài viết (Admin)
    * @description Admin API: Get all categories
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategoryList[]>"}
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/BlogCategory"}]}
    */
   async index({ response }: HttpContext) {
     const categories = await this.blogCategoryService.getList()
@@ -38,9 +40,10 @@ export default class BlogCategoriesController {
 
   /**
    * @show
+   * @summary Chi tiết danh mục bài viết
    * @description Admin API: Get category by ID
-   * @paramPath id - Category ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategoryList>"}
+   * @paramPath id - Category ID
+   * @responseBody 200 - <BlogCategoryResponse>
    */
   async show({ params, response }: HttpContext) {
     const category = await this.blogCategoryService.findById(params.id)
@@ -53,9 +56,10 @@ export default class BlogCategoriesController {
 
   /**
    * @store
+   * @summary Tạo danh mục bài viết
    * @description Admin API: Create new category
    * @requestBody <createBlogCategoryValidator>
-   * @responseBody 201 - {"success": true, "message": "string", "data": "<BlogCategory>"}
+   * @responseBody 201 - <BlogCategoryResponse>
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createBlogCategoryValidator)
@@ -70,10 +74,11 @@ export default class BlogCategoriesController {
 
   /**
    * @update
+   * @summary Cập nhật danh mục bài viết
    * @description Admin API: Update category
-   * @paramPath id - Category ID - @type(number) @required
+   * @paramPath id - Category ID
    * @requestBody <updateBlogCategoryValidator>
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<BlogCategory>"}
+   * @responseBody 200 - <BlogCategoryResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateBlogCategoryValidator, {
@@ -90,9 +95,10 @@ export default class BlogCategoriesController {
 
   /**
    * @destroy
+   * @summary Xóa danh mục bài viết
    * @description Admin API: Delete category
-   * @paramPath id - Category ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string"}
+   * @paramPath id - Category ID
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response }: HttpContext) {
     await this.blogCategoryService.delete(params.id)

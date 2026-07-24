@@ -8,10 +8,11 @@ export default class AddressesController {
   constructor(protected addressService: AddressService) {}
 
   /**
+   * @index
    * @summary Danh sách địa chỉ
    * @description Lấy danh sách địa chỉ giao hàng của một user
    * @paramPath userId - ID người dùng
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": [{"id": 1, "addressLine": "string", "isDefault": true}]}
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Address"}]}
    */
   async index({ params, response }: HttpContext) {
     const addresses = await this.addressService.getUserAddresses(params.userId)
@@ -24,11 +25,12 @@ export default class AddressesController {
   }
 
   /**
+   * @store
    * @summary Thêm địa chỉ mới
    * @description Tạo mới địa chỉ giao hàng cho user
    * @paramPath userId - ID người dùng
-   * @requestBody {"addressLine": "string", "province": "string", "ward": "string", "isDefault": true}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"id": 1}}
+   * @requestBody <createAddressValidator>
+   * @responseBody 201 - <AddressResponse>
    */
   async store({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(createAddressValidator)
@@ -42,11 +44,12 @@ export default class AddressesController {
   }
 
   /**
+   * @show
    * @summary Chi tiết địa chỉ
    * @description Xem thông tin chi tiết của một địa chỉ
    * @paramPath userId - ID người dùng
    * @paramPath id - ID địa chỉ
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1}}
+   * @responseBody 200 - <AddressResponse>
    */
   async show({ params, response }: HttpContext) {
     const address = await this.addressService.getAddress(params.userId, params.id)
@@ -59,12 +62,13 @@ export default class AddressesController {
   }
 
   /**
+   * @update
    * @summary Cập nhật địa chỉ
    * @description Chỉnh sửa thông tin địa chỉ hoặc set địa chỉ mặc định
    * @paramPath userId - ID người dùng
    * @paramPath id - ID địa chỉ
-   * @requestBody {"addressLine": "string", "isDefault": true}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1}}
+   * @requestBody <updateAddressValidator>
+   * @responseBody 200 - <AddressResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateAddressValidator)
@@ -78,11 +82,12 @@ export default class AddressesController {
   }
 
   /**
+   * @destroy
    * @summary Xóa địa chỉ
    * @description Xóa một địa chỉ khỏi danh bạ của user
    * @paramPath userId - ID người dùng
    * @paramPath id - ID địa chỉ
-   * @responseBody 200 - {"success": true, "message": "Thành công"}
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response }: HttpContext) {
     await this.addressService.deleteAddress(params.userId, params.id)

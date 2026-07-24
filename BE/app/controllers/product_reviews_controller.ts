@@ -16,12 +16,12 @@ export default class ProductReviewsController {
 
   /**
    * @clientIndex
+   * @summary Lấy đánh giá sản phẩm (Client)
    * @description Client API: Get product reviews
-   * @paramPath id - Product ID - @type(number) @required
-   * @paramUse(sort, limit)
-   * @param page - page number - @type(number)
-   * @param limit - items per page - @type(number)
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductReviewClientList[]>", "meta": "<PaginationMeta>"}
+   * @paramPath id - Product ID
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/ProductReview"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
    */
   async clientIndex({ params, request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -49,10 +49,11 @@ export default class ProductReviewsController {
 
   /**
    * @store
+   * @summary Gửi đánh giá sản phẩm
    * @description Client API: Post a new review
-   * @paramPath id - Product ID - @type(number) @required
+   * @paramPath id - Product ID
    * @requestBody <createProductReviewValidator>
-   * @responseBody 201 - {"success": true, "message": "string", "data": "<ProductReview>"}
+   * @responseBody 201 - <ProductReviewResponse>
    */
   async store({ params, request, response, auth }: HttpContext) {
     const user = auth.user!
@@ -69,11 +70,11 @@ export default class ProductReviewsController {
 
   /**
    * @index
+   * @summary Lấy tất cả đánh giá (Admin)
    * @description Admin API: Get all product reviews
-   * @paramUse(sort, limit)
-   * @param page - page number - @type(number)
-   * @param limit - items per page - @type(number)
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductReviewAdminList[]>", "meta": "<PaginationMeta>"}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/ProductReview"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
    */
   async index({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -101,10 +102,11 @@ export default class ProductReviewsController {
 
   /**
    * @approve
+   * @summary Duyệt/Ẩn đánh giá
    * @description Admin API: Approve/Reject a review
-   * @paramPath id - Review ID - @type(number) @required
+   * @paramPath id - Review ID
    * @requestBody <approveProductReviewValidator>
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductReview>"}
+   * @responseBody 200 - <ProductReviewResponse>
    */
   async approve({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(approveProductReviewValidator)
@@ -120,9 +122,10 @@ export default class ProductReviewsController {
 
   /**
    * @destroy
+   * @summary Xóa đánh giá
    * @description Admin API: Delete a review
-   * @paramPath id - Review ID - @type(number) @required
-   * @responseBody 200 - {"success": true, "message": "string"}
+   * @paramPath id - Review ID
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response }: HttpContext) {
     await this.productReviewService.delete(params.id)
@@ -135,10 +138,11 @@ export default class ProductReviewsController {
 
   /**
    * @reply
+   * @summary Trả lời đánh giá
    * @description Admin API: Reply to a review
-   * @paramPath id - Review ID - @type(number) @required
+   * @paramPath id - Review ID
    * @requestBody <replyProductReviewValidator>
-   * @responseBody 200 - {"success": true, "message": "string", "data": "<ProductReview>"}
+   * @responseBody 200 - <ProductReviewResponse>
    */
   async reply({ params, request, response, auth }: HttpContext) {
     const admin = auth.user!

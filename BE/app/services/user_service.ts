@@ -34,7 +34,16 @@ export default class UserService {
     return User.query()
       .select('id', 'full_name', 'phone_number', 'role', 'created_at')
       .where('id', id)
-      .preload('profile')
+      .preload('profile', (q) => {
+        q.select(
+          'user_id',
+          'avatar_url',
+          'store_name',
+          'debt_limit',
+          'current_debt',
+          'zalo_user_id'
+        )
+      })
       .firstOrFail()
   }
 
@@ -60,7 +69,16 @@ export default class UserService {
       profile.useTransaction(trx)
       await profile.save()
 
-      await user.load('profile')
+      await user.load('profile', (q) => {
+        q.select(
+          'user_id',
+          'avatar_url',
+          'store_name',
+          'debt_limit',
+          'current_debt',
+          'zalo_user_id'
+        )
+      })
       return user
     })
   }
@@ -82,7 +100,9 @@ export default class UserService {
     user.merge(data)
     await user.save()
 
-    await user.load('profile')
+    await user.load('profile', (q) => {
+      q.select('user_id', 'avatar_url', 'store_name', 'debt_limit', 'current_debt', 'zalo_user_id')
+    })
     return user
   }
 

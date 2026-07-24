@@ -11,9 +11,13 @@ export default class RawMaterialsController {
   constructor(protected rawMaterialService: RawMaterialService) {}
 
   /**
+   * @index
    * @summary Danh sách nguyên vật liệu
    * @description Lấy danh sách nguyên vật liệu, hỗ trợ tìm kiếm và phân trang.
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"id": 1, "name": "string", "unit": "string", "currentStock": "string", "createdAt": "string"}]}}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @paramQuery search - Từ khóa tìm kiếm
+   * @responseBody 200 - <PaginatedRawMaterialListResponse>
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -30,9 +34,10 @@ export default class RawMaterialsController {
   }
 
   /**
+   * @show
    * @summary Chi tiết nguyên vật liệu
    * @paramPath id - ID nguyên vật liệu
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "name": "string", "unit": "string", "currentStock": "string", "createdAt": "string"}}
+   * @responseBody 200 - <RawMaterialResponse>
    */
   async show({ params, response }: HttpContext) {
     const rawMaterial = await this.rawMaterialService.getRawMaterial(params.id)
@@ -44,9 +49,10 @@ export default class RawMaterialsController {
   }
 
   /**
+   * @store
    * @summary Tạo mới nguyên vật liệu
-   * @requestBody {"name": "Gạo ST25", "unit": "kg", "currentStock": 0}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"id": 1, "name": "string", "unit": "string", "currentStock": "string", "createdAt": "string"}}
+   * @requestBody <createRawMaterialValidator>
+   * @responseBody 201 - <RawMaterialResponse>
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createRawMaterialValidator)
@@ -60,10 +66,11 @@ export default class RawMaterialsController {
   }
 
   /**
+   * @update
    * @summary Cập nhật nguyên vật liệu
    * @paramPath id - ID nguyên vật liệu
-   * @requestBody {"name": "Gạo ST25", "unit": "kg", "currentStock": 0}
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "name": "string", "unit": "string", "currentStock": "string", "createdAt": "string"}}
+   * @requestBody <updateRawMaterialValidator>
+   * @responseBody 200 - <RawMaterialResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateRawMaterialValidator)
@@ -77,10 +84,11 @@ export default class RawMaterialsController {
   }
 
   /**
+   * @destroy
    * @summary Xóa nguyên vật liệu
    * @description Xóa mềm nguyên vật liệu (Soft delete)
    * @paramPath id - ID nguyên vật liệu
-   * @responseBody 200 - {"success": true, "message": "Thành công"}
+   * @responseBody 200 - <SuccessResponse>
    */
   async destroy({ params, response }: HttpContext) {
     await this.rawMaterialService.deleteRawMaterial(params.id)

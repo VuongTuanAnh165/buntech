@@ -37,7 +37,20 @@ export default class CategoryService {
    * Lấy chi tiết bằng ID
    */
   async findById(id: number) {
-    return await Category.findOrFail(id)
+    return await Category.query()
+      .select(
+        'id',
+        'name',
+        'slug',
+        'thumbnail_url',
+        'description',
+        'meta_title',
+        'meta_description',
+        'created_at',
+        'updated_at'
+      )
+      .where('id', id)
+      .firstOrFail()
   }
 
   /**
@@ -86,7 +99,10 @@ export default class CategoryService {
    * Cập nhật
    */
   async update(id: number, data: UpdateCategoryDTO, userId: number) {
-    const category = await this.findById(id)
+    const category = await Category.query()
+      .select('id', 'thumbnail_url')
+      .where('id', id)
+      .firstOrFail()
     const { thumbnail, ...categoryData } = data
 
     let thumbnailUrl: string | undefined
@@ -130,7 +146,7 @@ export default class CategoryService {
    * Xóa (Soft Delete)
    */
   async delete(id: number, userId: number) {
-    const category = await this.findById(id)
+    const category = await Category.query().select('id').where('id', id).firstOrFail()
     category.deletedAt = DateTime.now()
     category.updatedBy = userId
     await category.save()

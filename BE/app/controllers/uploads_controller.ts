@@ -5,11 +5,12 @@ import { uploadValidator } from '#validators/upload_validator'
 
 export default class UploadsController {
   /**
+   * @store
    * @summary Upload ảnh
    * @description Tải lên một file ảnh (tối đa 5MB, định dạng jpg, png, jpeg, webp)
    * @requestFormDataBody {"image": "file"}
-   * @responseBody 200 - {"success": true, "message": "Upload thành công", "data": {"url": "string", "path": "string"}}
-   * @responseBody 400 - {"success": false, "message": "File không hợp lệ"}
+   * @requestBody <uploadValidator>
+   * @responseBody 200 - <UploadResponse>
    */
   async store({ request, response }: HttpContext) {
     const { image } = await request.validateUsing(uploadValidator)

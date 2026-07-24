@@ -12,9 +12,15 @@ export default class AdminOrdersController {
   constructor(protected adminOrderService: AdminOrderService) {}
 
   /**
+   * @index
    * @summary Danh sách đơn hàng (Admin)
    * @description Lấy danh sách toàn bộ đơn hàng trong hệ thống
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"meta": {}, "data": [{"id": 1, "userId": 1, "driverId": 2, "totalAmount": "string", "status": "string", "createdAt": "string", "user": {"id": 1, "fullName": "string", "phoneNumber": "string"}, "driver": {"id": 2, "fullName": "string", "phoneNumber": "string"}}]}}
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @paramQuery status - Trạng thái đơn hàng
+   * @paramQuery userId - ID khách hàng
+   * @paramQuery driverId - ID tài xế
+   * @responseBody 200 - <PaginatedOrderListResponse>
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -37,9 +43,11 @@ export default class AdminOrdersController {
   }
 
   /**
+   * @show
    * @summary Chi tiết đơn hàng
+   * @description Lấy chi tiết đơn hàng cho Admin
    * @paramPath id - ID đơn hàng
-   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"id": 1, "user": {"id": 1, "fullName": "string", "phoneNumber": "string"}, "driver": {"id": 2, "fullName": "string", "phoneNumber": "string"}, "items": [{"id": 1, "orderId": 1, "productId": 1, "quantity": 10, "unitPrice": "string", "product": {"id": 1, "name": "string", "unit": "string", "basePrice": "string"}}]}}
+   * @responseBody 200 - <OrderResponse>
    */
   async show({ params, response }: HttpContext) {
     const order = await this.adminOrderService.getOrder(params.id)
@@ -51,10 +59,11 @@ export default class AdminOrdersController {
   }
 
   /**
+   * @store
    * @summary Tạo đơn hàng (Admin)
    * @description Tạo đơn hàng cho khách sỉ, hệ thống tự động quét và áp dụng bảng giá riêng (CustomerPrice) nếu có.
-   * @requestBody {"userId": 1, "shippingAddressId": 1, "note": "Giao gấp", "items": [{"productId": 1, "quantity": 10}]}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"id": 1, "userId": 1, "shippingAddressId": 1, "source": "string", "status": "string", "totalAmount": "string"}}
+   * @requestBody <createAdminOrderValidator>
+   * @responseBody 201 - <OrderResponse>
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createAdminOrderValidator)
@@ -72,10 +81,12 @@ export default class AdminOrdersController {
   }
 
   /**
+   * @updateStatus
    * @summary Cập nhật trạng thái
    * @description Đổi status đơn hàng
    * @paramPath id - ID đơn hàng
-   * @requestBody {"status": "DELIVERED"}
+   * @requestBody <updateOrderStatusValidator>
+   * @responseBody 200 - <OrderResponse>
    */
   async updateStatus({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateOrderStatusValidator)
@@ -89,10 +100,11 @@ export default class AdminOrdersController {
   }
 
   /**
+   * @batchAssign
    * @summary Gán tài xế hàng loạt
    * @description Phân công lộ trình giao hàng (Routing) cho một tài xế cụ thể.
-   * @requestBody {"driverId": 2, "orders": [{"orderId": 1, "routeOrder": 1}, {"orderId": 2, "routeOrder": 2}]}
-   * @responseBody 200 - {"success": true, "message": "Thành công"}
+   * @requestBody <batchAssignDriverValidator>
+   * @responseBody 200 - <SuccessResponse>
    */
   async batchAssign({ request, response }: HttpContext) {
     const payload = await request.validateUsing(batchAssignDriverValidator)

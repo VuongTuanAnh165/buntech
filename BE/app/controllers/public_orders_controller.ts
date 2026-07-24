@@ -8,16 +8,15 @@ export default class PublicOrdersController {
   constructor(protected publicOrderService: PublicOrderService) {}
 
   /**
+   * @quickOrder
    * @summary Đặt hàng nhanh (Lead Generation)
    * @description Dành cho khách lẻ vãng lai không cần đăng nhập. Có Honeypot để chống Bot và Rate limit.
-   * @requestBody {"fullName": "string", "phoneNumber": "string", "address": "string", "note": "string", "website_url": "string", "items": [{"productId": 1, "quantity": 1}]}
-   * @responseBody 201 - {"success": true, "message": "Thành công", "data": {"orderId": 1, "totalAmount": "100000"}}
-   * @responseBody 400 - {"success": false, "message": "Lỗi dữ liệu hoặc Bot detected"}
+   * @requestBody <quickOrderValidator>
+   * @responseBody 201 - <QuickOrderResponse>
    */
   async quickOrder({ request, response }: HttpContext) {
     const payload = await request.validateUsing(quickOrderValidator)
 
-    // Honeypot check
     if (payload.website_url) {
       // It's a bot!
       return response.badRequest({

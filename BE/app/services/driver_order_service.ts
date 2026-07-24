@@ -24,6 +24,7 @@ export default class DriverOrderService {
     return await db.transaction(async (trx) => {
       // 1. Kiểm tra Idempotency Key để chống Double-click từ client
       const existingTx = await Transaction.query({ client: trx })
+        .select('id')
         .where('reference_code', data.idempotencyKey)
         .first()
 
@@ -33,6 +34,7 @@ export default class DriverOrderService {
 
       // 2. Lock Order để tránh xung đột
       const order = await Order.query({ client: trx })
+        .select('id', 'user_id', 'driver_id', 'status', 'total_amount', 'note')
         .where('id', orderId)
         .where('driver_id', driverId)
         .forUpdate()
@@ -44,6 +46,7 @@ export default class DriverOrderService {
 
       // 3. Lock UserProfile để cập nhật công nợ
       const profile = await UserProfile.query({ client: trx })
+        .select('id', 'user_id', 'current_debt')
         .where('user_id', order.userId)
         .forUpdate()
         .firstOrFail()
