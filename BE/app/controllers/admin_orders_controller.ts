@@ -20,7 +20,7 @@ export default class AdminOrdersController {
    * @paramQuery status - Trạng thái đơn hàng
    * @paramQuery userId - ID khách hàng
    * @paramQuery driverId - ID tài xế
-   * @responseBody 200 - <PaginatedOrderListResponse>
+   * @responseBody 200 - <PaginatedOrderAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -47,7 +47,7 @@ export default class AdminOrdersController {
    * @summary Chi tiết đơn hàng
    * @description Lấy chi tiết đơn hàng cho Admin
    * @paramPath id - ID đơn hàng
-   * @responseBody 200 - <OrderResponse>
+   * @responseBody 200 - <OrderAdminDetailResponse>
    */
   async show({ params, response }: HttpContext) {
     const order = await this.adminOrderService.getOrder(params.id)
@@ -86,7 +86,7 @@ export default class AdminOrdersController {
    * @description Đổi status đơn hàng
    * @paramPath id - ID đơn hàng
    * @requestBody <updateOrderStatusValidator>
-   * @responseBody 200 - <OrderResponse>
+   * @responseBody 200 - <OrderAdminDetailResponse>
    */
   async updateStatus({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateOrderStatusValidator)

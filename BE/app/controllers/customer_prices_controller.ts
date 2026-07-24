@@ -12,7 +12,7 @@ export default class CustomerPricesController {
    * @summary Danh sách Bảng giá riêng
    * @description Lấy danh sách các sản phẩm đã được cài đặt giá bán riêng cho một khách hàng sỉ.
    * @paramPath userId - ID người dùng
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/CustomerPrice"}]}
+   * @responseBody 200 - <CustomerPriceListArrayResponse>
    */
   async index({ params, response }: HttpContext) {
     const prices = await this.customerPriceService.getUserPrices(params.userId)

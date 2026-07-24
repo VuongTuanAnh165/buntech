@@ -40,7 +40,7 @@ export default class TransactionsController {
    * @summary Thanh toán nợ
    * @description Ghi nhận khách hàng trả nợ, tự động trừ vào current_debt của khách.
    * @requestBody <payDebtValidator>
-   * @responseBody 200 - <TransactionResponse>
+   * @responseBody 200 - <TransactionListResponse>
    */
   async payDebt({ request, response }: HttpContext) {
     const payload = await request.validateUsing(payDebtValidator)

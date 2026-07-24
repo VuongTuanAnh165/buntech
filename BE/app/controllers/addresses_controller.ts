@@ -12,7 +12,7 @@ export default class AddressesController {
    * @summary Danh sách địa chỉ
    * @description Lấy danh sách địa chỉ giao hàng của một user
    * @paramPath userId - ID người dùng
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Address"}]}
+   * @responseBody 200 - <AddressListArrayResponse>
    */
   async index({ params, response }: HttpContext) {
     const addresses = await this.addressService.getUserAddresses(params.userId)
@@ -30,7 +30,7 @@ export default class AddressesController {
    * @description Tạo mới địa chỉ giao hàng cho user
    * @paramPath userId - ID người dùng
    * @requestBody <createAddressValidator>
-   * @responseBody 201 - <AddressResponse>
+   * @responseBody 201 - <AddressListResponse>
    */
   async store({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(createAddressValidator)
@@ -49,7 +49,7 @@ export default class AddressesController {
    * @description Xem thông tin chi tiết của một địa chỉ
    * @paramPath userId - ID người dùng
    * @paramPath id - ID địa chỉ
-   * @responseBody 200 - <AddressResponse>
+   * @responseBody 200 - <AddressListResponse>
    */
   async show({ params, response }: HttpContext) {
     const address = await this.addressService.getAddress(params.userId, params.id)
@@ -68,7 +68,7 @@ export default class AddressesController {
    * @paramPath userId - ID người dùng
    * @paramPath id - ID địa chỉ
    * @requestBody <updateAddressValidator>
-   * @responseBody 200 - <AddressResponse>
+   * @responseBody 200 - <AddressListResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateAddressValidator)

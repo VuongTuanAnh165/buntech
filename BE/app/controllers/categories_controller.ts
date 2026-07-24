@@ -45,7 +45,7 @@ export default class CategoriesController {
    * @clientIndex
    * @summary Danh sách danh mục (Client)
    * @description GET /api/v1/categories
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Category"}]}
+   * @responseBody 200 - <CategoryClientListArrayResponse>
    */
   async clientIndex({ response }: HttpContext) {
     const categories = await this.categoryService.clientList()
@@ -80,7 +80,7 @@ export default class CategoriesController {
    * @summary Chi tiết danh mục (Admin)
    * @description GET /api/v1/admin/categories/:id
    * @paramPath id - Category ID
-   * @responseBody 200 - <CategoryResponse>
+   * @responseBody 200 - <CategoryAdminListResponse>
    */
   async show({ params, response }: HttpContext) {
     const category = await this.categoryService.findById(params.id)
@@ -96,7 +96,7 @@ export default class CategoriesController {
    * @summary Chi tiết danh mục (Client)
    * @description GET /api/v1/categories/:id
    * @paramPath id - Category ID
-   * @responseBody 200 - <CategoryResponse>
+   * @responseBody 200 - <CategoryAdminListResponse>
    */
   async clientShow({ params, response }: HttpContext) {
     const category = await this.categoryService.findByIdForClient(params.id)
@@ -113,7 +113,7 @@ export default class CategoriesController {
    * @description PUT /api/v1/admin/categories/:id
    * @paramPath id - Category ID
    * @requestBody <updateCategoryValidator>
-   * @responseBody 200 - <CategoryResponse>
+   * @responseBody 200 - <CategoryAdminListResponse>
    */
   async update({ params, request, response, auth }: HttpContext) {
     const payload = await request.validateUsing(updateCategoryValidator, {

@@ -37,7 +37,7 @@ export default class RawMaterialsController {
    * @show
    * @summary Chi tiết nguyên vật liệu
    * @paramPath id - ID nguyên vật liệu
-   * @responseBody 200 - <RawMaterialResponse>
+   * @responseBody 200 - <RawMaterialListResponse>
    */
   async show({ params, response }: HttpContext) {
     const rawMaterial = await this.rawMaterialService.getRawMaterial(params.id)
@@ -52,7 +52,7 @@ export default class RawMaterialsController {
    * @store
    * @summary Tạo mới nguyên vật liệu
    * @requestBody <createRawMaterialValidator>
-   * @responseBody 201 - <RawMaterialResponse>
+   * @responseBody 201 - <RawMaterialListResponse>
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createRawMaterialValidator)
@@ -70,7 +70,7 @@ export default class RawMaterialsController {
    * @summary Cập nhật nguyên vật liệu
    * @paramPath id - ID nguyên vật liệu
    * @requestBody <updateRawMaterialValidator>
-   * @responseBody 200 - <RawMaterialResponse>
+   * @responseBody 200 - <RawMaterialListResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateRawMaterialValidator)

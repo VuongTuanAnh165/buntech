@@ -35,7 +35,7 @@ export default class SystemConfigsController {
    * @summary Tạo cấu hình mới
    * @description Thêm một key-value cấu hình hệ thống
    * @requestBody <createSystemConfigValidator>
-   * @responseBody 201 - <SystemConfigResponse>
+   * @responseBody 201 - <SystemConfigListResponse>
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createSystemConfigValidator)
@@ -53,7 +53,7 @@ export default class SystemConfigsController {
    * @summary Chi tiết cấu hình
    * @description Lấy chi tiết một cấu hình hệ thống theo key
    * @paramPath id - Key của cấu hình
-   * @responseBody 200 - <SystemConfigResponse>
+   * @responseBody 200 - <SystemConfigListResponse>
    */
   async show({ params, response }: HttpContext) {
     const config = await this.systemConfigService.getConfig(params.id)
@@ -71,7 +71,7 @@ export default class SystemConfigsController {
    * @description Thay đổi giá trị của cấu hình hiện tại
    * @paramPath id - Key của cấu hình
    * @requestBody <updateSystemConfigValidator>
-   * @responseBody 200 - <SystemConfigResponse>
+   * @responseBody 200 - <SystemConfigListResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateSystemConfigValidator)

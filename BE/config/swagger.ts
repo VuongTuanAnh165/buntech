@@ -173,7 +173,21 @@ export default {
         properties: {
           id: { type: 'integer' },
           fullName: { type: 'string' },
+          phoneNumber: { type: 'string', nullable: true },
+          role: { type: 'string', nullable: true },
+          createdAt: { type: 'string', format: 'date-time', nullable: true },
+          updatedAt: { type: 'string', format: 'date-time', nullable: true },
+        },
+      },
+      UserProfile: {
+        type: 'object',
+        properties: {
+          userId: { type: 'integer' },
           avatarUrl: { type: 'string', nullable: true },
+          storeName: { type: 'string', nullable: true },
+          debtLimit: { type: 'number', nullable: true },
+          currentDebt: { type: 'number', nullable: true },
+          zaloUserId: { type: 'string', nullable: true },
         },
       },
       ProductImage: {

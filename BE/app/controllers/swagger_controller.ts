@@ -61,11 +61,61 @@ export default class SwaggerController {
       CategoryNameOnly: { base: 'Category', pick: ['id', 'name'] },
       UserBasic: { base: 'User', pick: ['id', 'fullName'] },
       UserAvatar: { base: 'User', pick: ['id', 'fullName', 'avatarUrl'] },
+      UserBasicWithPhone: { base: 'User', pick: ['id', 'fullName', 'phoneNumber'] },
+      UserProfileBasic: {
+        base: 'UserProfile',
+        pick: ['userId', 'avatarUrl', 'storeName', 'debtLimit', 'currentDebt', 'zaloUserId'],
+      },
       ProductImageBasic: { base: 'ProductImage', pick: ['id', 'fileUrl', 'altText'] },
       ProductReviewImageBasic: { base: 'ProductReviewImage', pick: ['fileUrl'] },
       ProductNameOnly: { base: 'Product', pick: ['id', 'name'] },
+      ProductNameWithThumb: { base: 'Product', pick: ['id', 'name', 'thumbnailUrl'] },
+      OrderItemAdminDetail: {
+        base: 'OrderItem',
+        pick: ['id', 'orderId', 'productId', 'quantity', 'unitPrice'],
+        relations: { product: 'ProductNameOnly' },
+      },
+      OrderItemBasic: {
+        base: 'OrderItem',
+        pick: ['id', 'orderId', 'productId', 'quantity'],
+        relations: { product: 'ProductNameWithThumb' },
+      },
 
       // Main DTOs
+      AddressList: {
+        base: 'Address',
+        pick: [
+          'id',
+          'userId',
+          'addressLine',
+          'ward',
+          'district',
+          'province',
+          'latitude',
+          'longitude',
+          'isDefault',
+        ],
+      },
+      DriverRouteList: {
+        base: 'Order',
+        pick: [
+          'id',
+          'userId',
+          'shippingAddressId',
+          'totalAmount',
+          'status',
+          'deliveryStatus',
+          'paymentStatus',
+          'routeOrder',
+          'deliveryDate',
+          'note',
+        ],
+        relations: {
+          shippingAddress: 'AddressList',
+          user: 'UserBasicWithPhone',
+          items: 'OrderItemBasic',
+        },
+      },
       CategoryAdminList: {
         base: 'Category',
         pick: ['id', 'name', 'slug', 'thumbnailUrl', 'createdAt', 'updatedAt'],
@@ -191,6 +241,90 @@ export default class SwaggerController {
         ],
         relations: { user: 'UserBasic', product: 'ProductNameOnly', replier: 'UserBasic' },
       },
+
+      UserAdminList: {
+        base: 'User',
+        pick: ['id', 'fullName', 'phoneNumber', 'role', 'createdAt'],
+        relations: { profile: 'UserProfileBasic' },
+      },
+      UserAdminDetail: {
+        base: 'User',
+        pick: ['id', 'fullName', 'phoneNumber', 'role', 'createdAt'],
+        relations: { profile: 'UserProfileBasic' },
+      },
+
+      OrderAdminList: {
+        base: 'Order',
+        pick: [
+          'id',
+          'userId',
+          'status',
+          'totalAmount',
+          'note',
+          'deliveryDate',
+          'deliveryStatus',
+          'paymentStatus',
+          'driverId',
+          'createdAt',
+        ],
+        relations: { user: 'UserBasicWithPhone', driver: 'UserBasicWithPhone' },
+      },
+      OrderAdminDetail: {
+        base: 'Order',
+        pick: [
+          'id',
+          'userId',
+          'status',
+          'totalAmount',
+          'note',
+          'deliveryDate',
+          'deliveryStatus',
+          'paymentStatus',
+          'driverId',
+        ],
+        relations: {
+          user: 'UserBasicWithPhone',
+          driver: 'UserBasicWithPhone',
+          items: 'OrderItemAdminDetail',
+          shippingAddress: 'Address',
+        },
+      },
+
+      CustomerPriceList: {
+        base: 'CustomerPrice',
+        pick: ['id', 'productId', 'customPrice'],
+        relations: { product: 'ProductNameWithThumb' },
+      },
+
+      TransactionList: {
+        base: 'Transaction',
+        pick: [
+          'id',
+          'userId',
+          'orderId',
+          'amount',
+          'type',
+          'paymentMethod',
+          'referenceCode',
+          'transactionDate',
+          'createdAt',
+        ],
+      },
+
+      RawMaterialList: {
+        base: 'RawMaterial',
+        pick: ['id', 'name', 'unit', 'currentStock', 'createdAt'],
+      },
+
+      SystemConfigList: {
+        base: 'SystemConfig',
+        pick: ['key', 'value', 'description', 'createdAt'],
+      },
+
+      DivisionList: {
+        base: 'AdministrativeDivision',
+        pick: ['code', 'name', 'codename', 'divisionType', 'phoneCode', 'level', 'parentCode'],
+      },
     }
 
     for (const [dtoName, config] of Object.entries(dtoMappings)) {
@@ -265,6 +399,19 @@ export default class SwaggerController {
             success: { type: 'boolean', example: true },
             message: { type: 'string', example: 'Thành công' },
             data: { $ref: `#/components/schemas/${paginatedListName}` },
+          },
+        }
+      }
+
+      // 4. Tạo ModelArrayResponse: { success, message, data: Model[] }
+      const modelArrayResponseName = `${schemaName}ArrayResponse`
+      if (!docs.components.schemas[modelArrayResponseName]) {
+        docs.components.schemas[modelArrayResponseName] = {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            message: { type: 'string', example: 'Thành công' },
+            data: { type: 'array', items: { $ref: `#/components/schemas/${schemaName}` } },
           },
         }
       }

@@ -19,7 +19,7 @@ export default class UsersController {
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
    * @paramQuery role - Vai trò của người dùng
-   * @responseBody 200 - <PaginatedUserListResponse>
+   * @responseBody 200 - <PaginatedUserAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
@@ -40,7 +40,7 @@ export default class UsersController {
    * @summary Tạo User
    * @description Tạo người dùng mới và profile rỗng (chỉ dành cho Admin)
    * @requestBody <createUserValidator>
-   * @responseBody 201 - <UserResponse>
+   * @responseBody 201 - <UserAdminDetailResponse>
    */
   async store({ request, response }: HttpContext) {
     const payload = await request.validateUsing(createUserValidator)
@@ -59,7 +59,7 @@ export default class UsersController {
    * @summary Chi tiết User
    * @description Lấy thông tin chi tiết một người dùng
    * @paramPath id - ID người dùng
-   * @responseBody 200 - <UserResponse>
+   * @responseBody 200 - <UserAdminDetailResponse>
    */
   async show({ params, response }: HttpContext) {
     const user = await this.userService.getUser(params.id)
@@ -77,7 +77,7 @@ export default class UsersController {
    * @description Cập nhật thông tin (tên, role) của người dùng
    * @paramPath id - ID người dùng
    * @requestBody <updateUserValidator>
-   * @responseBody 200 - <UserResponse>
+   * @responseBody 200 - <UserAdminDetailResponse>
    */
   async update({ params, request, response }: HttpContext) {
     const payload = await request.validateUsing(updateUserValidator)
