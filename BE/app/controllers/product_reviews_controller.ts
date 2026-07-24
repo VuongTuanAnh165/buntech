@@ -21,7 +21,7 @@ export default class ProductReviewsController {
    * @paramPath id - Product ID
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/ProductReview"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
+   * @responseBody 200 - <PaginatedProductReviewClientListResponse>
    */
   async clientIndex({ params, request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -74,7 +74,7 @@ export default class ProductReviewsController {
    * @description Admin API: Get all product reviews
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/ProductReview"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
+   * @responseBody 200 - <PaginatedProductReviewAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {

@@ -9,9 +9,9 @@ export default class MasterDataController {
 
   /**
    * @getDivisionsVersion
-   * @summary Lấy phiên bản Master Data
-   * @description GET /api/v1/master-data/divisions/version
-   * @responseBody 200 - {"success": true, "message": "Lấy phiên bản thành công", "data": {"versionHash": "string"}}
+   * @summary Kiểm tra phiên bản Master Data
+   * @description Dùng để client check xem Master Data có thay đổi không
+   * @responseBody 200 - <MasterDataVersionResponse>
    */
   async getDivisionsVersion({ response }: HttpContext) {
     const version = await this.masterDataService.getDivisionsVersion()

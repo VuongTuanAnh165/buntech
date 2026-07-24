@@ -15,7 +15,7 @@ export default class CategoriesController {
    * @description GET /api/v1/admin/categories
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Category"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
+   * @responseBody 200 - <PaginatedCategoryAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {

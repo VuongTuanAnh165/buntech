@@ -15,7 +15,7 @@ export default class ProductsController {
    * @description GET /api/v1/admin/products
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Product"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
+   * @responseBody 200 - <PaginatedProductAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -48,7 +48,7 @@ export default class ProductsController {
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
    * @paramQuery categoryId - ID Danh mục
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Product"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
+   * @responseBody 200 - <PaginatedProductClientListResponse>
    */
   async clientIndex({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {

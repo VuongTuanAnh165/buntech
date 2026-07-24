@@ -12,7 +12,7 @@ export default class BlogCategoriesController {
    * @clientIndex
    * @summary Danh sách danh mục bài viết (Client)
    * @description Public API: Get all categories
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/BlogCategory"}]}
+   * @responseBody 200 - <BlogCategoryListArrayResponse>
    */
   async clientIndex({ response }: HttpContext) {
     const categories = await this.blogCategoryService.getList()
@@ -27,7 +27,7 @@ export default class BlogCategoriesController {
    * @index
    * @summary Danh sách danh mục bài viết (Admin)
    * @description Admin API: Get all categories
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/BlogCategory"}]}
+   * @responseBody 200 - <BlogCategoryListArrayResponse>
    */
   async index({ response }: HttpContext) {
     const categories = await this.blogCategoryService.getList()

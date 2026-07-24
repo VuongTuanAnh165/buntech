@@ -417,6 +417,23 @@ export default class SwaggerController {
       }
     }
 
+    // Custom static response
+    if (!docs.components.schemas['MasterDataVersionResponse']) {
+      docs.components.schemas['MasterDataVersionResponse'] = {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          message: { type: 'string', example: 'Thành công' },
+          data: {
+            type: 'object',
+            properties: {
+              versionHash: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+
     return response.send(docs)
   }
 

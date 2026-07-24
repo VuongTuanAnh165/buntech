@@ -17,7 +17,7 @@ export default class PostsController {
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
    * @paramQuery categoryId - ID Danh mục
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Post"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
+   * @responseBody 200 - <PaginatedPostListResponse>
    */
   async clientIndex({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
@@ -70,7 +70,7 @@ export default class PostsController {
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
    * @paramQuery categoryId - ID Danh mục
-   * @responseBody 200 - {"success": true, "message": "string", "data": [{"$ref": "#/components/schemas/Post"}], "meta": {"$ref": "#/components/schemas/PaginationMeta"}}
+   * @responseBody 200 - <PaginatedPostListResponse>
    */
   async index({ request, response }: HttpContext) {
     const { page, limit } = await request.validateUsing(paginationValidator, {
