@@ -1,5 +1,4 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import { Role } from '#enums/role'
 
 export default class extends BaseSchema {
   protected tableName = 'users'
@@ -9,8 +8,7 @@ export default class extends BaseSchema {
       table.increments('id').primary()
       table.string('phone_number', 20).notNullable().unique()
       table.string('password', 255).notNullable()
-      table.string('full_name', 255).notNullable()
-      table.enum('role', Object.values(Role)).defaultTo(Role.RETAIL)
+      table.enum('role', ['admin', 'driver', 'wholesale', 'retail', 'guest']).defaultTo('retail')
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

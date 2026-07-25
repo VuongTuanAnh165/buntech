@@ -4,6 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import { inject } from '@adonisjs/core'
 import FileUploadService from '#services/file_upload_service'
 import { Pagination } from '#enums/pagination'
+import { CustomerType } from '#enums/customer_type'
 
 @inject()
 export default class UserService {
@@ -55,6 +56,7 @@ export default class UserService {
     password?: string
     fullName: string
     role: string
+    customerType?: CustomerType
   }) {
     // Transaction to ensure user and profile are created together
     return await db.transaction(async (trx) => {
@@ -66,6 +68,7 @@ export default class UserService {
       // Create an empty profile for the user
       const profile = new UserProfile()
       profile.userId = user.id
+      profile.customerType = data.customerType || CustomerType.RETAIL
       profile.useTransaction(trx)
       await profile.save()
 
@@ -91,14 +94,24 @@ export default class UserService {
     data: {
       fullName?: string
       role?: string
+      customerType?: CustomerType
     }
   ) {
     const user = await User.query()
       .select('id', 'full_name', 'phone_number', 'role')
       .where('id', id)
       .firstOrFail()
-    user.merge(data)
+    user.merge({
+      fullName: data.fullName,
+      role: data.role,
+    })
     await user.save()
+
+    if (data.customerType) {
+      const profile = await UserProfile.findByOrFail('user_id', user.id)
+      profile.customerType = data.customerType
+      await profile.save()
+    }
 
     await user.load('profile', (q) => {
       q.select('user_id', 'avatar_url', 'store_name', 'debt_limit', 'current_debt', 'zalo_user_id')

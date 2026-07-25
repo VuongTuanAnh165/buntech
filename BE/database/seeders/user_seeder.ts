@@ -1,6 +1,7 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import User from '#models/user'
 import { Role } from '#enums/role'
+import { CustomerType } from '#enums/customer_type'
 
 export default class extends BaseSeeder {
   async run() {
@@ -35,26 +36,28 @@ export default class extends BaseSeeder {
         fullName: 'Đại lý Minh Phát',
         phoneNumber: '0922222222',
         password: 'password123',
-        role: Role.WHOLESALE,
+        role: Role.CUSTOMER,
         profile: {
           storeName: 'Cửa hàng Minh Phát',
           avatarUrl: null,
           debtLimit: '50000000',
           currentDebt: '0',
           zaloUserId: null,
+          customerType: CustomerType.WHOLESALE,
         },
       },
       {
         fullName: 'Khách hàng Lẻ 1',
         phoneNumber: '0987654321',
         password: 'password123',
-        role: Role.RETAIL,
+        role: Role.CUSTOMER,
         profile: {
           storeName: null,
           avatarUrl: null,
           debtLimit: '0',
           currentDebt: '0',
           zaloUserId: 'zalo_test_123',
+          customerType: CustomerType.RETAIL,
         },
       },
     ]

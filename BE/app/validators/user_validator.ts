@@ -1,5 +1,6 @@
 import vine from '@vinejs/vine'
 import { Role } from '#enums/role'
+import { CustomerType } from '#enums/customer_type'
 
 export const createUserValidator = vine.compile(
   vine.object({
@@ -14,6 +15,7 @@ export const createUserValidator = vine.compile(
     password: vine.string().minLength(6),
     fullName: vine.string().trim().maxLength(100),
     role: vine.enum(Object.values(Role)),
+    customerType: vine.enum(Object.values(CustomerType)).optional(),
   })
 )
 
@@ -21,6 +23,7 @@ export const updateUserValidator = vine.compile(
   vine.object({
     fullName: vine.string().trim().maxLength(100).optional(),
     role: vine.enum(Object.values(Role)).optional(),
+    customerType: vine.enum(Object.values(CustomerType)).optional(),
   })
 )
 

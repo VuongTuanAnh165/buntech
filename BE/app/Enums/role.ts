@@ -1,7 +1,6 @@
 export enum Role {
   ADMIN = 'admin', // Quản trị viên hệ thống (chủ cửa hàng/người quản lý)
   DRIVER = 'driver', // Tài xế giao hàng
-  WHOLESALE = 'wholesale', // Khách hàng mua sỉ / Đại lý (có chính sách giá riêng)
-  RETAIL = 'retail', // Khách hàng mua lẻ thông thường
-  GUEST = 'guest', // Khách hàng mua lẻ thông thường
+  CUSTOMER = 'customer', // Khách hàng (Sỉ/Lẻ được phân biệt bởi customerType)
+  GUEST = 'guest', // Khách hàng vãng lai
 }

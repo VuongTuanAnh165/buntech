@@ -7,7 +7,7 @@ export const UserFactory = factory
       fullName: faker.person.fullName(),
       phoneNumber: faker.string.numeric(10), // Vietnamese phone length
       password: 'password123',
-      role: 'retail',
+      role: 'customer',
     }
   })
   .build()

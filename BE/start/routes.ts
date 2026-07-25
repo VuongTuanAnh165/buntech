@@ -1,4 +1,4 @@
-﻿/*
+/*
 |--------------------------------------------------------------------------
 | Routes file
 |--------------------------------------------------------------------------
@@ -89,6 +89,9 @@ router
     router
       .post('/orders/quick', [() => import('#controllers/public_orders_controller'), 'quickOrder'])
       .use(quickOrderThrottle)
+
+    // Constants
+    router.get('/constants', [() => import('#controllers/constants_controller'), 'index'])
   })
   .prefix('/api/v1')
 
@@ -330,3 +333,4 @@ router
   })
   .prefix('/api/v1/driver')
   .use(middleware.auth())
+  .use(middleware.driver())

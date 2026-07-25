@@ -9,7 +9,7 @@ test.group('Product Reviews', (group) => {
 
   group.setup(async () => {
     adminUser = await UserFactory.merge({ role: 'admin' }).create()
-    clientUser = await UserFactory.merge({ role: 'retail' }).create()
+    clientUser = await UserFactory.merge({ role: 'customer' }).create()
   })
 
   test('client can create review', async ({ client, assert }) => {
