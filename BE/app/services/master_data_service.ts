@@ -1,9 +1,12 @@
+import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
 import AdministrativeDivision from '#models/administrative_division'
 import MasterDataSync from '#models/master_data_sync'
 import crypto from 'node:crypto'
 import logger from '@adonisjs/core/services/logger'
 import { DateTime } from 'luxon'
+import redis from '@adonisjs/redis/services/main'
+import axios from 'axios'
 
 interface DivisionTreeItem {
   code: number
@@ -25,32 +28,21 @@ interface DivisionUpsert {
   level: string
 }
 
+@inject()
 export default class MasterDataService {
   private readonly MAX_RETRIES = 3
   private readonly TIMEOUT_MS = 5000
-
-  // In-Memory cache for divisions tree
-  private cachedTree: DivisionTreeItem[] | null = null
-  private cachedVersion: string | null = null
 
   /**
    * Helper function to fetch API with Timeout and Retry mechanism
    */
   private async fetchWithRetry(url: string, retries = 3, timeoutMs = 5000): Promise<unknown> {
     for (let attempt = 1; attempt <= retries; attempt++) {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
       try {
-        const response = await fetch(url, { signal: controller.signal })
-        clearTimeout(timeoutId)
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch API: ${response.statusText}`)
-        }
-        return await response.json()
+        const response = await axios.get(url, { timeout: timeoutMs })
+        return response.data
       } catch (error) {
-        clearTimeout(timeoutId)
-        const isTimeout = error instanceof Error && error.name === 'AbortError'
+        const isTimeout = axios.isAxiosError(error) && error.code === 'ECONNABORTED'
 
         logger.warn(
           { attempt, url, isTimeout, error: error instanceof Error ? error.message : error },
@@ -204,9 +196,9 @@ export default class MasterDataService {
 
       await trx.commit()
 
-      // Invalidate memory cache
-      this.cachedTree = null
-      this.cachedVersion = null
+      // Invalidate Redis cache
+      await redis.del('divisions_tree')
+      await redis.del('divisions_version')
 
       logger.info('Master Data synchronized successfully.')
       return { status: 'success', hash: currentHash }
@@ -238,14 +230,19 @@ export default class MasterDataService {
       .first()
 
     const currentDbVersion = lastSync ? lastSync.sourceHash : null
+    const cachedVersion = await redis.get('divisions_version')
 
     // If DB version differs from cached version, invalidate the tree cache
-    if (this.cachedVersion !== currentDbVersion) {
-      this.cachedVersion = currentDbVersion
-      this.cachedTree = null // Force rebuild on next getDivisionsTree() call
+    if (cachedVersion !== currentDbVersion) {
+      if (currentDbVersion) {
+        await redis.set('divisions_version', currentDbVersion)
+      } else {
+        await redis.del('divisions_version')
+      }
+      await redis.del('divisions_tree') // Force rebuild on next getDivisionsTree() call
     }
 
-    return this.cachedVersion
+    return currentDbVersion
   }
 
   /**
@@ -253,8 +250,9 @@ export default class MasterDataService {
    * Trả về định dạng giống 100% với OpenAPI
    */
   public async getDivisionsTree() {
-    if (this.cachedTree) {
-      return this.cachedTree
+    const cachedStr = await redis.get('divisions_tree')
+    if (cachedStr) {
+      return JSON.parse(cachedStr) as DivisionTreeItem[]
     }
 
     // Load all divisions from DB
@@ -301,7 +299,7 @@ export default class MasterDataService {
     }
 
     // Set cache
-    this.cachedTree = tree
-    return this.cachedTree
+    await redis.set('divisions_tree', JSON.stringify(tree))
+    return tree
   }
 }

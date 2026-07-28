@@ -1,8 +1,10 @@
+import { inject } from '@adonisjs/core'
 import Order from '#models/order'
 import db from '@adonisjs/lucid/services/db'
 import { type DateTime } from 'luxon'
 import { OrderStatus } from '#enums/order_status'
 
+@inject()
 export default class DashboardService {
   /**
    * Lấy dữ liệu tổng quan Dashboard
@@ -19,27 +21,25 @@ export default class DashboardService {
 
     // 1. Tổng doanh thu (Chỉ tính đơn hàng đã giao thành công)
     const revenueQuery = orderQuery.clone().where('status', OrderStatus.DELIVERED)
-    const [revenueResult] = await revenueQuery.client
-      .from(revenueQuery.as('q'))
-      .sum('total_amount as totalRevenue')
-    const totalRevenue = revenueResult?.totalRevenue || 0
 
-    // 2. Tổng số lượng đơn hàng (Các đơn chưa bị hủy)
+    // Chạy song song 4 query độc lập
     const [
-      {
-        $extras: { totalOrders },
-      },
-    ] = await orderQuery.clone().count('* as totalOrders')
+      [revenueResult],
+      [
+        {
+          $extras: { totalOrders },
+        },
+      ],
+      orderStatuses,
+      [debtResult],
+    ] = await Promise.all([
+      revenueQuery.client.from(revenueQuery.as('q')).sum('total_amount as totalRevenue'),
+      orderQuery.clone().count('* as totalOrders'),
+      orderQuery.clone().select('status').count('* as count').groupBy('status'),
+      db.from('user_profiles').sum('current_debt as totalDebt'),
+    ])
 
-    // 3. Thống kê theo trạng thái đơn hàng
-    const orderStatuses = await orderQuery
-      .clone()
-      .select('status')
-      .count('* as count')
-      .groupBy('status')
-
-    // 4. Tổng công nợ toàn hệ thống
-    const [debtResult] = await db.from('user_profiles').sum('current_debt as totalDebt')
+    const totalRevenue = revenueResult?.totalRevenue || 0
     const totalDebt = debtResult?.totalDebt || 0
 
     return {

@@ -1,17 +1,22 @@
+import { inject } from '@adonisjs/core'
 import CustomerPrice from '#models/customer_price'
 import Product from '#models/product'
 import db from '@adonisjs/lucid/services/db'
+import { Pagination } from '#enums/pagination'
 
+@inject()
 export default class CustomerPriceService {
   /**
    * Get all custom prices for a specific user
    */
-  async getUserPrices(userId: number) {
+  async getUserPrices(userId: number, page: number = 1, limit: number = Pagination.DEFAULT_LIMIT) {
+    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
     return CustomerPrice.query()
       .select('id', 'user_id', 'product_id', 'custom_price', 'created_at')
       .where('user_id', userId)
       .preload('product', (q) => q.select('id', 'name', 'thumbnailUrl'))
       .orderBy('created_at', 'desc')
+      .paginate(page, safeLimit)
   }
 
   /**

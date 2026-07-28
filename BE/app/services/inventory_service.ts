@@ -1,8 +1,10 @@
+import { inject } from '@adonisjs/core'
 import RawMaterial from '#models/raw_material'
 import InventoryLog from '#models/inventory_log'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 
+@inject()
 export default class InventoryService {
   /**
    * Nhập kho nguyên vật liệu
@@ -25,14 +27,24 @@ export default class InventoryService {
         .forUpdate()
         .firstOrFail()
 
-      // 2. Cập nhật số lượng tồn kho
-      const currentStock = Number.parseFloat(material.currentStock || '0')
-      const newStock = currentStock + data.quantity
+      // 2. Cập nhật số lượng tồn kho an toàn bằng DB Native Math
+      await db
+        .from('raw_materials')
+        .where('id', material.id)
+        .update({
+          current_stock: db.raw('current_stock + ?', [data.quantity]),
+          updated_by: userId,
+          updated_at: DateTime.now().toSQL(),
+        })
+        .useTransaction(trx)
 
-      material.currentStock = newStock.toString()
+      const updatedMaterial = await RawMaterial.query({ client: trx })
+        .select('current_stock')
+        .where('id', material.id)
+        .firstOrFail()
+
+      material.currentStock = updatedMaterial.currentStock
       material.updatedBy = userId
-      material.useTransaction(trx)
-      await material.save()
 
       // 3. Ghi log nhập kho
       const log = new InventoryLog()

@@ -1,3 +1,4 @@
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import { DeliveryStatus } from '#enums/delivery_status'
 import { DeviceType } from '#enums/device_type'
@@ -10,6 +11,7 @@ import { Role } from '#enums/role'
 import { TransactionType } from '#enums/transaction_type'
 import { CustomerType } from '#enums/customer_type'
 
+@inject()
 export default class ConstantsController {
   async index({ response }: HttpContext) {
     return response.json({
@@ -25,7 +27,7 @@ export default class ConstantsController {
         PaymentStatus,
         Role,
         TransactionType,
-        CustomerType
+        CustomerType,
       },
     })
   }

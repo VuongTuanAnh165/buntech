@@ -1,8 +1,10 @@
+import { inject } from '@adonisjs/core'
 import swagger from 'adonis-autoswagger'
 import swaggerConfig from '#config/swagger'
 import router from '@adonisjs/core/services/router'
 import type { HttpContext } from '@adonisjs/core/http'
 
+@inject()
 export default class SwaggerController {
   /**
    * @swagger
@@ -427,10 +429,10 @@ export default class SwaggerController {
           data: {
             type: 'object',
             properties: {
-              versionHash: { type: 'string' }
-            }
-          }
-        }
+              versionHash: { type: 'string' },
+            },
+          },
+        },
       }
     }
 

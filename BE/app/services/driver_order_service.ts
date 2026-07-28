@@ -1,12 +1,14 @@
+import { inject } from '@adonisjs/core'
 import Order from '#models/order'
 import Transaction from '#models/transaction'
-import UserProfile from '#models/user_profile'
 import db from '@adonisjs/lucid/services/db'
 import { OrderStatus } from '#enums/order_status'
 import { DeliveryStatus } from '#enums/delivery_status'
 import { PaymentStatus } from '#enums/payment_status'
 import { TransactionType } from '#enums/transaction_type'
+import { DateTime } from 'luxon'
 
+@inject()
 export default class DriverOrderService {
   /**
    * Chốt giao hàng thành công & Thu tiền
@@ -22,17 +24,7 @@ export default class DriverOrderService {
     }
   ) {
     return await db.transaction(async (trx) => {
-      // 1. Kiểm tra Idempotency Key để chống Double-click từ client
-      const existingTx = await Transaction.query({ client: trx })
-        .select('id')
-        .where('reference_code', data.idempotencyKey)
-        .first()
-
-      if (existingTx) {
-        throw new Error('Giao dịch này đã được xử lý (Idempotency conflict)')
-      }
-
-      // 2. Lock Order để tránh xung đột
+      // 1. Lock Order ĐẦU TIÊN để tránh xung đột (Race Condition)
       const order = await Order.query({ client: trx })
         .select('id', 'user_id', 'driver_id', 'status', 'total_amount', 'note')
         .where('id', orderId)
@@ -44,15 +36,17 @@ export default class DriverOrderService {
         throw new Error('Đơn hàng không ở trạng thái có thể giao')
       }
 
-      // 3. Lock UserProfile để cập nhật công nợ
-      const profile = await UserProfile.query({ client: trx })
-        .select('id', 'user_id', 'current_debt')
-        .where('user_id', order.userId)
-        .forUpdate()
-        .firstOrFail()
+      // 2. Kiểm tra Idempotency Key để chống Double-click từ client (Sau khi đã lock order)
+      const existingTx = await Transaction.query({ client: trx })
+        .select('id')
+        .where('reference_code', data.idempotencyKey)
+        .first()
 
-      let currentDebt = Number.parseFloat(profile.currentDebt || '0')
-      const orderTotal = Number.parseFloat(order.totalAmount || '0')
+      if (existingTx) {
+        throw new Error('Giao dịch này đã được xử lý (Idempotency conflict)')
+      }
+
+      // 3. (Removed explicit lock since DB native update handles atomic row locking)
 
       // Bước 3.1: Ghi NỢ đơn hàng (Tăng nợ)
       const chargeTx = new Transaction()
@@ -65,8 +59,6 @@ export default class DriverOrderService {
       chargeTx.useTransaction(trx)
       await chargeTx.save()
 
-      currentDebt += orderTotal
-
       // Bước 3.2: Ghi nhận THANH TOÁN (Nếu có thu tiền)
       if (data.amountPaid > 0) {
         const payTx = new Transaction()
@@ -78,8 +70,6 @@ export default class DriverOrderService {
         payTx.referenceCode = data.idempotencyKey // Main idempotency key
         payTx.useTransaction(trx)
         await payTx.save()
-
-        currentDebt -= data.amountPaid
       } else {
         // Dummy transaction to lock idempotency key if they paid 0 (DEBT)
         const dummyTx = new Transaction()
@@ -93,15 +83,22 @@ export default class DriverOrderService {
         await dummyTx.save()
       }
 
-      // 4. Lưu lại User Profile
-      profile.currentDebt = currentDebt.toString()
-      profile.useTransaction(trx)
-      await profile.save()
+      // 4. Lưu lại User Profile bằng DB Native Math (DB trừ trực tiếp)
+      await db
+        .from('user_profiles')
+        .where('user_id', order.userId)
+        .update({
+          current_debt: db.raw('current_debt + ? - ?', [order.totalAmount, data.amountPaid]),
+          updated_at: DateTime.now().toSQL(),
+        })
+        .useTransaction(trx)
 
       // 5. Cập nhật Order
+      const orderTotalFloat = Number.parseFloat(order.totalAmount || '0')
       order.status = OrderStatus.DELIVERED
       order.deliveryStatus = DeliveryStatus.SUCCESS
-      order.paymentStatus = data.amountPaid >= orderTotal ? PaymentStatus.PAID : PaymentStatus.DEBT
+      order.paymentStatus =
+        data.amountPaid >= orderTotalFloat ? PaymentStatus.PAID : PaymentStatus.DEBT
       if (data.deliveryNote) {
         order.note = order.note ? `${order.note} | ${data.deliveryNote}` : data.deliveryNote
       }

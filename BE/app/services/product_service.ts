@@ -240,10 +240,7 @@ export default class ProductService {
    * Cập nhật sản phẩm
    */
   async update(id: number, data: UpdateProductDTO, userId: number) {
-    const product = await Product.query()
-      .select('id', 'thumbnail_url', 'base_price', 'category_id') // minimum fields needed to avoid undefined when merging
-      .where('id', id)
-      .firstOrFail()
+    const product = await Product.findOrFail(id)
     const { thumbnail, images, deletedImageIds, imageOrders, ...productData } = data
 
     let thumbnailUrl: string | undefined

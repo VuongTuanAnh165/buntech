@@ -18,16 +18,14 @@ export default class ExportsController {
    */
   async exportOrders({ request, response }: HttpContext) {
     const payload = await request.validateUsing(dashboardOverviewValidator)
-    const csvContent = await this.exportService.exportOrdersToCsv(payload)
+    const stream = this.exportService.exportOrdersToCsvStream(payload)
 
     const fileName = `Export_Orders_${DateTime.now().toFormat('yyyy_MM_dd')}.csv`
 
     response.header('Content-Type', 'text/csv; charset=utf-8')
     response.header('Content-Disposition', `attachment; filename="${fileName}"`)
 
-    // Thêm BOM (Byte Order Mark) để Excel mở tiếng Việt UTF-8 không bị lỗi font
-    const BOM = '\uFEFF'
-    return response.send(BOM + csvContent)
+    return response.stream(stream)
   }
 
   /**
@@ -38,7 +36,7 @@ export default class ExportsController {
    */
   async exportOrdersToday({ response }: HttpContext) {
     const today = DateTime.now().startOf('day')
-    const csvContent = await this.exportService.exportOrdersToCsv({
+    const stream = this.exportService.exportOrdersToCsvStream({
       startDate: today,
       endDate: today.endOf('day'),
     })
@@ -48,7 +46,6 @@ export default class ExportsController {
     response.header('Content-Type', 'text/csv; charset=utf-8')
     response.header('Content-Disposition', `attachment; filename="${fileName}"`)
 
-    const BOM = '\uFEFF'
-    return response.send(BOM + csvContent)
+    return response.stream(stream)
   }
 }

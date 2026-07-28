@@ -1,8 +1,10 @@
+import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import drive from '@adonisjs/drive/services/main'
 import crypto from 'node:crypto'
 import { uploadValidator } from '#validators/upload_validator'
 
+@inject()
 export default class UploadsController {
   /**
    * @store

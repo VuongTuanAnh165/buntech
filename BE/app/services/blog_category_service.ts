@@ -1,3 +1,4 @@
+import { inject } from '@adonisjs/core'
 import BlogCategory from '#models/blog_category'
 import type { Infer } from '@vinejs/vine/types'
 import {
@@ -8,6 +9,7 @@ import {
 export type CreateBlogCategoryDTO = Infer<typeof createBlogCategoryValidator>
 export type UpdateBlogCategoryDTO = Infer<typeof updateBlogCategoryValidator>
 
+@inject()
 export default class BlogCategoryService {
   async getList() {
     return await BlogCategory.query()

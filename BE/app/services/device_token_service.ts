@@ -1,5 +1,7 @@
+import { inject } from '@adonisjs/core'
 import DeviceToken from '#models/device_token'
 
+@inject()
 export default class DeviceTokenService {
   /**
    * Register or update a device token for a user

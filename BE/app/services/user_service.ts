@@ -72,16 +72,7 @@ export default class UserService {
       profile.useTransaction(trx)
       await profile.save()
 
-      await user.load('profile', (q) => {
-        q.select(
-          'user_id',
-          'avatar_url',
-          'store_name',
-          'debt_limit',
-          'current_debt',
-          'zalo_user_id'
-        )
-      })
+      user.$setRelated('profile', profile)
       return user
     })
   }
@@ -97,10 +88,7 @@ export default class UserService {
       customerType?: CustomerType
     }
   ) {
-    const user = await User.query()
-      .select('id', 'full_name', 'phone_number', 'role')
-      .where('id', id)
-      .firstOrFail()
+    const user = await User.findOrFail(id)
     user.merge({
       fullName: data.fullName,
       role: data.role,
@@ -108,7 +96,10 @@ export default class UserService {
     await user.save()
 
     if (data.customerType) {
-      const profile = await UserProfile.findByOrFail('user_id', user.id)
+      const profile = await UserProfile.query()
+        .select('id', 'customer_type')
+        .where('user_id', user.id)
+        .firstOrFail()
       profile.customerType = data.customerType
       await profile.save()
     }
@@ -149,7 +140,16 @@ export default class UserService {
     }
   ) {
     const profile = await UserProfile.query()
-      .select('id', 'user_id', 'avatar_url', 'debt_limit', 'store_name', 'zalo_user_id')
+      .select(
+        'id',
+        'user_id',
+        'avatar_url',
+        'store_name',
+        'debt_limit',
+        'current_debt',
+        'zalo_user_id',
+        'customer_type'
+      )
       .where('user_id', userId)
       .firstOrFail()
 

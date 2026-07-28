@@ -1,8 +1,10 @@
+import { inject } from '@adonisjs/core'
 import drive from '@adonisjs/drive/services/main'
 import { randomUUID } from 'node:crypto'
 import type { MultipartFile } from '@adonisjs/core/bodyparser'
 import logger from '@adonisjs/core/services/logger'
 
+@inject()
 export default class FileUploadService {
   /**
    * Upload a single file to a specific folder
@@ -25,7 +27,30 @@ export default class FileUploadService {
   ): Promise<Array<{ url: string; key: string }>> {
     const validFiles = files.filter((f) => !!f)
     const uploadPromises = validFiles.map((file) => this.upload(file, folder))
-    return await Promise.all(uploadPromises)
+    const results = await Promise.allSettled(uploadPromises)
+
+    const successfulUploads: Array<{ url: string; key: string }> = []
+    const errors: any[] = []
+
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        successfulUploads.push(result.value)
+      } else {
+        errors.push(result.reason)
+      }
+    }
+
+    // Nếu có bất kỳ lỗi nào, rollback toàn bộ các file đã upload thành công (Dọn rác)
+    if (errors.length > 0) {
+      if (successfulUploads.length > 0) {
+        const keysToDelete = successfulUploads.map((item) => item.key)
+        await this.deleteMany(keysToDelete)
+      }
+      logger.error({ err: errors[0] }, `Upload thất bại ${errors.length} file. Đã dọn rác.`)
+      throw new Error('Có lỗi xảy ra khi upload nhiều file. Vui lòng thử lại.')
+    }
+
+    return successfulUploads
   }
 
   /**

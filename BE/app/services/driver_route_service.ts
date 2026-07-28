@@ -1,6 +1,8 @@
+import { inject } from '@adonisjs/core'
 import Order from '#models/order'
 import { DateTime } from 'luxon'
 
+@inject()
 export default class DriverRouteService {
   /**
    * Lấy danh sách lộ trình giao hàng trong ngày của Tài xế

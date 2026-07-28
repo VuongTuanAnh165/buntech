@@ -3,10 +3,8 @@
  * DO NOT EDIT manually
  * Run "node ace migration:run" command to re-generate this file
  */
-
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
-
 export class AddressSchema extends BaseModel {
   static $columns = [
     'addressLine',
@@ -51,7 +49,6 @@ export class AddressSchema extends BaseModel {
   @column()
   declare ward: string | null
 }
-
 export class AdministrativeDivisionSchema extends BaseModel {
   static $columns = [
     'code',
@@ -84,7 +81,6 @@ export class AdministrativeDivisionSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
-
 export class AuthAccessTokenSchema extends BaseModel {
   static $columns = [
     'abilities',
@@ -120,7 +116,6 @@ export class AuthAccessTokenSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
-
 export class BlogCategorySchema extends BaseModel {
   static $columns = ['createdAt', 'description', 'id', 'name', 'slug', 'updatedAt'] as const
   $columns = BlogCategorySchema.$columns
@@ -137,12 +132,10 @@ export class BlogCategorySchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
-
 export class CategorySchema extends BaseModel {
   static $columns = [
     'createdAt',
     'createdBy',
-    'deletedAt',
     'description',
     'id',
     'metaDescription',
@@ -179,7 +172,6 @@ export class CategorySchema extends BaseModel {
   @column()
   declare updatedBy: number | null
 }
-
 export class CustomerPriceSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -212,7 +204,6 @@ export class CustomerPriceSchema extends BaseModel {
   @column()
   declare userId: number | null
 }
-
 export class DeviceTokenSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -245,7 +236,6 @@ export class DeviceTokenSchema extends BaseModel {
   @column()
   declare userId: number | null
 }
-
 export class InventoryLogSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -287,7 +277,6 @@ export class InventoryLogSchema extends BaseModel {
   @column()
   declare updatedBy: number | null
 }
-
 export class MasterDataSyncSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -314,7 +303,6 @@ export class MasterDataSyncSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
-
 export class OrderItemSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -350,7 +338,6 @@ export class OrderItemSchema extends BaseModel {
   @column()
   declare updatedBy: number | null
 }
-
 export class OrderSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -407,14 +394,12 @@ export class OrderSchema extends BaseModel {
   @column()
   declare userId: number | null
 }
-
 export class PostSchema extends BaseModel {
   static $columns = [
     'authorId',
     'blogCategoryId',
     'content',
     'createdAt',
-    'deletedAt',
     'id',
     'isPublished',
     'metaDescription',
@@ -434,8 +419,6 @@ export class PostSchema extends BaseModel {
   declare content: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
-  @column.dateTime()
-  declare deletedAt: DateTime | null
   @column({ isPrimary: true })
   declare id: number
   @column()
@@ -455,7 +438,6 @@ export class PostSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
-
 export class ProductImageSchema extends BaseModel {
   static $columns = [
     'altText',
@@ -482,7 +464,6 @@ export class ProductImageSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
-
 export class ProductReviewImageSchema extends BaseModel {
   static $columns = ['createdAt', 'fileUrl', 'id', 'reviewId', 'updatedAt'] as const
   $columns = ProductReviewImageSchema.$columns
@@ -497,7 +478,6 @@ export class ProductReviewImageSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
 }
-
 export class ProductReviewSchema extends BaseModel {
   static $columns = [
     'content',
@@ -539,7 +519,6 @@ export class ProductReviewSchema extends BaseModel {
   @column()
   declare userId: number | null
 }
-
 export class ProductionLogSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -581,7 +560,6 @@ export class ProductionLogSchema extends BaseModel {
   @column()
   declare wastePercentage: string
 }
-
 export class ProductSchema extends BaseModel {
   static $columns = [
     'averageRating',
@@ -644,7 +622,6 @@ export class ProductSchema extends BaseModel {
   @column()
   declare updatedBy: number | null
 }
-
 export class RateLimitSchema extends BaseModel {
   static $columns = ['expire', 'key', 'points'] as const
   $columns = RateLimitSchema.$columns
@@ -655,13 +632,11 @@ export class RateLimitSchema extends BaseModel {
   @column()
   declare points: number
 }
-
 export class RawMaterialSchema extends BaseModel {
   static $columns = [
     'createdAt',
     'createdBy',
     'currentStock',
-    'deletedAt',
     'id',
     'name',
     'unit',
@@ -675,8 +650,6 @@ export class RawMaterialSchema extends BaseModel {
   declare createdBy: number | null
   @column()
   declare currentStock: string | null
-  @column.dateTime()
-  declare deletedAt: DateTime | null
   @column({ isPrimary: true })
   declare id: number
   @column()
@@ -688,7 +661,6 @@ export class RawMaterialSchema extends BaseModel {
   @column()
   declare updatedBy: number | null
 }
-
 export class RefreshTokenSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -724,7 +696,6 @@ export class RefreshTokenSchema extends BaseModel {
   @column()
   declare userId: number | null
 }
-
 export class SystemConfigSchema extends BaseModel {
   static $columns = [
     'createdAt',
@@ -754,7 +725,6 @@ export class SystemConfigSchema extends BaseModel {
   @column()
   declare value: string
 }
-
 export class TransactionSchema extends BaseModel {
   static $columns = [
     'amount',
@@ -799,7 +769,6 @@ export class TransactionSchema extends BaseModel {
   @column()
   declare userId: number | null
 }
-
 export class UserProfileSchema extends BaseModel {
   static $columns = [
     'avatarUrl',
@@ -838,7 +807,6 @@ export class UserProfileSchema extends BaseModel {
   @column()
   declare zaloUserId: string | null
 }
-
 export class UserSchema extends BaseModel {
   static $columns = [
     'createdAt',

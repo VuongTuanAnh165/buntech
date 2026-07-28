@@ -2,6 +2,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import CustomerPriceService from '#services/customer_price_service'
 import { upsertCustomerPriceValidator } from '#validators/customer_price_validator'
+import { paginationValidator } from '#validators/pagination'
+import { Pagination } from '#enums/pagination'
 
 @inject()
 export default class CustomerPricesController {
@@ -12,15 +14,31 @@ export default class CustomerPricesController {
    * @summary Danh sách Bảng giá riêng
    * @description Lấy danh sách các sản phẩm đã được cài đặt giá bán riêng cho một khách hàng sỉ.
    * @paramPath userId - ID người dùng
-   * @responseBody 200 - <CustomerPriceListArrayResponse>
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @responseBody 200 - <PaginatedCustomerPriceResponse>
    */
-  async index({ params, response }: HttpContext) {
-    const prices = await this.customerPriceService.getUserPrices(params.userId)
+  async index({ params, request, response }: HttpContext) {
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
+
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const prices = await this.customerPriceService.getUserPrices(params.userId, pageNum, limitNum)
+    const meta = prices.getMeta()
 
     return response.ok({
       success: true,
       message: 'Lấy bảng giá riêng thành công',
-      data: prices,
+      data: prices.all(),
+      meta: {
+        page: meta.currentPage,
+        pageSize: meta.perPage,
+        total: meta.total,
+        totalPages: meta.lastPage,
+      },
     })
   }
 

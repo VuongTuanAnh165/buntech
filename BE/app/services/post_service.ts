@@ -140,7 +140,6 @@ export default class PostService {
 
   async delete(id: number) {
     const post = await Post.query().select('id').where('id', id).firstOrFail()
-    post.deletedAt = DateTime.now()
-    await post.save()
+    await post.delete()
   }
 }

@@ -1,6 +1,8 @@
+import { inject } from '@adonisjs/core'
 import Address from '#models/address'
 import db from '@adonisjs/lucid/services/db'
 
+@inject()
 export default class AddressService {
   /**
    * Get all addresses of a user

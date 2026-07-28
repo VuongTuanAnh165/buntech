@@ -16,7 +16,10 @@ export default class AuthService {
    */
   public async login(phoneNumber: string, passwordText: string, rememberMe?: boolean) {
     // 1. Tìm user
-    const user = await User.findBy('phone_number', phoneNumber)
+    const user = await User.query()
+      .select('id', 'password', 'phone_number', 'full_name', 'role')
+      .where('phone_number', phoneNumber)
+      .first()
     if (!user) {
       throw new BusinessException(
         'Số điện thoại hoặc mật khẩu không chính xác',
@@ -77,7 +80,10 @@ export default class AuthService {
    */
   public async refresh(tokenString: string) {
     // 1. Tìm Refresh Token trong DB
-    const refreshTokenRecord = await RefreshToken.findBy('token', tokenString)
+    const refreshTokenRecord = await RefreshToken.query()
+      .select('id', 'user_id', 'token', 'expires_at', 'is_revoked')
+      .where('token', tokenString)
+      .first()
 
     // 2. Kiểm tra hợp lệ
     if (!refreshTokenRecord) {
@@ -93,7 +99,10 @@ export default class AuthService {
     }
 
     // 3. Lấy User tương ứng
-    const user = await User.findOrFail(refreshTokenRecord.userId)
+    const user = await User.query()
+      .select('id', 'phone_number', 'password', 'full_name', 'role')
+      .where('id', refreshTokenRecord.userId)
+      .firstOrFail()
 
     // 4. Sinh Access Token mới
     const newAccessToken = await User.accessTokens.create(user, ['*'], {

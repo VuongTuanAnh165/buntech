@@ -1,70 +1,97 @@
+import { inject } from '@adonisjs/core'
 import Order from '#models/order'
 import { type DateTime } from 'luxon'
 
+@inject()
 export default class ExportService {
   /**
-   * Tạo nội dung CSV cho danh sách đơn hàng
+   * Tạo Stream CSV cho danh sách đơn hàng để chống tràn RAM (OOM)
    */
-  async exportOrdersToCsv(filters: { startDate?: DateTime; endDate?: DateTime }): Promise<string> {
-    const query = Order.query()
-      .select(
-        'id',
-        'created_at',
-        'user_id',
-        'driver_id',
-        'total_amount',
-        'status',
-        'payment_status',
-        'note'
-      )
-      .preload('user', (q) => q.select('id', 'fullName', 'phoneNumber'))
-      .preload('driver', (q) => q.select('id', 'fullName'))
-      .orderBy('created_at', 'desc')
+  exportOrdersToCsvStream(filters: { startDate?: DateTime; endDate?: DateTime }) {
+    const { Readable } = require('node:stream')
+    let currentPage = 1
+    const perPage = 1000
+    let isFirstChunk = true
+    const BOM = '\uFEFF'
 
-    if (filters.startDate) {
-      query.where('created_at', '>=', filters.startDate.toSQLDate() as string)
-    }
-    if (filters.endDate) {
-      query.where('created_at', '<=', filters.endDate.toSQLDate() as string)
-    }
+    const escapeCsv = this.escapeCsv.bind(this)
 
-    // Lấy toàn bộ dữ liệu (cần chú ý nếu dữ liệu quá lớn nên dùng Cursor/Stream, nhưng ở đây demo xuất ngày/tháng nên lấy all)
-    // Để Enterprise-ready, ta nên dùng query stream. AdonisJS Lucid hỗ trợ .client.stream()
-    // Tuy nhiên để trả về 1 chuỗi hoàn chỉnh cho controller tải xuống, ta build string:
-    const orders = await query
+    const stream = new Readable({
+      async read() {
+        try {
+          const query = Order.query()
+            .select(
+              'id',
+              'created_at',
+              'user_id',
+              'driver_id',
+              'total_amount',
+              'status',
+              'payment_status',
+              'note'
+            )
+            .preload('user', (q) => q.select('id', 'fullName', 'phoneNumber'))
+            .preload('driver', (q) => q.select('id', 'fullName'))
+            .orderBy('created_at', 'desc')
 
-    // Header CSV
-    const headers = [
-      'Mã Đơn',
-      'Ngày Tạo',
-      'Khách Hàng',
-      'Số ĐT Khách',
-      'Tổng Tiền',
-      'Trạng Thái',
-      'Thanh Toán',
-      'Tài Xế',
-      'Ghi Chú',
-    ]
+          if (filters.startDate) {
+            query.where('created_at', '>=', filters.startDate.toSQLDate() as string)
+          }
+          if (filters.endDate) {
+            query.where('created_at', '<=', filters.endDate.toSQLDate() as string)
+          }
 
-    let csvContent = headers.join(',') + '\n'
+          const orders = await query.forPage(currentPage, perPage)
+          const headers = [
+            'Mã Đơn',
+            'Ngày Tạo',
+            'Khách Hàng',
+            'Số ĐT Khách',
+            'Tổng Tiền',
+            'Trạng Thái',
+            'Thanh Toán',
+            'Tài Xế',
+            'Ghi Chú',
+          ]
 
-    // Body CSV
-    for (const order of orders) {
-      const row = [
-        `ORD-${order.id}`,
-        order.createdAt ? order.createdAt.toFormat('yyyy-MM-dd HH:mm:ss') : '',
-        this.escapeCsv(order.user?.fullName),
-        order.user?.phoneNumber || '',
-        order.totalAmount,
-        order.status,
-        order.paymentStatus,
-        this.escapeCsv(order.driver?.fullName),
-        this.escapeCsv(order.note),
-      ]
-      csvContent += row.join(',') + '\n'
-    }
+          if (orders.length === 0) {
+            if (isFirstChunk) {
+              this.push(BOM + headers.join(',') + '\n')
+            }
+            this.push(null)
+            return
+          }
 
-    return csvContent
+          let chunk = ''
+          if (isFirstChunk) {
+            chunk += BOM + headers.join(',') + '\n'
+            isFirstChunk = false
+          }
+
+          for (const order of orders) {
+            const row = [
+              `ORD-${order.id}`,
+              order.createdAt ? order.createdAt.toFormat('yyyy-MM-dd HH:mm:ss') : '',
+              escapeCsv(order.user?.fullName),
+              order.user?.phoneNumber || '',
+              order.totalAmount,
+              order.status,
+              order.paymentStatus,
+              escapeCsv(order.driver?.fullName),
+              escapeCsv(order.note),
+            ]
+            chunk += row.join(',') + '\n'
+          }
+
+          this.push(chunk)
+          currentPage++
+        } catch (error) {
+          this.destroy(error instanceof Error ? error : new Error(String(error)))
+        }
+      },
+    })
+
+    return stream
   }
 
   /**

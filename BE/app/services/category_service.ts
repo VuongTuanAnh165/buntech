@@ -1,5 +1,4 @@
 import Category from '#models/category'
-import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
 import { type createCategoryValidator, type updateCategoryValidator } from '#validators/category'
 import { Pagination } from '#enums/pagination'
@@ -145,10 +144,8 @@ export default class CategoryService {
   /**
    * Xóa (Soft Delete)
    */
-  async delete(id: number, userId: number) {
+  async delete(id: number, _userId: number) {
     const category = await Category.query().select('id').where('id', id).firstOrFail()
-    category.deletedAt = DateTime.now()
-    category.updatedBy = userId
-    await category.save()
+    await category.delete()
   }
 }

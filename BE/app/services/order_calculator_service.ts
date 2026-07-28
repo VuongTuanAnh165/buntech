@@ -1,7 +1,9 @@
+import { inject } from '@adonisjs/core'
 import Product from '#models/product'
 import CustomerPrice from '#models/customer_price'
 import BusinessException from '#exceptions/business_exception'
 
+@inject()
 export default class OrderCalculatorService {
   /**
    * Tính toán tổng tiền và tạo chi tiết items cho đơn hàng

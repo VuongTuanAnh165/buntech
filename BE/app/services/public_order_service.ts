@@ -30,46 +30,29 @@ export default class PublicOrderService {
     const { totalAmount, orderItemsData } = await this.orderCalculator.calculateOrder(data.items)
 
     return await db.transaction(async (trx) => {
-      // 2. Find or Create Guest User
-      let user = await User.query({ client: trx })
-        .select('id', 'phone_number', 'full_name', 'role')
-        .where('phone_number', data.phoneNumber)
-        .first()
+      // 2. Find or Create Guest User (Safe from Race Condition via firstOrCreate)
+      let user = await User.firstOrCreate(
+        { phoneNumber: data.phoneNumber },
+        { fullName: data.fullName, role: Role.GUEST },
+        { client: trx }
+      )
 
-      if (!user) {
-        user = new User()
-        user.phoneNumber = data.phoneNumber
+      // Ensure profile exists for guest user
+      await UserProfile.firstOrCreate({ userId: user.id }, {}, { client: trx })
+
+      // Update name if missing
+      if (!user.fullName) {
         user.fullName = data.fullName
-        user.role = Role.GUEST
         user.useTransaction(trx)
         await user.save()
-
-        const profile = new UserProfile()
-        profile.userId = user.id
-        profile.useTransaction(trx)
-        await profile.save()
-      } else {
-        if (!user.fullName) {
-          user.fullName = data.fullName
-          user.useTransaction(trx)
-          await user.save()
-        }
       }
 
       // 3. Find or Create Address for this user
-      let address = await Address.query({ client: trx })
-        .select('id', 'user_id', 'address_line')
-        .where('user_id', user.id)
-        .where('address_line', data.address)
-        .first()
-
-      if (!address) {
-        address = new Address()
-        address.userId = user.id
-        address.addressLine = data.address
-        address.useTransaction(trx)
-        await address.save()
-      }
+      let address = await Address.firstOrCreate(
+        { userId: user.id, addressLine: data.address },
+        {},
+        { client: trx }
+      )
 
       // 4. Create Order
       const order = new Order()
@@ -94,9 +77,9 @@ export default class PublicOrderService {
         quantity: itemData.quantity,
         unitPrice: itemData.unitPrice,
       }))
-      await OrderItem.createMany(itemsToCreate, { client: trx })
+      const createdItems = await OrderItem.createMany(itemsToCreate, { client: trx })
 
-      await order.load('items')
+      order.$setRelated('items', createdItems)
       return order
     })
   }

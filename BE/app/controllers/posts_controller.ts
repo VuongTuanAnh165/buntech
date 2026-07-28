@@ -144,7 +144,9 @@ export default class PostsController {
    * @responseBody 200 - <PostResponse>
    */
   async update({ params, request, response }: HttpContext) {
-    const payload = await request.validateUsing(updatePostValidator)
+    const payload = await request.validateUsing(updatePostValidator, {
+      meta: { postId: Number(params.id) },
+    })
     const post = await this.postService.update(params.id, payload)
 
     return response.json({

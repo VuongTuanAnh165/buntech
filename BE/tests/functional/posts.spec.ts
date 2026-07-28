@@ -66,6 +66,6 @@ test.group('Posts', (group) => {
     response.assertBodyContains({ success: true })
 
     const deletedPost = await Post.find(post.id)
-    assert.isNotNull(deletedPost?.deletedAt)
+    assert.isNull(deletedPost)
   })
 })

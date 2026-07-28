@@ -27,10 +27,21 @@ export const createPostValidator = vine.compile(
  * Validator to validate the payload when updating
  * an existing post.
  */
-export const updatePostValidator = vine.compile(
+export const updatePostValidator = vine.withMetaData<{ postId: number }>().compile(
   vine.object({
     title: vine.string().maxLength(255).optional(),
-    slug: vine.string().maxLength(255).optional(),
+    slug: vine
+      .string()
+      .maxLength(255)
+      .unique(async (db, value, field) => {
+        const match = await db
+          .from('posts')
+          .where('slug', value)
+          .whereNot('id', field.meta.postId)
+          .first()
+        return !match
+      })
+      .optional(),
     blogCategoryId: vine.number().optional(),
     thumbnail: vine
       .file({

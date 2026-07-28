@@ -1,3 +1,4 @@
+import { inject } from '@adonisjs/core'
 import Transaction from '#models/transaction'
 import UserProfile from '#models/user_profile'
 import db from '@adonisjs/lucid/services/db'
@@ -5,6 +6,7 @@ import { DateTime } from 'luxon'
 import { Pagination } from '#enums/pagination'
 import { TransactionType } from '#enums/transaction_type'
 
+@inject()
 export default class TransactionService {
   /**
    * Lấy danh sách Sổ cái các khoản thu chi
@@ -58,15 +60,22 @@ export default class TransactionService {
         .forUpdate() // CRITICAL: Row-level lock
         .firstOrFail()
 
-      // 2. Calculate new debt
-      // DB stores as string (decimal), parse it to float, then back to string
-      const currentDebtFloat = Number.parseFloat(profile.currentDebt || '0')
-      const newDebt = currentDebtFloat - data.amount
+      // 2. Calculate new debt safely using DB Native Math
+      await db
+        .from('user_profiles')
+        .where('user_id', data.userId)
+        .update({
+          current_debt: db.raw('current_debt - ?', [data.amount]),
+          updated_at: DateTime.now().toSQL(),
+        })
+        .useTransaction(trx)
 
-      // Update profile
-      profile.currentDebt = newDebt.toString()
-      profile.useTransaction(trx)
-      await profile.save()
+      const updatedProfile = await UserProfile.query({ client: trx })
+        .select('current_debt')
+        .where('user_id', data.userId)
+        .firstOrFail()
+
+      profile.currentDebt = updatedProfile.currentDebt
 
       // 3. Create Transaction Record
       const transaction = new Transaction()

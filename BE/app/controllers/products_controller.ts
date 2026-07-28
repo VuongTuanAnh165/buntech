@@ -140,7 +140,9 @@ export default class ProductsController {
    * @responseBody 200 - <ProductResponse>
    */
   async update({ params, request, response, auth }: HttpContext) {
-    const payload = await request.validateUsing(updateProductValidator)
+    const payload = await request.validateUsing(updateProductValidator, {
+      meta: { productId: Number(params.id) },
+    })
     const userId = auth.user!.id
     const product = await this.productService.update(params.id, payload, userId)
 

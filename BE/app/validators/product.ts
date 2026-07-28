@@ -7,7 +7,7 @@ export const createProductValidator = vine.compile(
   vine.object({
     categoryId: vine.number().optional(),
     name: vine.string().maxLength(255),
-    slug: vine.string().maxLength(255),
+    slug: vine.string().maxLength(255).unique({ table: 'products', column: 'slug' }),
     basePrice: vine.number().min(0),
     unit: vine.string().maxLength(20),
     shortDescription: vine.string().optional(),
@@ -39,11 +39,22 @@ export const createProductValidator = vine.compile(
 /**
  * Validator for updating a product
  */
-export const updateProductValidator = vine.compile(
+export const updateProductValidator = vine.withMetaData<{ productId: number }>().compile(
   vine.object({
     categoryId: vine.number().optional(),
     name: vine.string().maxLength(255).optional(),
-    slug: vine.string().maxLength(255).optional(),
+    slug: vine
+      .string()
+      .maxLength(255)
+      .unique(async (db, value, field) => {
+        const match = await db
+          .from('products')
+          .where('slug', value)
+          .whereNot('id', field.meta.productId)
+          .first()
+        return !match
+      })
+      .optional(),
     basePrice: vine.number().min(0).optional(),
     unit: vine.string().maxLength(20).optional(),
     shortDescription: vine.string().optional(),
