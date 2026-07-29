@@ -1,62 +1,44 @@
-# Upload Module API Specification
+# Upload File
 
-Tài liệu này mô tả dịch vụ lưu trữ và truyền tải tệp tĩnh (File Server) dùng chung trên toàn ứng dụng.
+Hệ thống hỗ trợ Upload qua thư viện `@adonisjs/drive` (Abstraction storage của AdonisJS).
+Dữ liệu hiện tại được lưu ở Local Storage (ổ cứng cục bộ) trong thư mục `storage/images/`.
 
----
+## API Upload Ảnh
 
-## 1. POST `/api/v1/admin/upload`
-
-### 1. Tổng quan
-- **Tên API**: Dịch vụ Upload File trung tâm
+- **URL**: `POST /api/v1/admin/upload`
 - **Method**: `POST`
-- **Module**: Uploads
-- **Permission**: Admin
-- **Middleware**: `auth`, `admin`
+- **Authentication**: `Bearer Token` (yêu cầu Admin).
+- **Mục đích**: Tải ảnh (Avatar, Hình ảnh sản phẩm, Banner...) lên server.
 
-### 2. Mục đích
-Nền tảng này không lưu ảnh dạng Base64 vào CSDL mà sử dụng ổ đĩa tĩnh. API này nhận File tải lên (ảnh), ghi xuống đĩa, và trả về đường dẫn URL an toàn để Frontend chèn vào các Form dữ liệu khác (như Tạo Sản phẩm, Đổi Avatar, Soạn Blog HTML).
+## Request
 
-### 3. Khi nào Frontend nên gọi
-- Khi người dùng chọn Ảnh trên trình duyệt và API thực tế (như Update Profile) chỉ nhận tham số String URL (chứ không nhận FormData trực tiếp). Lúc này Frontend gọi Upload ngầm trước, lấy URL rồi mới Submit form chính.
-- Plugin của Trình soạn thảo văn bản (Rich Text Editor như TinyMCE, Quill) gọi API này khi người dùng paste ảnh vào khung soạn thảo.
+- **Content-Type**: `multipart/form-data`
 
-### 5. Request
-- **Headers**: `Content-Type: multipart/form-data`
-- **Body**:
-  - `file` (File object, **required**): Đối tượng Blob/File từ thẻ `<input type="file" />`.
+### Body (Form-Data)
 
-**Field Explanation**:
-- AdonisJS Backend sẽ thiết lập giới hạn cấu hình (ví dụ max size = 5MB, format: jpg, png, webp, jpeg).
+| Key | Loại file cho phép | Dung lượng Max | Yêu cầu |
+| --- | --- | --- | --- |
+| `image` | `jpg`, `png`, `jpeg`, `webp` | 5MB | Bắt buộc |
 
-### 6. Business Rule
-- Ghi trực tiếp xuống hệ thống lưu trữ tĩnh (`Drive` của Adonis).
-- Tạo ra 1 chuỗi Tên ngẫu nhiên cực mạnh (UUID hoặc Timestamp hash) để chống trùng tên file.
-- Không chạm vào Database. (Tức là không có Transaction DB).
+## Quá trình xử lý (Business Flow)
 
-### 7. Response
-- **Body**:
+1. Validator (`uploadValidator`) kiểm tra dung lượng và định dạng mở rộng (extname).
+2. Tạo tên file ngẫu nhiên (UUID) bằng `crypto.randomUUID()` để chống đụng độ và Path Traversal.
+3. Chuyển file tới thư mục `storage/images` thông qua Drive disk `fs`.
+4. Lấy public URL trả về cho Frontend (ví dụ: `http://localhost:3333/uploads/images/abc-xyz.jpg`).
+
+## Response
+
+**200 OK**
+
 ```json
 {
-  "url": "http://localhost:3333/uploads/products/image123.webp",
-  "key": "products/image123.webp"
+  "success": true,
+  "message": "Upload ảnh thành công",
+  "data": {
+    "url": "http://localhost:3333/uploads/images/some-uuid.jpg",
+    "path": "images/some-uuid.jpg"
+  }
 }
 ```
-
-**Field Explanation**:
-- `url`: Link HTTP(S) tuyệt đối. Dùng để nhét vào thẻ `<img src="..." />` hiển thị ra giao diện.
-- `key`: Định danh tương đối lưu trên ổ cứng. (FE có thể không cần xài key này, BE sẽ xài ngầm khi cần xóa).
-
-### 8. Error Handling
-- `413 Payload Too Large`: Dung lượng file vượt giới hạn quy định.
-  - *FE xử lý*: Báo lỗi ngay cho người dùng "Kích thước ảnh tối đa 5MB".
-- `422 Unprocessable Entity`: Định dạng file bị từ chối (Chặn tải lên .exe, .sh, .bat).
-
-### 9. Frontend Workflow
-- Bắt lấy URL. Đổ URL đó vào state của React/Vue.
-- Thay thế ảnh Thumbnail trên UI thành ảnh mới.
-
-### 10. Loading Strategy *(Recommended Practice)*
-- Hiển thị thanh Progress Bar dựa vào event `onUploadProgress` của Axios. (Rất hữu ích với 3G, 4G).
-
-### 16. Best Practice
-- **Nén ảnh trước khi up**: Frontend nên sử dụng thư viện như `browser-image-compression` để nén ảnh (ví dụ 10MB xuống 500KB) TRƯỚC KHI bắn qua API này. Điều này tiết kiệm băng thông và tăng tốc độ UX cực kỳ lớn.
+Client nên lưu `url` hiển thị và lưu `path` để thuận tiện xóa sau này nếu cần.
