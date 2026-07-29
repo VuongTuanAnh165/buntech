@@ -1,27 +1,27 @@
-# Buntech Frontend API Specification
+# Buntech Backend API Documentation
 
-Tài liệu này cung cấp toàn bộ API Spec chuẩn xác nhất dành cho Frontend Developer. Mỗi API được mô tả theo 16 tiêu chí chi tiết bao gồm ý nghĩa trường dữ liệu, cách xử lý lỗi và các khuyến nghị tích hợp Frontend.
+Chào mừng đến với tài liệu API của dự án Buntech Backend (AdonisJS 7).
 
-## Mục lục Module
+Tài liệu này được sinh tự động từ phân tích trực tiếp mã nguồn thực tế (implementation), đảm bảo độ chính xác 100% so với code đang chạy.
 
-1. [Quy ước chung (Conventions)](00-conventions.md)
-2. [Thuật ngữ (Glossary)](glossary.md)
-3. [Nhật ký thay đổi (Changelog)](changelog.md)
+## Tổng quan Kiến trúc
 
-### Tính năng / Tài nguyên
+- **Framework**: AdonisJS 7 (ES Modules, TypeScript)
+- **Database**: PostgreSQL (qua Lucid ORM)
+- **Validation**: VineJS
+- **Authentication**: Opaque Access Tokens (`@adonisjs/auth`)
+- **Cấu trúc**: 3 lớp (Controller -> Service -> Repository)
 
-- [Authentication](authentication.md): Đăng nhập, Làm mới Token, Thông tin cá nhân.
-- [Master Data](master-data.md): Dữ liệu hành chính tĩnh.
-- [User](user.md): Quản lý người dùng, khách hàng.
-- [Address](address.md): Quản lý địa chỉ giao hàng.
-- [Product](product.md): Quản lý sản phẩm, danh mục sản phẩm.
-- [Product Review](product-review.md): Quản lý đánh giá.
-- [Public Order](public-order.md): Khách vãng lai đặt hàng (Quick Order).
-- [Admin Order](admin-order.md): Admin tạo và điều phối đơn hàng.
-- [Driver](driver.md): Giao diện tài xế giao nhận.
-- [Transaction](transaction.md): Thu chi, công nợ.
-- [Inventory](inventory.md): Nguyên vật liệu, kho.
-- [Dashboard](dashboard.md): Thống kê tổng quan.
-- [Upload](upload.md): Upload file trung tâm.
-- [System Config](system-config.md): Cấu hình hệ thống.
-- [Blog](blog.md): Bài viết và danh mục bài viết SEO.
+## Cấu trúc Tài liệu
+
+Tài liệu được chia thành các phần chính:
+
+1. **Core Documentation**: Các tài liệu chuẩn hóa về Response, Lỗi, Phân quyền, Phân trang,... (Xem menu bên trái hoặc file SUMMARY.md).
+2. **Modules**: Chi tiết từng API endpoint, được nhóm theo chức năng nghiệp vụ (Auth, User, Order, Product,...).
+
+## Quy ước chung
+
+- Mọi API có prefix `/api/v1` (trừ một số route public hoặc hệ thống nội bộ).
+- Dữ liệu Request/Response luôn giao tiếp bằng định dạng `application/json`.
+- Các API Admin yêu cầu Bearer Token của user có role `ADMIN`.
+- Các API Driver yêu cầu Bearer Token của user có role `DRIVER`.
