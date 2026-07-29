@@ -11,23 +11,28 @@ const hidePromo = () => {
 const menuItems = [
   {
     label: 'Trang chủ',
-    to: '/'
+    to: '/',
+    icon: 'i-lucide-house'
   },
   {
     label: 'Giới thiệu',
-    to: '/gioi-thieu'
+    to: '/gioi-thieu',
+    icon: 'i-lucide-users'
   },
   {
     label: 'Đơn vị bán buôn',
-    to: '/don-vi-ban-buon'
+    to: '/don-vi-ban-buon',
+    icon: 'i-lucide-building'
   },
   {
     label: 'Sản phẩm',
-    to: '/san-pham'
+    to: '/san-pham',
+    icon: 'i-lucide-package'
   },
   {
     label: 'Tin tức',
-    to: '/tin-tuc'
+    to: '/tin-tuc',
+    icon: 'i-lucide-newspaper'
   }
 ]
 
@@ -37,6 +42,16 @@ const { data: currentUserData } = useAsyncData('current-user', () => AuthService
   watch: [token]
 })
 const currentUser = computed(() => currentUserData.value?.data)
+
+const route = useRoute()
+
+const isActive = (path: string) => {
+  if (path === '/') {
+    return route.path === '/'
+  }
+
+  return route.path.startsWith(path)
+}
 </script>
 
 <template>
@@ -120,45 +135,24 @@ const currentUser = computed(() => currentUserData.value?.data)
     </div>
   </header>
 
-  <!-- Mobile Bottom Navigation (Visible only on < md) -->
-  <nav
-    class="safe-area-bottom border-muted bg-background fixed right-0 bottom-0 left-0 z-50 border-t md:hidden"
-  >
-    <div class="flex h-16 items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
+  <!-- Mobile Bottom Navigation -->
+  <nav class="bg-primary fixed inset-x-0 bottom-0 z-50 md:hidden">
+    <div
+      class="flex h-[60px] items-center justify-evenly px-3 pb-[max(env(safe-area-inset-bottom))]"
+    >
       <NuxtLink
-        to="/"
-        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
-        active-class="text-primary"
+        v-for="item in menuItems"
+        :key="item.to"
+        :to="item.to"
+        class="flex h-14 w-14 items-center justify-center rounded-full transition-all duration-200 ease-out active:scale-90"
+        :class="[isActive(item.to) ? 'text-white' : 'text-white/60 hover:text-white/90']"
+        :aria-label="item.label"
       >
-        <UIcon name="i-lucide-home" class="h-6 w-6" />
-      </NuxtLink>
-      <NuxtLink
-        to="/gioi-thieu"
-        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
-        active-class="text-primary"
-      >
-        <UIcon name="i-lucide-users" class="h-6 w-6" />
-      </NuxtLink>
-      <NuxtLink
-        to="/don-vi-ban-buon"
-        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
-        active-class="text-primary"
-      >
-        <UIcon name="i-lucide-building" class="h-6 w-6" />
-      </NuxtLink>
-      <NuxtLink
-        to="/san-pham"
-        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
-        active-class="text-primary"
-      >
-        <UIcon name="i-lucide-package" class="h-6 w-6" />
-      </NuxtLink>
-      <NuxtLink
-        to="/tin-tuc"
-        class="text-muted-foreground hover:text-primary flex flex-col items-center justify-center gap-1 transition-colors"
-        active-class="text-primary"
-      >
-        <UIcon name="i-lucide-newspaper" class="h-6 w-6" />
+        <UIcon
+          :name="item.icon"
+          class="h-6 w-6 transition-all duration-200 ease-out"
+          :class="[isActive(item.to) ? 'scale-110' : 'scale-100']"
+        />
       </NuxtLink>
     </div>
   </nav>

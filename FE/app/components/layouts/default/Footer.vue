@@ -1,12 +1,10 @@
 <template>
-  <footer class="safe-area-bottom hidden border-t border-white/5 bg-gray-950 md:block">
+  <footer
+    class="safe-area-bottom bg-primary hidden h-[60px] items-center border-t border-white/5 md:flex"
+  >
     <div
-      class="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-6 px-6 py-7 md:flex-row md:px-12 lg:px-16"
+      class="mx-auto flex w-full max-w-7xl flex-col items-center justify-center gap-6 px-6 p-2 md:flex-row md:px-12 lg:px-16"
     >
-      <p class="order-2 text-center text-sm font-medium text-gray-400 md:order-1 md:text-left">
-        © 2026 BúnTech. All rights reserved.
-      </p>
-
       <nav
         class="order-1 flex flex-wrap items-center justify-center gap-6 text-sm font-semibold text-white md:order-2 md:gap-10"
       >
