@@ -38,7 +38,24 @@ export default defineNuxtConfig({
   // --- Cấu hình Security ---
   security: {
     headers: {
-      contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false, // Bật CSP ở prod (undefined để dùng mặc định), tắt ở dev
+      contentSecurityPolicy: {
+        'default-src': ["'self'"],
+        'script-src': [
+          "'self'",
+          'https:',
+          "'unsafe-inline'",
+          "'strict-dynamic'",
+          "'nonce-{{nonce}}'"
+        ],
+        'style-src': ["'self'", 'https:', "'unsafe-inline'"],
+        'base-uri': ["'self'"],
+        'img-src': ["'self'", 'data:', 'https:', 'http:'],
+        'font-src': ["'self'", 'https:', 'data:'],
+        'object-src': ["'none'"],
+        'script-src-attr': ["'none'"],
+        'connect-src': ["'self'", 'https:', 'http:', 'capacitor:', 'ionic:'],
+        'upgrade-insecure-requests': process.env.NODE_ENV === 'production'
+      },
       xXSSProtection: '1; mode=block',
       xFrameOptions: 'DENY',
       strictTransportSecurity: {

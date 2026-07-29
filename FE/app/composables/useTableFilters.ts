@@ -84,7 +84,7 @@ export const useTableFilters = <F extends Record<string, unknown> = Record<strin
    */
   const queryParams = computed(() => ({
     page: pagination.page.value,
-    pageSize: pagination.pageSize.value,
+    limit: pagination.pageSize.value,
     search: debouncedSearch.value || undefined,
     sortBy: sortBy.value || undefined,
     sortOrder: sortBy.value ? sortOrder.value : undefined,

@@ -13,7 +13,7 @@ export const usePagination = (defaultPageSize = 20) => {
 
   // --- State (đọc từ URL hoặc dùng mặc định) ---
   const page = ref(Number(route.query.page) || 1)
-  const pageSize = ref(Number(route.query.pageSize) || defaultPageSize)
+  const pageSize = ref(Number(route.query.limit) || defaultPageSize)
   const total = ref(0)
   const totalPages = ref(0)
 
@@ -40,7 +40,7 @@ export const usePagination = (defaultPageSize = 20) => {
       query: {
         ...route.query,
         page: page.value.toString(),
-        pageSize: pageSize.value.toString()
+        limit: pageSize.value.toString()
       }
     })
   }
@@ -70,9 +70,9 @@ export const usePagination = (defaultPageSize = 20) => {
    */
   const updateMeta = (meta: PaginationMeta) => {
     total.value = meta.total
-    totalPages.value = meta.totalPages
-    page.value = meta.page
-    pageSize.value = meta.pageSize
+    totalPages.value = meta.lastPage
+    page.value = meta.currentPage
+    pageSize.value = meta.perPage
   }
 
   /**
@@ -87,6 +87,7 @@ export const usePagination = (defaultPageSize = 20) => {
     // State
     page: readonly(page),
     pageSize: readonly(pageSize),
+    limit: readonly(pageSize),
     total: readonly(total),
     totalPages: readonly(totalPages),
     // Computed

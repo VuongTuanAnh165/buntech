@@ -13,10 +13,15 @@ export interface ApiResponse<T = unknown> {
  * Metadata phân trang trả về từ Backend.
  */
 export interface PaginationMeta {
-  page: number
-  pageSize: number
   total: number
-  totalPages: number
+  perPage: number
+  currentPage: number
+  lastPage: number
+  firstPage: number
+  firstPageUrl?: string
+  lastPageUrl?: string
+  nextPageUrl?: string | null
+  previousPageUrl?: string | null
 }
 
 /**
@@ -24,8 +29,10 @@ export interface PaginationMeta {
  */
 export interface PaginatedResponse<T> {
   success: boolean
-  data: T[]
-  meta: PaginationMeta
+  data: {
+    meta: PaginationMeta
+    data: T[]
+  }
   message?: string
 }
 
@@ -35,7 +42,7 @@ export interface PaginatedResponse<T> {
  */
 export interface PaginationParams {
   page?: number
-  pageSize?: number
+  limit?: number
   search?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
