@@ -85,6 +85,8 @@ Một user có thể có nhiều địa chỉ giao hàng. Các API này được
 ## 3. Bảng giá riêng (Customer Prices)
 
 Buntech có cơ chế Bảng Giá Riêng cho khách sỉ. Khi khách sỉ đặt hàng, hệ thống sẽ tự động quét bảng giá này để áp dụng thay vì lấy giá gốc của sản phẩm.
+*(Ghi chú: Trong Phase 1, hệ thống chỉ hỗ trợ cấu hình **1 mức giá sỉ cố định** duy nhất cho 1 khách hàng đối với 1 sản phẩm. Chưa hỗ trợ cài đặt giá bậc thang / Tier pricing theo số lượng).*
+
 Các API nested dưới dạng `/api/v1/admin/users/:userId/custom-prices`.
 
 ### 3.1 Danh sách giá riêng đã cài
