@@ -36,9 +36,8 @@ API quản lý các cấu hình động dạng Key-Value (Ví dụ: `maintain_mo
 Các API này không trả về JSON mà trả về định dạng **File Stream** (Ví dụ: `text/csv`) để trình duyệt tự động tải xuống.
 
 ### 2.1 Xuất đơn hàng theo ngày
-- **URL**: `GET /api/v1/admin/exports/orders` (Ghi chú: Theo Controller, có hàm này nhưng trong `routes.ts` không thấy map, cần check lại coverage. Nhưng nó hỗ trợ query `startDate`, `endDate`).
-- **URL thực tế**: `GET /api/v1/admin/exports/orders-today`
-  - **Mục đích**: Xuất nhanh các đơn hàng trong ngày hôm nay.
+- **URL**: `GET /api/v1/admin/exports/orders-today`
+- **Mục đích**: Xuất nhanh các đơn hàng trong ngày hôm nay.
 - **Response**: Trả về một file CSV đính kèm (Header `Content-Disposition: attachment; filename="Export_Orders_Today_YYYY_MM_DD.csv"`).
 
 ---
