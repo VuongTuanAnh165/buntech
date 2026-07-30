@@ -65,6 +65,7 @@ Toàn bộ API dưới đây có Prefix `/api/v1/admin/orders` và yêu cầu `B
   - `status` (String, required)
   - `deliveryStatus` (String, optional)
   - `paymentStatus` (String, optional)
+  - `updatedAt` (String, required): Khóa chống ghi đè (Optimistic Locking). Bắt buộc phải truyền đúng `updatedAt` của order hiện tại. Nếu sai lệch, API sẽ trả về lỗi `409 Conflict`.
 - **Mục đích**: Đổi trạng thái đơn hàng (Ví dụ: PROCESSING -> SHIPPING).
 
 ### 2.5 Gán tài xế hàng loạt (Batch Assign)
