@@ -301,11 +301,23 @@ router
       () => import('#controllers/inventory_controller'),
       'importMaterial',
     ])
+    router.post('/admin/inventory/export', [
+      () => import('#controllers/inventory_controller'),
+      'exportMaterial',
+    ])
+    router.get('/admin/inventory/loss-report', [
+      () => import('#controllers/inventory_controller'),
+      'lossReport',
+    ])
 
     // Dashboard
     router.get('/admin/dashboard/overview', [
       () => import('#controllers/dashboard_controller'),
       'overview',
+    ])
+    router.get('/admin/dashboard/top-buyers', [
+      () => import('#controllers/dashboard_controller'),
+      'topBuyers',
     ])
 
     // Exports

@@ -17,8 +17,8 @@ export default class DriverOrderService {
     orderId: number,
     driverId: number,
     data: {
-      paymentMethod: string
-      amountPaid: number
+      paymentMethod?: string
+      amountCollected: number
       deliveryNote?: string
       idempotencyKey: string
     }
@@ -60,13 +60,13 @@ export default class DriverOrderService {
       await chargeTx.save()
 
       // Bước 3.2: Ghi nhận THANH TOÁN (Nếu có thu tiền)
-      if (data.amountPaid > 0) {
+      if (data.amountCollected > 0) {
         const payTx = new Transaction()
         payTx.userId = order.userId
         payTx.orderId = order.id
-        payTx.amount = data.amountPaid.toString()
+        payTx.amount = data.amountCollected.toString()
         payTx.type = TransactionType.PAYMENT
-        payTx.paymentMethod = data.paymentMethod
+        payTx.paymentMethod = data.paymentMethod || 'CASH'
         payTx.referenceCode = data.idempotencyKey // Main idempotency key
         payTx.useTransaction(trx)
         await payTx.save()
@@ -77,7 +77,7 @@ export default class DriverOrderService {
         dummyTx.orderId = order.id
         dummyTx.amount = '0'
         dummyTx.type = TransactionType.DEBT_RECORD
-        dummyTx.paymentMethod = data.paymentMethod
+        dummyTx.paymentMethod = data.paymentMethod || 'CASH'
         dummyTx.referenceCode = data.idempotencyKey
         dummyTx.useTransaction(trx)
         await dummyTx.save()
@@ -88,7 +88,7 @@ export default class DriverOrderService {
         .from('user_profiles')
         .where('user_id', order.userId)
         .update({
-          current_debt: db.raw('current_debt + ? - ?', [order.totalAmount, data.amountPaid]),
+          current_debt: db.raw('current_debt + ? - ?', [order.totalAmount, data.amountCollected]),
           updated_at: DateTime.now().toSQL(),
         })
         .useTransaction(trx)
@@ -98,7 +98,7 @@ export default class DriverOrderService {
       order.status = OrderStatus.DELIVERED
       order.deliveryStatus = DeliveryStatus.SUCCESS
       order.paymentStatus =
-        data.amountPaid >= orderTotalFloat ? PaymentStatus.PAID : PaymentStatus.DEBT
+        data.amountCollected >= orderTotalFloat ? PaymentStatus.PAID : PaymentStatus.DEBT
       if (data.deliveryNote) {
         order.note = order.note ? `${order.note} | ${data.deliveryNote}` : data.deliveryNote
       }

@@ -6,6 +6,7 @@ import {
   updateOrderStatusValidator,
   batchAssignDriverValidator,
 } from '#validators/admin_order_validator'
+import emitter from '@adonisjs/core/services/emitter'
 
 @inject()
 export default class AdminOrdersController {
@@ -72,6 +73,9 @@ export default class AdminOrdersController {
       ...payload,
       deliveryDate: payload.deliveryDate as Date | undefined,
     })
+
+    // Kích hoạt sự kiện để gửi thông báo Zalo ZNS ngầm
+    emitter.emit('order:created', order)
 
     return response.created({
       success: true,
