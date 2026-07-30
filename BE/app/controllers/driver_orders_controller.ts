@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import DriverOrderService from '#services/driver_order_service'
 import { deliverOrderValidator } from '#validators/driver_order_validator'
+import emitter from '@adonisjs/core/services/emitter'
 
 @inject()
 export default class DriverOrdersController {
@@ -20,6 +21,8 @@ export default class DriverOrdersController {
     const payload = await request.validateUsing(deliverOrderValidator)
 
     const order = await this.driverOrderService.deliverOrder(params.id, user.id, payload)
+
+    emitter.emit('order:delivered', order)
 
     return response.ok({
       success: true,

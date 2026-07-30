@@ -7,5 +7,7 @@ export const deliverOrderValidator = vine.compile(
     deliveryNote: vine.string().trim().optional(),
     // Idempotency key to prevent double-charging if driver clicks 'Submit' twice
     idempotencyKey: vine.string().trim().maxLength(100),
+    // Optimistic locking
+    updatedAt: vine.string().trim(),
   })
 )

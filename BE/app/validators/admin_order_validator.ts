@@ -22,6 +22,7 @@ export const updateOrderStatusValidator = vine.compile(
     status: vine.string().trim(), // e.g., PENDING, PROCESSING, DELIVERING, DELIVERED, CANCELED
     deliveryStatus: vine.string().trim().optional(),
     paymentStatus: vine.string().trim().optional(),
+    updatedAt: vine.string().trim(),
   })
 )
 

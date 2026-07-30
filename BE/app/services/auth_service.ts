@@ -64,6 +64,7 @@ export default class AuthService {
       return {
         accessToken: accessToken.value!.release(), // Get the plaintext token
         refreshToken: refreshToken.token,
+        user: user,
       }
     } catch (error) {
       await trx.rollback()

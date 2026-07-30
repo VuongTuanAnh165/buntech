@@ -6,6 +6,7 @@ import { OrderSource } from '#enums/order_source'
 import { OrderStatus } from '#enums/order_status'
 import { Pagination } from '#enums/pagination'
 import { inject } from '@adonisjs/core'
+import { Exception } from '@adonisjs/core/exceptions'
 import OrderCalculatorService from '#services/order_calculator_service'
 
 @inject()
@@ -120,13 +121,25 @@ export default class AdminOrderService {
       status?: string
       deliveryStatus?: string
       paymentStatus?: string
+      updatedAt?: string
     }
   ) {
     const order = await Order.query()
-      .select('id', 'status', 'delivery_status', 'payment_status')
+      .select('id', 'status', 'delivery_status', 'payment_status', 'updated_at')
       .where('id', orderId)
       .firstOrFail()
-    order.merge(data)
+
+    if (data.updatedAt && order.updatedAt?.toISO() !== data.updatedAt) {
+      throw new Exception('Data has been modified by another transaction', {
+        code: 'E_OPTIMISTIC_LOCK',
+        status: 409,
+      })
+    }
+
+    // Xóa trường updatedAt ra khỏi data trước khi merge để Adonis tự sinh ngày mới
+    const { updatedAt, ...updateData } = data
+
+    order.merge(updateData)
     await order.save()
     return order
   }

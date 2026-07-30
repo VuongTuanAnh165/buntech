@@ -320,6 +320,9 @@ router
       'topBuyers',
     ])
 
+    // SSE
+    router.get('/admin/events/sse', [() => import('#controllers/events_controller'), 'stream'])
+
     // Exports
     router.get('/admin/exports/orders-today', [
       () => import('#controllers/exports_controller'),

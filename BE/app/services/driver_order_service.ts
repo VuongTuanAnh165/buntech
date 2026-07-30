@@ -7,6 +7,7 @@ import { DeliveryStatus } from '#enums/delivery_status'
 import { PaymentStatus } from '#enums/payment_status'
 import { TransactionType } from '#enums/transaction_type'
 import { DateTime } from 'luxon'
+import { Exception } from '@adonisjs/core/exceptions'
 
 @inject()
 export default class DriverOrderService {
@@ -21,16 +22,24 @@ export default class DriverOrderService {
       amountCollected: number
       deliveryNote?: string
       idempotencyKey: string
+      updatedAt: string
     }
   ) {
     return await db.transaction(async (trx) => {
       // 1. Lock Order ĐẦU TIÊN để tránh xung đột (Race Condition)
       const order = await Order.query({ client: trx })
-        .select('id', 'user_id', 'driver_id', 'status', 'total_amount', 'note')
+        .select('id', 'user_id', 'driver_id', 'status', 'total_amount', 'note', 'updated_at')
         .where('id', orderId)
         .where('driver_id', driverId)
         .forUpdate()
         .firstOrFail()
+
+      if (data.updatedAt && order.updatedAt?.toISO() !== data.updatedAt) {
+        throw new Exception('Data has been modified by another transaction', {
+          code: 'E_OPTIMISTIC_LOCK',
+          status: 409,
+        })
+      }
 
       if (order.status === OrderStatus.DELIVERED || order.status === OrderStatus.CANCELED) {
         throw new Error('Đơn hàng không ở trạng thái có thể giao')

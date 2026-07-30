@@ -23,6 +23,26 @@ export default class AuthController {
       payload.rememberMe
     )
 
+    const clientType = request.header('x-client-type') || 'APP'
+
+    if (clientType.toUpperCase() === 'WEB') {
+      response.cookie('accessToken', tokens.accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        // maxAge in seconds (example: 7 days or tokens.expiresIn)
+        maxAge: 7 * 24 * 60 * 60,
+      })
+
+      return response.json({
+        success: true,
+        message: 'Đăng nhập thành công',
+        data: {
+          user: tokens.user,
+        },
+      })
+    }
+
     return response.json({
       success: true,
       message: 'Đăng nhập thành công',
@@ -41,6 +61,22 @@ export default class AuthController {
     const payload = await request.validateUsing(refreshValidator)
 
     const token = await this.authService.refresh(payload.refreshToken)
+
+    const clientType = request.header('x-client-type') || 'APP'
+
+    if (clientType.toUpperCase() === 'WEB') {
+      response.cookie('accessToken', token.accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60,
+      })
+      return response.json({
+        success: true,
+        message: 'Làm mới token thành công',
+        data: {},
+      })
+    }
 
     return response.json({
       success: true,
