@@ -40,6 +40,7 @@ Trả về mảng (danh sách) các đơn hàng và thông tin khách hàng, s�
 - **Request Body**:
   - `idempotencyKey` (String, required): Mã UUID sinh từ phía App FE. Dùng để chống lỗi "Double Click" (Tài xế bấm nhiều lần do lag mạng, app crash).
   - `amountCollected` (Number, required): Số tiền thực tế tài xế thu của khách. (Truyền `0` nếu khách ghi nợ 100%, truyền bằng `tổng bill` nếu khách trả đủ).
+  - `updatedAt` (String, required): Khóa chống ghi đè (Optimistic Locking). Bắt buộc phải truyền đúng `updatedAt` của order hiện tại để chống xung đột thao tác với Admin trên Web.
 
 - **Business Flow (Luồng xử lý CỰC KỲ QUAN TRỌNG)**:
   1. Kiểm tra đơn hàng có đúng thuộc về Tài xế này không.

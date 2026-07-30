@@ -45,3 +45,14 @@ Các API này không trả về JSON mà trả về định dạng **File Stream
 ## 3. Upload File
 (Xem tài liệu chi tiết tại file [Upload File](../upload.md)).
 - **URL**: `POST /api/v1/admin/upload`
+
+---
+
+## 4. Server-Sent Events (SSE)
+
+- **URL**: `GET /api/v1/admin/events/sse`
+- **Mục đích**: Luồng kết nối 1 chiều (Server bắn về Client) phục vụ tính năng Real-time Dashboard, thông báo chốt đơn từ Tài xế.
+- **Header Response**: `Content-Type: text/event-stream`
+- **Event Flow**:
+  - Khi Tài xế chốt đơn thành công, Server sẽ đẩy stream event `order:delivered`.
+  - Frontend chỉ cần dùng `EventSource('/api/v1/admin/events/sse')` để hứng event và tự render UI mà không cần gọi API Polling.

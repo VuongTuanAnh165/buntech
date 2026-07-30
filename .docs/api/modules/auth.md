@@ -11,6 +11,9 @@ Module này cung cấp các API để xác thực người dùng (đăng nhập,
 - **Authentication**: Public API
 - **Mục đích**: Đăng nhập bằng số điện thoại và mật khẩu. Hệ thống trả về `accessToken` (thời hạn 1 giờ) và `refreshToken` (thời hạn 1 ngày, hoặc 30 ngày nếu chọn `rememberMe`).
 
+### Request Header (Tuỳ chọn)
+- `X-Client-Type`: Truyền `WEB` hoặc `APP`. Mặc định là `APP`. Nếu là `WEB`, Backend sẽ tự động gắn HttpOnly Cookie để chống XSS.
+
 ### Request Body
 
 | Field | Type | Required | Description | Validation Rule |
@@ -30,6 +33,7 @@ Module này cung cấp các API để xác thực người dùng (đăng nhập,
 
 ### Response
 
+**Trường hợp 1: APP (`X-Client-Type: APP` - Mặc định)**
 **200 OK**
 ```json
 {
@@ -37,10 +41,25 @@ Module này cung cấp các API để xác thực người dùng (đăng nhập,
   "message": "Đăng nhập thành công",
   "data": {
     "accessToken": "oat_...",
-    "refreshToken": "random_string_64_chars"
+    "refreshToken": "random_string_64_chars",
+    "user": { ... }
   }
 }
 ```
+
+**Trường hợp 2: WEB Admin (`X-Client-Type: WEB`)**
+- Kèm theo HTTP Header: `Set-Cookie: accessToken=oat_...; HttpOnly; Secure; SameSite=Strict; Max-Age=604800`
+**200 OK**
+```json
+{
+  "success": true,
+  "message": "Đăng nhập thành công",
+  "data": {
+    "user": { ... }
+  }
+}
+```
+*(Token không nằm trong JSON body để chống XSS)*
 
 ---
 
