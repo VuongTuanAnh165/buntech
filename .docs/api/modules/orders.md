@@ -54,9 +54,10 @@ Toàn bộ API dưới đây có Prefix `/api/v1/admin/orders` và yêu cầu `B
   - `idempotencyKey` (String, required, max 100): Mã UUID sinh từ phía App. Dùng để chống lỗi "Double Click" (Tài xế bấm nhiều lần do lag mạng).
   - `items` (Array of Object `[{ productId, quantity }]`, required, min 1 item)
 - **Business Flow (Luồng xử lý CỰC KỲ QUAN TRỌNG)**:
-  1. Payload validator.
+  1. Payload validator. *(Lưu ý: Đối với tính năng "Copy đơn ngày hôm qua", Frontend tự parse dữ liệu cũ và gọi chung vào API `POST` này với format JSON đầy đủ, Backend không tạo API `/clone` riêng).*
   2. Dựa vào `userId` của khách hàng, hệ thống tự động quét và áp dụng **Bảng giá riêng (CustomerPrice)** (nếu khách sỉ được thiết lập giá ưu đãi trước).
   3. Tính toán tổng tiền, VAT, tạo đơn hàng trong Database.
+  4. Hệ thống (Backend) sẽ kích hoạt sự kiện ngầm chạy Background Job để gửi tin nhắn Zalo ZNS tự động thông báo đơn hàng (FE không cần xử lý trigger gửi tin nhắn).
 
 ### 2.4 Cập nhật trạng thái
 - **Method**: `PATCH /:id/status`
