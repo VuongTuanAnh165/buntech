@@ -38,13 +38,14 @@ Trả về mảng (danh sách) các đơn hàng và thông tin khách hàng, s�
 - **Path Params**: `id` - ID Đơn hàng
 - **Mục đích**: Tài xế bấm "Giao thành công" trên app.
 - **Request Body**:
-  - `idempotencyKey` (String): Mã UUID sinh từ phía App. Dùng để chống lỗi "Double Click" (Tài xế bấm nhiều lần do lag mạng).
-  - Có thể chứa `amountCollected` (Số tiền thực tế tài xế thu của khách - Tùy validator cấu hình).
+  - `idempotencyKey` (String, required): Mã UUID sinh từ phía App FE. Dùng để chống lỗi "Double Click" (Tài xế bấm nhiều lần do lag mạng, app crash).
+  - `amountCollected` (Number, required): Số tiền thực tế tài xế thu của khách. (Truyền `0` nếu khách ghi nợ 100%, truyền bằng `tổng bill` nếu khách trả đủ).
+
 - **Business Flow (Luồng xử lý CỰC KỲ QUAN TRỌNG)**:
   1. Kiểm tra đơn hàng có đúng thuộc về Tài xế này không.
   2. Bắt đầu Database Transaction.
   3. Cập nhật trạng thái đơn hàng thành `DELIVERED`.
-  4. Nếu có thu hộ tiền -> Tự động tính toán và tạo Record Kế toán (Transactions).
-  5. Cập nhật **Công nợ (Debt)** của Khách hàng vào bảng profile.
+  4. **Hạch toán công nợ**: Tự động tính toán phần tiền còn thiếu: `Debt = Tổng Bill - amountCollected`. Nếu `Debt > 0`, hệ thống sẽ cộng dồn số tiền này vào Công nợ của Khách hàng (`users.debt`). Tạo Record Kế toán (Transactions) tương ứng. *(Lưu ý: FE không cần gọi thêm API phụ nào khác để ghi nợ)*.
+  5. **Trừ tồn kho thành phẩm**: Tự động trừ số lượng sản phẩm Bún (thành phẩm) tương ứng trong đơn hàng khỏi kho thực tế để tránh sai lệch sổ sách.
   6. Lưu `idempotencyKey` để chống trùng.
   7. Commit Transaction.

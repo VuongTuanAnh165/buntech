@@ -53,3 +53,35 @@ Thực hiện các thao tác tăng/giảm số lượng tồn kho của Nguyên 
   2. Truyền `userId` của Admin đang thao tác (lấy từ HTTP Context).
   3. Mở Database Transaction: Cộng dồn số lượng vào bảng `raw_materials`.
   4. Ghi một dòng log vào bảng lịch sử tồn kho (Ví dụ: `inventory_logs`).
+
+### 2.2 Xuất kho nguyên liệu (Export)
+- **URL**: `POST /api/v1/admin/inventory/export`
+- **Mục đích**: Trừ số lượng nguyên vật liệu khỏi Tồn kho hiện tại. Dùng khi mang Gạo đi xay/nấu bún. Tự động sinh ra Log xuất kho.
+- **Request Body (JSON)**:
+  - `materialId` (Number, required, positive)
+  - `quantity` (Number, required, positive)
+  - `note` (String, optional, max 255)
+  - `referenceId` (String, optional, max 100) - Mã phiếu xuất tham chiếu.
+- **Business Flow**:
+  1. Validator kiểm tra ID nguyên liệu và số lượng xuất. Kiểm tra xem tồn kho hiện tại có đủ xuất không.
+  2. Truyền `userId` của Admin đang thao tác.
+  3. Mở Database Transaction: Trừ số lượng khỏi bảng `raw_materials`.
+  4. Ghi một dòng log vào bảng lịch sử tồn kho (`inventory_logs`) với loại giao dịch là Xuất (EXPORT).
+
+### 2.3 Báo cáo Tỷ lệ Hao hụt (Loss Report)
+- **URL**: `GET /api/v1/admin/inventory/loss-report`
+- **Mục đích**: Báo cáo tổng hợp số lượng Gạo (nguyên liệu) đã xuất kho so với tổng số lượng Bún (thành phẩm) đã bán ra/chốt đơn trong một khoảng thời gian, để ban quản lý đánh giá tỷ lệ hao hụt.
+- **Query Params**:
+  - `startDate`, `endDate` (Định dạng `YYYY-MM-DD`).
+- **Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "totalMaterialExportedKg": 5000,
+      "totalProductDeliveredKg": 4800,
+      "lossQuantityKg": 200,
+      "lossPercentage": 4.0
+    }
+  }
+  ```
