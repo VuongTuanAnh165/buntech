@@ -13,30 +13,30 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const isPublicRoute = ['/', '/products', '/blog', '/quick-order', '/login'].includes(to.path) ||
     to.path.startsWith('/products/') || to.path.startsWith('/blog/')
 
-  if (isAuthRoute) {
-    if (authStore.isAuthenticated) {
-      if (authStore.role === Role.ADMIN) return navigateTo('/admin')
-      if (authStore.role === Role.DRIVER) return navigateTo('/driver')
-      if (authStore.role === Role.CUSTOMER) return navigateTo('/portal')
-    }
-    return
-  }
+  // if (isAuthRoute) {
+  //   if (authStore.isAuthenticated) {
+  //     // if (authStore.role === Role.ADMIN) return navigateTo('/admin')
+  //     // if (authStore.role === Role.DRIVER) return navigateTo('/driver')
+  //     // if (authStore.role === Role.CUSTOMER) return navigateTo('/portal')
+  //   }
+  //   return
+  // }
 
-  if (isAdminRoute) {
-    if (!authStore.isAuthenticated) return navigateTo('/auth/admin/login')
-    if (authStore.role !== Role.ADMIN) return navigateTo('/')
-    return
-  }
+  // if (isAdminRoute) {
+  //   if (!authStore.isAuthenticated) return navigateTo('/auth/admin/login')
+  //   if (authStore.role !== Role.ADMIN) return navigateTo('/')
+  //   return
+  // }
 
-  if (isDriverRoute) {
-    if (!authStore.isAuthenticated) return navigateTo('/auth/driver/login')
-    if (authStore.role !== Role.DRIVER) return navigateTo('/')
-    return
-  }
+  // if (isDriverRoute) {
+  //   if (!authStore.isAuthenticated) return navigateTo('/auth/driver/login')
+  //   if (authStore.role !== Role.DRIVER) return navigateTo('/')
+  //   return
+  // }
 
-  if (isCustomerPortal) {
-    if (!authStore.isAuthenticated) return navigateTo('/auth/customer/login')
-    if (authStore.role !== Role.CUSTOMER) return navigateTo('/')
-    return
-  }
+  // if (isCustomerPortal) {
+  //   if (!authStore.isAuthenticated) return navigateTo('/auth/customer/login')
+  //   if (authStore.role !== Role.CUSTOMER) return navigateTo('/')
+  //   return
+  // }
 })
