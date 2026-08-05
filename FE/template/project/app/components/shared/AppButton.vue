@@ -1,13 +1,14 @@
 <script setup lang="ts">
-interface Props {
+import { Loader2 } from 'lucide-vue-next'
+
+const props = withDefaults(defineProps<{
   variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'warning' | 'ghost' | 'outline'
   size?: 'sm' | 'md' | 'lg'
   type?: 'button' | 'submit' | 'reset'
   loading?: boolean
   disabled?: boolean
   block?: boolean
-}
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   variant: 'primary',
   size: 'md',
   type: 'button',
@@ -15,21 +16,28 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
   block: false,
 })
-defineEmits<{ click: [event: MouseEvent] }>()
+
+const emit = defineEmits<{ click: [event: MouseEvent] }>()
 
 const variantClasses: Record<string, string> = {
-  primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm',
-  secondary: 'bg-secondary-600 hover:bg-secondary-700 text-white shadow-sm',
-  danger: 'bg-danger-600 hover:bg-danger-700 text-white shadow-sm',
-  success: 'bg-success-600 hover:bg-success-700 text-white shadow-sm',
-  warning: 'bg-warning-500 hover:bg-warning-600 text-white shadow-sm',
-  ghost: 'bg-transparent hover:bg-gray-100 text-gray-700',
-  outline: 'bg-transparent border border-gray-300 hover:bg-gray-50 text-gray-700',
+  primary: 'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 focus-visible:ring-primary-500/40 shadow-xs shadow-primary-600/10',
+  secondary: 'bg-slate-900 text-white hover:bg-slate-800 active:bg-slate-950 focus-visible:ring-slate-500/40 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 shadow-xs',
+  danger: 'bg-danger-600 text-white hover:bg-danger-700 active:bg-danger-800 focus-visible:ring-danger-500/40 shadow-xs shadow-danger-600/10',
+  success: 'bg-success-600 text-white hover:bg-success-700 active:bg-success-800 focus-visible:ring-success-500/40 shadow-xs shadow-success-600/10',
+  warning: 'bg-warning-500 text-white hover:bg-warning-600 active:bg-warning-700 focus-visible:ring-warning-500/40 shadow-xs shadow-warning-500/10',
+  ghost: 'text-surface-foreground hover:bg-surface-hover active:bg-surface-hover/70 focus-visible:ring-primary-500/20',
+  outline: 'border border-surface-border bg-surface text-surface-foreground hover:bg-surface-hover hover:border-slate-300 dark:hover:border-zinc-600 active:bg-surface-hover/70 focus-visible:ring-primary-500/20',
 }
+
 const sizeClasses: Record<string, string> = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-sm',
-  lg: 'px-6 py-3 text-base',
+  sm: 'text-[13px] font-medium px-3 py-1.5 h-8 gap-1.5 rounded-lg',
+  md: 'text-sm font-medium px-4 py-2 h-10 gap-2 rounded-lg',
+  lg: 'text-sm font-medium px-5 py-2.5 h-12 gap-2 rounded-xl',
+}
+
+function onClick(e: MouseEvent) {
+  if (props.disabled || props.loading) return
+  emit('click', e)
 }
 </script>
 
@@ -37,19 +45,18 @@ const sizeClasses: Record<string, string> = {
   <button
     :type="type"
     :disabled="disabled || loading"
+    :aria-busy="loading"
+    :aria-disabled="disabled || loading"
     :class="[
-      'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2',
+      'inline-flex items-center justify-center font-medium transition-all duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100',
       variantClasses[variant],
       sizeClasses[size],
       block ? 'w-full' : '',
-      (disabled || loading) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
     ]"
-    @click="$emit('click', $event)"
+    @click="onClick"
   >
-    <svg v-if="loading" class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
-    <slot />
+    <Loader2 v-if="loading" class="w-4 h-4 animate-spin" aria-hidden="true" />
+    <slot v-if="!loading || $slots.loading === undefined" />
+    <slot v-if="loading" name="loading" />
   </button>
 </template>

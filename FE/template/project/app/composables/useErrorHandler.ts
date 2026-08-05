@@ -4,46 +4,43 @@ export interface AppError {
   fieldErrors: Record<string, string>
 }
 
-export function parseError(error: { code?: string; message: string }): AppError {
-  const message = error.message || ''
-  const code = error.code || ''
-
-  if (code === '23505' || message.includes('duplicate') || message.includes('đã tồn tại')) {
-    return { status: 409, message: 'Dữ liệu đã tồn tại', fieldErrors: {} }
-  }
-  if (code === '42501' || message.includes('permission') || message.includes('policy') || message.includes('quyền')) {
-    return { status: 403, message: 'Bạn không có quyền tác vụ này', fieldErrors: {} }
-  }
-  if (message.includes('violates') || message.includes('constraint') || message.includes('không hợp lệ')) {
-    return { status: 422, message: 'Dữ liệu không hợp lệ', fieldErrors: {} }
-  }
-  return { status: 500, message: 'Hệ thống đang bận, vui lòng thử lại', fieldErrors: {} }
-}
-
 export function useErrorHandler() {
+  const toast = useToast()
+  const { t } = useI18n()
+
   function handleError(error: unknown, context?: string): AppError {
-    const { t } = useI18n()
-    const toast = useToast()
+    const msg = error instanceof Error ? error.message : String(error)
 
-    if (error && typeof error === 'object' && 'code' in error) {
-      const appError = parseError(error as { code?: string; message: string })
-
-      if (appError.status === 403) {
-        toast.error(t('errors.forbidden'))
-      } else if (appError.status === 500) {
-        toast.error(t('errors.serverBusy'))
-      } else if (context) {
-        toast.error(appError.message)
-      }
-      return appError
+    if (msg.includes('Invalid credentials') || msg.includes('invalid') && msg.includes('credential')) {
+      toast.error(t('auth.invalidCredentials'))
+      return { status: 401, message: t('auth.invalidCredentials'), fieldErrors: {} }
     }
 
-    if (error instanceof Error) {
-      toast.error(error.message || t('errors.unexpected'))
-      return { status: 400, message: error.message, fieldErrors: {} }
+    if (msg.includes('conflict') || msg.includes('duplicate') || msg.includes('already exists')) {
+      toast.error(t('errors.conflict'))
+      return { status: 409, message: t('errors.conflict'), fieldErrors: {} }
     }
 
-    toast.error(t('errors.unexpected'))
+    if (msg.includes('not found') || msg.includes('404')) {
+      toast.error(t('errors.notFound') || t('errors.loadFailed'))
+      return { status: 404, message: t('errors.notFound') || t('errors.loadFailed'), fieldErrors: {} }
+    }
+
+    if (msg.includes('forbidden') || msg.includes('403')) {
+      toast.error(t('errors.forbidden') || t('errors.unexpected'))
+      return { status: 403, message: t('errors.forbidden') || t('errors.unexpected'), fieldErrors: {} }
+    }
+
+    if (msg.includes('network') || msg.includes('fetch')) {
+      toast.error(t('errors.network') || t('errors.unexpected'))
+      return { status: 0, message: t('errors.network') || t('errors.unexpected'), fieldErrors: {} }
+    }
+
+    if (context) {
+      toast.error(context)
+    } else {
+      toast.error(t('errors.unexpected'))
+    }
     return { status: 500, message: t('errors.unexpected'), fieldErrors: {} }
   }
 

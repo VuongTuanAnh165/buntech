@@ -1,79 +1,143 @@
 <script setup lang="ts">
-interface Props {
+import { AlertTriangle, ArrowRight, CheckCircle2 } from 'lucide-vue-next'
+
+const props = withDefaults(defineProps<{
   text?: string
   disabled?: boolean
   width?: number
-}
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
+  text: '',
   disabled: false,
   width: 320,
 })
-const emit = defineEmits<{ confirm: [] }>()
-const { t } = useI18n()
-const sliderRef = ref<HTMLElement | null>(null)
-const handleX = ref(0)
-const isDragging = ref(false)
-const startX = ref(0)
-const confirmed = ref(false)
-const trackWidth = 280
-const handleSize = 52
 
-function onStart(e: TouchEvent | MouseEvent) {
+const emit = defineEmits<{ confirm: [] }>()
+
+const trackRef = ref<HTMLElement | null>(null)
+const handleX = ref(0)
+const handleSize = 56
+const trackWidth = ref(props.width)
+const isDragging = ref(false)
+const confirmed = ref(false)
+const fallbackConfirming = ref(false)
+
+onMounted(() => {
+  if (trackRef.value) {
+    trackWidth.value = trackRef.value.offsetWidth
+  }
+})
+
+function onStart(e: MouseEvent | TouchEvent) {
   if (props.disabled || confirmed.value) return
   isDragging.value = true
-  startX.value = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
-}
-function onMove(e: TouchEvent | MouseEvent) {
-  if (!isDragging.value || props.disabled) return
-  const currentX = 'touches' in e ? e.touches[0].clientX : (e as MouseEvent).clientX
-  const delta = currentX - startX.value
-  handleX.value = Math.max(0, Math.min(delta, trackWidth - handleSize))
-}
-function onEnd() {
-  if (!isDragging.value) return
-  isDragging.value = false
-  if (handleX.value > trackWidth - handleSize - 20) {
-    handleX.value = trackWidth - handleSize
-    confirmed.value = true
-    emit('confirm')
-  } else {
-    handleX.value = 0
+  if (e.type === 'mousedown') {
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onEnd)
   }
 }
+
+let lastTouchX = 0
+function onMove(e: MouseEvent | TouchEvent) {
+  if (!isDragging.value || !trackRef.value) return
+  let clientX: number
+  if (e.type === 'touchmove') {
+    clientX = (e as TouchEvent).touches[0].clientX
+  } else {
+    clientX = (e as MouseEvent).clientX
+  }
+  const rect = trackRef.value.getBoundingClientRect()
+  const x = clientX - rect.left - handleSize / 2
+  handleX.value = Math.max(0, Math.min(x, trackWidth.value - handleSize))
+  if (handleX.value >= trackWidth.value - handleSize - 4) {
+    confirm()
+  }
+}
+
+function onEnd() {
+  isDragging.value = false
+  if (!confirmed.value) {
+    handleX.value = 0
+  }
+  window.removeEventListener('mousemove', onMove)
+  window.removeEventListener('mouseup', onEnd)
+}
+
+function confirm() {
+  if (confirmed.value) return
+  confirmed.value = true
+  handleX.value = trackWidth.value - handleSize
+  emit('confirm')
+}
+
+function fallbackConfirm() {
+  if (props.disabled || confirmed.value) return
+  fallbackConfirming.value = true
+  setTimeout(() => {
+    confirm()
+    fallbackConfirming.value = false
+  }, 200)
+}
+
+function onTouchStart(e: TouchEvent) {
+  if (props.disabled || confirmed.value) return
+  lastTouchX = e.touches[0].clientX
+  isDragging.value = true
+  window.addEventListener('touchmove', onMove, { passive: true })
+  window.addEventListener('touchend', onEnd)
+}
+
+function onTouchEnd() {
+  isDragging.value = false
+  if (!confirmed.value) handleX.value = 0
+  window.removeEventListener('touchmove', onMove)
+  window.removeEventListener('touchend', onEnd)
+}
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', onMove)
+  window.removeEventListener('mouseup', onEnd)
+  window.removeEventListener('touchmove', onMove)
+  window.removeEventListener('touchend', onTouchEnd)
+})
 </script>
 
 <template>
-  <div
-    class="relative rounded-full bg-gray-200 select-none overflow-hidden"
-    :style="{ width: `${trackWidth}px`, height: '56px' }"
-  >
+  <div class="space-y-2">
     <div
-      class="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-500"
+      ref="trackRef"
+      class="relative bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden select-none"
+      :style="{ width: `${trackWidth}px`, height: `${handleSize}px` }"
+      :class="{ 'opacity-50': disabled }"
     >
-      {{ confirmed ? t('driver.deliveryConfirmed') : (text || t('driver.swipeToConfirm')) }}
+      <div
+        class="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-500 dark:text-zinc-400"
+        :style="{ opacity: 1 - (handleX / (trackWidth - handleSize)) * 2 }"
+      >
+        {{ text }}
+      </div>
+      <div
+        class="absolute inset-y-0 left-0 bg-success-500/20 transition-all duration-150"
+        :style="{ width: `${handleX + handleSize}px` }"
+      />
+      <div
+        class="absolute top-0 left-0 w-14 h-14 bg-success-500 rounded-full shadow-lg flex items-center justify-center text-white cursor-grab active:cursor-grabbing"
+        :style="{ transform: `translateX(${handleX}px)` }"
+        :class="{ 'cursor-not-allowed': disabled }"
+        @mousedown="onStart"
+        @touchstart="onTouchStart"
+      >
+        <ArrowRight v-if="!confirmed" class="w-5 h-5" aria-hidden="true" />
+        <CheckCircle2 v-else class="w-5 h-5 animate-scale-in" aria-hidden="true" />
+      </div>
     </div>
-    <div
-      class="absolute inset-y-0 left-0 bg-success-500 rounded-full transition-all duration-300"
-      :style="{ width: `${handleX.value + handleSize}px` }"
-    />
-    <div
-      ref="sliderRef"
-      :class="[
-        'absolute top-1 left-1 w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center touch-none',
-        confirmed ? 'bg-success-500' : '',
-        props.disabled ? 'opacity-50' : '',
-      ]"
-      :style="{ transform: `translateX(${handleX.value}px)` }"
-      @touchstart="onStart"
-      @touchmove="onMove"
-      @touchend="onEnd"
-      @mousedown="onStart"
-      @mousemove="onMove"
-      @mouseup="onEnd"
-      @mouseleave="onEnd"
+    <button
+      type="button"
+      class="text-xs text-gray-400 dark:text-zinc-500 hover:text-success-600 dark:hover:text-success-400 transition-colors underline underline-offset-2 min-h-[44px] px-2"
+      :disabled="disabled || confirmed"
+      :aria-label="text"
+      @click="fallbackConfirm"
     >
-      <svg v-if="!confirmed" class="w-6 h-6 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-      <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-    </div>
+      {{ fallbackConfirming ? 'Đang xác nhận...' : 'Hoặc nhấn để xác nhận' }}
+    </button>
   </div>
 </template>

@@ -1,16 +1,15 @@
 <script setup lang="ts">
-interface Props {
+withDefaults(defineProps<{
   width?: string
   height?: string
   rounded?: string
-}
-withDefaults(defineProps<Props>(), {
+}>(), {
   width: 'w-full',
   height: 'h-4',
-  rounded: 'rounded',
+  rounded: 'rounded-md',
 })
 </script>
 
 <template>
-  <div :class="['skeleton', width, height, rounded]" />
+  <div :class="[width, height, rounded, 'skeleton']" aria-hidden="true" />
 </template>

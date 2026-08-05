@@ -1,24 +1,32 @@
 <script setup lang="ts">
-interface Props {
+import { AlertCircle, RefreshCw } from 'lucide-vue-next'
+
+withDefaults(defineProps<{
   message?: string
-  onRetry?: () => void
-}
-const props = withDefaults(defineProps<Props>(), {})
+}>(), {
+  message: '',
+})
+
+const emit = defineEmits<{ retry: [] }>()
 const { t } = useI18n()
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-    <svg class="w-16 h-16 text-danger-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
-    </svg>
-    <p class="text-sm text-gray-600 mb-4">{{ message || t('errors.loadFailed') }}</p>
+  <div role="alert" class="flex flex-col items-center justify-center text-center max-w-sm mx-auto py-16">
+    <div class="relative mb-5">
+      <div class="w-16 h-16 rounded-2xl bg-danger-100 dark:bg-danger-900/30 flex items-center justify-center shadow-sm">
+        <AlertCircle class="w-8 h-8 text-danger-600 dark:text-danger-400" aria-hidden="true" />
+      </div>
+    </div>
+    <p class="text-base font-semibold text-surface-foreground">{{ message || t('errors.loadFailed') }}</p>
+    <p class="text-sm text-slate-500 dark:text-zinc-400 mt-1.5">{{ t('errors.tryAgain') || 'Vui lòng thử lại sau ít phút' }}</p>
     <button
-      v-if="onRetry"
-      class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
-      @click="onRetry"
+      type="button"
+      class="mt-6 inline-flex items-center gap-2 text-sm font-medium bg-primary-600 text-white hover:bg-primary-700 px-4 py-2.5 rounded-lg min-h-[44px] active:scale-95 transition-all shadow-sm shadow-primary-600/10"
+      @click="emit('retry')"
     >
-      {{ t('errors.tryAgain') }}
+      <RefreshCw class="w-4 h-4" aria-hidden="true" />
+      {{ t('common.retry') }}
     </button>
   </div>
 </template>

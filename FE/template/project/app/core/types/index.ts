@@ -1,4 +1,4 @@
-import type { Role, OrderStatus, TransactionType, ProductStatus, UserStatus, BlogStatus, InventoryMovementType } from '../enums'
+import type { Role, OrderStatus, TransactionType, ProductStatus, UserStatus, BlogStatus, InventoryMovementType, VehicleStatus, NotificationType } from '../enums'
 
 export interface Profile {
   id: string
@@ -144,6 +144,9 @@ export interface BlogPost {
   excerpt: string
   content: string
   image_url: string | null
+  featured_image: string | null
+  author_name: string | null
+  published_at: string | null
   status: BlogStatus
   deleted_at: string | null
   created_at: string
@@ -181,4 +184,49 @@ export interface TopBuyer {
   full_name: string
   avatar_url: string | null
   total: number
+}
+
+export interface Vehicle {
+  id: string
+  driver_id: string | null
+  plate_number: string
+  model: string
+  capacity: number
+  status: VehicleStatus
+  last_maintenance: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Notification {
+  id: string
+  user_id: string | null
+  type: NotificationType
+  title: string
+  message: string
+  is_read: boolean
+  link: string | null
+  created_at: string
+}
+
+export interface Message {
+  id: string
+  sender_id: string | null
+  receiver_id: string | null
+  content: string
+  is_read: boolean
+  created_at: string
+}
+
+export interface DeliveryRoute {
+  id: string
+  driver_id: string
+  date: string
+  order_ids: string[]
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED'
+  total_orders: number
+  completed_orders: number
+  total_distance: number
+  estimated_time: number
+  created_at: string
 }

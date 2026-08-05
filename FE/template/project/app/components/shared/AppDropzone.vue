@@ -1,77 +1,122 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-interface Props {
+import { UploadCloud, X } from 'lucide-vue-next'
+
+const props = withDefaults(defineProps<{
   modelValue?: File | null
   preview?: string | null
   maxSize?: number
   accept?: string
   label?: string
-}
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
+  modelValue: null,
+  preview: null,
   maxSize: 2 * 1024 * 1024,
   accept: 'image/*',
 })
+
 const emit = defineEmits<{
   'update:modelValue': [file: File | null]
   'update:preview': [url: string | null]
   error: [message: string]
 }>()
+
 const { t } = useI18n()
-const dragOver = ref(false)
+const inputRef = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
 const localPreview = ref<string | null>(props.preview)
 
 function handleFile(file: File) {
-  if (file.size > props.maxSize) {
-    emit('error', t('products.imageTooLarge'))
+  if (!file.type.startsWith('image/')) {
+    emit('error', t('errors.invalidFileType'))
     return
+  }
+  if (file.size > props.maxSize) {
+    emit('error', t('errors.fileTooLarge'))
+    return
+  }
+  if (localPreview.value && localPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(localPreview.value)
   }
   const url = URL.createObjectURL(file)
   localPreview.value = url
   emit('update:modelValue', file)
   emit('update:preview', url)
 }
-function onDrop(e: DragEvent) {
-  dragOver.value = false
-  const file = e.dataTransfer?.files?.[0]
-  if (file) handleFile(file)
-}
-function onInput(e: Event) {
+
+function onInputChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (file) handleFile(file)
 }
+
+function onDrop(e: DragEvent) {
+  isDragging.value = false
+  const file = e.dataTransfer?.files?.[0]
+  if (file) handleFile(file)
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault()
+    inputRef.value?.click()
+  }
+}
+
 function removeImage() {
-  if (localPreview.value && localPreview.value.startsWith('blob:')) URL.revokeObjectURL(localPreview.value)
+  if (localPreview.value && localPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(localPreview.value)
+  }
   localPreview.value = null
   emit('update:modelValue', null)
   emit('update:preview', null)
+  if (inputRef.value) inputRef.value.value = ''
 }
+
+onUnmounted(() => {
+  if (localPreview.value && localPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(localPreview.value)
+  }
+})
 </script>
 
 <template>
-  <div class="w-full">
-    <label v-if="label" class="block text-sm font-medium text-gray-700 mb-1.5">{{ label }}</label>
+  <div>
+    <label v-if="label" class="form-label">{{ label }}</label>
+    <input
+      ref="inputRef"
+      type="file"
+      class="hidden"
+      :accept="accept"
+      aria-label="Tải lên hình ảnh"
+      @change="onInputChange"
+    >
     <div
       v-if="!localPreview"
+      role="button"
+      tabindex="0"
       :class="[
-        'flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-6 transition-colors cursor-pointer',
-        dragOver ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-primary-400',
+        'relative flex flex-col items-center justify-center w-full min-h-[160px] rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200',
+        isDragging ? 'border-primary-400 bg-primary-50/50 dark:bg-primary-900/10' : 'border-surface-border hover:border-primary-300 hover:bg-surface-hover',
       ]"
-      @dragover.prevent="dragOver = true"
-      @dragleave.prevent="dragOver = false"
+      aria-label="Kéo thả hoặc nhấn để tải lên hình ảnh"
+      @click="inputRef?.click()"
+      @keydown="onKeydown"
+      @dragover.prevent="isDragging = true"
+      @dragleave.prevent="isDragging = false"
       @drop.prevent="onDrop"
     >
-      <input type="file" :accept="accept" class="hidden" @change="onInput">
-      <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-      <p class="text-sm text-gray-600">{{ t('products.uploadImage') }}</p>
-      <p class="text-xs text-gray-400 mt-1">{{ t('products.maxFileSize') }}</p>
+      <UploadCloud class="w-8 h-8 text-gray-400 dark:text-zinc-500 mb-2" aria-hidden="true" />
+      <p class="text-sm text-gray-500 dark:text-zinc-400">{{ t('common.dropOrClick') || 'Kéo thả hoặc nhấn để tải lên' }}</p>
+      <p class="text-xs text-gray-400 dark:text-zinc-500 mt-1">{{ t('common.maxSize') || 'Tối đa' }} {{ (maxSize / 1024 / 1024).toFixed(0) }}MB</p>
     </div>
-    <div v-else class="relative inline-block">
-      <img :src="localPreview" alt="preview" class="w-32 h-32 object-cover rounded-xl border border-gray-200">
+    <div v-else class="relative w-full rounded-xl overflow-hidden border border-surface-border group">
+      <img :src="localPreview" alt="Xem trước hình ảnh" class="w-full h-48 object-cover">
       <button
-        class="absolute -top-2 -right-2 w-6 h-6 bg-danger-500 text-white rounded-full flex items-center justify-center hover:bg-danger-600 transition-colors"
+        type="button"
+        class="absolute top-2 right-2 p-2 bg-gray-900/70 text-white rounded-lg hover:bg-gray-900 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+        aria-label="Xóa hình ảnh"
         @click="removeImage"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        <X class="w-4 h-4" aria-hidden="true" />
       </button>
     </div>
   </div>

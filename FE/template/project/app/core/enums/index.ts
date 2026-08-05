@@ -40,6 +40,21 @@ export enum BlogStatus {
   PUBLISHED = 'PUBLISHED',
 }
 
+export enum VehicleStatus {
+  ACTIVE = 'ACTIVE',
+  MAINTENANCE = 'MAINTENANCE',
+  INACTIVE = 'INACTIVE',
+}
+
+export enum NotificationType {
+  ORDER_ASSIGNED = 'ORDER_ASSIGNED',
+  ORDER_DELIVERED = 'ORDER_DELIVERED',
+  ORDER_CANCELLED = 'ORDER_CANCELLED',
+  LOW_STOCK = 'LOW_STOCK',
+  NEW_REVIEW = 'NEW_REVIEW',
+  SYSTEM = 'SYSTEM',
+}
+
 export const ORDER_STATUS_FLOW: OrderStatus[] = [
   OrderStatus.PENDING,
   OrderStatus.PROCESSING,

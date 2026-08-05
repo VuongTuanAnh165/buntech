@@ -1,18 +1,31 @@
 <script setup lang="ts">
+import { MailCheck, ArrowLeft, Mail } from 'lucide-vue-next'
 const { t } = useI18n()
 const toast = useToast()
+const router = useRouter()
+
+useHead({ title: `${t('auth.forgotPassword')} - BunTech` })
 definePageMeta({ layout: 'auth' })
-useHead({ title: `${t('auth.forgotPasswordTitle')} - BunTech` })
 
 const email = ref('')
-const sent = ref(false)
+const error = ref('')
 const loading = ref(false)
+const sent = ref(false)
+
+function validateEmail(val: string): string | undefined {
+  if (!val) return t('auth.emailRequired')
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return t('auth.emailInvalid')
+  return undefined
+}
 
 async function handleSubmit() {
+  error.value = validateEmail(email.value) || ''
+  if (error.value) return
+
   loading.value = true
   try {
-    // Mock network request
-    await new Promise(r => setTimeout(r, 500))
+    // TODO: Connect to Supabase auth.resetPasswordForEmail
+    await new Promise(resolve => setTimeout(resolve, 1200))
     sent.value = true
     toast.success(t('auth.resetLinkSent'))
   } catch {
@@ -24,40 +37,60 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-    <div class="w-full max-w-sm">
-      <div class="flex items-center gap-2 mb-8 justify-center">
-        <div class="w-10 h-10 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold">B</div>
-        <span class="text-xl font-bold text-gray-900">BunTech</span>
+  <div>
+    <!-- Back link -->
+    <NuxtLink to="/auth/admin/login" class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-surface-foreground transition-colors mb-6 min-h-[44px] px-2 -ml-2 rounded-md">
+      <ArrowLeft class="w-4 h-4" aria-hidden="true" />
+      {{ t('common.back') }}
+    </NuxtLink>
+
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-sm font-medium mb-4">
+        <Mail class="w-4 h-4" aria-hidden="true" />
+        {{ t('auth.forgotPassword') }}
       </div>
-      <template v-if="!sent">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ t('auth.forgotPasswordTitle') }}</h2>
-        <p class="text-gray-500 mb-8">{{ t('auth.forgotPasswordDescription') }}</p>
-        <form class="space-y-5" @submit.prevent="handleSubmit">
-          <AppInput
-            v-model="email"
-            :label="t('auth.email')"
-            type="email"
-            :required="true"
-            placeholder="email@example.com"
-          />
-          <AppButton type="submit" :loading="loading" block>
-            {{ t('auth.sendResetLink') }}
-          </AppButton>
-        </form>
-      </template>
-      <template v-else>
-        <div class="text-center py-8">
-          <div class="w-16 h-16 rounded-full bg-success-100 flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-          </div>
-          <h2 class="text-xl font-bold text-gray-900 mb-2">{{ t('auth.resetLinkSent') }}</h2>
-          <p class="text-gray-500 mb-6">{{ t('auth.resetLinkSentDescription') }}</p>
-        </div>
-      </template>
-      <NuxtLink to="/auth/admin/login" class="block text-center text-sm text-primary-600 hover:text-primary-700 mt-6">
-        {{ t('auth.backToLogin') }}
-      </NuxtLink>
+      <h2 class="text-2xl font-bold text-surface-foreground mb-2 tracking-tight">{{ t('auth.forgotPasswordTitle') }}</h2>
+      <p class="text-sm text-gray-500 dark:text-zinc-400">{{ t('auth.forgotPasswordSubtitle') }}</p>
     </div>
+
+    <!-- Success state -->
+    <Transition name="fade" mode="out-in">
+      <div v-if="sent" key="success" class="text-center py-8 animate-scale-in">
+        <div class="w-16 h-16 rounded-full bg-success-100 dark:bg-success-900/30 flex items-center justify-center mx-auto mb-4">
+          <MailCheck class="w-8 h-8 text-success-600 dark:text-success-400" aria-hidden="true" />
+        </div>
+        <h3 class="text-lg font-semibold text-surface-foreground mb-2">{{ t('auth.checkYourEmail') }}</h3>
+        <p class="text-sm text-gray-500 dark:text-zinc-400 max-w-xs mx-auto mb-6">
+          {{ t('auth.resetLinkSentDesc') || 'Chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn. Vui lòng kiểm tra hộp thư.' }}
+        </p>
+        <AppButton variant="outline" block @click="router.push('/auth/admin/login')">
+          {{ t('common.back') }}
+        </AppButton>
+      </div>
+
+      <!-- Form -->
+      <form v-else key="form" class="space-y-5" novalidate @submit.prevent="handleSubmit">
+        <AppInput
+          v-model="email"
+          :label="t('auth.email')"
+          type="email"
+          placeholder="admin@buntech.vn"
+          :required="true"
+          :error="error"
+          autocomplete="email"
+          @blur="error = validateEmail(email) || ''"
+        />
+
+        <AppButton type="submit" :loading="loading" block size="lg" class="!mt-8">
+          {{ t('auth.sendResetLink') }}
+        </AppButton>
+      </form>
+    </Transition>
+
+    <p class="text-center text-xs text-gray-400 dark:text-zinc-500 mt-8">
+      {{ t('auth.rememberPassword') || 'Nhớ mật khẩu?' }}
+      <NuxtLink to="/auth/admin/login" class="text-primary-600 dark:text-primary-400 font-medium hover:underline">{{ t('auth.loginTitle') }}</NuxtLink>
+    </p>
   </div>
 </template>

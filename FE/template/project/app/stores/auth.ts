@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Profile } from '../core/types'
 import { Role } from '../core/enums'
-import { mockUserAccounts, mockUsers, type MockUser } from '../core/mockData'
-
-const AUTH_STORAGE_KEY = 'buntech_auth_session'
+import { mockProfiles } from '../core/mock/data'
 
 interface AuthState {
   user: Profile | null
@@ -20,99 +18,38 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.user,
-    isLoggedIn: (state) => !!state.user,
     role: (state) => state.user?.role ?? null,
     isAdmin: (state) => state.user?.role === Role.ADMIN,
     isDriver: (state) => state.user?.role === Role.DRIVER,
     isCustomer: (state) => state.user?.role === Role.CUSTOMER,
-    isGuest: (state) => !state.user,
-    fullName: (state) => state.user?.full_name ?? '',
-    permissions: (state) => {
-      const role = state.user?.role ?? 'GUEST'
-      return rolePermissions[role] ?? []
-    },
-    hasPermission: (state) => (perm: string) => {
-      const role = state.user?.role ?? 'GUEST'
-      return (rolePermissions[role] ?? []).includes(perm)
-    },
   },
 
   actions: {
-    async init() {
+    init() {
       if (this.initialized) return
       this.initialized = true
-      // Restore session from localStorage (client-side only)
       if (import.meta.client) {
-        try {
-          const stored = localStorage.getItem(AUTH_STORAGE_KEY)
-          if (stored) {
-            const session = JSON.parse(stored) as { email: string }
-            const account = mockUserAccounts.find(u => u.email === session.email)
-            if (account) {
-              this.user = { ...account.profile }
-            }
-          }
-        } catch {
-          localStorage.removeItem(AUTH_STORAGE_KEY)
+        const saved = sessionStorage.getItem('buntech_mock_auth')
+        if (saved) {
+          try {
+            const userId = JSON.parse(saved)
+            const profile = mockProfiles.find(p => p.id === userId)
+            if (profile) this.user = profile
+          } catch { /* ignore */ }
         }
       }
     },
 
-    async fetchProfile() {
-      // Profile is already loaded from mock data during login/init
-      // This is a no-op in mock mode
-    },
-
-    async login(email: string, password: string) {
+    async login(email: string, _password: string) {
       this.loading = true
       try {
-        // Simulate network delay
-        await new Promise(r => setTimeout(r, 500))
-
-        const account = mockUserAccounts.find(
-          u => u.email === email && u.password === password
-        )
-        if (!account) {
-          throw new Error('Email hoặc mật khẩu không đúng')
-        }
-
-        this.user = { ...account.profile }
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ email }))
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async register(email: string, password: string, fullName: string, _role: Role = Role.CUSTOMER) {
-      this.loading = true
-      try {
-        await new Promise(r => setTimeout(r, 500))
-
-        // Check if email already exists
-        if (mockUserAccounts.find(u => u.email === email)) {
-          throw new Error('Email đã được sử dụng')
-        }
-
-        // Create new mock user
-        const newProfile: Profile = {
-          id: crypto.randomUUID(),
-          role: Role.CUSTOMER,
-          phone: null,
-          full_name: fullName,
-          status: 'ACTIVE' as any,
-          debt_limit: 0,
-          avatar_url: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-
-        const newAccount: MockUser = { email, password, profile: newProfile }
-        mockUserAccounts.push(newAccount)
-        mockUsers.value.push({ ...newProfile })
-
-        // Auto login after register
-        this.user = { ...newProfile }
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ email }))
+        let profile: Profile | undefined
+        if (email === 'admin@buntech.vn') profile = mockProfiles.find(p => p.role === Role.ADMIN)
+        else if (email === 'driver@buntech.vn') profile = mockProfiles.find(p => p.role === Role.DRIVER)
+        else if (email === 'customer@buntech.vn') profile = mockProfiles.find(p => p.role === Role.CUSTOMER && p.status === 'ACTIVE')
+        if (!profile) throw new Error('Invalid credentials')
+        this.user = profile
+        if (import.meta.client) sessionStorage.setItem('buntech_mock_auth', JSON.stringify(profile.id))
       } finally {
         this.loading = false
       }
@@ -120,43 +57,38 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       this.user = null
-      localStorage.removeItem(AUTH_STORAGE_KEY)
+      if (import.meta.client) sessionStorage.removeItem('buntech_mock_auth')
     },
 
     async updateProfile(updates: Partial<Profile>) {
       if (!this.user) return
-      await new Promise(r => setTimeout(r, 300))
-
-      // Update in mock users list
-      const idx = mockUsers.value.findIndex(u => u.id === this.user!.id)
-      if (idx !== -1) {
-        mockUsers.value[idx] = { ...mockUsers.value[idx], ...updates }
-      }
-
-      // Update account profile
-      const account = mockUserAccounts.find(a => a.profile.id === this.user!.id)
-      if (account) {
-        Object.assign(account.profile, updates)
-      }
-
-      this.user = { ...this.user, ...updates } as Profile
+      this.user = { ...this.user, ...updates, updated_at: new Date().toISOString() }
     },
 
-    async changePassword(oldPassword: string, newPassword: string) {
-      await new Promise(r => setTimeout(r, 300))
+    async changePassword(_oldPassword: string, _newPassword: string) {
+      // Mock - always succeeds
+    },
 
-      const account = mockUserAccounts.find(a => a.profile.id === this.user?.id)
-      if (!account) throw new Error('Không tìm thấy tài khoản')
-      if (account.password !== oldPassword) throw new Error('Mật khẩu cũ không đúng')
-
-      account.password = newPassword
+    async register(email: string, _password: string, fullName: string) {
+      this.loading = true
+      try {
+        const newProfile: Profile = {
+          id: `usr-${Math.random().toString(36).slice(2, 10)}`,
+          role: Role.CUSTOMER,
+          phone: null,
+          full_name: fullName || email.split('@')[0],
+          status: 'ACTIVE' as never,
+          debt_limit: 0,
+          avatar_url: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+        mockProfiles.push(newProfile)
+        this.user = newProfile
+        if (import.meta.client) sessionStorage.setItem('buntech_mock_auth', JSON.stringify(newProfile.id))
+      } finally {
+        this.loading = false
+      }
     },
   },
 })
-
-const rolePermissions: Record<string, string[]> = {
-  ADMIN: ['dashboard', 'orders', 'products', 'users', 'reports', 'settings', 'blog', 'delivery'],
-  CUSTOMER: ['portal', 'profile'],
-  DRIVER: ['delivery', 'profile'],
-  GUEST: [],
-}

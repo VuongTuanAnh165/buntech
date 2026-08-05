@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useHead } from '#imports'
+import { ShieldCheck, ArrowRight } from 'lucide-vue-next'
 const { t } = useI18n()
 const authStore = useAuthStore()
 const toast = useToast()
@@ -13,10 +13,31 @@ const password = ref('')
 const errors = ref<{ email?: string; password?: string }>({})
 const loading = ref(false)
 
+function validateEmail(val: string): string | undefined {
+  if (!val) return t('auth.emailRequired')
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return t('auth.emailInvalid')
+  return undefined
+}
+
+function validatePassword(val: string): string | undefined {
+  if (!val) return t('auth.passwordRequired')
+  if (val.length < 6) return t('auth.passwordTooShort')
+  return undefined
+}
+
+function onEmailBlur() {
+  errors.value.email = validateEmail(email.value)
+}
+
+function onPasswordBlur() {
+  errors.value.password = validatePassword(password.value)
+}
+
 async function handleSubmit() {
-  errors.value = {}
-  if (!email.value) { errors.value.email = t('auth.emailRequired'); return }
-  if (!password.value) { errors.value.password = t('auth.passwordRequired'); return }
+  errors.value.email = validateEmail(email.value)
+  errors.value.password = validatePassword(password.value)
+  if (errors.value.email || errors.value.password) return
+
   loading.value = true
   try {
     await authStore.login(email.value, password.value)
@@ -33,61 +54,83 @@ async function handleSubmit() {
     loading.value = false
   }
 }
-function onEnter() {
-  if (email.value && password.value) handleSubmit()
-}
 </script>
 
 <template>
-  <div class="min-h-screen flex w-full">
-    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-600 to-primary-800 relative overflow-hidden">
-      <div class="absolute inset-0 opacity-10">
-        <div class="absolute top-20 left-20 w-64 h-64 rounded-full bg-white blur-3xl" />
-        <div class="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-accent-300 blur-3xl" />
+  <div>
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-sm font-medium mb-4 ring-1 ring-primary-200/50 dark:ring-primary-800/40">
+        <ShieldCheck class="w-4 h-4" aria-hidden="true" />
+        {{ t('auth.adminPortal') || 'Admin Portal' }}
       </div>
-      <div class="relative z-10 flex flex-col justify-center px-16 text-white">
-        <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-3xl font-bold mb-6">B</div>
-        <h1 class="text-4xl font-bold mb-4">{{ t('app.name') }}</h1>
-        <p class="text-lg text-primary-100 max-w-md">{{ t('app.tagline') }}</p>
+      <h2 class="text-2xl font-bold text-surface-foreground mb-2 tracking-tight" style="letter-spacing: -0.02em">{{ t('auth.loginTitle') }}</h2>
+      <p class="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">{{ t('auth.loginSubtitle') }}</p>
+    </div>
+
+    <!-- Form -->
+    <form class="space-y-4" novalidate @submit.prevent="handleSubmit">
+      <AppInput
+        v-model="email"
+        :label="t('auth.email')"
+        type="email"
+        placeholder="admin@buntech.vn"
+        :required="true"
+        :error="errors.email"
+        autocomplete="email"
+        @blur="onEmailBlur"
+      />
+
+      <AppInput
+        v-model="password"
+        :label="t('auth.password')"
+        type="password"
+        placeholder="••••••••"
+        :required="true"
+        :error="errors.password"
+        autocomplete="current-password"
+        @blur="onPasswordBlur"
+      />
+
+      <div class="flex justify-end -mt-3">
+        <NuxtLink to="/auth/admin/forgot-password" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium transition-colors">
+          {{ t('auth.forgotPassword') }}
+        </NuxtLink>
+      </div>
+
+      <AppButton type="submit" :loading="loading" block size="lg" class="!mt-6 group">
+        {{ t('auth.loginButton') }}
+        <ArrowRight v-if="!loading" class="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+      </AppButton>
+    </form>
+
+    <!-- Divider -->
+    <div class="relative my-6">
+      <div class="absolute inset-0 flex items-center">
+        <div class="w-full border-t border-surface-border" />
+      </div>
+      <div class="relative flex justify-center">
+        <span class="px-3 bg-surface-muted text-xs text-slate-400 dark:text-zinc-500 uppercase tracking-wider">{{ t('auth.or') || 'hoặc' }}</span>
       </div>
     </div>
-    <div class="flex-1 flex items-center justify-center px-6 py-12 bg-gray-50">
-      <div class="w-full max-w-sm">
-        <div class="lg:hidden flex items-center gap-2 mb-8">
-          <div class="w-10 h-10 rounded-lg bg-primary-600 flex items-center justify-center text-white font-bold">B</div>
-          <span class="text-xl font-bold text-gray-900">BunTech</span>
-        </div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ t('auth.loginTitle') }}</h2>
-        <p class="text-gray-500 mb-8">{{ t('auth.loginSubtitle') }}</p>
-        <form class="space-y-5" @submit.prevent="handleSubmit">
-          <AppInput
-            v-model="email"
-            :label="t('auth.email')"
-            type="email"
-            :placeholder="'admin@buntech.vn'"
-            :required="true"
-            :error="errors.email"
-            @keydown.enter="onEnter"
-          />
-          <AppInput
-            v-model="password"
-            :label="t('auth.password')"
-            type="password"
-            placeholder="••••••••"
-            :required="true"
-            :error="errors.password"
-            @keydown.enter="onEnter"
-          />
-          <div class="flex items-center justify-between">
-            <NuxtLink to="/auth/admin/forgot-password" class="text-sm text-primary-600 hover:text-primary-700">
-              {{ t('auth.forgotPassword') }}
-            </NuxtLink>
-          </div>
-          <AppButton type="submit" :loading="loading" block>
-            {{ t('auth.loginButton') }}
-          </AppButton>
-        </form>
-      </div>
+
+    <!-- Quick links -->
+    <div class="grid grid-cols-2 gap-3">
+      <NuxtLink to="/auth/driver/login">
+        <AppButton variant="outline" block class="!text-sm">
+          {{ t('nav.driverApp') }}
+        </AppButton>
+      </NuxtLink>
+      <NuxtLink to="/auth/customer/login">
+        <AppButton variant="outline" block class="!text-sm">
+          {{ t('customer.customerLogin') }}
+        </AppButton>
+      </NuxtLink>
     </div>
+
+    <p class="text-center text-xs text-slate-400 dark:text-zinc-500 mt-8">
+      {{ t('auth.needHelp') || 'Cần hỗ trợ? Liên hệ' }}
+      <a href="mailto:support@buntech.vn" class="text-primary-600 dark:text-primary-400 font-medium hover:underline">support@buntech.vn</a>
+    </p>
   </div>
 </template>
