@@ -1,32 +1,56 @@
 import { defineStore } from 'pinia'
 import { AuthService } from '~/services/authService'
 import type { LoginPayload } from '~/types/auth'
+import type { CurrentUser } from '~/types/common'
+import { Role } from '~/enums/role'
 
 export const useAuthStore = defineStore('auth', () => {
   // --- State ---
   const isLoading = ref(false)
-  const user = ref<Record<string, unknown> | null>(null)
+  const user = ref<CurrentUser | null>(null)
   const initialized = ref(false)
 
   // --- Getters ---
   const isAuthenticated = computed(() => !!user.value)
-  const role = computed(() => (user.value?.role as string) ?? null)
-  const isAdmin = computed(() => user.value?.role === 'ADMIN')
-  const isDriver = computed(() => user.value?.role === 'DRIVER')
-  const isCustomer = computed(() => user.value?.role === 'CUSTOMER')
+  const role = computed(() => user.value?.role ?? null)
+  const isAdmin = computed(() => user.value?.role === Role.ADMIN)
+  const isDriver = computed(() => user.value?.role === Role.DRIVER)
+  const isCustomer = computed(() => user.value?.role === Role.CUSTOMER)
+
+  const userInitials = computed(() => {
+    if (!user.value?.fullName) return ''
+    const words = user.value.fullName.trim().split(/\s+/)
+    if (words.length === 1) return (words[0] ?? '').slice(0, 2).toUpperCase()
+    const first = words[0]?.[0] ?? ''
+    const last = words[words.length - 1]?.[0] ?? ''
+    return (first + last).toUpperCase()
+  })
 
   // --- Actions ---
-  const init = () => {
-    if (initialized.value) return
-    initialized.value = true
-    if (import.meta.client) {
-      const saved = sessionStorage.getItem('buntech_mock_auth')
-      if (saved) {
-        try {
-          user.value = JSON.parse(saved)
-        } catch { /* ignore */ }
-      }
+  const fetchUser = async () => {
+    const token = useCookie('auth_token')
+    if (!token.value) {
+      initialized.value = true
+      return
     }
+
+    isLoading.value = true
+    try {
+      const res = await AuthService.getCurrentUser()
+      if (res.data) {
+        user.value = res.data
+      }
+    } catch {
+      user.value = null
+    } finally {
+      isLoading.value = false
+      initialized.value = true
+    }
+  }
+
+  const init = async () => {
+    if (initialized.value) return
+    await fetchUser()
   }
 
   const login = async (payload: LoginPayload) => {
@@ -44,17 +68,20 @@ export const useAuthStore = defineStore('auth', () => {
         useCookie('auth_token', cookieOptions).value = res.data.accessToken
         useCookie('refresh_token', cookieOptions).value = res.data.refreshToken
 
-        // Mock user for UI display
-        const { mockProfiles } = await import('~/utils/mockData')
-        const adminProfile = mockProfiles.find(p => p.role === 'ADMIN')
-        user.value = adminProfile || { role: 'ADMIN', phoneNumber: payload.phoneNumber, id: '1' }
-        if (import.meta.client) {
-          sessionStorage.setItem('buntech_mock_auth', JSON.stringify(user.value))
-        }
+        // Fetch actual user data instead of mocking
+        await fetchUser()
 
         const route = useRoute()
         const redirectPath = route.query.redirect as string | undefined
-        navigateTo(redirectPath || '/admin')
+        
+        // redirect based on role
+        if (!redirectPath) {
+          if (isAdmin.value) navigateTo('/admin')
+          else if (isDriver.value) navigateTo('/driver')
+          else navigateTo('/')
+        } else {
+          navigateTo(redirectPath)
+        }
       }
     } catch (error) {
       console.error('[useAuthStore] Login failed:', error)
@@ -71,15 +98,12 @@ export const useAuthStore = defineStore('auth', () => {
     useCookie('auth_token', cookieOptions).value = null
     useCookie('refresh_token', cookieOptions).value = null
     user.value = null
-    if (import.meta.client) {
-      sessionStorage.removeItem('buntech_mock_auth')
-    }
     navigateTo('/auth/admin/login')
   }
 
-  const updateProfile = async (updates: Record<string, unknown>) => {
+  const updateProfile = async (updates: Partial<CurrentUser>) => {
     if (!user.value) return
-    user.value = { ...user.value, ...updates, updated_at: new Date().toISOString() }
+    user.value = { ...user.value, ...updates } as CurrentUser
   }
 
   const changePassword = async (_oldPassword: string, _newPassword: string) => {
@@ -95,7 +119,9 @@ export const useAuthStore = defineStore('auth', () => {
     isAdmin,
     isDriver,
     isCustomer,
+    userInitials,
     init,
+    fetchUser,
     login,
     logout,
     updateProfile,

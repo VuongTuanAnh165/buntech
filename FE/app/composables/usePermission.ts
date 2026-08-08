@@ -1,4 +1,4 @@
-import { useCurrentUserStore } from '~/stores/currentUser'
+import { useAuthStore } from '~/stores/auth'
 import type { Role } from '~/enums/role'
 
 /**
@@ -6,17 +6,17 @@ import type { Role } from '~/enums/role'
  * Sử dụng để ẩn/hiện Component hoặc chặn logic dựa trên Role của User.
  */
 export const usePermission = () => {
-  const userStore = useCurrentUserStore()
+  const authStore = useAuthStore()
 
   /**
    * Kiểm tra xem User có ít nhất 1 role trong danh sách yêu cầu không.
    * @param roles Một Role hoặc mảng các Role
    */
   const hasRole = (roles: Role | Role[]) => {
-    if (!userStore.currentUser) return false
+    if (!authStore.user) return false
 
     const roleList = Array.isArray(roles) ? roles : [roles]
-    return roleList.includes(userStore.currentUser.role as Role)
+    return roleList.includes(authStore.user.role as Role)
   }
 
   /**

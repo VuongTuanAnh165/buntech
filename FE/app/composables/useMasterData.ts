@@ -41,10 +41,7 @@ export const useMasterData = () => {
             // 4. Lưu vào LocalStorage để dùng cho lần sau
             localStorage.setItem('administrative_divisions', JSON.stringify(divisionsRes.data))
             localStorage.setItem('master_data_version', serverVersion)
-            console.log('[MasterData] Đã tải và lưu phiên bản mới:', serverVersion)
           }
-        } else {
-          console.log('[MasterData] Đang dùng phiên bản từ Cache:', serverVersion)
         }
       }
     } catch (e) {
