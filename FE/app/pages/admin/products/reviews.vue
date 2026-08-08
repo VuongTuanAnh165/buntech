@@ -1,38 +1,29 @@
 <script setup lang="ts">
 import type { ProductReview } from '~/utils/types'
 import { mockProductReviews as mockReviews, mockProducts } from '~/utils/mockData'
-
 const toast = useToast()
-const { formatDate } = useFormat()
-
 useSeoMeta({ title: `Đánh giá sản phẩm - BunTech Admin` })
 definePageMeta({ layout: 'admin' })
-
 // ─── State ──────────────────────────────────────────────
 const loading = ref(true)
 const reviews = ref<ProductReview[]>(mockReviews.map(r => ({ ...r })))
 const products = ref([...mockProducts])
-
 const filterStatus = ref<'pending' | 'approved' | 'all'>('pending')
 const replyTargetId = ref<string | null>(null)
 const replyText = ref('')
 const savingReply = ref(false)
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
-
 // ─── Product lookup ──────────────────────────────────────
 function productName(review: ProductReview): string {
   const p = products.value.find(pr => pr.id === review.product_id)
   return p?.name || 'Sản phẩm không xác định'
 }
-
 function productImage(review: ProductReview): string | null {
   const p = products.value.find(pr => pr.id === review.product_id)
   return p?.image_url || null
 }
-
 // ─── Filtered reviews ────────────────────────────────────
 const filteredReviews = computed(() => {
   switch (filterStatus.value) {
@@ -41,7 +32,6 @@ const filteredReviews = computed(() => {
     default: return reviews.value
   }
 })
-
 // ─── Stats ───────────────────────────────────────────────
 const totalReviews = computed(() => reviews.value.length)
 const pendingCount = computed(() => reviews.value.filter(r => !r.is_approved).length)
@@ -51,7 +41,6 @@ const averageRating = computed(() => {
   const sum = reviews.value.reduce((s, r) => s + r.rating, 0)
   return Math.round((sum / reviews.value.length) * 10) / 10
 })
-
 const stats = computed(() => [
   {
     title: 'Tổng đánh giá',
@@ -72,13 +61,11 @@ const stats = computed(() => [
     color: 'warning' as const,
   },
 ])
-
 const filters = computed(() => [
   { accessorKey: 'pending' as const, header: 'Chờ duyệt', count: pendingCount.value },
   { accessorKey: 'approved' as const, header: 'Đã duyệt', count: approvedCount.value },
   { accessorKey: 'all' as const, header: 'Tất cả', count: totalReviews.value },
 ])
-
 // ─── Actions ────────────────────────────────────────────
 async function toggleApprove(review: ProductReview, approve: boolean) {
   const original = review.is_approved
@@ -93,17 +80,14 @@ async function toggleApprove(review: ProductReview, approve: boolean) {
     toast.add({ title: 'Lỗi khi cập nhật trạng thái', color: 'error' })
   }
 }
-
 function startReply(review: ProductReview) {
   replyTargetId.value = review.id
   replyText.value = review.reply || ''
 }
-
 function cancelReply() {
   replyTargetId.value = null
   replyText.value = ''
 }
-
 async function submitReply() {
   if (!replyTargetId.value || !replyText.value.trim()) return
   
@@ -128,21 +112,17 @@ async function submitReply() {
     toast.add({ title: 'Lỗi khi lưu phản hồi', color: 'error' })
   }
 }
-
 function ratingStars(rating: number) {
   return Array.from({ length: 5 }, (_, i) => i < rating)
 }
 </script>
-
 <template>
   <div>
     <BasePageHeader title="Đánh giá sản phẩm" description="Duyệt và phản hồi đánh giá từ khách hàng" />
-
     <!-- Stats -->
     <div class="mb-6">
       <BaseStatsGrid :stats="stats" :columns="3" :loading="loading" />
     </div>
-
     <!-- Filter Tabs -->
     <div class="flex items-center gap-1 bg-surface-hover rounded-lg p-1 w-fit mb-4 animate-fade-in-up">
       <UButton variant="ghost" color="neutral"
@@ -167,7 +147,6 @@ function ratingStars(rating: number) {
         >{{ f.count }}</span>
       </UButton>
     </div>
-
     <!-- Reviews List -->
     <template v-if="loading">
       <div v-for="i in 5" :key="i" class="card p-4 mb-3 animate-fade-in-up" :style="{ animationDelay: `${i * 50}ms` }">
@@ -185,7 +164,6 @@ function ratingStars(rating: number) {
         <div class="skeleton h-4 w-2/3" />
       </div>
     </template>
-
     <template v-else-if="filteredReviews.length">
       <TransitionGroup name="fade" tag="div" class="space-y-3">
         <div
@@ -208,7 +186,6 @@ function ratingStars(rating: number) {
                 <span class="i-lucide-message-square w-5 h-5 text-slate-300 dark:text-zinc-600" aria-hidden="true" />
               </div>
             </div>
-
             <div class="flex-1 min-w-0">
               <!-- Header row -->
               <div class="flex items-start justify-between gap-3 mb-2">
@@ -226,10 +203,8 @@ function ratingStars(rating: number) {
                   <span class="text-xs font-medium text-slate-500 dark:text-zinc-400 tabular-nums ml-1">{{ review.rating }}/5</span>
                 </div>
               </div>
-
               <!-- Content -->
               <p class="text-sm text-slate-700 dark:text-zinc-200 mb-3 leading-relaxed">{{ review.content }}</p>
-
               <!-- Reply (if exists) -->
               <div v-if="review.reply && replyTargetId !== review.id" class="bg-surface-muted rounded-lg p-3 mb-3 border-l-2 border-primary-400">
                 <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400 mb-1">
@@ -238,9 +213,7 @@ function ratingStars(rating: number) {
                 </div>
                 <p class="text-sm text-slate-700 dark:text-zinc-200">{{ review.reply }}</p>
               </div>
-
               <!-- Inline reply input removed, using Modal instead -->
-
               <!-- Actions -->
               <div class="flex items-center gap-2 flex-wrap pt-1">
                 <UBadge :color="review.is_approved ? 'success' : 'warning'" variant="subtle">
@@ -250,7 +223,6 @@ function ratingStars(rating: number) {
                 <span class="text-xs text-slate-400 dark:text-zinc-500 flex items-center gap-1 tabular-nums">
                   <span class="i-lucide-clock w-3 h-3" aria-hidden="true" /> {{ formatDate(review.created_at) }}
                 </span>
-
                 <div class="flex items-center gap-1 ml-auto">
                   <UButton variant="ghost" color="neutral"
                     v-if="!review.is_approved"
@@ -279,14 +251,12 @@ function ratingStars(rating: number) {
         </div>
       </TransitionGroup>
     </template>
-
     <BaseEmptyState
       v-else
       :title="filterStatus === 'pending' ? 'Không có đánh giá chờ duyệt' : 'Chưa có đánh giá nào'"
       :description="filterStatus === 'pending' ? 'Tất cả đánh giá đã được duyệt.' : 'Đánh giá từ khách hàng sẽ hiển thị tại đây.'"
       icon="i-lucide-message-square"
     />
-
     <!-- Reply Modal -->
     <UModal :open="!!replyTargetId" @update:open="!$event && cancelReply()" title="Phản hồi đánh giá">
       <template #body>

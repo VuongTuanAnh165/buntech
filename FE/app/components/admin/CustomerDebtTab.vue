@@ -2,14 +2,10 @@
 import { computed } from 'vue'
 import { TransactionType } from '~/utils/mockData'
 import type { Transaction } from '~/utils/mockData'
-
 const props = defineProps<{
   transactions: Transaction[]
   debtLimit: number
 }>()
-
-const { formatVND, formatDateTime } = useFormat()
-
 const currentDebt = computed(() => {
   let debt = 0
   for (const tx of props.transactions) {
@@ -18,21 +14,17 @@ const currentDebt = computed(() => {
   }
   return debt
 })
-
 const debtRemaining = computed(() => Math.max(0, props.debtLimit - currentDebt.value))
 const debtUtilization = computed(() => props.debtLimit > 0 ? Math.min(100, Math.round((currentDebt.value / props.debtLimit) * 100)) : 0)
-
 const debtTransactions = computed(() =>
   props.transactions.filter(tx =>
     tx.type === TransactionType.DEBT_INCREASE || tx.type === TransactionType.DEBT_PAYMENT
   )
 )
-
 const paymentTransactions = computed(() =>
   props.transactions.filter(tx => tx.type === TransactionType.PAYMENT)
 )
 </script>
-
 <template>
   <div class="space-y-6 animate-fade-in-up">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -48,7 +40,6 @@ const paymentTransactions = computed(() =>
         </p>
         <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Từ {{ debtTransactions.length }} giao dịch</p>
       </UCard>
-
       <UCard class="stagger-item" style="animation-delay: 40ms">
         <div class="flex items-center gap-2 mb-3">
           <div class="w-7 h-7 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
@@ -71,7 +62,6 @@ const paymentTransactions = computed(() =>
           <p class="text-xs text-slate-400 dark:text-zinc-500 mt-1.5">Còn lại: {{ formatVND(debtRemaining) }}</p>
         </div>
       </UCard>
-
       <UCard class="stagger-item" style="animation-delay: 80ms">
         <div class="flex items-center gap-2 mb-3">
           <div class="w-7 h-7 rounded-lg bg-success-50 dark:bg-success-900/20 flex items-center justify-center">
@@ -85,7 +75,6 @@ const paymentTransactions = computed(() =>
         <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">{{ paymentTransactions.length }} lần thanh toán</p>
       </UCard>
     </div>
-
     <UCard class="stagger-item" style="animation-delay: 120ms">
       <h2 class="text-sm font-semibold text-surface-foreground mb-4">Lịch sử giao dịch</h2>
       <template v-if="transactions.length">

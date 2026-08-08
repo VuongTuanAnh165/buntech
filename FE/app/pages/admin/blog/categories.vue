@@ -1,20 +1,14 @@
 <script setup lang="ts">
 import { mockBlogCategories, mockBlogPosts } from '~/utils/mockData'
-
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Danh mục Blog - BunTech Admin' })
-
-const { formatDate, slugify } = useFormat()
 const toast = useToast()
-
 // ─── State ────────────────────────────────────────────────
 const loading = ref(true)
 const search = ref('')
-
 const showModal = ref(false)
 const isEditing = ref(false)
 const categoryName = ref('')
-
 // ─── Filter & Data ────────────────────────────────────────
 // Add post count to each category
 const categoriesWithCount = computed(() => {
@@ -23,13 +17,11 @@ const categoriesWithCount = computed(() => {
     postCount: mockBlogPosts.filter(p => p.category_id === c.id).length,
   }))
 })
-
 const filteredCategories = computed(() => {
   if (!search.value.trim()) return categoriesWithCount.value
   const q = search.value.toLowerCase()
   return categoriesWithCount.value.filter(c => c.name.toLowerCase().includes(q))
 })
-
 const columns = [
   { accessorKey: 'name', header: 'Tên danh mục' },
   { accessorKey: 'slug', header: 'Đường dẫn (Slug)' },
@@ -37,20 +29,17 @@ const columns = [
   { accessorKey: 'created_at', header: 'Ngày tạo' },
   { accessorKey: 'actions', header: 'Hành động' },
 ]
-
 // ─── Handlers ─────────────────────────────────────────────
 function openAdd() {
   isEditing.value = false
   categoryName.value = ''
   showModal.value = true
 }
-
 function openEdit(cat: typeof mockBlogCategories[0]) {
   isEditing.value = true
   categoryName.value = cat.name
   showModal.value = true
 }
-
 function handleSave() {
   if (!categoryName.value.trim()) {
     toast.add({ title: 'Vui lòng nhập tên danh mục', color: 'warning' })
@@ -62,17 +51,14 @@ function handleSave() {
   })
   showModal.value = false
 }
-
 function handleDelete(id: string) {
   toast.add({ title: 'Đã xóa danh mục', color: 'success' })
 }
-
 // ─── Lifecycle ────────────────────────────────────────────
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
 </script>
-
 <template>
   <div class="max-w-6xl mx-auto">
     <BasePageHeader
@@ -93,11 +79,9 @@ onMounted(() => {
         </UButton>
       </template>
     </BasePageHeader>
-
     <template v-if="loading">
       <BasePageLoading />
     </template>
-
     <template v-else>
       <div class="card p-5 animate-fade-in-up">
         <div class="flex items-center gap-4 mb-4">
@@ -105,7 +89,6 @@ onMounted(() => {
             <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm kiếm danh mục..." />
           </div>
         </div>
-
         <div class="bg-surface ring-1 ring-surface-border rounded-lg overflow-hidden">
           <UTable :columns="columns" :data="filteredCategories">
             <template #name-cell="{ row }">
@@ -131,7 +114,6 @@ onMounted(() => {
           </UTable>
         </div>
       </div>
-
       <!-- Add/Edit Modal -->
       <UModal v-model:open="showModal" :title="isEditing ? 'Sửa danh mục' : 'Thêm danh mục mới'">
         <template #body>

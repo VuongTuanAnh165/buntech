@@ -1,51 +1,40 @@
 <script setup lang="ts">
 import type { Category } from '~/utils/types'
 import { mockCategories, mockProducts } from '~/utils/mockData'
-
 const toast = useToast()
-const { formatDate, slugify } = useFormat()
-
 useSeoMeta({ title: `Danh mục sản phẩm - BunTech Admin` })
 definePageMeta({ layout: 'admin' })
-
 // ─── State ──────────────────────────────────────────────
 const loading = ref(true)
 const categories = ref<Category[]>([...mockCategories])
 const products = ref([...mockProducts])
-
 const showModal = ref(false)
 const editingId = ref<string | null>(null)
 const form = ref({ name: '', slug: '' })
 const saving = ref(false)
 const deleteTarget = ref<Category | null>(null)
 const deleting = ref(false)
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
-
 // ─── Product count per category ──────────────────────────
 function productCount(catId: string): number {
   return products.value.filter(p => p.category_id === catId).length
 }
-
 function activeProductCount(catId: string): number {
   return products.value.filter(p => p.category_id === catId && p.status === 'ACTIVE' && !p.deleted_at).length
 }
-
 // ─── CRUD ───────────────────────────────────────────────
 function openAdd() {
   editingId.value = null
   form.value = { name: '', slug: '' }
   showModal.value = true
 }
-
 function openEdit(cat: Category) {
   editingId.value = cat.id
   form.value = { name: cat.name, slug: cat.slug }
   showModal.value = true
 }
-
 function save() {
   if (!form.value.name.trim()) {
     toast.add({ title: 'Vui lòng nhập tên danh mục', color: 'error' })
@@ -73,7 +62,6 @@ function save() {
     saving.value = false
   }, 400)
 }
-
 function confirmDelete() {
   if (!deleteTarget.value) return
   deleting.value = true
@@ -84,19 +72,16 @@ function confirmDelete() {
     deleting.value = false
   }, 400)
 }
-
 const deleteConfirmMessage = computed(() =>
   deleteTarget.value
     ? `Bạn có chắc muốn xóa danh mục "${deleteTarget.value.name}"? Các sản phẩm thuộc danh mục này sẽ không bị xóa.`
     : '',
 )
-
 const isDeleteModalOpen = computed({
   get: () => !!deleteTarget.value,
   set: (val) => { if (!val) deleteTarget.value = null }
 })
 </script>
-
 <template>
   <div>
     <BasePageHeader title="Danh mục sản phẩm" description="Phân loại sản phẩm bún, phở, miến...">
@@ -106,7 +91,6 @@ const isDeleteModalOpen = computed({
         </UButton>
       </template>
     </BasePageHeader>
-
     <!-- Stats Summary -->
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
       <div class="card p-4 stagger-item" style="animation-delay: 0ms">
@@ -143,7 +127,6 @@ const isDeleteModalOpen = computed({
         </div>
       </div>
     </div>
-
     <!-- Category Grid -->
     <template v-if="loading">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -160,7 +143,6 @@ const isDeleteModalOpen = computed({
         </div>
       </div>
     </template>
-
     <template v-else-if="categories.length">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
@@ -196,7 +178,6 @@ const isDeleteModalOpen = computed({
               </UButton>
             </div>
           </div>
-
           <div class="flex items-center gap-3 pt-3 border-t border-surface-border">
             <div class="flex items-center gap-1.5">
               <span class="i-lucide-package w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" aria-hidden="true" />
@@ -214,7 +195,6 @@ const isDeleteModalOpen = computed({
         </div>
       </div>
     </template>
-
     <BaseEmptyState
       v-else
       title="Chưa có danh mục nào"
@@ -225,7 +205,6 @@ const isDeleteModalOpen = computed({
         <UButton @click="openAdd" color="primary">Thêm danh mục</UButton>
       </template>
     </BaseEmptyState>
-
     <!-- Add/Edit Modal -->
     <UModal v-model:open="showModal" :title="editingId ? 'Sửa danh mục' : 'Thêm danh mục mới'">
       <template #body>
@@ -245,7 +224,6 @@ const isDeleteModalOpen = computed({
         </div>
       </template>
     </UModal>
-
     <UModal v-model:open="isDeleteModalOpen" title="Xóa danh mục">
       <template #body>
         <p>{{ deleteConfirmMessage }}</p>

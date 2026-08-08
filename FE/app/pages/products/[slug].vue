@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { Star, ArrowRight, Package, Truck, ShieldCheck, RotateCcw, Share2, Heart, Minus, Plus, ShoppingCart, Zap } from 'lucide-vue-next'
 
-const toast = useAppToast()
-const route = useRoute()
-const { formatVND } = useFormat()
-
-definePageMeta({ layout: 'default' })
+const toast = useToast()
+const route = useRoute()definePageMeta({ layout: 'default' })
 
 const slug = route.params.slug as string
 const loading = ref(true)
@@ -59,7 +56,7 @@ const incrementQty = () => {
   if (product.value && quantity.value < product.value.stock) {
     quantity.value++
   } else {
-    toast.warning('Đã đạt giới hạn tồn kho')
+    toast.add({ title: 'Cảnh báo', description: '', color: 'warning' })
   }
 }
 
@@ -69,28 +66,28 @@ const decrementQty = () => {
 
 const toggleWishlist = () => {
   isWishlisted.value = !isWishlisted.value
-  toast.success(isWishlisted.value ? 'Đã thêm vào yêu thích' : 'Đã bỏ yêu thích')
+  toast.add({ title: 'Thành công', description: '', color: 'success' })
 }
 
 const shareProduct = () => {
   if (import.meta.client) {
     navigator.clipboard.writeText(window.location.href)
-    toast.success('Đã sao chép link sản phẩm')
+    toast.add({ title: 'Thành công', description: '', color: 'success' })
   }
 }
 
 const addToCart = () => {
   if (!product.value) return
   if (product.value.stock <= 0) {
-    toast.error('Sản phẩm đã hết hàng')
+    toast.add({ title: 'Thất bại', description: '', color: 'error' })
     return
   }
-  toast.success(`Đã thêm ${quantity.value} ${product.value.unit} ${product.value.name} vào giỏ`)
+  toast.add({ title: 'Thành công', description: '', color: 'success' })
 }
 
 const quickOrder = () => {
   if (!product.value) return
-  toast.info('Đang chuyển đến trang đặt hàng nhanh...')
+  toast.add({ title: 'Thông báo', description: '', color: 'info' })
   setTimeout(() => navigateTo('/quick-order'), 600)
 }
 

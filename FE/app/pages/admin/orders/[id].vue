@@ -6,10 +6,7 @@ import { ORDER_STATUS_COLORS, ORDER_STATUS_ICONS, ORDER_STATUS_LABELS, ORDER_STA
 
 const toast = useToast()
 const route = useRoute()
-const router = useRouter()
-const { formatVND, formatDateTime } = useFormat()
-
-definePageMeta({ layout: 'admin' })
+const router = useRouter()definePageMeta({ layout: 'admin' })
 
 const orderId = route.params.id as string
 

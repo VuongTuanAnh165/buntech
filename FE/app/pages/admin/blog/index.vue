@@ -1,36 +1,28 @@
 <script setup lang="ts">
 import { BlogStatus } from '~/utils/enums'
 import { mockBlogPosts, mockBlogCategories } from '~/utils/mockData'
-
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Quản lý Blog - BunTech Admin' })
-
-const { formatDate } = useFormat()
 const toast = useToast()
-
 // ─── State ────────────────────────────────────────────────
 const loading = ref(true)
 const search = ref('')
 const statusFilter = ref<string>('ALL')
 const page = ref(1)
 const perPage = ref(10)
-
 // ─── Computed KPIs ────────────────────────────────────────
 const totalPosts = computed(() => mockBlogPosts.length)
 const publishedPosts = computed(() => mockBlogPosts.filter(p => p.status === BlogStatus.PUBLISHED).length)
 const draftPosts = computed(() => mockBlogPosts.filter(p => p.status === BlogStatus.DRAFT).length)
 const totalViews = computed(() => mockBlogPosts.reduce((s, p, i) => s + (p.views || (i * 150 + 100)), 0))
-
 const kpiStats = computed(() => [
   { title: 'Tổng bài viết', value: totalPosts.value, icon: 'i-lucide-file-text', color: 'primary' as const, trend: { value: 3, isPositive: true } },
   { title: 'Đã xuất bản', value: publishedPosts.value, icon: 'i-lucide-check-circle-2', color: 'success' as const, trend: { value: 5, isPositive: true } },
   { title: 'Bản nháp', value: draftPosts.value, icon: 'i-lucide-file-edit', color: 'warning' as const, trend: { value: 2, isPositive: false } },
   { title: 'Lượt xem (ước tính)', value: new Intl.NumberFormat('vi-VN').format(totalViews.value), icon: 'i-lucide-eye', color: 'info' as const, trend: { value: 12, isPositive: true } },
 ])
-
 // ─── Featured Posts ───────────────────────────────────────
 const featuredPosts = computed(() => mockBlogPosts.slice(0, 3))
-
 // ─── Filter & Pagination ─────────────────────────────────
 const filteredPosts = computed(() => {
   let list = [...mockBlogPosts]
@@ -43,13 +35,11 @@ const filteredPosts = computed(() => {
   }
   return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 })
-
 const totalPages = computed(() => Math.ceil(filteredPosts.value.length / perPage.value))
 const pagedPosts = computed(() => {
   const start = (page.value - 1) * perPage.value
   return filteredPosts.value.slice(start, start + perPage.value)
 })
-
 const columns = [
   { accessorKey: 'title', header: 'Bài viết' },
   { accessorKey: 'category', header: 'Danh mục' },
@@ -58,18 +48,15 @@ const columns = [
   { accessorKey: 'date', header: 'Ngày xuất bản' },
   { accessorKey: 'actions', header: 'Hành động' },
 ]
-
 // ─── Handlers ─────────────────────────────────────────────
 function handleDelete(id: string) {
   toast.add({ title: 'Đã xóa bài viết', color: 'success' })
 }
-
 // ─── Lifecycle ────────────────────────────────────────────
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
 </script>
-
 <template>
   <div>
     <BasePageHeader
@@ -86,16 +73,13 @@ onMounted(() => {
         </UButton>
       </template>
     </BasePageHeader>
-
     <template v-if="loading">
       <BasePageLoading />
     </template>
-
     <template v-else>
       <div class="mb-6">
         <BaseStatsGrid :stats="kpiStats" :columns="4" />
       </div>
-
       <!-- Featured Posts -->
       <div class="mb-8 stagger-item" style="animation-delay: 200ms">
         <div class="flex items-center justify-between mb-4">
@@ -129,7 +113,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Table Section -->
       <div class="card p-5 stagger-item" style="animation-delay: 500ms">
         <div class="flex items-center justify-between gap-4 mb-4">
@@ -148,7 +131,6 @@ onMounted(() => {
             />
           </div>
         </div>
-
         <div class="bg-surface ring-1 ring-surface-border rounded-lg overflow-hidden">
           <UTable :columns="columns" :data="pagedPosts">
             <template #title-cell="{ row }">
@@ -165,18 +147,15 @@ onMounted(() => {
                 </div>
               </div>
             </template>
-
             <template #category-cell="{ row }">
               <UBadge color="primary" variant="subtle" size="sm">{{ row.original.category?.name || 'Tin tức' }}</UBadge>
             </template>
-
             <template #author-cell="{ row }">
               <div class="flex items-center gap-2">
                 <UAvatar :alt="row.original.author_name || 'A'" size="xs" />
                 <span class="text-sm font-medium text-surface-foreground">{{ row.original.author_name || 'Admin' }}</span>
               </div>
             </template>
-
             <template #status-cell="{ row }">
               <UBadge
                 :color="row.original.status === BlogStatus.PUBLISHED ? 'success' : 'warning'"
@@ -189,14 +168,12 @@ onMounted(() => {
                 </span>
               </UBadge>
             </template>
-
             <template #date-cell="{ row }">
               <span class="text-sm text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
                 <UIcon name="i-lucide-clock" class="w-3.5 h-3.5" />
                 {{ row.original.status === BlogStatus.PUBLISHED ? formatDate(row.original.published_at || row.original.created_at) : 'Chưa XB' }}
               </span>
             </template>
-
             <template #actions-cell="{ row }">
               <div class="flex items-center gap-1">
                 <UButton variant="ghost" color="neutral" size="sm" icon="i-lucide-pencil" :to="`/admin/blog/edit?id=${row.original.id}`" />
@@ -204,7 +181,6 @@ onMounted(() => {
               </div>
             </template>
           </UTable>
-
           <div v-if="totalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-surface-border">
             <span class="text-sm text-slate-500 tabular-nums">
               {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, filteredPosts.length) }} / {{ filteredPosts.length }}

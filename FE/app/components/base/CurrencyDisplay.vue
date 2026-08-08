@@ -4,14 +4,10 @@ interface Props {
   size?: 'sm' | 'md' | 'lg'
   highlight?: boolean
 }
-
 const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   highlight: false
 })
-
-const { formatVND } = useFormat()
-
 const sizeClass = computed(() => {
   const map: Record<string, string> = {
     sm: 'text-sm',
@@ -21,7 +17,6 @@ const sizeClass = computed(() => {
   return map[props.size]
 })
 </script>
-
 <template>
   <span
     class="tabular-nums"

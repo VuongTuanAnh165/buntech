@@ -4,10 +4,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart, BarChart, PieChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 import VChart from 'vue-echarts'
-const { formatVND } = useFormat()
-
 use([CanvasRenderer, LineChart, BarChart, PieChart, GridComponent, TooltipComponent, LegendComponent])
-
 interface Props {
   type?: 'line' | 'bar' | 'pie' | 'area'
   data: Record<string, unknown>[]
@@ -18,7 +15,6 @@ interface Props {
   height?: string
   colors?: string[]
 }
-
 const props = withDefaults(defineProps<Props>(), {
   type: 'line',
   xField: 'day',
@@ -28,10 +24,8 @@ const props = withDefaults(defineProps<Props>(), {
   height: '320px',
   colors: () => ['#ed7628', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'],
 })
-
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
-
 const option = computed(() => {
   const base = {
     tooltip: {
@@ -43,7 +37,6 @@ const option = computed(() => {
       extraCssText: 'border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 10px 14px;',
     },
   }
-
   if (props.type === 'pie') {
     return {
       ...base,
@@ -71,7 +64,6 @@ const option = computed(() => {
       }],
     }
   }
-
   if (props.type === 'bar') {
     return {
       ...base,
@@ -106,7 +98,6 @@ const option = computed(() => {
       }],
     }
   }
-
   // line / area
   return {
     ...base,
@@ -155,7 +146,6 @@ const option = computed(() => {
   }
 })
 </script>
-
 <template>
   <div :style="{ height: props.height }">
     <VChart :option="option" autoresize />

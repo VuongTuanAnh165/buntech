@@ -1,34 +1,26 @@
 <script setup lang="ts">
 import { Role } from '~/utils/enums'
 import type { Profile } from '~/utils/types'
-
 const authStore = useAuthStore()
-const { formatDate, formatDateTime } = useFormat()
 const toast = useToast()
-
 const ROLE_LABELS: Record<string, string> = {
   [Role.ADMIN]: 'Quản trị viên',
   [Role.DRIVER]: 'Tài xế',
   [Role.CUSTOMER]: 'Khách hàng',
 }
-
 useSeoMeta({ title: 'Hồ sơ cá nhân - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
-
 const ROLE_COLORS = {
   [Role.ADMIN]: 'primary',
   [Role.DRIVER]: 'warning',
   [Role.CUSTOMER]: 'success',
 }
-
 import { mockProfiles } from '~/utils/mockData'
-
 const user = computed(() => {
   const authUser = authStore.user as Profile | null
   if (authUser && authUser.full_name) return authUser
   return mockProfiles.find(p => p.role === Role.ADMIN) as Profile || null
 })
-
 // Derived email from login convention
 const email = computed(() => {
   if (!user.value) return '—'
@@ -36,14 +28,12 @@ const email = computed(() => {
   if (user.value.role === Role.DRIVER) return 'driver@buntech.vn'
   return `${user.value.full_name.toLowerCase().replace(/\s+/g, '.')}@buntech.vn`
 })
-
 // Account age in days
 const accountAgeDays = computed(() => {
   if (!user.value?.created_at) return 0
   const diff = Date.now() - new Date(user.value.created_at).getTime()
   return Math.max(0, Math.floor(diff / 86400000))
 })
-
 const accountAgeLabel = computed(() => {
   const days = accountAgeDays.value
   if (days < 30) return `${days} ngày`
@@ -54,7 +44,6 @@ const accountAgeLabel = computed(() => {
   const remMonths = months % 12
   return `${years} năm${remMonths ? ` ${remMonths} tháng` : ''}`
 })
-
 // Stats
 const stats = computed(() => [
   {
@@ -79,13 +68,11 @@ const stats = computed(() => [
     hint: `Từ ${formatDate(user.value?.created_at || new Date().toISOString())}`,
   },
 ])
-
 const colorMap = {
   primary: { bg: 'bg-primary-50 dark:bg-primary-900/20', text: 'text-primary-600 dark:text-primary-400', ring: 'ring-primary-100 dark:ring-primary-900/30', bar: 'bg-gradient-to-r from-primary-500 to-primary-400' },
   success: { bg: 'bg-success-50 dark:bg-success-900/20', text: 'text-success-600 dark:text-success-400', ring: 'ring-success-100 dark:ring-success-900/30', bar: 'bg-gradient-to-r from-success-500 to-success-400' },
   accent: { bg: 'bg-accent-50 dark:bg-accent-900/20', text: 'text-accent-600 dark:text-accent-400', ring: 'ring-accent-100 dark:ring-accent-900/30', bar: 'bg-gradient-to-r from-accent-500 to-accent-400' },
 }
-
 // Activity timeline mock data
 interface ActivityEntry {
   id: string
@@ -96,7 +83,6 @@ interface ActivityEntry {
   icon: string
   color: 'primary' | 'success' | 'accent' | 'warning' | 'info' | 'secondary'
 }
-
 const activities = ref<ActivityEntry[]>([
   {
     id: 'act-1',
@@ -153,7 +139,6 @@ const activities = ref<ActivityEntry[]>([
     color: 'secondary',
   },
 ])
-
 const activityColorMap = {
   primary: { bg: 'bg-primary-50 dark:bg-primary-900/20', text: 'text-primary-600 dark:text-primary-400', ring: 'ring-primary-200/60 dark:ring-primary-800/40' },
   success: { bg: 'bg-success-50 dark:bg-success-900/20', text: 'text-success-600 dark:text-success-400', ring: 'ring-success-200/60 dark:ring-success-800/40' },
@@ -162,7 +147,6 @@ const activityColorMap = {
   info: { bg: 'bg-info-50 dark:bg-info-900/20', text: 'text-info-600 dark:text-info-400', ring: 'ring-info-200/60 dark:ring-info-800/40' },
   secondary: { bg: 'bg-secondary-50 dark:bg-secondary-900/20', text: 'text-secondary-600 dark:text-secondary-400', ring: 'ring-secondary-200/60 dark:ring-secondary-800/40' },
 }
-
 function relativeTime(isoStr: string): string {
   const diff = Date.now() - new Date(isoStr).getTime()
   const mins = Math.floor(diff / 60000)
@@ -174,20 +158,16 @@ function relativeTime(isoStr: string): string {
   if (days < 7) return `${days} ngày trước`
   return formatDate(isoStr)
 }
-
 // Security / sessions mock data
 const sessions = ref([
   { id: 's1', device: 'Windows · Chrome', location: 'TP. HCM, Việt Nam', current: true, icon: 'i-lucide-monitor', lastActive: 'Đang hoạt động' },
   { id: 's2', device: 'iPhone 15 · Safari', location: 'TP. HCM, Việt Nam', current: false, icon: 'i-lucide-smartphone', lastActive: '2 giờ trước' },
 ])
-
 const passwordLastChanged = new Date(Date.now() - 7 * 86400000).toISOString()
 const twoFAEnabled = ref(false)
-
 const showEditModal = ref(false)
 const editForm = ref({ full_name: '', phone: '' })
 const saving = ref(false)
-
 function openEdit() {
   editForm.value = {
     full_name: user.value?.full_name || '',
@@ -195,7 +175,6 @@ function openEdit() {
   }
   showEditModal.value = true
 }
-
 async function saveProfile() {
   if (!editForm.value.full_name.trim()) return
   saving.value = true
@@ -213,7 +192,6 @@ async function saveProfile() {
     saving.value = false
   }
 }
-
 // Personal info rows
 const personalInfo = computed(() => [
   { label: 'Họ và tên', value: user.value?.full_name || '—', icon: 'i-lucide-user-cog' },
@@ -224,7 +202,6 @@ const personalInfo = computed(() => [
   { label: 'Ngày tạo', value: user.value ? formatDate(user.value.created_at) : '—', icon: 'i-lucide-calendar-days' },
 ])
 </script>
-
 <template>
   <div>
     <BasePageHeader
@@ -241,7 +218,6 @@ const personalInfo = computed(() => [
         </UButton>
       </template>
     </BasePageHeader>
-
     <!-- Profile Header Card -->
     <div class="card card-gradient p-5 sm:p-7 mb-6 mt-6 stagger-item relative" style="animation-delay: 0ms">
       <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 via-accent-400 to-primary-400 rounded-t-xl" />
@@ -283,7 +259,6 @@ const personalInfo = computed(() => [
         </div>
       </div>
     </div>
-
     <!-- Stats Row -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
       <div
@@ -303,7 +278,6 @@ const personalInfo = computed(() => [
         <p class="text-xs text-slate-400 dark:text-zinc-500 mt-1 truncate">{{ stat.hint }}</p>
       </div>
     </div>
-
     <!-- 2-column grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
       <!-- Left Column -->
@@ -335,7 +309,6 @@ const personalInfo = computed(() => [
             </div>
           </dl>
         </UCard>
-
         <!-- Security Card -->
         <UCard class="stagger-item" style="animation-delay: 260ms">
           <div class="flex items-center gap-2.5 mb-4">
@@ -344,7 +317,6 @@ const personalInfo = computed(() => [
             </div>
             <h3 class="text-sm font-semibold text-surface-foreground">Bảo mật</h3>
           </div>
-
           <div class="space-y-4">
             <!-- Password last changed -->
             <div class="flex items-start justify-between gap-3">
@@ -359,7 +331,6 @@ const personalInfo = computed(() => [
                 Đổi
               </NuxtLink>
             </div>
-
             <!-- 2FA -->
             <div class="flex items-center justify-between gap-3 py-3 border-y border-surface-border">
               <div class="flex items-center gap-2.5 min-w-0">
@@ -373,7 +344,6 @@ const personalInfo = computed(() => [
                 {{ twoFAEnabled ? 'Bật' : 'Tắt' }}
               </UBadge>
             </div>
-
             <!-- Active sessions -->
             <div>
               <div class="flex items-center gap-2.5 mb-2.5">
@@ -405,10 +375,8 @@ const personalInfo = computed(() => [
           </div>
         </UCard>
       </div>
-
       <AdminActivityTimeline :activities="activities" />
     </div>
-
     <!-- Edit Modal -->
     <UModal v-model:open="showEditModal" title="Chỉnh sửa hồ sơ" :ui="{ content: 'sm:max-w-md' }">
       <template #body>

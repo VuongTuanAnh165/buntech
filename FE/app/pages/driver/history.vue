@@ -1,33 +1,25 @@
 <script setup lang="ts">
 import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
-
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Lịch sử giao hàng - BunTech Driver' })
-
 const router = useRouter()
 const toast = useToast()
-const { formatVND, formatDateTime, formatTimeAgo } = useFormat()
-
 type DateRange = 'today' | '7days' | '30days'
 type StatusFilter = 'all' | 'delivered' | 'cancelled'
-
 const loading = ref(true)
 const refreshing = ref(false)
 const dateRange = ref<DateRange>('7days')
 const statusFilter = ref<StatusFilter>('all')
 const visibleCount = ref(8)
-
 const currentDriver = computed(() =>
   mockProfiles.find(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) || mockProfiles[2]
 )
-
 const dateRangeDays = computed(() => {
   if (dateRange.value === 'today') return 1
   if (dateRange.value === '7days') return 7
   return 30
 })
-
 const allHistory = computed(() => {
   const driverId = currentDriver.value?.id
   if (!driverId) return []
@@ -38,13 +30,11 @@ const allHistory = computed(() => {
     .filter(o => new Date(o.created_at).getTime() >= cutoff)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 })
-
 const filteredHistory = computed(() => {
   if (statusFilter.value === 'all') return allHistory.value
   if (statusFilter.value === 'delivered') return allHistory.value.filter(o => o.status === OrderStatus.DELIVERED)
   return allHistory.value.filter(o => o.status === OrderStatus.CANCELLED)
 })
-
 const stats = computed(() => {
   const list = allHistory.value
   const delivered = list.filter(o => o.status === OrderStatus.DELIVERED)
@@ -57,28 +47,22 @@ const stats = computed(() => {
   }, 0)
   return { total: list.length, delivered: delivered.length, cancelled: cancelled.length, totalCollected, successRate, totalDistance }
 })
-
 const visibleHistory = computed(() => filteredHistory.value.slice(0, visibleCount.value))
 const hasMore = computed(() => visibleCount.value < filteredHistory.value.length)
-
 function loadMore() { visibleCount.value += 8 }
 function setRange(range: DateRange) { dateRange.value = range; visibleCount.value = 8 }
 function setStatusFilter(filter: StatusFilter) { statusFilter.value = filter; visibleCount.value = 8 }
-
 function distanceFor(orderId: string): string {
   const seed = orderId.charCodeAt(orderId.length - 1) || 1
   const km = 6 + (seed % 18) + (seed % 7) / 10
   return `${km.toFixed(1)} km`
 }
-
 function refresh() {
   refreshing.value = true
   setTimeout(() => { refreshing.value = false; toast.add({ title: 'Đã làm mới lịch sử', color: 'success' }) }, 700)
 }
-
 onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
 </script>
-
 <template>
   <div class="p-4">
     <!-- Header -->
@@ -95,7 +79,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
         <UIcon name="i-lucide-refresh-cw" :class="['w-5 h-5', refreshing ? 'animate-spin' : '']" />
       </UButton>
     </div>
-
     <!-- Date range filter -->
     <div class="flex items-center gap-2 mb-4">
       <UIcon name="i-lucide-calendar" class="w-4 h-4 text-slate-400 dark:text-zinc-500 flex-shrink-0" />
@@ -117,7 +100,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
         >{{ opt.label }}</UButton>
       </div>
     </div>
-
     <!-- Stats cards -->
     <div class="grid grid-cols-2 gap-3 mb-4">
       <div class="card p-4 relative overflow-hidden">
@@ -161,7 +143,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
         </div>
       </div>
     </div>
-
     <!-- Status filter tabs -->
     <div class="flex items-center gap-2 mb-4 overflow-x-auto">
       <UIcon name="i-lucide-filter" class="w-4 h-4 text-slate-400 dark:text-zinc-500 flex-shrink-0" />
@@ -183,7 +164,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
         >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton>
       </div>
     </div>
-
     <!-- Loading -->
     <template v-if="loading">
       <div v-for="i in 4" :key="i" class="card p-4 mb-3">
@@ -195,7 +175,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
         <div class="skeleton h-3 w-2/3" />
       </div>
     </template>
-
     <!-- History list -->
     <template v-else-if="visibleHistory.length">
       <div
@@ -255,7 +234,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
           </div>
         </div>
       </div>
-
       <!-- Load more -->
       <div v-if="hasMore" class="flex justify-center pt-2 pb-4">
         <UButton variant="outline" @click="loadMore">
@@ -266,7 +244,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
         Đã hiển thị tất cả {{ filteredHistory.length }} chuyến
       </p>
     </template>
-
     <!-- Empty -->
     <BaseEmptyState
       v-else

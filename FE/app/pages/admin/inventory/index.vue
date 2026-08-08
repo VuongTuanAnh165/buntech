@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { mockInventoryItems, mockInventoryMovements } from '~/utils/mockData'
 import { InventoryMovementType } from '~/utils/enums'
-
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Kho nguyên liệu - BunTech Admin' })
-
-const { formatNumber, formatDate } = useFormat()
 const toast = useToast()
-
 // ─── State ────────────────────────────────────────────────
 const loading = ref(true)
 const search = ref('')
@@ -16,7 +12,6 @@ const editItem = ref<typeof mockInventoryItems[0] | null>(null)
 const newItemName = ref('')
 const newItemUnit = ref('')
 const newItemQty = ref<number>(0)
-
 // ─── Computed KPIs ────────────────────────────────────────
 const totalItems = computed(() => mockInventoryItems.length)
 const totalQuantity = computed(() => mockInventoryItems.reduce((s, i) => s + i.quantity, 0))
@@ -26,70 +21,59 @@ const monthMovements = computed(() => {
   const thirtyDays = 30 * 86400000
   return mockInventoryMovements.filter(m => now - new Date(m.created_at).getTime() < thirtyDays).length
 })
-
 const kpiStats = computed(() => [
   { title: 'Tổng nguyên liệu', value: formatNumber(totalItems.value), icon: 'i-lucide-package', color: 'primary' as const, trend: { value: 2, isPositive: true } },
   { title: 'Tổng số lượng', value: formatNumber(totalQuantity.value), icon: 'i-lucide-layers', color: 'success' as const, trend: { value: 8.4, isPositive: true } },
   { title: 'Sắp hết hàng', value: String(lowStockItems.value), icon: 'i-lucide-alert-triangle', color: 'warning' as const },
   { title: 'Giao dịch tháng này', value: formatNumber(monthMovements.value), icon: 'i-lucide-repeat', color: 'info' as const, trend: { value: 15, isPositive: true } },
 ])
-
 // ─── Filtered items ───────────────────────────────────────
 const filteredItems = computed(() => {
   if (!search.value.trim()) return mockInventoryItems
   const q = search.value.toLowerCase()
   return mockInventoryItems.filter(i => i.name.toLowerCase().includes(q))
 })
-
 // ─── Stock level helpers ──────────────────────────────────
 const maxQty = computed(() => Math.max(...mockInventoryItems.map(i => i.quantity), 1))
-
 function stockLevel(qty: number): 'high' | 'medium' | 'low' | 'out' {
   if (qty === 0) return 'out'
   if (qty <= 30) return 'low'
   if (qty <= 100) return 'medium'
   return 'high'
 }
-
 const stockColors: Record<string, string> = {
   high: 'bg-success-500',
   medium: 'bg-primary-500',
   low: 'bg-warning-500',
   out: 'bg-error-500',
 }
-
 const stockLabels: Record<string, string> = {
   high: 'Đủ',
   medium: 'Đủ',
   low: 'Thấp',
   out: 'Sắp hết',
 }
-
 // ─── Recent activity ──────────────────────────────────────
 const recentMovements = computed(() =>
   [...mockInventoryMovements]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 10)
 )
-
 function movementIcon(type: InventoryMovementType) {
   if (type === InventoryMovementType.IMPORT) return 'i-lucide-arrow-down-to-line'
   if (type === InventoryMovementType.EXPORT) return 'i-lucide-arrow-up-from-line'
   return 'i-lucide-alert-circle'
 }
-
 function movementColor(type: InventoryMovementType) {
   if (type === InventoryMovementType.IMPORT) return 'text-success-500'
   if (type === InventoryMovementType.EXPORT) return 'text-primary-500'
   return 'text-error-500'
 }
-
 function movementLabel(type: InventoryMovementType) {
   if (type === InventoryMovementType.IMPORT) return 'Nhập kho'
   if (type === InventoryMovementType.EXPORT) return 'Xuất kho'
   return 'Hao hụt'
 }
-
 // ─── Table columns ────────────────────────────────────────
 const columns = [
   { accessorKey: 'name', header: 'Nguyên liệu' },
@@ -98,7 +82,6 @@ const columns = [
   { accessorKey: 'updated_at', header: 'Cập nhật' },
   { accessorKey: 'actions', header: 'Hành động' },
 ]
-
 // ─── Handlers ─────────────────────────────────────────────
 function handleAdd() {
   if (!newItemName.value.trim() || !newItemUnit.value.trim()) {
@@ -111,21 +94,17 @@ function handleAdd() {
   newItemUnit.value = ''
   newItemQty.value = 0
 }
-
 function handleEdit(item: typeof mockInventoryItems[0]) {
   editItem.value = { ...item }
 }
-
 function handleDelete(item: typeof mockInventoryItems[0]) {
   toast.add({ title: `Đã xóa ${item.name}`, color: 'success' })
 }
-
 // ─── Lifecycle ────────────────────────────────────────────
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
 </script>
-
 <template>
   <div>
     <BasePageHeader
@@ -142,17 +121,14 @@ onMounted(() => {
         </UButton>
       </template>
     </BasePageHeader>
-
     <template v-if="loading">
       <BasePageLoading />
     </template>
-
     <template v-else>
       <!-- KPI Stats -->
       <div class="mb-6">
         <BaseStatsGrid :stats="kpiStats" />
       </div>
-
       <!-- Main content: Table + Activity -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <!-- Left: Search + Table -->
@@ -166,7 +142,6 @@ onMounted(() => {
               <UIcon name="i-lucide-plus" class="w-4 h-4 mr-1" /> Thêm nguyên liệu
             </UButton>
           </div>
-
           <!-- Table -->
           <div class="animate-fade-in-up bg-surface ring-1 ring-surface-border rounded-xl overflow-hidden" style="animation-delay: 280ms">
             <UTable :columns="columns" :data="filteredItems">
@@ -200,11 +175,9 @@ onMounted(() => {
                   </div>
                 </div>
               </template>
-
               <template #unit-cell="{ row }">
                 <span class="text-sm text-slate-600 dark:text-zinc-300">{{ row.original.unit }}</span>
               </template>
-
               <template #quantity-cell="{ row }">
                 <span
                   class="font-semibold tabular-nums text-sm"
@@ -214,11 +187,9 @@ onMounted(() => {
                 </span>
                 <span class="text-xs text-slate-400 ml-1">{{ row.original.unit }}</span>
               </template>
-
               <template #updated_at-cell="{ row }">
                 <span class="text-sm text-slate-500 dark:text-zinc-400 tabular-nums">{{ formatDate(row.original.updated_at) }}</span>
               </template>
-
               <template #actions-cell="{ row }">
                 <div class="flex items-center gap-1">
                   <UButton variant="ghost" color="neutral" size="sm" icon="i-lucide-pencil" @click="handleEdit(row.original)" />
@@ -228,7 +199,6 @@ onMounted(() => {
             </UTable>
           </div>
         </div>
-
         <!-- Right: Activity Timeline -->
         <div class="card p-5 h-fit stagger-item" style="animation-delay: 360ms">
           <div class="flex items-center justify-between mb-4">
@@ -238,7 +208,6 @@ onMounted(() => {
             </h3>
             <span class="text-xs text-primary-500 cursor-pointer hover:text-primary-600 transition-colors">Tất cả →</span>
           </div>
-
           <div class="space-y-3">
             <div
               v-for="(mov, i) in recentMovements"
@@ -275,7 +244,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Add Modal -->
       <UModal v-model:open="showAddModal" title="Thêm nguyên liệu">
         <template #body>

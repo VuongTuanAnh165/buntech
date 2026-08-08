@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { ArrowLeft, Calendar, User, Clock, Package, Tag, Facebook, Twitter, Link2 } from 'lucide-vue-next'
 import DOMPurify from 'dompurify'
-const toast = useAppToast()
-const route = useRoute()
-const { formatDate } = useFormat()
-definePageMeta({ layout: 'default' })
+const toast = useToast()
+const route = useRoute()definePageMeta({ layout: 'default' })
 
 const slug = route.params.slug as string
 const loading = ref(true)
@@ -39,16 +37,16 @@ const sanitizedContent = computed(() => {
 const sharePost = () => {
   if (import.meta.client) {
     navigator.clipboard.writeText(window.location.href)
-    toast.success('Đã sao chép link bài viết')
+    toast.add({ title: 'Thành công', description: '', color: 'success' })
   }
 }
 
 const shareFacebook = () => {
-  toast.info('Đang mở Facebook...')
+  toast.add({ title: 'Thông báo', description: '', color: 'info' })
 }
 
 const shareTwitter = () => {
-  toast.info('Đang mở Twitter...')
+  toast.add({ title: 'Thông báo', description: '', color: 'info' })
 }
 
 onMounted(() => {

@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { mockProducts, mockCategories } from '~/utils/mockData'
-
 const toast = useToast()
-const { formatVND } = useFormat()
-
 useSeoMeta({ title: 'Đặt hàng sỉ - BunTech' })
 definePageMeta({ layout: 'default' })
-
 const loading = ref(true)
 const search = ref('')
 const selectedCategory = ref('')
@@ -17,9 +13,7 @@ const errors = ref<Record<string, string>>({})
 const submitting = ref(false)
 const success = ref(false)
 const successOrderCode = ref('')
-
 const WHOLESALE_DISCOUNT = 0.1 // 10% discount
-
 const availableProducts = computed(() => {
   let result = mockProducts.filter((p: Product) => p.status === 'ACTIVE')
   if (search.value) {
@@ -31,11 +25,9 @@ const availableProducts = computed(() => {
   }
   return result
 })
-
 function getWholesalePrice(price: number): number {
   return Math.round(price * (1 - WHOLESALE_DISCOUNT))
 }
-
 const total = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.price, 0))
 const totalSavings = computed(() => {
   const retailTotal = orderItems.value.reduce((sum, item) => {
@@ -44,7 +36,6 @@ const totalSavings = computed(() => {
   }, 0)
   return retailTotal - total.value
 })
-
 function addProduct(productId: string) {
   const product = mockProducts.find((p: Product) => p.id === productId)
   if (!product) return
@@ -68,7 +59,6 @@ function addProduct(productId: string) {
   })
   toast.add({ title: `Đã thêm ${product.name}`, color: 'success' })
 }
-
 function incrementQty(index: number) {
   const item = orderItems.value[index]
   if (item && item.quantity >= item.stock) {
@@ -77,14 +67,12 @@ function incrementQty(index: number) {
   }
   if (item) item.quantity++
 }
-
 function decrementQty(index: number) {
   const item = orderItems.value[index]
   if (item && item.quantity > 1) {
     item.quantity--
   }
 }
-
 function removeItem(index: number) {
   const item = orderItems.value[index]
   if(item) {
@@ -92,12 +80,10 @@ function removeItem(index: number) {
     toast.add({ title: `Đã xóa ${item.product_name}`, color: 'info' })
   }
 }
-
 function clearCart() {
   orderItems.value = []
   toast.add({ title: 'Đã xóa giỏ hàng', color: 'info' })
 }
-
 function submitOrder() {
   errors.value = {}
   if (!form.value.name) errors.value.name = 'Vui lòng nhập họ tên'
@@ -109,7 +95,6 @@ function submitOrder() {
     return
   }
   if (Object.keys(errors.value).length) return
-
   submitting.value = true
   setTimeout(() => {
     successOrderCode.value = 'BT' + Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -118,7 +103,6 @@ function submitOrder() {
     toast.add({ title: 'Đặt hàng sỉ thành công!', color: 'success' })
   }, 1200)
 }
-
 function resetForm() {
   success.value = false
   orderItems.value = []
@@ -127,12 +111,10 @@ function resetForm() {
   search.value = ''
   selectedCategory.value = ''
 }
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 400)
 })
 </script>
-
 <template>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-12">
     <!-- Back -->
@@ -145,7 +127,6 @@ onMounted(() => {
     >
       Quay lại
     </UButton>
-
     <!-- Header -->
     <div class="flex items-center gap-3 mb-2">
       <div class="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
@@ -156,13 +137,11 @@ onMounted(() => {
         <p class="text-sm text-slate-500 dark:text-zinc-400">Giá sỉ giảm 10% — đặt số lượng lớn, giao tận nơi</p>
       </div>
     </div>
-
     <!-- Discount banner -->
     <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/10 text-success-700 dark:text-success-400 text-sm font-medium mb-6 animate-fade-in-up">
       <UIcon name="i-lucide-percent" class="w-4 h-4" />
       Giảm 10% cho đơn hàng sỉ — áp dụng tự động khi thêm vào giỏ
     </div>
-
     <!-- Success state -->
     <template v-if="success">
       <div class="card p-8 sm:p-12 text-center max-w-lg mx-auto animate-fade-in-up">
@@ -199,7 +178,6 @@ onMounted(() => {
         </div>
       </div>
     </template>
-
     <template v-else>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Product selection -->
@@ -239,7 +217,6 @@ onMounted(() => {
                 {{ cat.name }}
               </UButton>
             </div>
-
             <!-- Product grid -->
             <template v-if="loading">
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -286,7 +263,6 @@ onMounted(() => {
             <div v-else class="text-center py-8 text-sm text-slate-500 dark:text-zinc-400">Không tìm thấy sản phẩm</div>
           </div>
         </div>
-
         <!-- Cart + Form -->
         <div class="space-y-4">
           <div class="card p-4 sticky top-4">
@@ -304,7 +280,6 @@ onMounted(() => {
                 Xóa tất cả
               </UButton>
             </div>
-
             <template v-if="orderItems.length">
               <div class="space-y-2 max-h-48 overflow-y-auto pr-1 mb-4">
                 <div
@@ -342,13 +317,11 @@ onMounted(() => {
                   </UButton>
                 </div>
               </div>
-
               <!-- Savings -->
               <div v-if="totalSavings > 0" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-400 text-sm mb-3">
                 <UIcon name="i-lucide-percent" class="w-4 h-4" />
                 Tiết kiệm {{ formatVND(totalSavings) }} với giá sỉ
               </div>
-
               <div class="flex justify-between items-center pt-3 border-t border-surface-border mb-4">
                 <span class="font-semibold text-surface-foreground">Tổng cộng</span>
                 <span class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ formatVND(total) }}</span>
@@ -360,7 +333,6 @@ onMounted(() => {
               </div>
               <p class="text-sm text-slate-500 dark:text-zinc-400">Chưa có sản phẩm</p>
             </div>
-
             <!-- Delivery form -->
             <form v-if="orderItems.length" class="space-y-4 mt-4 pt-4 border-t border-surface-border" @submit.prevent="submitOrder">
               <UFormField label="Họ và tên" :error="errors.name">
@@ -375,7 +347,6 @@ onMounted(() => {
               <UFormField label="Ghi chú (tùy chọn)">
                 <UInput v-model="note" placeholder="Giao trước 9h sáng" class="w-full" />
               </UFormField>
-
               <UButton type="submit" :loading="submitting" size="lg" block>
                 <template #leading>
                   <UIcon name="i-lucide-truck" class="w-5 h-5" />

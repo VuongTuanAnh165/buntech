@@ -2,13 +2,9 @@
 import { Role, OrderStatus, ProductStatus } from '~/utils/enums'
 import type { Profile, Product, Address } from '~/utils/types'
 import { mockProfiles, mockProducts, mockCustomPrices, mockAddresses, mockTransactions } from '~/utils/mockData'
-
 const toast = useToast()
-const { formatVND } = useFormat()
-
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Tạo đơn hàng - BunTech Admin' })
-
 const loading = ref(true)
 const customers = ref<Profile[]>([])
 const products = ref<Product[]>([])
@@ -24,14 +20,12 @@ const saving = ref(false)
 const searchQuery = ref('')
 const success = ref(false)
 const createdOrderId = ref('')
-
 const selectedCustomer = computed(() => customers.value.find(c => c.id === selectedCustomerId.value))
 const subtotal = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.price, 0))
 const deliveryFee = computed(() => { const n = Number(deliveryFeeInput.value); return Number.isNaN(n) ? 0 : n })
 const total = computed(() => subtotal.value + deliveryFee.value)
 const amountCollected = computed(() => { const n = Number(amountCollectedInput.value); return Number.isNaN(n) ? 0 : n })
 const debtAmount = computed(() => Math.max(0, total.value - amountCollected.value))
-
 const customerDebt = computed(() => {
   let debt = 0
   const txs = mockTransactions.filter(tx => tx.user_id === selectedCustomerId.value)
@@ -43,17 +37,14 @@ const customerDebt = computed(() => {
 })
 const debtLimit = computed(() => Number(selectedCustomer.value?.debt_limit ?? 0))
 const exceedsDebtLimit = computed(() => debtLimit.value > 0 && customerDebt.value + debtAmount.value > debtLimit.value)
-
 const filteredProducts = computed(() => {
   if (!searchQuery.value.trim()) return products.value.slice(0, 24)
   const q = searchQuery.value.toLowerCase().trim()
   return products.value.filter(p => p.name.toLowerCase().includes(q) || (p.category?.name || '').toLowerCase().includes(q)).slice(0, 24)
 })
-
 const customerOptions = computed(() => customers.value.map(c => ({ value: c.id, label: `${c.full_name} — ${c.phone || 'SĐT'}` })))
 const addressOptions = computed(() => customerAddresses.value.map(a => ({ value: a.id, label: `${a.street}, ${a.ward}, ${a.district}, ${a.city}${a.is_default ? ' (Mặc định)' : ''}` })))
 const selectedAddress = computed(() => customerAddresses.value.find(a => a.id === selectedAddressId.value))
-
 function loadInitData() {
   loading.value = true
   setTimeout(() => {
@@ -62,29 +53,23 @@ function loadInitData() {
     loading.value = false
   }, 400)
 }
-
 function onCustomerChange() {
   customPrices.value.clear()
   customerAddresses.value = []
   selectedAddressId.value = ''
   if (!selectedCustomerId.value) return
-
   const cps = mockCustomPrices.filter(cp => cp.user_id === selectedCustomerId.value)
   for (const cp of cps) customPrices.value.set(cp.product_id, Number(cp.price))
-
   customerAddresses.value = mockAddresses.filter(a => a.user_id === selectedCustomerId.value).sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0))
   const defaultAddr = customerAddresses.value.find(a => a.is_default)
   if (defaultAddr) selectedAddressId.value = defaultAddr.id
-
   orderItems.value = orderItems.value.map(item => ({ ...item, price: customPrices.value.has(item.product_id) ? customPrices.value.get(item.product_id)! : item.price }))
 }
-
 function getProductPrice(productId: string): number {
   if (customPrices.value.has(productId)) return customPrices.value.get(productId)!
   const p = products.value.find(p => p.id === productId)
   return Number(p?.price) || 0
 }
-
 function addProduct(productId: string) {
   if (!productId) return
   const existing = orderItems.value.find(i => i.product_id === productId)
@@ -94,7 +79,6 @@ function addProduct(productId: string) {
     orderItems.value.push({ product_id: productId, product_name: product.name, quantity: 1, price: getProductPrice(productId), stock: Number(product.stock), unit: product.unit, image_url: product.image_url })
   }
 }
-
 function removeItem(index: number) { orderItems.value.splice(index, 1) }
 function updateQuantity(index: number, delta: number) {
   const item = orderItems.value[index]
@@ -102,7 +86,6 @@ function updateQuantity(index: number, delta: number) {
   if (newQty <= 0) { removeItem(index); return }
   item.quantity = newQty
 }
-
 function submitOrder() {
   if (!orderItems.value.length) return toast.add({ title: 'Vui lòng chọn ít nhất một sản phẩm', color: 'error' })
   if (!selectedCustomerId.value) return toast.add({ title: 'Vui lòng chọn khách hàng', color: 'error' })
@@ -116,10 +99,8 @@ function submitOrder() {
     toast.add({ title: 'Tạo đơn hàng thành công!', color: 'success' })
   }, 800)
 }
-
 onMounted(loadInitData)
 </script>
-
 <template>
   <div>
     <BasePageHeader title="Tạo đơn hàng mới" description="Chọn khách hàng, thêm sản phẩm và xác nhận đơn" :breadcrumbs="[{label: 'Tạo đơn'}]">
@@ -127,7 +108,6 @@ onMounted(loadInitData)
         <UButton color="neutral" variant="outline" icon="i-lucide-arrow-left" to="/admin/orders">Quay lại</UButton>
       </template>
     </BasePageHeader>
-
     <div v-if="success" class="bg-surface p-8 rounded-xl shadow-sm text-center max-w-lg mx-auto ring-1 ring-surface-border">
       <div class="w-16 h-16 rounded-full bg-success-50 flex items-center justify-center mx-auto mb-4">
         <UIcon name="i-lucide-check-circle-2" class="w-8 h-8 text-success-600" />
@@ -140,7 +120,6 @@ onMounted(loadInitData)
         <UButton color="neutral" variant="outline" icon="i-lucide-plus" @click="success = false; orderItems = []; selectedCustomerId = ''; note = ''; amountCollectedInput = ''; deliveryFeeInput = ''">Tạo đơn khác</UButton>
       </div>
     </div>
-
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div class="lg:col-span-2 space-y-6">
         <!-- Customer Select -->
@@ -164,7 +143,6 @@ onMounted(loadInitData)
             class="w-full"
             @update:model-value="onCustomerChange"
           />
-
           <div v-if="selectedCustomerId" class="mt-4 grid grid-cols-3 gap-3">
             <div class="p-3 rounded-lg bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-700">
               <p class="text-xs text-slate-500 dark:text-zinc-400 mb-0.5">Công nợ hiện tại</p>
@@ -180,7 +158,6 @@ onMounted(loadInitData)
             </div>
           </div>
         </div>
-
         <!-- Product Picker -->
         <div class="bg-surface p-5 rounded-xl shadow-sm ring-1 ring-surface-border">
           <div class="flex items-center justify-between mb-4">
@@ -197,7 +174,6 @@ onMounted(loadInitData)
               <UInput v-model="searchQuery" icon="i-lucide-search" placeholder="Tìm sản phẩm..." class="w-full" />
             </div>
           </div>
-
           <div v-if="filteredProducts.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             <UButton variant="ghost" color="neutral"
               v-for="p in filteredProducts" :key="p.id" type="button"
@@ -220,7 +196,6 @@ onMounted(loadInitData)
           </div>
           <div v-else class="text-center py-8 text-slate-500 text-sm">Không tìm thấy sản phẩm</div>
         </div>
-
         <!-- Cart -->
         <div class="bg-surface p-5 rounded-xl shadow-sm ring-1 ring-surface-border">
           <div class="flex items-center gap-2 mb-4">
@@ -232,7 +207,6 @@ onMounted(loadInitData)
               <p class="text-xs text-slate-500">{{ orderItems.length }} sản phẩm</p>
             </div>
           </div>
-
           <template v-if="orderItems.length">
             <TransitionGroup 
               name="list" 
@@ -276,12 +250,10 @@ onMounted(loadInitData)
           </div>
         </div>
       </div>
-
       <!-- Right Column -->
       <div class="space-y-6">
         <div class="bg-surface p-5 rounded-xl shadow-sm ring-1 ring-surface-border sticky top-20">
           <h2 class="text-sm font-semibold text-surface-foreground mb-4">Tóm tắt đơn hàng</h2>
-
           <div v-if="selectedCustomerId" class="mb-4">
             <UFormField label="Địa chỉ giao hàng">
               <USelectMenu
@@ -295,7 +267,6 @@ onMounted(loadInitData)
               <p v-else class="text-xs text-slate-400 dark:text-zinc-500 p-2 bg-slate-50 dark:bg-zinc-800/50 rounded-lg border border-slate-100 dark:border-zinc-700">Khách hàng chưa có địa chỉ</p>
             </UFormField>
           </div>
-
           <div class="space-y-3 text-sm">
             <div class="flex justify-between items-center"><span class="text-slate-500">Tạm tính</span><span class="font-medium">{{ formatVND(subtotal) }}</span></div>
             <div class="flex justify-between items-center">
@@ -315,18 +286,15 @@ onMounted(loadInitData)
               <span class="text-xl font-bold text-primary-600">{{ formatVND(total) }}</span>
             </div>
           </div>
-
           <div v-if="exceedsDebtLimit" class="mt-4 p-3 bg-error-50 rounded-lg flex items-start gap-2 border border-error-100">
             <UIcon name="i-lucide-alert-triangle" class="w-5 h-5 text-error-600 shrink-0 mt-0.5" />
             <p class="text-xs text-error-700">Đơn hàng vượt hạn mức công nợ của {{ selectedCustomer?.full_name }} (còn {{ formatVND(debtLimit - customerDebt) }})</p>
           </div>
-
           <div class="mt-4">
             <UFormField label="Ghi chú">
               <UTextarea v-model="note" :rows="2" placeholder="Ghi chú cho đơn..." class="w-full" />
             </UFormField>
           </div>
-
           <UButton :loading="saving" block size="lg" class="mt-4 font-semibold shadow-sm" :disabled="!orderItems.length || !selectedCustomerId" @click="submitOrder" icon="i-lucide-plus">
             Tạo đơn hàng
           </UButton>

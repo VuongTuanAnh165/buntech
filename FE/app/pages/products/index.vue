@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { Grid2x2, LayoutGrid, Package, X, Search, ChevronDown } from 'lucide-vue-next'
-
-const { formatVND } = useFormat()
-
 useSeoMeta({ title: 'Sản phẩm - BunTech' })
 definePageMeta({ layout: 'default' })
-
 const loading = ref(true)
 const search = ref('')
 const selectedCategory = ref('')
@@ -13,58 +9,46 @@ const sortBy = ref<'latest' | 'price-asc' | 'price-desc' | 'name'>('latest')
 const viewMode = ref<'grid' | 'list'>('grid')
 const currentPage = ref(1)
 const perPage = 12
-
 const sortOptions = [
   { value: 'latest', label: 'Mới nhất' },
   { value: 'price-asc', label: 'Giá thấp → cao' },
   { value: 'price-desc', label: 'Giá cao → thấp' },
   { value: 'name', label: 'Tên A → Z' },
 ]
-
 const filteredProducts = computed(() => {
   let result = mockProducts.filter(p => p.status === 'ACTIVE')
-
   if (search.value) {
     const q = search.value.toLowerCase()
     result = result.filter(p => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q))
   }
-
   if (selectedCategory.value) {
     result = result.filter(p => p.category_id === selectedCategory.value)
   }
-
   switch (sortBy.value) {
     case 'price-asc': result = [...result].sort((a, b) => a.price - b.price); break
     case 'price-desc': result = [...result].sort((a, b) => b.price - a.price); break
     case 'name': result = [...result].sort((a, b) => a.name.localeCompare(b.name)); break
     default: result = [...result].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
   }
-
   return result
 })
-
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / perPage))
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * perPage
   return filteredProducts.value.slice(start, start + perPage)
 })
-
 const hasActiveFilters = computed(() => selectedCategory.value || search.value || sortBy.value !== 'latest')
-
 watch([search, selectedCategory, sortBy], () => { currentPage.value = 1 })
-
 const clearFilters = () => {
   selectedCategory.value = ''
   search.value = ''
   sortBy.value = 'latest'
   currentPage.value = 1
 }
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 400)
 })
 </script>
-
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <!-- Header -->
@@ -79,7 +63,6 @@ onMounted(() => {
       <h1 class="text-2xl sm:text-3xl font-bold text-surface-foreground tracking-tight mb-2">Tất cả sản phẩm</h1>
       <p class="text-sm text-gray-500 dark:text-zinc-400">Bún tươi thủ công, giao hàng tận nơi trong 2 giờ</p>
     </div>
-
     <!-- Search & Sort Bar -->
     <div class="card p-4 mb-6">
       <div class="flex flex-wrap items-center gap-3">
@@ -133,7 +116,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-
     <!-- Category Pills -->
     <div class="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1">
       <UButton variant="ghost" color="neutral"
@@ -159,14 +141,12 @@ onMounted(() => {
         {{ cat.name }}
       </UButton>
     </div>
-
     <!-- Results count -->
     <div class="flex items-center justify-between mb-4">
       <p class="text-sm text-gray-500 dark:text-zinc-400">
         {{ loading ? 'Đang tải...' : `${filteredProducts.length} sản phẩm` }}
       </p>
     </div>
-
     <!-- Loading skeleton -->
     <template v-if="loading">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -177,7 +157,6 @@ onMounted(() => {
         </div>
       </div>
     </template>
-
     <!-- Grid view -->
     <template v-else-if="paginatedProducts.length && viewMode === 'grid'">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -223,7 +202,6 @@ onMounted(() => {
         </NuxtLink>
       </div>
     </template>
-
     <!-- List view -->
     <template v-else-if="paginatedProducts.length && viewMode === 'list'">
       <div class="space-y-3">
@@ -259,7 +237,6 @@ onMounted(() => {
         </NuxtLink>
       </div>
     </template>
-
     <!-- Empty state -->
     <AppEmptyState
       v-else
@@ -268,7 +245,6 @@ onMounted(() => {
       cta-text="Đặt hàng nhanh"
       @action="navigateTo('/quick-order')"
     />
-
     <!-- Pagination -->
     <div v-if="!loading && totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
       <UButton variant="ghost" color="neutral"

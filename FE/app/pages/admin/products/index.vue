@@ -2,20 +2,15 @@
 import { ProductStatus } from '~/utils/enums'
 import type { Product, Category } from '~/utils/types'
 import { mockProducts, mockCategories } from '~/utils/mockData'
-
 const toast = useToast()
 const router = useRouter()
-const { formatVND, formatNumber, slugify } = useFormat()
-
 useSeoMeta({ title: `Sản phẩm - BunTech Admin` })
 definePageMeta({ layout: 'admin' })
-
 // ─── Local reactive data (mock) ───────────────────────────────
 const allProducts = ref<Product[]>(mockProducts.filter(p => !p.deleted_at))
 const categories = ref<Category[]>(mockCategories)
 const loading = ref(true)
 const error = ref(false)
-
 // ─── Filters / pagination state ───────────────────────────────
 const search = ref('')
 const statusFilter = ref<'ALL' | ProductStatus>('ALL')
@@ -24,14 +19,12 @@ const sortBy = ref<'name' | 'price' | 'stock' | 'status' | 'created_at'>('create
 const sortDirection = ref<'asc' | 'desc'>('desc')
 const page = ref(1)
 const limit = ref(10)
-
 const debouncedSearch = ref('')
 const searchTimeoutId = ref<ReturnType<typeof setTimeout>>()
 watch(search, (val) => {
   clearTimeout(searchTimeoutId.value)
   searchTimeoutId.value = setTimeout(() => { debouncedSearch.value = val }, 300)
 })
-
 // ─── CRUD state ────────────────────────────────────────────────
 const showDrawer = ref(false)
 const editingId = ref<string | null>(null)
@@ -51,12 +44,10 @@ const formErrors = ref<Record<string, string>>({})
 const saving = ref(false)
 const deleteTarget = ref<Product | null>(null)
 const deleting = ref(false)
-
 // ─── Simulate loading ──────────────────────────────────────────
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
-
 // ─── KPI cards ─────────────────────────────────────────────────
 const kpiCards = computed(() => {
   const list = allProducts.value
@@ -70,9 +61,7 @@ const kpiCards = computed(() => {
     { label: 'Tồn kho thấp', value: formatNumber(lowStock), icon: 'i-lucide-alert-triangle', accent: 'bg-gradient-to-r from-warning-500 to-warning-400', bg: 'bg-warning-50 dark:bg-warning-900/20', text: 'text-warning-600 dark:text-warning-400', ring: 'ring-warning-100 dark:ring-warning-900/30', trend: '+2' },
   ]
 })
-
 const inventoryValue = computed(() => allProducts.value.reduce((s, p) => s + p.price * p.stock, 0))
-
 // ─── Filtered + sorted + paginated rows ─────────────────────────
 const filteredRows = computed(() => {
   let rows = allProducts.value
@@ -85,7 +74,6 @@ const filteredRows = computed(() => {
   }
   if (statusFilter.value !== 'ALL') rows = rows.filter(p => p.status === statusFilter.value)
   if (categoryFilter.value !== 'ALL') rows = rows.filter(p => p.category_id === categoryFilter.value)
-
   return [...rows].sort((a, b) => {
     let av: string | number = ''
     let bv: string | number = ''
@@ -104,16 +92,13 @@ const filteredRows = computed(() => {
       : String(bv).localeCompare(String(av))
   })
 })
-
 const total = computed(() => filteredRows.value.length)
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / limit.value)))
 const pagedRows = computed(() => {
   const start = (page.value - 1) * limit.value
   return filteredRows.value.slice(start, start + limit.value)
 })
-
 watch([debouncedSearch, statusFilter, categoryFilter], () => { page.value = 1 })
-
 // ─── CRUD handlers ─────────────────────────────────────────────
 function openAdd() {
   editingId.value = null
@@ -122,7 +107,6 @@ function openAdd() {
   formErrors.value = {}
   showDrawer.value = true
 }
-
 function openEdit(row: Product) {
   editingId.value = row.id
   form.value = {
@@ -140,7 +124,6 @@ function openEdit(row: Product) {
   formErrors.value = {}
   showDrawer.value = true
 }
-
 function validateForm() {
   formErrors.value = {}
   if (!form.value.name.trim()) formErrors.value.name = 'Vui lòng nhập tên sản phẩm'
@@ -148,7 +131,6 @@ function validateForm() {
   if (form.value.stock < 0) formErrors.value.stock = 'Tồn kho không hợp lệ'
   return Object.keys(formErrors.value).length === 0
 }
-
 function saveProduct() {
   if (!validateForm()) return
   saving.value = true
@@ -199,7 +181,6 @@ function saveProduct() {
     showDrawer.value = false
   }, 400)
 }
-
 function confirmDelete() {
   if (!deleteTarget.value) return
   deleting.value = true
@@ -211,7 +192,6 @@ function confirmDelete() {
     if (pagedRows.value.length === 0 && page.value > 1) page.value--
   }, 400)
 }
-
 function toggleSort(col: 'name' | 'price' | 'stock' | 'status' | 'created_at') {
   if (sortBy.value === col) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
@@ -220,18 +200,15 @@ function toggleSort(col: 'name' | 'price' | 'stock' | 'status' | 'created_at') {
     sortDirection.value = 'asc'
   }
 }
-
 const deleteConfirmMessage = computed(() =>
   deleteTarget.value
     ? `Bạn có chắc muốn xóa sản phẩm "${deleteTarget.value.name}"? Sản phẩm sẽ được chuyển vào thùng rác.`
     : ''
 )
-
 const categoryOptions = computed(() => [
   { value: 'ALL', label: 'Tất cả danh mục' },
   ...categories.value.map(c => ({ value: c.id, label: c.name })),
 ])
-
 const columns = ref<Record<string, unknown>[]>([
   { accessorKey: 'image_url', header: 'Ảnh', width: '60px' },
   { accessorKey: 'name', header: 'Tên sản phẩm', sortable: true },
@@ -242,7 +219,6 @@ const columns = ref<Record<string, unknown>[]>([
   { accessorKey: 'actions', header: 'Thao tác', align: 'right' as const, width: '120px' },
 ])
 </script>
-
 <template>
   <div>
     <BasePageHeader title="Sản phẩm" description="Quản lý danh mục sản phẩm, giá và tồn kho">
@@ -256,9 +232,7 @@ const columns = ref<Record<string, unknown>[]>([
         <UButton @click="openAdd" icon="i-lucide-plus" color="primary">Thêm sản phẩm</UButton>
       </template>
     </BasePageHeader>
-
     <BaseEmptyState v-if="error" title="Lỗi" description="Không thể tải danh sách sản phẩm." icon="i-lucide-alert-triangle" />
-
     <template v-else>
       <!-- KPI Row -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
@@ -293,7 +267,6 @@ const columns = ref<Record<string, unknown>[]>([
           </div>
         </template>
       </div>
-
       <!-- Inventory value banner -->
       <div v-if="!loading" class="card p-4 mb-4 stagger-item flex items-center justify-between" style="animation-delay: 180ms">
         <div class="flex items-center gap-3">
@@ -310,7 +283,6 @@ const columns = ref<Record<string, unknown>[]>([
           Cập nhật theo thời gian thực
         </UBadge>
       </div>
-
       <!-- Toolbar -->
       <div class="bg-surface p-3 rounded-t-xl ring-1 ring-surface-border flex flex-col sm:flex-row gap-3 items-center">
         <BaseSearchInput v-model="search" placeholder="Tìm sản phẩm..." class="flex-1 w-full max-w-sm" />
@@ -333,7 +305,6 @@ const columns = ref<Record<string, unknown>[]>([
           class="w-full sm:w-48"
         />
       </div>
-
       <!-- Table -->
       <div class="animate-fade-in-up bg-surface ring-1 ring-surface-border ring-t-0 rounded-b-xl overflow-hidden" style="animation-delay: 100ms">
         <UTable
@@ -347,22 +318,18 @@ const columns = ref<Record<string, unknown>[]>([
               <span v-else class="i-lucide-image w-5 h-5 text-slate-300 dark:text-zinc-600 group-hover:scale-110 transition-transform duration-300" aria-hidden="true" />
             </div>
           </template>
-
           <template #name-cell="{ row }">
             <div class="min-w-0" @click="navigateTo(`/admin/products/${row.original.id}`)" style="cursor: pointer">
               <p class="font-medium text-surface-foreground truncate max-w-[260px] hover:text-primary-600 transition-colors">{{ row.original.name }}</p>
               <p class="text-xs text-slate-500 dark:text-zinc-400 truncate max-w-[260px] font-mono">{{ row.original.slug }}</p>
             </div>
           </template>
-
           <template #category-cell="{ row }">
             <UBadge color="info" variant="subtle">{{ row.original.category?.name || '—' }}</UBadge>
           </template>
-
           <template #price-cell="{ row }">
             <span class="font-medium text-surface-foreground tabular-nums">{{ formatVND(Number(row.original.price)) }}</span>
           </template>
-
           <template #stock-cell="{ row }">
             <div class="flex items-center justify-end gap-1.5">
               <span v-if="row.original.stock === 0" class="font-medium text-error-600 dark:text-error-400 tabular-nums">Hết hàng</span>
@@ -373,14 +340,12 @@ const columns = ref<Record<string, unknown>[]>([
               <span class="text-xs text-slate-400 dark:text-zinc-500">{{ row.original.unit }}</span>
             </div>
           </template>
-
           <template #status-cell="{ row }">
             <UBadge :color="row.original.status === ProductStatus.ACTIVE ? 'success' : 'neutral'" variant="subtle">
               <template #leading><span class="w-1.5 h-1.5 rounded-full bg-current" /></template>
               {{ row.original.status === ProductStatus.ACTIVE ? 'Đang bán' : 'Ngừng bán' }}
             </UBadge>
           </template>
-
           <template #actions-cell="{ row }">
             <div class="flex items-center justify-end gap-1">
               <UButton color="neutral" variant="ghost" icon="i-lucide-eye" size="sm" @click="() => { navigateTo(`/admin/products/${row.original.id}`) }" />
@@ -389,7 +354,6 @@ const columns = ref<Record<string, unknown>[]>([
             </div>
           </template>
         </UTable>
-
         <div class="p-4 flex items-center justify-between border-t border-surface-border bg-surface">
           <span class="text-sm text-slate-500">
             Hiển thị {{ total === 0 ? 0 : (page - 1) * limit + 1 }}-{{ Math.min(page * limit, total) }} của {{ total }}
@@ -398,7 +362,6 @@ const columns = ref<Record<string, unknown>[]>([
         </div>
       </div>
     </template>
-
     <!-- Add/Edit Drawer -->
     <USlideover v-model:open="showDrawer" :title="editingId ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'">
       <template #body>
@@ -456,7 +419,6 @@ const columns = ref<Record<string, unknown>[]>([
         </div>
       </template>
     </USlideover>
-
     <BaseConfirmDialog
       :open="!!deleteTarget"
       @update:open="!$event && (deleteTarget = null)"

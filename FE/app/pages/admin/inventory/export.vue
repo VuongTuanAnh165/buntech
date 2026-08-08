@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { mockInventoryItems } from '~/utils/mockData'
-
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Xuất kho - BunTech Admin' })
-
-const { formatNumber } = useFormat()
 const toast = useToast()
-
 // ─── State ────────────────────────────────────────────────
 const selectedItemId = ref('')
 const quantity = ref<number | undefined>()
 const note = ref('')
 const submitting = ref(false)
-
 // ─── Computed ─────────────────────────────────────────────
 const inventoryOptions = computed(() =>
   mockInventoryItems.map(item => ({
@@ -20,15 +15,12 @@ const inventoryOptions = computed(() =>
     value: item.id,
   }))
 )
-
 const selectedItem = computed(() =>
   mockInventoryItems.find(i => i.id === selectedItemId.value)
 )
-
 const exceedsStock = computed(() =>
   selectedItem.value && quantity.value ? quantity.value > selectedItem.value.quantity : false
 )
-
 // ─── Handlers ─────────────────────────────────────────────
 async function handleSubmit() {
   if (!selectedItemId.value || !quantity.value) {
@@ -52,7 +44,6 @@ async function handleSubmit() {
   note.value = ''
 }
 </script>
-
 <template>
   <div>
     <BasePageHeader
@@ -70,7 +61,6 @@ async function handleSubmit() {
         </UButton>
       </template>
     </BasePageHeader>
-
     <div class="max-w-2xl animate-fade-in-up">
       <div class="card p-6 sm:p-8">
         <div class="flex items-center gap-3 mb-6">
@@ -82,7 +72,6 @@ async function handleSubmit() {
             <p class="text-sm text-slate-500 dark:text-zinc-400">Ghi nhận xuất nguyên liệu sản xuất</p>
           </div>
         </div>
-
         <div class="space-y-5">
           <UFormField label="Nguyên liệu" required>
             <USelectMenu
@@ -94,7 +83,6 @@ async function handleSubmit() {
               class="w-full"
             />
           </UFormField>
-
           <Transition name="fade">
             <div v-if="selectedItem" class="p-4 rounded-xl bg-primary-50 dark:bg-primary-900/10 border border-primary-200 dark:border-primary-800/30">
               <div class="flex items-center justify-between">
@@ -105,15 +93,12 @@ async function handleSubmit() {
               </div>
             </div>
           </Transition>
-
           <UFormField label="Số lượng xuất" required :error="exceedsStock ? 'Vượt quá tồn kho' : undefined">
             <UInput v-model="quantity" type="number" placeholder="Nhập số lượng..." icon="i-lucide-package-minus" />
           </UFormField>
-
           <UFormField label="Ghi chú">
             <UTextarea v-model="note" placeholder="VD: Xuất sản xuất theo đơn hàng..." :rows="3" />
           </UFormField>
-
           <div class="flex items-center gap-3 pt-2">
             <UButton
               color="primary"

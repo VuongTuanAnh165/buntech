@@ -2,36 +2,27 @@
 import { OrderStatus } from '~/utils/enums'
 import { mockOrders, mockTopBuyers, mockProducts, mockDashboardKPI, mockRevenueData } from '~/utils/mockData'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_ICONS, ORDER_STATUS_LABELS } from '~/utils/orderStatus'
-
-const { formatVND, formatDate } = useFormat()
 useSeoMeta({ title: 'Dashboard - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
-
 const loading = ref(true)
 const error = ref(false)
-
 const kpi = reactive({
   revenueToday: 0,
   ordersToday: 0,
   customersTotal: 0,
   productsTotal: 0,
 })
-
 const revenueData = ref<{ day: string; revenue: number }[]>([])
 const topBuyers = ref(mockTopBuyers)
 const recentOrders = ref<Record<string, unknown>[]>([])
 const topProducts = ref<{ name: string; value: number }[]>([])
 const orderStatusData = ref<{ name: string; value: number }[]>([])
-
-
-
 const kpiStats = computed(() => [
   { title: 'Doanh thu hôm nay', value: formatVND(kpi.revenueToday), icon: 'i-lucide-wallet', color: 'primary' as const, trend: { value: 12, isPositive: true } },
   { title: 'Đơn hàng hôm nay', value: kpi.ordersToday, icon: 'i-lucide-shopping-cart', color: 'info' as const, trend: { value: 8, isPositive: true } },
   { title: 'Tổng khách hàng', value: kpi.customersTotal, icon: 'i-lucide-users', color: 'success' as const, trend: { value: 5, isPositive: true } },
   { title: 'Tổng sản phẩm', value: kpi.productsTotal, icon: 'i-lucide-package', color: 'warning' as const, trend: { value: 2, isPositive: true } },
 ])
-
 const mockStatusData = [
   { name: 'Chờ xử lý', value: 5 },
   { name: 'Đang chuẩn bị', value: 3 },
@@ -39,7 +30,6 @@ const mockStatusData = [
   { name: 'Đã giao', value: 32 },
   { name: 'Đã hủy', value: 2 },
 ]
-
 const mockTopProducts = [
   { name: 'Bún tươi sợi nhỏ', value: 8500000 },
   { name: 'Bún tươi sợi lớn', value: 6200000 },
@@ -48,7 +38,6 @@ const mockTopProducts = [
   { name: 'Hủ tiếu tươi', value: 2900000 },
   { name: 'Miến dong lớn', value: 2100000 },
 ]
-
 async function loadData() {
   loading.value = true
   error.value = false
@@ -58,13 +47,11 @@ async function loadData() {
     kpi.ordersToday = mockDashboardKPI.ordersToday
     kpi.customersTotal = mockDashboardKPI.newCustomers
     kpi.productsTotal = mockProducts.length
-
     revenueData.value = mockRevenueData.map((r, i) => ({
       day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()],
       revenue: r.revenue,
     }))
     recentOrders.value = mockOrders.slice(0, 6)
-
     const productTotals: Record<string, number> = {}
     for (const order of mockOrders) {
       for (const item of (order.order_items || [])) {
@@ -75,7 +62,6 @@ async function loadData() {
       .sort(([, a], [, b]) => b - a)
       .slice(0, 6)
       .map(([name, value]) => ({ name, value }))
-
     const statusCounts: Record<string, number> = {}
     for (const order of mockOrders) {
       statusCounts[order.status] = (statusCounts[order.status] || 0) + 1
@@ -90,9 +76,7 @@ async function loadData() {
     loading.value = false
   }
 }
-
 onMounted(loadData)
-
 const displayRevenue = computed(() => revenueData.value.length ? revenueData.value : mockRevenueData.map((r, i) => ({
   day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()],
   revenue: r.revenue,
@@ -101,21 +85,17 @@ const displayStatusData = computed(() => orderStatusData.value.length ? orderSta
 const displayTopProducts = computed(() => topProducts.value.length ? topProducts.value : mockTopProducts)
 const displayRecentOrders = computed(() => recentOrders.value.length ? recentOrders.value : mockOrders.slice(0, 6))
 </script>
-
 <template>
   <div>
     <BasePageHeader title="Tổng quan" description="Hoạt động kinh doanh hôm nay" />
-
     <template v-if="error">
       <BaseEmptyState title="Lỗi tải dữ liệu" description="Đã có lỗi xảy ra, vui lòng thử lại." />
     </template>
-
     <template v-else>
       <!-- KPI Cards -->
       <div class="mb-6">
         <BaseStatsGrid :stats="kpiStats" :loading="loading" />
       </div>
-
       <!-- Revenue Area Chart + Order Status Pie -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <UCard class="lg:col-span-2 animate-fade-in-up" style="animation-delay: 160ms">
@@ -139,7 +119,6 @@ const displayRecentOrders = computed(() => recentOrders.value.length ? recentOrd
             </div>
           </div>
         </UCard>
-
         <UCard class="animate-fade-in-up" style="animation-delay: 200ms">
           <template #header>
             <h2 class="text-sm font-semibold text-surface-foreground tracking-tight">Phân bố trạng thái đơn</h2>
@@ -153,7 +132,6 @@ const displayRecentOrders = computed(() => recentOrders.value.length ? recentOrd
           </div>
         </UCard>
       </div>
-
       <!-- Top Products Bar Chart + Top Buyers -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <UCard class="lg:col-span-2 animate-fade-in-up" style="animation-delay: 240ms">
@@ -168,7 +146,6 @@ const displayRecentOrders = computed(() => recentOrders.value.length ? recentOrd
             </div>
           </div>
         </UCard>
-
         <UCard class="animate-fade-in-up" style="animation-delay: 280ms">
           <template #header>
             <div class="flex items-center justify-between">
@@ -209,7 +186,6 @@ const displayRecentOrders = computed(() => recentOrders.value.length ? recentOrd
           </template>
         </UCard>
       </div>
-
       <!-- Recent Orders -->
       <UCard class="animate-fade-in-up" style="animation-delay: 320ms">
         <template #header>

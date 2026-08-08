@@ -1,19 +1,13 @@
 <script setup lang="ts">
 import { Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
-
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Phương tiện - BunTech Driver' })
-
 const toast = useToast()
-const { formatNumber, formatDate } = useFormat()
-
 const loading = ref(true)
-
 const currentDriver = computed(() =>
   mockProfiles.find(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) || mockProfiles[2]
 )
-
 // Vehicle stats from orders
 const vehicleStats = computed(() => {
   const driverId = currentDriver.value?.id
@@ -26,7 +20,6 @@ const vehicleStats = computed(() => {
   }, 0)
   return { trips, distance, fuelEfficiency: 42.5, daysActive: 127 }
 })
-
 const maintenanceHistory = ref([
   { id: 'm1', date: '2024-07-10', type: 'Bảo dưỡng định kỳ', description: 'Thay dầu máy, lọc gió, kiểm tra phanh. Tất cả hoạt động tốt.', cost: 450000, mileage: 28000, status: 'completed' as const },
   { id: 'm2', date: '2024-06-01', type: 'Thay lốp trước', description: 'Thay lốp trước do mòn vằn. Lốp mới Mitas MC-28.', cost: 680000, mileage: 26500, status: 'completed' as const },
@@ -34,11 +27,9 @@ const maintenanceHistory = ref([
   { id: 'm4', date: '2024-02-20', type: 'Sửa chữa phanh', description: 'Thay má phanh sau và độ mâm phanh. Phanh hoạt động nhạy hơn.', cost: 380000, mileage: 22100, status: 'completed' as const },
   { id: 'm5', date: '2024-08-15', type: 'Bảo dưỡng định kỳ sắp tới', description: 'Kiểm tra tổng quát, thay dầu máy và lọc gió.', cost: 0, mileage: 30000, status: 'scheduled' as const },
 ])
-
 const nextMaintenance = '2024-08-15'
 const registrationExpiry = '2025-03-20'
 const insuranceExpiry = '2025-01-15'
-
 const daysUntilNextMaintenance = computed(() =>
   Math.max(0, Math.ceil((new Date(nextMaintenance).getTime() - Date.now()) / 86400000))
 )
@@ -54,17 +45,14 @@ const insuranceStatus = computed(() => {
   if (days < 30) return { label: `Còn ${days} ngày`, color: 'warning' as const }
   return { label: `Còn ${days} ngày`, color: 'success' as const }
 })
-
 function reportIssue() {
   toast.add({ title: 'Đã gửi báo cáo hỏng hóc. Quản lý sẽ liên hệ bạn sớm.', color: 'success' })
 }
 function viewSchedule() {
   toast.add({ title: 'Mở lịch bảo dưỡng...', color: 'info' })
 }
-
 onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
 </script>
-
 <template>
   <div class="p-4 pb-6">
     <!-- Header -->
@@ -72,14 +60,12 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
       <h1 class="text-xl font-bold text-neutral-900 dark:text-white tracking-tight">Phương tiện</h1>
       <p class="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">Thông tin xe giao hàng của bạn</p>
     </div>
-
     <!-- Loading -->
     <template v-if="loading">
       <div class="skeleton h-56 w-full rounded-2xl mb-4" />
       <div class="skeleton h-32 w-full rounded-xl mb-4" />
       <div class="skeleton h-40 w-full rounded-xl" />
     </template>
-
     <template v-else>
       <!-- Vehicle hero card -->
       <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-primary-950 rounded-2xl p-5 mb-4 text-white relative overflow-hidden">
@@ -108,7 +94,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
           </div>
         </div>
       </div>
-
       <!-- Info grid -->
       <h2 class="text-sm font-semibold text-neutral-900 dark:text-white mb-3 px-1">Thông số kỹ thuật</h2>
       <div class="grid grid-cols-2 gap-3 mb-4">
@@ -141,7 +126,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
           <p class="text-sm font-bold text-neutral-900 dark:text-white">{{ formatDate('2024-07-10') }}</p>
         </div>
       </div>
-
       <!-- Maintenance schedule banner -->
       <div
         :class="['card p-4 mb-4 border-l-4', daysUntilNextMaintenance <= 7 ? 'border-l-warning-500 bg-warning-50/50 dark:bg-warning-900/10' : 'border-l-primary-500']"
@@ -160,7 +144,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
           <UIcon name="i-lucide-chevron-right" class="w-5 h-5 text-slate-300 dark:text-zinc-600" />
         </div>
       </div>
-
       <!-- Maintenance history timeline -->
       <div class="card p-5 mb-4">
         <div class="flex items-center justify-between mb-4">
@@ -196,7 +179,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
           </div>
         </div>
       </div>
-
       <!-- Vehicle stats -->
       <div class="card p-5 mb-4">
         <h2 class="font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
@@ -222,7 +204,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
           </div>
         </div>
       </div>
-
       <!-- Documents -->
       <div class="card p-5 mb-4">
         <h2 class="font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
@@ -252,7 +233,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
           </div>
         </div>
       </div>
-
       <!-- Action buttons -->
       <div class="grid grid-cols-2 gap-3 pb-6">
         <UButton variant="outline" size="lg" block @click="viewSchedule">

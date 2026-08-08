@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { MailCheck, ArrowLeft, Mail } from 'lucide-vue-next'
 const { t } = useI18n()
-const toast = useAppToast()
+const toast = useToast()
 
 useSeoMeta({ title: `${t('auth.forgotPassword')} - BunTech` })
 definePageMeta({ layout: 'auth' })
@@ -26,9 +26,9 @@ const handleSubmit = async () => {
     // TODO: Connect to Supabase auth.resetPasswordForEmail
     await new Promise(resolve => setTimeout(resolve, 1200))
     sent.value = true
-    toast.success(t('auth.resetLinkSent'))
+    toast.add({ title: 'Thành công', description: '', color: '' })
   } catch {
-    toast.error(t('errors.unexpected'))
+    toast.add({ title: 'Thất bại', description: '', color: '' })
   } finally {
     loading.value = false
   }

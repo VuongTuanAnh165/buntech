@@ -6,8 +6,10 @@ const userMenuOpen = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
 const showScrollTop = ref(false)
 
-const { colorMode, toggleDark, initDark } = useAppColorMode()
-onMounted(initDark)
+const colorMode = useColorMode()
+const toggleDark = () => {
+  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
+}
 
 const onScroll = () => {
   showScrollTop.value = window.scrollY > 400
@@ -74,10 +76,10 @@ onUnmounted(() => {
           <div class="flex items-center gap-1.5">
             <UButton variant="ghost" color="neutral"
               class="p-2.5 text-surface-foreground hover:bg-surface-hover rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-              :aria-label="colorMode === 'dark' ? 'Bật chế độ sáng' : 'Bật chế độ tối'"
+              :aria-label="colorMode.value === 'dark' ? 'Bật chế độ sáng' : 'Bật chế độ tối'"
               @click="toggleDark"
             >
-              <Sun v-if="colorMode === 'dark'" class="w-5 h-5" aria-hidden="true" />
+              <Sun v-if="colorMode.value === 'dark'" class="w-5 h-5" aria-hidden="true" />
               <Moon v-else class="w-5 h-5" aria-hidden="true" />
             </UButton>
             <template v-if="authStore.isAuthenticated">

@@ -3,18 +3,13 @@ import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import type { Order, Profile } from '~/utils/types'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '~/utils/orderStatus'
-
 const toast = useToast()
-const { formatVND, formatDate } = useFormat()
-
 useSeoMeta({ title: 'Đơn hàng - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
-
 // State
 const allOrders = ref<Order[]>([...mockOrders])
 const drivers = ref<Profile[]>(mockProfiles.filter(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE))
 const loading = ref(true)
-
 // Filters
 const search = ref('')
 const statusFilter = ref<'ALL' | OrderStatus>('ALL')
@@ -25,17 +20,14 @@ const sortDirection = ref<'asc' | 'desc'>('desc')
 const page = ref(1)
 const limit = ref(10)
 const showFilters = ref(false)
-
 const selectedOrders = ref<Set<string>>(new Set())
 const showBatchModal = ref(false)
 const batchDriverId = ref('')
 const batchAssigning = ref(false)
 const exporting = ref(false)
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
-
 const kpiStats = computed(() => {
   const list = allOrders.value
   const pending = list.filter(o => o.status === OrderStatus.PENDING).length
@@ -48,11 +40,9 @@ const kpiStats = computed(() => {
     { title: 'Đã giao', value: delivered, icon: 'i-lucide-package-check', color: 'success' as const, trend: { value: 12, isPositive: true } },
   ]
 })
-
 const totalRevenue = computed(() =>
   allOrders.value.filter(o => o.status === OrderStatus.DELIVERED).reduce((s, o) => s + o.total, 0)
 )
-
 const statusPills = computed(() => {
   const list = allOrders.value
   return [
@@ -64,7 +54,6 @@ const statusPills = computed(() => {
     { accessorKey: OrderStatus.CANCELLED, header: 'Đã hủy', count: list.filter(o => o.status === OrderStatus.CANCELLED).length },
   ]
 })
-
 const filteredRows = computed(() => {
   let rows = allOrders.value
   if (search.value) {
@@ -85,7 +74,6 @@ const filteredRows = computed(() => {
     const e = new Date(endDate.value + 'T23:59:59').toISOString()
     rows = rows.filter(o => o.created_at <= e)
   }
-
   return [...rows].sort((a, b) => {
     let av = (a as Record<string, unknown>)[sortBy.value]
     let bv = (b as Record<string, unknown>)[sortBy.value]
@@ -97,21 +85,17 @@ const filteredRows = computed(() => {
       : String(bv).localeCompare(String(av))
   })
 })
-
 const total = computed(() => filteredRows.value.length)
 const pagedRows = computed(() => {
   const start = (page.value - 1) * limit.value
   return filteredRows.value.slice(start, start + limit.value)
 })
-
 watch([search, statusFilter, startDate, endDate], () => { page.value = 1 })
-
 function toggleSelectOrder(id: string, checked: boolean) {
   if (checked) selectedOrders.value.add(id)
   else selectedOrders.value.delete(id)
   selectedOrders.value = new Set(selectedOrders.value)
 }
-
 function toggleAll(v: boolean | 'indeterminate') {
   if (v === true) {
     filteredRows.value.forEach(o => selectedOrders.value.add(o.id))
@@ -119,12 +103,10 @@ function toggleAll(v: boolean | 'indeterminate') {
     selectedOrders.value.clear()
   }
 }
-
 function clearSelection() {
   selectedOrders.value.clear()
   selectedOrders.value = new Set()
 }
-
 function batchAssign() {
   if (!batchDriverId.value || selectedOrders.value.size === 0) return
   batchAssigning.value = true
@@ -143,7 +125,6 @@ function batchAssign() {
     batchAssigning.value = false
   }, 500)
 }
-
 function exportCSV() {
   exporting.value = true
   setTimeout(() => {
@@ -151,14 +132,12 @@ function exportCSV() {
     exporting.value = false
   }, 300)
 }
-
 function clearFilters() {
   statusFilter.value = 'ALL'
   startDate.value = ''
   endDate.value = ''
   search.value = ''
 }
-
 const activeFilterCount = computed(() => {
   let c = 0
   if (statusFilter.value !== 'ALL') c++
@@ -166,11 +145,6 @@ const activeFilterCount = computed(() => {
   if (search.value) c++
   return c
 })
-
-
-
-
-
 const columns = [
   { accessorKey: 'select', header: '' },
   { accessorKey: 'id', header: 'Mã đơn' },
@@ -182,7 +156,6 @@ const columns = [
   { accessorKey: 'actions', header: 'Thao tác' }
 ]
 </script>
-
 <template>
   <div>
     <BasePageHeader title="Đơn hàng" description="Quản lý đơn hàng, điều phối tài xế và doanh thu">
@@ -208,7 +181,6 @@ const columns = [
         </UButton>
       </template>
     </BasePageHeader>
-
     <template v-if="loading">
       <BasePageLoading />
     </template>
@@ -218,7 +190,6 @@ const columns = [
       <div class="mb-6">
         <BaseStatsGrid :stats="kpiStats" :loading="loading" />
       </div>
-
       <!-- Revenue banner -->
       <div class="card p-4 mb-4 stagger-item flex items-center justify-between" style="animation-delay: 180ms">
         <div class="flex items-center gap-3">
@@ -240,7 +211,6 @@ const columns = [
           </span>
         </div>
       </div>
-
       <!-- Status pills -->
       <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 stagger-item" style="animation-delay: 220ms">
         <UButton
@@ -256,7 +226,6 @@ const columns = [
           <UBadge :color="statusFilter === pill.key ? 'neutral' : 'neutral'" variant="subtle" size="sm" class="ml-1">{{ pill.count }}</UBadge>
         </UButton>
       </div>
-
       <!-- Desktop filter bar -->
       <div class="hidden lg:flex flex-wrap items-center gap-3 mb-4 animate-fade-in-up" style="animation-delay: 240ms">
         <div class="flex-1 min-w-[200px] max-w-xs">
@@ -266,12 +235,10 @@ const columns = [
         <UInput v-model="endDate" type="date" />
         <UButton v-if="activeFilterCount > 0" variant="ghost" color="error" size="sm" icon="i-lucide-x" @click="clearFilters">Xóa lọc</UButton>
       </div>
-
       <!-- Mobile search -->
       <div class="lg:hidden mb-4">
         <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm đơn hàng..." class="w-full" />
       </div>
-
       <!-- Mobile filter slideover -->
       <USlideover v-model:open="showFilters" side="bottom" title="Bộ lọc">
         <template #body>
@@ -305,9 +272,6 @@ const columns = [
           </div>
         </template>
       </USlideover>
-
-
-
       <!-- Batch selection bar -->
       <Transition name="fade">
         <div v-if="selectedOrders.size > 0" class="card p-3 mb-3 flex items-center justify-between bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800">
@@ -323,7 +287,6 @@ const columns = [
           </div>
         </div>
       </Transition>
-
       <!-- Table -->
       <div class="animate-fade-in-up bg-surface ring-1 ring-surface-border rounded-xl overflow-hidden" style="animation-delay: 280ms">
         <UTable :columns="columns" :data="pagedRows">
@@ -335,11 +298,9 @@ const columns = [
               @click.stop
             />
           </template>
-
           <template #id-cell="{ row }">
             <span class="font-mono text-xs text-slate-500 dark:text-zinc-400">{{ row.original.id.slice(0, 8) }}</span>
           </template>
-
           <template #user-cell="{ row }">
             <div class="flex items-center gap-2 min-w-0">
               <UAvatar
@@ -355,27 +316,22 @@ const columns = [
               </div>
             </div>
           </template>
-
           <template #status-cell="{ row }">
             <UBadge :color="ORDER_STATUS_COLORS[row.original.status]" variant="subtle">
               {{ ORDER_STATUS_LABELS[row.original.status] }}
             </UBadge>
           </template>
-
           <template #total-cell="{ row }">
             <span class="font-semibold text-surface-foreground tabular-nums">{{ formatVND(row.original.total) }}</span>
           </template>
-
           <template #amount_collected-cell="{ row }">
             <span :class="['tabular-nums', row.original.amount_collected > 0 ? 'text-success-600 dark:text-success-400 font-medium' : 'text-slate-400 dark:text-zinc-500']">
               {{ row.original.amount_collected > 0 ? formatVND(row.original.amount_collected) : '—' }}
             </span>
           </template>
-
           <template #created_at-cell="{ row }">
             <span class="text-slate-500 dark:text-zinc-400 text-sm tabular-nums">{{ formatDate(row.original.created_at) }}</span>
           </template>
-
           <template #actions-cell="{ row }">
             <UButton color="neutral" variant="ghost" size="sm" :to="`/admin/orders/${row.original.id}`">
               <div class="i-lucide-eye w-4 h-4 mr-1" /> Xem
@@ -402,7 +358,6 @@ const columns = [
         </div>
       </div>
     </template>
-
     <!-- Batch Assign Modal -->
     <UModal v-model:open="showBatchModal" title="Điều phối đơn hàng">
       <template #body>

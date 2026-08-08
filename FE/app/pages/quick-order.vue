@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { Plus, Trash2, Minus, CheckCircle2, Package, Search, ShoppingCart } from 'lucide-vue-next'
-
-const toast = useAppToast()
-const { formatVND } = useFormat()
-
+const toast = useToast()
 useSeoMeta({ title: 'Đặt hàng nhanh - BunTech' })
 definePageMeta({ layout: 'default' })
-
 const loading = ref(true)
 const search = ref('')
 const selectedCategory = ref('')
@@ -17,7 +13,6 @@ const errors = ref<Record<string, string>>({})
 const submitting = ref(false)
 const success = ref(false)
 const successOrderCode = ref('')
-
 const availableProducts = computed(() => {
   let result = mockProducts.filter(p => p.status === 'ACTIVE')
   if (search.value) {
@@ -29,20 +24,18 @@ const availableProducts = computed(() => {
   }
   return result
 })
-
 const total = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.price, 0))
-
 const addProduct = (productId: string) => {
   const product = mockProducts.find(p => p.id === productId)
   if (!product) return
   const existing = orderItems.value.find(i => i.product_id === productId)
   if (existing) {
     if (existing.quantity >= existing.stock) {
-      toast.warning('Đã đạt giới hạn tồn kho')
+      toast.add({ title: 'Cảnh báo', description: '', color: 'warning' })
       return
     }
     existing.quantity++
-    toast.success(`Đã thêm ${product.name}`)
+    toast.add({ title: 'Thành công', description: '', color: 'success' })
     return
   }
   orderItems.value.push({
@@ -53,35 +46,30 @@ const addProduct = (productId: string) => {
     stock: Number(product.stock),
     unit: product.unit,
   })
-  toast.success(`Đã thêm ${product.name}`)
+  toast.add({ title: 'Thành công', description: '', color: 'success' })
 }
-
 const incrementQty = (index: number) => {
   const item = orderItems.value[index]!
   if (item.quantity >= item.stock) {
-    toast.warning('Đã đạt giới hạn tồn kho')
+    toast.add({ title: 'Cảnh báo', description: '', color: 'warning' })
     return
   }
   item.quantity++
 }
-
 const decrementQty = (index: number) => {
   if (orderItems.value[index]!.quantity > 1) {
     orderItems.value[index]!.quantity--
   }
 }
-
 const removeItem = (index: number) => {
   const item = orderItems.value[index]!
   orderItems.value.splice(index, 1)
-  toast.info(`Đã xóa ${item.product_name}`)
+  toast.add({ title: 'Thông báo', description: '', color: 'info' })
 }
-
 const clearCart = () => {
   orderItems.value = []
-  toast.info('Đã xóa giỏ hàng')
+  toast.add({ title: 'Thông báo', description: '', color: 'info' })
 }
-
 const submitOrder = () => {
   errors.value = {}
   if (website_url.value) return
@@ -90,20 +78,18 @@ const submitOrder = () => {
   else if (!/^(0[0-9]{9,10})$/.test(form.value.phone)) errors.value.phone = 'Số điện thoại không hợp lệ'
   if (!form.value.address) errors.value.address = 'Vui lòng nhập địa chỉ'
   if (orderItems.value.length === 0) {
-    toast.error('Vui lòng chọn ít nhất một sản phẩm')
+    toast.add({ title: 'Thất bại', description: '', color: 'error' })
     return
   }
   if (Object.keys(errors.value).length) return
-
   submitting.value = true
   setTimeout(() => {
     successOrderCode.value = 'BT' + Math.random().toString(36).substring(2, 8).toUpperCase()
     submitting.value = false
     success.value = true
-    toast.success('Đặt hàng thành công!')
+    toast.add({ title: 'Thành công', description: '', color: 'success' })
   }, 1200)
 }
-
 const resetForm = () => {
   success.value = false
   orderItems.value = []
@@ -111,12 +97,10 @@ const resetForm = () => {
   search.value = ''
   selectedCategory.value = ''
 }
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 400)
 })
 </script>
-
 <template>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <!-- Header -->
@@ -129,7 +113,6 @@ onMounted(() => {
     </nav>
     <h1 class="text-2xl sm:text-3xl font-bold text-surface-foreground tracking-tight mb-2">Đặt hàng nhanh</h1>
     <p class="text-sm text-gray-500 dark:text-zinc-400 mb-8">Chọn sản phẩm, điền thông tin — giao hàng tận nơi trong 2 giờ</p>
-
     <!-- Success state -->
     <template v-if="success">
       <div class="card p-8 sm:p-12 text-center max-w-lg mx-auto animate-fade-in-up">
@@ -164,7 +147,6 @@ onMounted(() => {
         </div>
       </div>
     </template>
-
     <!-- Order form -->
     <template v-else>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -206,7 +188,6 @@ onMounted(() => {
                 {{ cat.name }}
               </UButton>
             </div>
-
             <!-- Product grid -->
             <template v-if="loading">
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -250,7 +231,6 @@ onMounted(() => {
             <div v-else class="text-center py-8 text-sm text-gray-500 dark:text-zinc-400">Không tìm thấy sản phẩm</div>
           </div>
         </div>
-
         <!-- Cart + Form -->
         <div class="space-y-4">
           <!-- Cart -->
@@ -269,7 +249,6 @@ onMounted(() => {
                 Xóa tất cả
               </UButton>
             </div>
-
             <template v-if="orderItems.length">
               <div class="space-y-2 max-h-64 overflow-y-auto pr-1 mb-4">
                 <div
@@ -322,7 +301,6 @@ onMounted(() => {
               <p class="text-sm text-gray-500 dark:text-zinc-400">Chưa có sản phẩm nào</p>
               <p class="text-xs text-gray-400 dark:text-zinc-500 mt-1">Chọn sản phẩm bên cạnh để thêm vào giỏ</p>
             </div>
-
             <!-- Customer form -->
             <form v-if="orderItems.length" class="space-y-3 mt-4 pt-4 border-t border-surface-border" @submit.prevent="submitOrder">
               <UFormField label="Họ và tên" :error="errors.name">
@@ -340,13 +318,11 @@ onMounted(() => {
               <UFormField label="Ghi chú (tùy chọn)">
                 <UInput v-model="form.note" placeholder="Giao trước 9h sáng" class="w-full" />
               </UFormField>
-
               <!-- Honeypot -->
               <div style="opacity: 0; position: absolute; z-index: -1; left: -9999px;" aria-hidden="true">
                 <label>Website URL</label>
                 <UInput v-model="website_url" type="text" name="website_url" tabindex="-1" autocomplete="off" />
               </div>
-
               <UButton type="submit" :loading="submitting" size="lg" class="w-full justify-center">
                 <ShoppingCart class="w-5 h-5 mr-2" aria-hidden="true" />
                 Đặt hàng — {{ formatVND(total) }}

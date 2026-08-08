@@ -2,37 +2,29 @@
 import { Role, UserStatus } from '~/utils/mockData'
 import type { Profile } from '~/utils/mockData'
 import { mockProfiles } from '~/utils/mockData'
-
 useSeoMeta({ title: 'Khách hàng - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
-
 const toast = useToast()
-const { formatVND, formatDate } = useFormat()
-
 // State
 const allProfiles = ref<Profile[]>(mockProfiles.filter(p => p.role !== Role.ADMIN))
 const loading = ref(true)
 const error = ref(false)
-
 // Filters
 const search = ref('')
 const roleFilter = ref<string>('ALL')
 const statusFilter = ref<string>('ALL')
 const page = ref(1)
 const limit = ref(10)
-
 const roleOptions = [
   { label: 'Tất cả vai trò', value: 'ALL' },
   { label: 'Khách hàng', value: Role.CUSTOMER },
   { label: 'Tài xế', value: Role.DRIVER }
 ]
-
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: 'ALL' },
   { label: 'Đang hoạt động', value: UserStatus.ACTIVE },
   { label: 'Tạm khóa', value: UserStatus.INACTIVE }
 ]
-
 // Debounce for search
 const debouncedSearch = ref('')
 const searchTimeoutId = ref<ReturnType<typeof setTimeout>>()
@@ -42,7 +34,6 @@ watch(search, (val) => {
     debouncedSearch.value = val
   }, 300)
 })
-
 // KPI
 const kpiCards = computed(() => {
   const list = allProfiles.value
@@ -55,7 +46,6 @@ const kpiCards = computed(() => {
     { title: 'Tạm khóa', value: inactive, icon: 'i-lucide-user-x', color: 'error', trend: { value: 2, isPositive: false } }
   ]
 })
-
 // Data Table
 const filteredRows = computed(() => {
   let rows = allProfiles.value
@@ -67,15 +57,12 @@ const filteredRows = computed(() => {
   if (statusFilter.value !== 'ALL') rows = rows.filter(p => p.status === statusFilter.value)
   return rows.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 })
-
 const total = computed(() => filteredRows.value.length)
 const pagedRows = computed(() => {
   const start = (page.value - 1) * limit.value
   return filteredRows.value.slice(start, start + limit.value)
 })
-
 watch([debouncedSearch, roleFilter, statusFilter], () => { page.value = 1 })
-
 // Columns
 const columns = [
   { accessorKey: 'full_name', header: 'Khách hàng' },
@@ -86,7 +73,6 @@ const columns = [
   { accessorKey: 'created_at', header: 'Ngày tạo' },
   { accessorKey: 'actions', header: 'Thao tác' }
 ]
-
 // CRUD
 const showDrawer = ref(false)
 const editingId = ref<string | null>(null)
@@ -101,21 +87,17 @@ const form = ref({
 })
 const formErrors = ref<Record<string, string>>({})
 const saving = ref(false)
-
 const deleteTarget = ref<Profile | null>(null)
 const deleting = ref(false)
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
-
 function openAdd() {
   editingId.value = null
   form.value = { full_name: '', phone: '', email: '', password: '', role: Role.CUSTOMER, debt_limit: 0, status: UserStatus.ACTIVE }
   formErrors.value = {}
   showDrawer.value = true
 }
-
 function openEdit(row: Profile) {
   editingId.value = row.id
   form.value = {
@@ -130,7 +112,6 @@ function openEdit(row: Profile) {
   formErrors.value = {}
   showDrawer.value = true
 }
-
 function validateForm() {
   formErrors.value = {}
   if (!form.value.full_name.trim()) formErrors.value.full_name = 'Vui lòng nhập họ tên'
@@ -144,7 +125,6 @@ function validateForm() {
   }
   return Object.keys(formErrors.value).length === 0
 }
-
 function saveCustomer() {
   if (!validateForm()) return
   saving.value = true
@@ -183,7 +163,6 @@ function saveCustomer() {
     showDrawer.value = false
   }, 400)
 }
-
 function confirmDelete() {
   if (!deleteTarget.value) return
   deleting.value = true
@@ -195,12 +174,10 @@ function confirmDelete() {
     if (pagedRows.value.length === 0 && page.value > 1) page.value--
   }, 400)
 }
-
 const deleteConfirmMessage = computed(() =>
   deleteTarget.value ? `Bạn có chắc muốn xóa khách hàng "${deleteTarget.value.full_name}"? Hành động này không thể hoàn tác.` : ''
 )
 </script>
-
 <template>
   <div class="space-y-6">
     <BasePageHeader title="Khách hàng" subtitle="Quản lý thông tin khách hàng, tài xế và hạn mức nợ">
@@ -210,16 +187,13 @@ const deleteConfirmMessage = computed(() =>
         </UButton>
       </template>
     </BasePageHeader>
-
     <BaseEmptyState v-if="error" icon="i-lucide-alert-circle" title="Lỗi tải dữ liệu" description="Không thể tải danh sách khách hàng.">
       <template #action>
         <UButton color="primary" @click="loading = true; error = false; setTimeout(() => loading=false, 300)">Thử lại</UButton>
       </template>
     </BaseEmptyState>
-
     <template v-else>
       <BaseStatsGrid :stats="kpiCards" :loading="loading" />
-
       <UCard>
         <div class="flex flex-col sm:flex-row gap-4 mb-6">
           <BaseSearchInput
@@ -246,7 +220,6 @@ const deleteConfirmMessage = computed(() =>
             <template #label>{{ statusOptions.find(o => o.value === statusFilter)?.label }}</template>
           </USelectMenu>
         </div>
-
         <div class="animate-fade-in-up" style="animation-delay: 100ms">
           <BaseDataTable
             :columns="columns"
@@ -264,36 +237,30 @@ const deleteConfirmMessage = computed(() =>
                 </div>
               </div>
             </template>
-
             <template #phone-cell="{ row }">
               <span v-if="row.phone" class="flex items-center gap-1.5 text-surface-foreground tabular-nums">
                 <span class="i-lucide-phone w-3.5 h-3.5 text-slate-400" aria-hidden="true" /> {{ row.phone }}
               </span>
               <span v-else class="text-slate-400 dark:text-zinc-500">—</span>
             </template>
-
             <template #role-cell="{ row }">
               <UBadge :color="row.role === Role.DRIVER ? 'warning' : 'primary'" variant="soft">
                 {{ row.role === Role.DRIVER ? 'Tài xế' : 'Khách hàng' }}
               </UBadge>
             </template>
-
             <template #status-cell="{ row }">
               <BaseStatusBadge type="user" :status="row.status" />
             </template>
-
             <template #debt_limit-cell="{ row }">
               <span :class="['font-medium tabular-nums', Number(row.debt_limit) > 0 ? 'text-warning-600 dark:text-warning-400' : 'text-slate-400 dark:text-zinc-500']">
                 {{ Number(row.debt_limit) > 0 ? formatVND(Number(row.debt_limit)) : '—' }}
               </span>
             </template>
-
             <template #created_at-cell="{ row }">
               <span class="flex items-center gap-1.5 text-slate-500 dark:text-zinc-400">
                 <span class="i-lucide-calendar-days w-3.5 h-3.5" aria-hidden="true" /> {{ formatDate(row.created_at) }}
               </span>
             </template>
-
             <template #actions-cell="{ row }">
               <div class="flex items-center justify-end gap-1" @click.stop>
                 <UButton icon="i-lucide-eye" color="neutral" variant="ghost" aria-label="Xem chi tiết" @click.stop="navigateTo(`/admin/customers/${row.id}`)" />
@@ -301,7 +268,6 @@ const deleteConfirmMessage = computed(() =>
                 <UButton icon="i-lucide-trash-2" color="error" variant="ghost" aria-label="Xóa" @click.stop="deleteTarget = row" />
               </div>
             </template>
-
             <template #pagination>
               <div class="flex items-center justify-between mt-4 py-2 border-t border-surface-border">
                 <div class="flex items-center gap-3">
@@ -328,7 +294,6 @@ const deleteConfirmMessage = computed(() =>
         </div>
       </UCard>
     </template>
-
     <USlideover v-model:open="showDrawer" :title="editingId ? 'Chỉnh sửa khách hàng' : 'Thêm khách hàng mới'" description="Điền thông tin bên dưới để lưu.">
       <template #body>
         <div class="space-y-4">
@@ -376,7 +341,6 @@ const deleteConfirmMessage = computed(() =>
         </div>
       </template>
     </USlideover>
-
     <BaseConfirmDialog
       :open="!!deleteTarget"
       title="Xóa khách hàng"

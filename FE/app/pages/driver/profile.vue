@@ -1,20 +1,14 @@
 <script setup lang="ts">
 import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
-
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Hồ sơ tài xế - BunTech Driver' })
-
 const router = useRouter()
 const toast = useToast()
-const { formatVND, formatNumber, formatDate, formatTimeAgo } = useFormat()
-
 const loading = ref(true)
-
 const driver = computed(() =>
   mockProfiles.find(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) || mockProfiles[2]
 )
-
 const driverOrders = computed(() => {
   const id = driver.value?.id
   if (!id) return []
@@ -22,7 +16,6 @@ const driverOrders = computed(() => {
     .filter(o => o.driver_id === id)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 })
-
 const stats = computed(() => {
   const orders = driverOrders.value
   const delivered = orders.filter(o => o.status === OrderStatus.DELIVERED)
@@ -30,7 +23,6 @@ const stats = computed(() => {
   const successRate = orders.length ? Math.round((delivered.length / orders.length) * 100) : 0
   return { totalDeliveries: delivered.length, successRate, totalEarnings, rating: 4.8 }
 })
-
 // Weekly delivery chart
 const weeklyData = computed(() => {
   const days = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
@@ -44,7 +36,6 @@ const weeklyData = computed(() => {
 })
 const stableWeekly = ref<{ day: string; count: number; isToday: boolean }[]>([])
 const maxWeekly = computed(() => Math.max(...stableWeekly.value.map(d => d.count), 1))
-
 // Recent activity timeline
 const recentActivity = computed(() =>
   driverOrders.value.slice(0, 6).map(o => ({
@@ -57,7 +48,6 @@ const recentActivity = computed(() =>
     time: o.created_at,
   }))
 )
-
 function copyPhone() {
   if (driver.value?.phone) {
     navigator.clipboard?.writeText(driver.value.phone)
@@ -65,11 +55,9 @@ function copyPhone() {
       .catch(() => toast.add({ title: 'Không thể sao chép', color: 'error' }))
   }
 }
-
 function handleLogout() {
   navigateTo('/auth/login')
 }
-
 onMounted(() => {
   setTimeout(() => {
     stableWeekly.value = weeklyData.value
@@ -77,7 +65,6 @@ onMounted(() => {
   }, 500)
 })
 </script>
-
 <template>
   <div class="p-4">
     <!-- Header -->
@@ -85,7 +72,6 @@ onMounted(() => {
       <h1 class="text-xl font-bold text-neutral-900 dark:text-white tracking-tight">Hồ sơ tài xế</h1>
       <p class="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">Thông tin và thành tích của bạn</p>
     </div>
-
     <!-- Loading -->
     <template v-if="loading">
       <div class="skeleton h-44 w-full rounded-2xl mb-4" />
@@ -97,7 +83,6 @@ onMounted(() => {
       </div>
       <div class="skeleton h-40 w-full rounded-xl" />
     </template>
-
     <template v-else>
       <!-- Profile header card -->
       <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-primary-950 rounded-2xl p-5 mb-4 text-white relative overflow-hidden">
@@ -119,7 +104,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Stats row -->
       <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="card p-4 relative overflow-hidden">
@@ -163,7 +147,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Personal Information -->
       <div class="card p-5 mb-4">
         <h2 class="font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
@@ -210,7 +193,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Vehicle Assignment -->
       <div class="card card-hover p-5 mb-4 cursor-pointer" role="button" tabindex="0" @click="navigateTo('/driver/vehicle')" @keydown.enter="navigateTo('/driver/vehicle')">
         <div class="flex items-center justify-between mb-4">
@@ -231,7 +213,6 @@ onMounted(() => {
           <UBadge color="success" variant="subtle" size="xs">Hoạt động</UBadge>
         </div>
       </div>
-
       <!-- Performance card -->
       <div class="card p-5 mb-4">
         <h2 class="font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
@@ -274,7 +255,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Recent Activity timeline -->
       <div class="card p-5 mb-4">
         <div class="flex items-center justify-between mb-4">
@@ -320,7 +300,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Settings links -->
       <div class="card p-2 mb-4">
         <NuxtLink to="/driver/notifications" class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px]">

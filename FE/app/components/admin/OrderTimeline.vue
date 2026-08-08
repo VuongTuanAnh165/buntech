@@ -1,14 +1,10 @@
 <script setup lang="ts">
 import { OrderStatus } from '~/utils/mockData'
-
 interface Props {
   currentStatus: OrderStatus
   createdAt: string
 }
-
 const props = defineProps<Props>()
-const { formatDateTime } = useFormat()
-
 // Define the linear steps
 const timelineSteps = [
   { value: OrderStatus.PENDING, label: 'Chờ xử lý', icon: 'i-lucide-clock' },
@@ -16,21 +12,18 @@ const timelineSteps = [
   { value: OrderStatus.SHIPPING, label: 'Đang giao', icon: 'i-lucide-truck' },
   { value: OrderStatus.DELIVERED, label: 'Đã giao', icon: 'i-lucide-check-circle' }
 ]
-
 const getStepStatus = (stepValue: OrderStatus, index: number) => {
   if (props.currentStatus === OrderStatus.CANCELLED) {
     // If cancelled, steps up to the index where it might have been cancelled are shown as completed/cancelled
     // For simplicity, just mark the first step as cancelled or everything pending
     return index === 0 ? 'cancelled' : 'pending'
   }
-
   const currentIndex = timelineSteps.findIndex(s => s.value === props.currentStatus)
   
   if (index < currentIndex) return 'completed'
   if (index === currentIndex) return 'active'
   return 'pending'
 }
-
 // Generate mock dates for completed steps
 const getStepDate = (index: number) => {
   const status = getStepStatus(timelineSteps[index].value, index)
@@ -42,12 +35,10 @@ const getStepDate = (index: number) => {
   return formatDateTime(stepDate.toISOString())
 }
 </script>
-
 <template>
   <div class="relative py-4 pl-4 sm:pl-6">
     <!-- Vertical Line -->
     <div class="absolute left-[27px] sm:left-[35px] top-6 bottom-6 w-0.5 bg-surface-border"/>
-
     <div class="space-y-8">
       <!-- Special Cancelled Case handled inside normal loop if we want, but let's override logic -->
       <template v-if="props.currentStatus === OrderStatus.CANCELLED">

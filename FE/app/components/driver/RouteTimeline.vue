@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import type { Order } from '~/utils/types'
-
 const props = defineProps<{
   orders: Order[]
 }>()
-
-const { formatTime } = useFormat()
 </script>
-
 <template>
   <div class="relative pl-6 py-2">
     <!-- Vertical line -->

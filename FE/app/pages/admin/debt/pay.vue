@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { mockCustomers } from '~/utils/mockData'
-
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Thu nợ - BunTech Admin' })
-
-const { formatVND } = useFormat()
 const toast = useToast()
-
 // ─── State ────────────────────────────────────────────────
 const selectedCustomerId = ref('')
 const amount = ref<number | undefined>()
 const note = ref('')
 const submitting = ref(false)
-
 // ─── Computed ─────────────────────────────────────────────
 const debtCustomers = computed(() =>
   mockCustomers.filter(c => c.debt_limit > 0).map(c => ({
@@ -22,11 +17,9 @@ const debtCustomers = computed(() =>
     debt: c.debt_limit,
   }))
 )
-
 const selectedCustomer = computed(() =>
   debtCustomers.value.find(c => c.value === selectedCustomerId.value)
 )
-
 // ─── Handlers ─────────────────────────────────────────────
 async function handleSubmit() {
   if (!selectedCustomerId.value || !amount.value) {
@@ -42,7 +35,6 @@ async function handleSubmit() {
   note.value = ''
 }
 </script>
-
 <template>
   <div>
     <BasePageHeader
@@ -60,7 +52,6 @@ async function handleSubmit() {
         </UButton>
       </template>
     </BasePageHeader>
-
     <div class="max-w-2xl animate-fade-in-up">
       <div class="card p-6 sm:p-8">
         <div class="flex items-center gap-3 mb-6">
@@ -72,7 +63,6 @@ async function handleSubmit() {
             <p class="text-sm text-slate-500 dark:text-zinc-400">Chọn khách hàng và nhập số tiền trả nợ</p>
           </div>
         </div>
-
         <div class="space-y-5">
           <!-- Customer select -->
           <UFormField label="Khách hàng" required>
@@ -85,7 +75,6 @@ async function handleSubmit() {
               class="w-full"
             />
           </UFormField>
-
           <!-- Customer debt info -->
           <Transition name="fade">
             <div v-if="selectedCustomer" class="p-4 rounded-xl bg-error-50 dark:bg-error-900/10 border border-error-200 dark:border-error-800/30">
@@ -101,7 +90,6 @@ async function handleSubmit() {
               </div>
             </div>
           </Transition>
-
           <!-- Amount -->
           <UFormField label="Số tiền thanh toán" required>
             <UInput
@@ -115,12 +103,10 @@ async function handleSubmit() {
               <span v-if="amount" class="text-primary-600 dark:text-primary-400 font-medium">{{ formatVND(amount) }}</span>
             </template>
           </UFormField>
-
           <!-- Note -->
           <UFormField label="Ghi chú">
             <UTextarea v-model="note" placeholder="Ghi chú thanh toán (không bắt buộc)..." :rows="3" />
           </UFormField>
-
           <!-- Actions -->
           <div class="flex items-center gap-3 pt-2">
             <UButton

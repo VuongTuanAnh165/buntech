@@ -1,27 +1,20 @@
 <script setup lang="ts">
 import { NotificationType, Role, UserStatus } from '~/utils/enums'
 import { mockNotifications, mockProfiles } from '~/utils/mockData'
-
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Thông báo - BunTech Driver' })
-
 const toast = useToast()
-const { formatTimeAgo } = useFormat()
-
 type FilterTab = 'all' | 'unread' | 'read'
 const loading = ref(true)
 const filterTab = ref<FilterTab>('all')
-
 const currentDriver = computed(() =>
   mockProfiles.find(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) || mockProfiles[2]
 )
-
 const notifications = ref(
   mockNotifications
     .filter(n => n.user_id === currentDriver.value?.id || !n.user_id)
     .map(n => ({ ...n, read: n.is_read }))
 )
-
 const NOTIFICATION_ICONS: Record<string, { icon: string; bg: string; text: string }> = {
   [NotificationType.ORDER_ASSIGNED]: { icon: 'i-lucide-package', bg: 'bg-primary-50 dark:bg-primary-900/20', text: 'text-primary-600 dark:text-primary-400' },
   [NotificationType.ORDER_DELIVERED]: { icon: 'i-lucide-check-circle-2', bg: 'bg-success-50 dark:bg-success-900/20', text: 'text-success-600 dark:text-success-400' },
@@ -29,20 +22,16 @@ const NOTIFICATION_ICONS: Record<string, { icon: string; bg: string; text: strin
   [NotificationType.LOW_STOCK]: { icon: 'i-lucide-alert-triangle', bg: 'bg-warning-50 dark:bg-warning-900/20', text: 'text-warning-600 dark:text-warning-400' },
   [NotificationType.SYSTEM]: { icon: 'i-lucide-bell', bg: 'bg-info-50 dark:bg-info-900/20', text: 'text-info-600 dark:text-info-400' },
 }
-
 const filteredNotifications = computed(() => {
   if (filterTab.value === 'unread') return notifications.value.filter(n => !n.read)
   if (filterTab.value === 'read') return notifications.value.filter(n => n.read)
   return notifications.value
 })
-
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
-
 function markAsRead(id: string) {
   const n = notifications.value.find(x => x.id === id)
   if (n && !n.read) n.read = true
 }
-
 function markAllRead() {
   if (unreadCount.value === 0) {
     toast.add({ title: 'Không có thông báo chưa đọc', color: 'info' })
@@ -51,7 +40,6 @@ function markAllRead() {
   notifications.value.forEach(n => { n.read = true })
   toast.add({ title: `Đã đánh dấu ${unreadCount.value} thông báo là đã đọc`, color: 'success' })
 }
-
 function clearAllRead() {
   const readCount = notifications.value.filter(n => n.read).length
   if (readCount === 0) {
@@ -61,10 +49,8 @@ function clearAllRead() {
   notifications.value = notifications.value.filter(n => !n.read)
   toast.add({ title: `Đã xóa ${readCount} thông báo đã đọc`, color: 'success' })
 }
-
 onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
 </script>
-
 <template>
   <div class="p-4 pb-6">
     <!-- Header -->
@@ -91,7 +77,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
         </UButton>
       </div>
     </div>
-
     <!-- Filter tabs -->
     <div class="flex items-center gap-2 mb-4">
       <div class="flex items-center gap-1 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-neutral-200 dark:border-neutral-800 flex-1">
@@ -112,7 +97,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
         >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton>
       </div>
     </div>
-
     <!-- Loading -->
     <template v-if="loading">
       <div v-for="i in 5" :key="i" class="card p-4 mb-2.5">
@@ -122,7 +106,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
         </div>
       </div>
     </template>
-
     <!-- Notification list -->
     <template v-else-if="filteredNotifications.length">
       <UButton variant="ghost" color="neutral"
@@ -152,7 +135,6 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
         </div>
       </UButton>
     </template>
-
     <!-- Empty -->
     <BaseEmptyState
       v-else

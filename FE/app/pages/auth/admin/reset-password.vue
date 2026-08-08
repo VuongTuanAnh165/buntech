@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-vue-next'
 const { t } = useI18n()
-const toast = useAppToast()
+const toast = useToast()
 
 useSeoMeta({ title: `${t('auth.resetPassword')} - BunTech` })
 definePageMeta({ layout: 'auth' })
@@ -56,9 +56,9 @@ const handleSubmit = async () => {
     // TODO: Connect to Supabase auth.updateUser({ password })
     await new Promise(resolve => setTimeout(resolve, 1200))
     success.value = true
-    toast.success(t('auth.passwordResetSuccess'))
+    toast.add({ title: 'Thành công', description: '', color: '' })
   } catch {
-    toast.error(t('errors.unexpected'))
+    toast.add({ title: 'Thất bại', description: '', color: '' })
   } finally {
     loading.value = false
   }

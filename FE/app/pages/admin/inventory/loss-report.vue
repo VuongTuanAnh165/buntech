@@ -1,39 +1,30 @@
 <script setup lang="ts">
 import { InventoryMovementType } from '~/utils/enums'
 import { mockInventoryMovements, mockInventoryItems } from '~/utils/mockData'
-
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Báo cáo hao hụt - BunTech Admin' })
-
-const { formatNumber, formatDate } = useFormat()
 const toast = useToast()
-
 // ─── State ────────────────────────────────────────────────
 const loading = ref(true)
 const search = ref('')
 const selectedRange = ref('30')
 const page = ref(1)
 const perPage = ref(10)
-
 const rangeOptions = [
   { label: '7 ngày qua', value: '7' },
   { label: '30 ngày qua', value: '30' },
   { label: '90 ngày qua', value: '90' },
 ]
-
 // ─── Filtered Data ────────────────────────────────────────
 const rangeDays = computed(() => Number(selectedRange.value))
 const sinceDate = computed(() => new Date(Date.now() - rangeDays.value * 86400000).toISOString())
-
 const lossMovements = computed(() =>
   mockInventoryMovements
     .filter(m => m.type === InventoryMovementType.LOSS && m.created_at >= sinceDate.value)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 )
-
 const totalLossEvents = computed(() => lossMovements.value.length)
 const totalQuantityLost = computed(() => lossMovements.value.reduce((s, m) => s + m.quantity, 0))
-
 // For loss rate calculation
 const importedMovements = computed(() =>
   mockInventoryMovements
@@ -44,7 +35,6 @@ const lossRate = computed(() => {
   if (totalImported.value === 0) return 0
   return Math.round((totalQuantityLost.value / totalImported.value) * 1000) / 10
 })
-
 // ─── KPIs ─────────────────────────────────────────────────
 const kpiStats = computed(() => [
   { title: 'Số lần ghi nhận hao hụt', value: formatNumber(totalLossEvents.value), icon: 'i-lucide-alert-circle', color: 'error' as const },
@@ -52,7 +42,6 @@ const kpiStats = computed(() => [
   { title: 'Tỷ lệ hao hụt', value: `${lossRate.value}%`, icon: 'i-lucide-percent', color: lossRate.value > 5 ? 'error' as const : 'success' as const },
   { title: 'Mục tiêu ngành', value: '< 5%', icon: 'i-lucide-target', color: 'info' as const },
 ])
-
 // ─── Chart Data (last 7 days) ─────────────────────────────
 const lossTrend = computed(() => {
   const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
@@ -68,7 +57,6 @@ const lossTrend = computed(() => {
   })
 })
 const maxTrendTotal = computed(() => Math.max(...lossTrend.value.map(d => d.total), 1))
-
 // ─── Table ────────────────────────────────────────────────
 const filteredList = computed(() => {
   if (!search.value.trim()) return lossMovements.value
@@ -78,26 +66,22 @@ const filteredList = computed(() => {
     m.note.toLowerCase().includes(q)
   )
 })
-
 const totalPages = computed(() => Math.ceil(filteredList.value.length / perPage.value))
 const pagedList = computed(() => {
   const start = (page.value - 1) * perPage.value
   return filteredList.value.slice(start, start + perPage.value)
 })
-
 const columns = [
   { accessorKey: 'item', header: 'Nguyên liệu' },
   { accessorKey: 'quantity', header: 'Khối lượng hao hụt' },
   { accessorKey: 'note', header: 'Lý do/Ghi chú' },
   { accessorKey: 'created_at', header: 'Ngày ghi nhận' },
 ]
-
 // ─── Lifecycle ────────────────────────────────────────────
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
 </script>
-
 <template>
   <div>
     <BasePageHeader
@@ -113,16 +97,13 @@ onMounted(() => {
         <USelectMenu v-model="selectedRange" :items="rangeOptions" value-key="value" />
       </template>
     </BasePageHeader>
-
     <template v-if="loading">
       <BasePageLoading />
     </template>
-
     <template v-else>
       <div class="mb-6">
         <BaseStatsGrid :stats="kpiStats" :columns="4" />
       </div>
-
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <!-- Chart -->
         <div class="lg:col-span-2 card p-5 stagger-item" style="animation-delay: 200ms">
@@ -154,7 +135,6 @@ onMounted(() => {
             </div>
           </div>
         </div>
-
         <!-- AI Insights -->
         <div class="card p-5 stagger-item" style="animation-delay: 280ms">
           <div class="flex items-center justify-between mb-4">
@@ -184,7 +164,6 @@ onMounted(() => {
                 <p class="text-xs text-success-600 dark:text-success-400 mt-1">Hao hụt {{ lossRate }}% nằm trong mức an toàn của ngành sản xuất bún.</p>
               </div>
             </div>
-
             <div class="p-3 rounded-lg bg-primary-50 dark:bg-primary-900/10 border border-primary-200 dark:border-primary-800/30 flex gap-3 animate-fade-in-up" style="animation-delay: 100ms">
               <UIcon name="i-lucide-lightbulb" class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
               <div>
@@ -195,7 +174,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Table Section -->
       <div class="card p-5 stagger-item" style="animation-delay: 360ms">
         <div class="flex items-center gap-3 mb-4">
@@ -206,7 +184,6 @@ onMounted(() => {
             Xuất báo cáo
           </UButton>
         </div>
-
         <div class="bg-surface ring-1 ring-surface-border rounded-lg overflow-hidden">
           <UTable :columns="columns" :data="pagedList">
             <template #item-cell="{ row }">
@@ -229,7 +206,6 @@ onMounted(() => {
               <span class="text-sm text-slate-500 tabular-nums">{{ formatDate(row.original.created_at) }}</span>
             </template>
           </UTable>
-
           <div v-if="totalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-surface-border">
             <span class="text-sm text-slate-500 tabular-nums">
               {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, filteredList.length) }} / {{ filteredList.length }}

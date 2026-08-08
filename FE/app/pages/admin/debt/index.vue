@@ -2,20 +2,15 @@
 import { TransactionType } from '~/utils/enums'
 import { mockTransactions, mockCustomers, mockOrders } from '~/utils/mockData'
 import type { Transaction } from '~/utils/types'
-
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Tài chính - BunTech Admin' })
-
-const { formatVND, formatDate } = useFormat()
 const toast = useToast()
-
 // ─── State ────────────────────────────────────────────────
 const loading = ref(true)
 const search = ref('')
 const typeFilter = ref<string>('ALL')
 const page = ref(1)
 const perPage = ref(10)
-
 // ─── Computed KPIs ────────────────────────────────────────
 const totalRevenue = computed(() =>
   mockTransactions.filter(t => t.type === TransactionType.PAYMENT).reduce((s, t) => s + t.amount, 0)
@@ -27,14 +22,12 @@ const totalCollected = computed(() =>
   mockTransactions.filter(t => t.type === TransactionType.DEBT_PAYMENT).reduce((s, t) => s + t.amount, 0)
 )
 const debtRemaining = computed(() => totalDebt.value - totalCollected.value)
-
 const kpiStats = computed(() => [
   { title: 'Tổng doanh thu', value: formatVND(totalRevenue.value), icon: 'i-lucide-wallet', color: 'primary' as const, trend: { value: 12.4, isPositive: true } },
   { title: 'Tổng công nợ', value: formatVND(totalDebt.value), icon: 'i-lucide-credit-card', color: 'error' as const, trend: { value: 5.2, isPositive: false } },
   { title: 'Đã thu hồi', value: formatVND(totalCollected.value), icon: 'i-lucide-trending-up', color: 'success' as const, trend: { value: 8.7, isPositive: true } },
   { title: 'Công nợ còn lại', value: formatVND(debtRemaining.value), icon: 'i-lucide-alert-circle', color: 'warning' as const, trend: { value: 15.3, isPositive: false } },
 ])
-
 // ─── Top debtors ──────────────────────────────────────────
 const topDebtors = computed(() => {
   const debtMap = new Map<string, { name: string; avatar: string; total: number }>()
@@ -52,7 +45,6 @@ const topDebtors = computed(() => {
   const max = arr[0]?.total || 1
   return arr.map(d => ({ ...d, percent: Math.round((d.total / max) * 100) }))
 })
-
 // ─── Cashflow chart data (7 days) ─────────────────────────
 const cashflowData = computed(() => {
   const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
@@ -70,7 +62,6 @@ const cashflowData = computed(() => {
     ...deterministicData[i],
   }))
 })
-
 // ─── Filter & Pagination ─────────────────────────────────
 const typePills = computed(() => {
   const counts = {
@@ -88,21 +79,18 @@ const typePills = computed(() => {
     { accessorKey: 'DEBT_PAYMENT', header: 'Trả nợ', icon: 'i-lucide-arrow-up-right', count: counts.DEBT_PAYMENT },
   ]
 })
-
 const transactionTypeLabel: Record<string, string> = {
   PAYMENT: 'Thanh toán',
   REFUND: 'Hoàn tiền',
   DEBT_INCREASE: 'Tăng nợ',
   DEBT_PAYMENT: 'Trả nợ',
 }
-
 const transactionTypeColor: Record<string, 'success' | 'error' | 'warning' | 'info'> = {
   PAYMENT: 'success',
   REFUND: 'error',
   DEBT_INCREASE: 'error',
   DEBT_PAYMENT: 'success',
 }
-
 const filteredTransactions = computed(() => {
   let list = [...mockTransactions]
   if (typeFilter.value !== 'ALL') {
@@ -117,13 +105,11 @@ const filteredTransactions = computed(() => {
   }
   return list
 })
-
 const totalPages = computed(() => Math.ceil(filteredTransactions.value.length / perPage.value))
 const pagedTransactions = computed(() => {
   const start = (page.value - 1) * perPage.value
   return filteredTransactions.value.slice(start, start + perPage.value)
 })
-
 const columns = [
   { accessorKey: 'user', header: 'Khách hàng' },
   { accessorKey: 'type', header: 'Loại giao dịch' },
@@ -131,14 +117,12 @@ const columns = [
   { accessorKey: 'note', header: 'Ghi chú' },
   { accessorKey: 'created_at', header: 'Ngày' },
 ]
-
 // ─── Quick actions ────────────────────────────────────────
 const quickActions = [
   { icon: 'i-lucide-wallet', label: 'Thu tiền nợ', description: 'Ghi nhận khách trả nợ', to: '/admin/debt/pay' },
   { icon: 'i-lucide-download', label: 'Xuất CSV', description: 'Tải danh sách giao dịch' },
   { icon: 'i-lucide-file-bar-chart', label: 'Báo cáo tài chính', description: 'Xem báo cáo chi tiết' },
 ]
-
 function handleQuickAction(action: typeof quickActions[0]) {
   if (action.to) {
     navigateTo(action.to)
@@ -146,13 +130,11 @@ function handleQuickAction(action: typeof quickActions[0]) {
     toast.add({ title: action.label, description: 'Tính năng đang phát triển', color: 'info' })
   }
 }
-
 // ─── Lifecycle ────────────────────────────────────────────
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
 </script>
-
 <template>
   <div>
     <BasePageHeader
@@ -166,17 +148,14 @@ onMounted(() => {
         </UButton>
       </template>
     </BasePageHeader>
-
     <template v-if="loading">
       <BasePageLoading />
     </template>
-
     <template v-else>
       <!-- KPI Stats -->
       <div class="mb-6">
         <BaseStatsGrid :stats="kpiStats" />
       </div>
-
       <!-- Chart + Top Debtors -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <!-- Cashflow Chart -->
@@ -211,7 +190,6 @@ onMounted(() => {
             </div>
           </div>
         </div>
-
         <!-- Top Debtors Panel -->
         <div class="card p-5 stagger-item" style="animation-delay: 280ms">
           <div class="flex items-center justify-between mb-4">
@@ -249,7 +227,6 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
       <!-- Quick Actions -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         <UButton variant="ghost" color="neutral"
@@ -269,7 +246,6 @@ onMounted(() => {
           <UIcon name="i-lucide-arrow-right" class="w-4 h-4 text-slate-400 dark:text-zinc-500 flex-shrink-0" />
         </UButton>
       </div>
-
       <!-- Filter pills -->
       <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 stagger-item" style="animation-delay: 500ms">
         <UButton
@@ -286,14 +262,12 @@ onMounted(() => {
           <UBadge color="neutral" variant="subtle" size="sm" class="ml-1">{{ pill.count }}</UBadge>
         </UButton>
       </div>
-
       <!-- Search -->
       <div class="flex items-center gap-3 mb-4 animate-fade-in-up" style="animation-delay: 540ms">
         <div class="flex-1 max-w-md">
           <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm giao dịch theo ghi chú hoặc khách hàng..." />
         </div>
       </div>
-
       <!-- Table -->
       <div class="animate-fade-in-up bg-surface ring-1 ring-surface-border rounded-xl overflow-hidden" style="animation-delay: 580ms">
         <UTable :columns="columns" :data="pagedTransactions">
@@ -310,7 +284,6 @@ onMounted(() => {
               </div>
             </div>
           </template>
-
           <template #type-cell="{ row }">
             <UBadge
               :color="transactionTypeColor[row.original.type] || 'neutral'"
@@ -327,7 +300,6 @@ onMounted(() => {
               {{ transactionTypeLabel[row.original.type] || row.original.type }}
             </UBadge>
           </template>
-
           <template #amount-cell="{ row }">
             <span
               :class="[
@@ -340,16 +312,13 @@ onMounted(() => {
               {{ row.original.type === TransactionType.DEBT_INCREASE || row.original.type === TransactionType.REFUND ? '-' : '+' }}{{ formatVND(row.original.amount) }}
             </span>
           </template>
-
           <template #note-cell="{ row }">
             <span class="text-sm text-slate-600 dark:text-zinc-300">{{ row.original.note }}</span>
           </template>
-
           <template #created_at-cell="{ row }">
             <span class="text-sm text-slate-500 dark:text-zinc-400 tabular-nums">{{ formatDate(row.original.created_at) }}</span>
           </template>
         </UTable>
-
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="flex items-center justify-between px-4 py-3 border-t border-surface-border">
           <span class="text-sm text-slate-500 dark:text-zinc-400 tabular-nums">

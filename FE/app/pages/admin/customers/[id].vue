@@ -7,9 +7,7 @@ import {
   mockProfiles, mockOrders, mockTransactions, mockAddresses, mockCustomPrices, mockProducts
 } from '~/utils/mockData'
 
-const route = useRoute()
-const { formatVND, formatDate, formatDateTime } = useFormat()
-const toast = useToast()
+const route = useRoute()const toast = useToast()
 
 definePageMeta({ layout: 'admin' })
 

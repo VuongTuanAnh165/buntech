@@ -1,20 +1,15 @@
 <script setup lang="ts">
 import { OrderStatus } from '~/utils/enums'
 import type { Order } from '~/utils/types'
-
 const props = defineProps<{
   order: Order
 }>()
-
-const { formatVND } = useFormat()
-
 const statusColor = computed(() => {
   if (props.order.status === OrderStatus.PENDING) return 'warning'
   if (props.order.status === OrderStatus.IN_PROGRESS || props.order.status === OrderStatus.SHIPPING) return 'primary'
   if (props.order.status === OrderStatus.DELIVERED) return 'success'
   return 'error'
 })
-
 const statusLabel = computed(() => {
   if (props.order.status === OrderStatus.PENDING) return 'Chờ giao'
   if (props.order.status === OrderStatus.IN_PROGRESS || props.order.status === OrderStatus.SHIPPING) return 'Đang giao'
@@ -23,7 +18,6 @@ const statusLabel = computed(() => {
   return props.order.status
 })
 </script>
-
 <template>
   <UCard 
     class="w-full active:scale-[0.98] transition-transform duration-200 cursor-pointer overflow-hidden border-0 ring-1 ring-neutral-200 dark:ring-neutral-800 shadow-sm"
@@ -49,13 +43,11 @@ const statusLabel = computed(() => {
           </span>
         </UBadge>
       </div>
-
       <div class="flex gap-2 text-sm text-neutral-600 dark:text-neutral-400">
         <UIcon name="i-lucide-map-pin" class="w-4 h-4 flex-shrink-0 text-primary-500 mt-0.5" />
         <p class="line-clamp-2 leading-tight">{{ order.shipping_address }}</p>
       </div>
     </div>
-
     <!-- Bottom section -->
     <div class="px-4 py-3 bg-neutral-50 dark:bg-zinc-800/50 flex items-center justify-between">
       <div class="flex flex-col">

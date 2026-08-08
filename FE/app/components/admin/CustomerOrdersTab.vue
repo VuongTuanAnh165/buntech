@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import type { Order } from '~/utils/mockData'
-
 defineProps<{
   orders: Order[]
 }>()
-
-const { formatVND, formatDate } = useFormat()
 </script>
-
 <template>
   <div class="animate-fade-in-up">
     <BaseDataTable

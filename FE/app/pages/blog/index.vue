@@ -1,21 +1,15 @@
 <script setup lang="ts">
 import { Package, Search, ChevronRight, Calendar, User, X } from 'lucide-vue-next'
-
-const { formatDate } = useFormat()
-
 useSeoMeta({ title: 'Tin tức - BunTech' })
 definePageMeta({ layout: 'default' })
-
 const loading = ref(true)
 const search = ref('')
 const selectedCategory = ref('')
 const currentPage = ref(1)
 const perPage = 9
-
 const allPosts = computed(() =>
   mockBlogPosts.filter(p => p.status === 'PUBLISHED')
 )
-
 const filteredPosts = computed(() => {
   let result = allPosts.value
   if (search.value) {
@@ -27,7 +21,6 @@ const filteredPosts = computed(() => {
   }
   return result
 })
-
 const featuredPost = computed(() => filteredPosts.value[0] || null)
 const remainingPosts = computed(() => filteredPosts.value.slice(1))
 const totalPages = computed(() => Math.ceil(remainingPosts.value.length / perPage))
@@ -35,20 +28,16 @@ const paginatedPosts = computed(() => {
   const start = (currentPage.value - 1) * perPage
   return remainingPosts.value.slice(start, start + perPage)
 })
-
 watch([search, selectedCategory], () => { currentPage.value = 1 })
-
 const clearFilters = () => {
   selectedCategory.value = ''
   search.value = ''
   currentPage.value = 1
 }
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 400)
 })
 </script>
-
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <!-- Header -->
@@ -61,7 +50,6 @@ onMounted(() => {
     </nav>
     <h1 class="text-2xl sm:text-3xl font-bold text-surface-foreground tracking-tight mb-2">Tin tức & Mẹo hay</h1>
     <p class="text-sm text-gray-500 dark:text-zinc-400 mb-8">Cập nhật kiến thức về bún, ẩm thực và mẹo kinh doanh</p>
-
     <!-- Search -->
     <div class="flex flex-wrap items-center gap-3 mb-6">
       <div class="flex-1 min-w-[200px] max-w-md relative">
@@ -83,7 +71,6 @@ onMounted(() => {
         Xóa lọc
       </UButton>
     </div>
-
     <!-- Category pills -->
     <div class="flex items-center gap-2 mb-8 overflow-x-auto scrollbar-hide pb-1">
       <UButton variant="ghost" color="neutral"
@@ -109,7 +96,6 @@ onMounted(() => {
         {{ cat.name }}
       </UButton>
     </div>
-
     <!-- Loading -->
     <template v-if="loading">
       <!-- Featured skeleton -->
@@ -132,7 +118,6 @@ onMounted(() => {
         </div>
       </div>
     </template>
-
     <template v-else-if="filteredPosts.length">
       <!-- Featured post -->
       <NuxtLink
@@ -167,7 +152,6 @@ onMounted(() => {
           </div>
         </div>
       </NuxtLink>
-
       <!-- Posts grid -->
       <div v-if="paginatedPosts.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <NuxtLink
@@ -204,7 +188,6 @@ onMounted(() => {
           </div>
         </NuxtLink>
       </div>
-
       <!-- Pagination -->
       <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
         <UButton variant="ghost" color="neutral"
@@ -235,7 +218,6 @@ onMounted(() => {
         </UButton>
       </div>
     </template>
-
     <AppEmptyState
       v-else
       title="Không tìm thấy bài viết"

@@ -20,6 +20,8 @@ export const formatCurrency = (value: number | null | undefined): string => {
   }).format(value)
 }
 
+export const formatVND = formatCurrency
+
 /**
  * Format số tiền rút gọn (không ký hiệu tiền tệ).
  * @example formatNumber(1500000) → '1.500.000'
@@ -66,6 +68,8 @@ export const formatRelativeTime = (date: string | Date | null | undefined): stri
   return dayjs(date).fromNow()
 }
 
+export const formatTimeAgo = formatRelativeTime
+
 /**
  * Format số điện thoại Việt Nam.
  * @example formatPhone('0912345678') → '0912 345 678'
@@ -77,4 +81,22 @@ export const formatPhone = (phone: string | null | undefined): string => {
     return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(7)}`
   }
   return phone
+}
+
+/**
+ * Parse input string to VND number.
+ * @example parseVNDInput('1.500.000 ₫') → 1500000
+ */
+export const parseVNDInput = (value: string): number => {
+  const cleaned = value.replace(/[^\d]/g, '')
+  return cleaned ? parseInt(cleaned) : 0
+}
+
+/**
+ * Format number to VND string for inputs.
+ * @example formatVNDInput(1500000) → '1.500.000'
+ */
+export const formatVNDInput = (value: number): string => {
+  if (!value) return ''
+  return new Intl.NumberFormat('vi-VN').format(value)
 }

@@ -2,24 +2,18 @@
 import { OrderStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
 import { Role, UserStatus } from '~/utils/enums'
-
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Tuyến giao hàng - BunTech Driver' })
-
 const router = useRouter()
 const toast = useToast()
-const { formatVND, formatDate } = useFormat()
-
 const loading = ref(true)
 const refreshing = ref(false)
 const isOnline = ref(true)
 const activeTab = ref<'all' | 'shipping' | 'pending' | 'delivered'>('all')
-
 // Current driver
 const currentDriver = computed(() =>
   mockProfiles.find(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) || mockProfiles[2]
 )
-
 // All active orders assigned to this driver
 const driverOrders = computed(() => {
   const driverId = currentDriver.value?.id
@@ -35,7 +29,6 @@ const driverOrders = computed(() => {
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     })
 })
-
 const filteredOrders = computed(() => {
   if (activeTab.value === 'all') return driverOrders.value
   if (activeTab.value === 'shipping') return driverOrders.value.filter(o => o.status === OrderStatus.SHIPPING)
@@ -43,7 +36,6 @@ const filteredOrders = computed(() => {
   if (activeTab.value === 'delivered') return driverOrders.value.filter(o => o.status === OrderStatus.DELIVERED)
   return driverOrders.value
 })
-
 const stats = computed(() => {
   const all = driverOrders.value
   const delivered = all.filter(o => o.status === OrderStatus.DELIVERED)
@@ -59,14 +51,12 @@ const stats = computed(() => {
     pending: pending.length + shipping.length,
   }
 })
-
 function distanceFor(orderId: string): string {
   let seed = 0
   for (let i = 0; i < orderId.length; i++) seed = (seed * 31 + orderId.charCodeAt(i)) >>> 0
   const km = 2 + (seed % 18) + (seed % 7) / 10
   return `${km.toFixed(1)} km`
 }
-
 const statusLabel: Record<string, string> = {
   SHIPPING: 'Đang giao',
   PROCESSING: 'Đang xử lý',
@@ -74,12 +64,10 @@ const statusLabel: Record<string, string> = {
   DELIVERED: 'Đã giao',
   CANCELLED: 'Đã hủy',
 }
-
 function toggleOnline() {
   isOnline.value = !isOnline.value
   toast.add({ title: isOnline.value ? 'Bạn đã trực tuyến' : 'Bạn đã ngoại tuyến', color: 'success' })
 }
-
 function refresh() {
   refreshing.value = true
   setTimeout(() => {
@@ -87,12 +75,10 @@ function refresh() {
     toast.add({ title: 'Đã làm mới danh sách', color: 'success' })
   }, 700)
 }
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 500)
 })
 </script>
-
 <template>
   <div class="p-4 pb-6">
     <!-- Online/Offline status banner -->
@@ -129,7 +115,6 @@ onMounted(() => {
         </UButton>
       </div>
     </div>
-
     <!-- Date + Refresh -->
     <div class="flex items-center justify-between mb-4">
       <div>
@@ -144,7 +129,6 @@ onMounted(() => {
         <UIcon name="i-lucide-refresh-cw" :class="['w-5 h-5', refreshing ? 'animate-spin' : '']" />
       </UButton>
     </div>
-
     <!-- Premium Stats Banner -->
     <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-primary-950 rounded-2xl p-5 mb-5 text-white relative overflow-hidden">
       <div class="absolute top-0 right-0 w-32 h-32 rounded-full bg-primary-500/20 blur-2xl" />
@@ -183,7 +167,6 @@ onMounted(() => {
         </div>
       </div>
     </div>
-
     <!-- Tab filter -->
     <div class="flex items-center gap-2 mb-4 overflow-x-auto">
       <div class="flex items-center gap-1 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-neutral-200 dark:border-neutral-800 flex-1 min-w-fit">
@@ -205,7 +188,6 @@ onMounted(() => {
         >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton>
       </div>
     </div>
-
     <!-- Loading -->
     <template v-if="loading">
       <div v-for="i in 4" :key="i" class="card p-4 mb-3">
@@ -220,7 +202,6 @@ onMounted(() => {
         <div class="skeleton h-3 w-2/3" />
       </div>
     </template>
-
     <!-- Route list -->
     <template v-else-if="filteredOrders.length">
       <div
@@ -291,7 +272,6 @@ onMounted(() => {
         </div>
       </div>
     </template>
-
     <!-- Empty -->
     <BaseEmptyState
       v-else

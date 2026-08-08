@@ -6,10 +6,7 @@ definePageMeta({ layout: 'driver' })
 
 const router = useRouter()
 const route = useRoute()
-const toast = useToast()
-const { formatVND, formatDateTime } = useFormat()
-
-const orderId = computed(() => route.params.id as string)
+const toast = useToast()const orderId = computed(() => route.params.id as string)
 const loading = ref(true)
 const delivered = ref(false)
 const showCollectModal = ref(false)

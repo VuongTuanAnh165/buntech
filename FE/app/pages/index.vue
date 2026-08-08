@@ -1,59 +1,46 @@
 <script setup lang="ts">
 import { ArrowRight, Sparkles, Truck, ShieldCheck, Clock, Star, Package, Quote, ChevronRight, Leaf, Award, Store } from 'lucide-vue-next'
-
-const { formatVND } = useFormat()
-
 useSeoMeta({ title: 'BunTech - Xưởng bún gia đình truyền thống 3 đời' })
 definePageMeta({ layout: 'default' })
-
 const loading = ref(true)
-
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 400)
 })
-
 const heroImage = 'https://images.pexels.com/photos/1001773/pexels-photo-1001773.jpeg?auto=compress&cs=tinysrgb&w=1600'
-
 const featuredProducts = computed(() =>
   mockProducts
     .filter(p => p.status === 'ACTIVE')
     .slice(0, 8)
 )
-
 const blogPosts = computed(() =>
   mockBlogPosts
     .filter(p => p.status === 'PUBLISHED')
     .slice(0, 3)
 )
-
 const trustBadges = [
   { icon: Leaf, label: '100% Gạo tự nhiên' },
   { icon: Truck, label: 'Giao hàng 2 giờ' },
   { icon: Store, label: '50+ đại lý' },
   { icon: Award, label: '3 đời kinh nghiệm' },
 ]
-
 const features = [
   { icon: Sparkles, title: 'Bún tươi mỗi ngày', desc: 'Sản xuất mỗi sáng, giao đến tay khách hàng trong vòng 2 giờ.', color: 'primary' },
   { icon: Truck, title: 'Giao hàng siêu tốc', desc: 'Nội thành 2 giờ, ngoại thành 4 giờ. Đảm bảo bún còn nóng nguyên bọc.', color: 'secondary' },
   { icon: ShieldCheck, title: 'An toàn vệ sinh', desc: 'Đạt tiêu chuẩn VSATTP, quy trình khép kín từ gạo đến thành phẩm.', color: 'success' },
   { icon: Clock, title: 'Đặt hàng 24/7', desc: 'App đặt hàng anytime, theo dõi đơn hàng và công nợ realtime.', color: 'warning' },
 ]
-
 const colorMap: Record<string, { bg: string; text: string }> = {
   primary: { bg: 'bg-primary-50 dark:bg-primary-900/20', text: 'text-primary-600 dark:text-primary-400' },
   secondary: { bg: 'bg-secondary-50 dark:bg-secondary-900/20', text: 'text-secondary-600 dark:text-secondary-400' },
   success: { bg: 'bg-success-50 dark:bg-success-900/20', text: 'text-success-600 dark:text-success-400' },
   warning: { bg: 'bg-warning-50 dark:bg-warning-900/20', text: 'text-warning-600 dark:text-warning-400' },
 }
-
 const testimonials = [
   { name: 'Chị Mai', role: 'Tiệm bún Mai Hoàng, Q.5', text: 'Đặt hàng online rất tiện, giao đúng giờ. Bún ngon, sạch, khách quen khen nhiều. Dùng app BunTech từ ngày đầu, không bao giờ thất vọng.', rating: 5 },
   { name: 'Anh Hùng', role: 'Quán phở Hùng, Bình Thạnh', text: 'Công nợ rõ ràng, dễ theo dõi. Không cần gọi điện đặt hàng mỗi ngày nữa. Tiết kiệm được rất nhiều thời gian cho quán.', rating: 5 },
   { name: 'Chị Lan', role: 'Hộ kinh doanh, Gò Vấp', text: 'App dễ xài, tài xế nhiệt tình. Bún giao còn nóng nguyên bọc. Giá sỉ rẻ hơn mua lẻ nhiều, lại có chương trình tích điểm.', rating: 5 },
 ]
 </script>
-
 <template>
   <div>
     <!-- Hero -->
@@ -62,7 +49,6 @@ const testimonials = [
         <NuxtImg :src="heroImage" alt="" class="w-full h-full object-cover" aria-hidden="true" />
         <div class="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/75 to-slate-900/40" />
       </div>
-
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-36 w-full">
         <div class="max-w-2xl">
           <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white/90 text-sm font-medium mb-6 animate-fade-in">
@@ -88,7 +74,6 @@ const testimonials = [
               </UButton>
             </NuxtLink>
           </div>
-
           <!-- Stats bar -->
           <div class="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/10 animate-fade-in-up" style="animation-delay: 300ms">
             <div>
@@ -107,7 +92,6 @@ const testimonials = [
         </div>
       </div>
     </section>
-
     <!-- Trust Badges -->
     <section class="border-b border-surface-border bg-surface">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -127,7 +111,6 @@ const testimonials = [
         </div>
       </div>
     </section>
-
     <!-- Categories Showcase -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
       <div class="text-center mb-10">
@@ -150,7 +133,6 @@ const testimonials = [
         </NuxtLink>
       </div>
     </section>
-
     <!-- Featured Products -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="flex items-end justify-between mb-8">
@@ -163,7 +145,6 @@ const testimonials = [
           <ChevronRight class="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </NuxtLink>
       </div>
-
       <!-- Loading skeleton -->
       <div v-if="loading" class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div v-for="i in 8" :key="i" class="card p-4">
@@ -172,7 +153,6 @@ const testimonials = [
           <USkeleton class="h-4 w-2/3" />
         </div>
       </div>
-
       <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <NuxtLink
           v-for="(product, i) in featuredProducts"
@@ -205,14 +185,12 @@ const testimonials = [
           </div>
         </NuxtLink>
       </div>
-
       <div class="sm:hidden mt-6">
         <NuxtLink to="/products">
           <UButton color="neutral" variant="outline" block>Xem tất cả sản phẩm</UButton>
         </NuxtLink>
       </div>
     </section>
-
     <!-- Why Choose BunTech -->
     <section class="bg-surface py-16 sm:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -236,7 +214,6 @@ const testimonials = [
         </div>
       </div>
     </section>
-
     <!-- Testimonials -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
       <div class="text-center mb-12">
@@ -270,7 +247,6 @@ const testimonials = [
         </div>
       </div>
     </section>
-
     <!-- Blog Preview -->
     <section v-if="blogPosts.length" class="bg-surface py-16 sm:py-20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -311,7 +287,6 @@ const testimonials = [
         </div>
       </div>
     </section>
-
     <!-- CTA Banner -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 to-primary-800 px-6 sm:px-12 py-12 sm:py-16 text-center">

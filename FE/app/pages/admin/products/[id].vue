@@ -5,10 +5,7 @@ import { mockProducts, mockProductReviews as mockReviews } from '~/utils/mockDat
 
 const toast = useToast()
 const route = useRoute()
-const router = useRouter()
-const { formatVND, formatNumber, formatDate, formatDateTime } = useFormat()
-
-definePageMeta({ layout: 'admin' })
+const router = useRouter()definePageMeta({ layout: 'admin' })
 
 const productId = route.params.id as string
 

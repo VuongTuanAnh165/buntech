@@ -40,7 +40,22 @@ const getRefreshState = (): RefreshState => {
   return { isRefreshing: false, queue: [] }
 }
 
-const abortControllers = new Map<string, AbortController>()
+const ssrAbortMap = new WeakMap<object, Map<string, AbortController>>()
+const clientAbortMap = new Map<string, AbortController>()
+
+const getAbortControllers = (): Map<string, AbortController> => {
+  if (import.meta.client) return clientAbortMap
+  const nuxtApp = tryUseNuxtApp()
+  if (nuxtApp) {
+    let map = ssrAbortMap.get(nuxtApp)
+    if (!map) {
+      map = new Map<string, AbortController>()
+      ssrAbortMap.set(nuxtApp, map)
+    }
+    return map
+  }
+  return new Map<string, AbortController>()
+}
 
 const generateIdempotencyKey = (): string => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -215,11 +230,12 @@ export const fetchWithAuth = async <T = unknown, R extends ResponseType = 'json'
   const mergedOptions = defu(options, defaultOptions) as CustomFetchOptions<R>
 
   if (options.abortId) {
-    if (abortControllers.has(options.abortId)) {
-      abortControllers.get(options.abortId)?.abort()
+    const controllers = getAbortControllers()
+    if (controllers.has(options.abortId)) {
+      controllers.get(options.abortId)?.abort()
     }
     const controller = new AbortController()
-    abortControllers.set(options.abortId, controller)
+    controllers.set(options.abortId, controller)
     mergedOptions.signal = controller.signal
   }
 
@@ -387,8 +403,11 @@ export const fetchWithAuth = async <T = unknown, R extends ResponseType = 'json'
 
     throw error
   } finally {
-    if (options.abortId && abortControllers.get(options.abortId)?.signal === mergedOptions.signal) {
-      abortControllers.delete(options.abortId)
+    if (options.abortId) {
+      const controllers = getAbortControllers()
+      if (controllers.get(options.abortId)?.signal === mergedOptions.signal) {
+        controllers.delete(options.abortId)
+      }
     }
   }
 }
