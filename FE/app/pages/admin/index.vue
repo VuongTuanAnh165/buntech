@@ -19,7 +19,7 @@ const kpi = reactive({
 
 const revenueData = ref<{ day: string; revenue: number }[]>([])
 const topBuyers = ref(mockTopBuyers)
-const recentOrders = ref<any[]>([])
+const recentOrders = ref<Record<string, unknown>[]>([])
 const topProducts = ref<{ name: string; value: number }[]>([])
 const orderStatusData = ref<{ name: string; value: number }[]>([])
 

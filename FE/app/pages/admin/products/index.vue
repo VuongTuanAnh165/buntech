@@ -232,7 +232,7 @@ const categoryOptions = computed(() => [
   ...categories.value.map(c => ({ value: c.id, label: c.name })),
 ])
 
-const columns = ref<any[]>([
+const columns = ref<Record<string, unknown>[]>([
   { accessorKey: 'image_url', header: 'Ảnh', width: '60px' },
   { accessorKey: 'name', header: 'Tên sản phẩm', sortable: true },
   { accessorKey: 'category', header: 'Danh mục', sortable: true },
