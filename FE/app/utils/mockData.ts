@@ -84,6 +84,7 @@ const customerProfiles: Profile[] = Array.from({ length: 68 }, (_, i) => {
 })
 
 export const mockProfiles: Profile[] = [...adminProfiles, ...driverProfiles, ...customerProfiles]
+export const mockCustomers: Profile[] = customerProfiles
 export const mockAdminUser = adminProfiles[0]
 
 // ─── Categories (8) ─────────────────────────────────────────────

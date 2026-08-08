@@ -3,7 +3,7 @@ import { ArrowRight, Sparkles, Truck, ShieldCheck, Clock, Star, Package, Quote, 
 
 const { formatVND } = useFormat()
 
-useHead({ title: 'BunTech - Xưởng bún gia đình truyền thống 3 đời' })
+useSeoMeta({ title: 'BunTech - Xưởng bún gia đình truyền thống 3 đời' })
 definePageMeta({ layout: 'default' })
 
 const loading = ref(true)

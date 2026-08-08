@@ -2,7 +2,7 @@
 import { Sparkles, Award, Users, Heart, Leaf, Truck, Target, Eye, MapPin, Phone, ChevronRight, Factory, ShieldCheck } from 'lucide-vue-next'
 
 
-useHead({ title: 'Về chúng tôi - BunTech' })
+useSeoMeta({ title: 'Về chúng tôi - BunTech' })
 definePageMeta({ layout: 'default' })
 
 const heroImage = 'https://images.pexels.com/photos/1001773/pexels-photo-1001773.jpeg?auto=compress&cs=tinysrgb&w=1600'

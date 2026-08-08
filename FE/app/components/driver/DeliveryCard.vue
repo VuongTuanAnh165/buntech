@@ -28,7 +28,7 @@ const statusLabel = computed(() => {
   <UCard 
     class="w-full active:scale-[0.98] transition-transform duration-200 cursor-pointer overflow-hidden border-0 ring-1 ring-neutral-200 dark:ring-neutral-800 shadow-sm"
     :ui="{ body: { padding: 'p-0' } }"
-    @click="$router.push(`/driver/delivery/${order.id}`)"
+    @click="$navigateTo(`/driver/delivery/${order.id}`)"
   >
     <!-- Top section -->
     <div class="p-4 border-b border-neutral-100 dark:border-neutral-800/50">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-useHead({ title: 'Đăng nhập - BunTech' })
+useSeoMeta({ title: 'Đăng nhập - BunTech' })
 definePageMeta({ layout: 'auth' })
 </script>
 

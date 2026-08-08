@@ -3,7 +3,7 @@ import { ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-vue-next'
 const { t } = useI18n()
 const toast = useAppToast()
 
-useHead({ title: `${t('auth.resetPassword')} - BunTech` })
+useSeoMeta({ title: `${t('auth.resetPassword')} - BunTech` })
 definePageMeta({ layout: 'auth' })
 
 const password = ref('')

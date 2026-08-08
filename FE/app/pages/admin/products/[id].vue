@@ -157,7 +157,7 @@ function saveReorder() {
   toast.add({ title: `Đã cập nhật điểm đặt hàng lại: ${reorderPoint.value} ${unit.value}`, color: 'success' })
 }
 
-useHead({ title: () => `${productName.value || 'Sản phẩm'} - BunTech Admin` })
+useSeoMeta({ title: () => `${productName.value || 'Sản phẩm'} - BunTech Admin` })
 onMounted(loadProduct)
 </script>
 
@@ -165,7 +165,7 @@ onMounted(loadProduct)
   <div>
     <button
       class="flex items-center gap-1 text-sm text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 mb-4 min-h-[44px] px-2 transition-colors"
-      @click="router.push('/admin/products')"
+      @click="navigateTo('/admin/products')"
     >
       <span class="i-lucide-arrow-left w-4 h-4" aria-hidden="true" /> Quay lại
     </button>

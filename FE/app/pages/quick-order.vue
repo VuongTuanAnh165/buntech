@@ -4,7 +4,7 @@ import { Plus, Trash2, Minus, CheckCircle2, Package, Search, ShoppingCart } from
 const toast = useAppToast()
 const { formatVND } = useFormat()
 
-useHead({ title: 'Đặt hàng nhanh - BunTech' })
+useSeoMeta({ title: 'Đặt hàng nhanh - BunTech' })
 definePageMeta({ layout: 'default' })
 
 const loading = ref(true)

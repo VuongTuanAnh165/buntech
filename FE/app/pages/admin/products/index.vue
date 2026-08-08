@@ -342,14 +342,14 @@ const columns = ref<any[]>([
           :loading="loading"
         >
           <template #image_url-cell="{ row }">
-            <div class="w-11 h-11 rounded-lg bg-surface-hover overflow-hidden flex items-center justify-center ring-1 ring-surface-border group cursor-pointer" @click="router.push(`/admin/products/${row.original.id}`)">
+            <div class="w-11 h-11 rounded-lg bg-surface-hover overflow-hidden flex items-center justify-center ring-1 ring-surface-border group cursor-pointer" @click="navigateTo(`/admin/products/${row.original.id}`)">
               <NuxtImg v-if="row.original.image_url" :src="row.original.image_url" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" />
               <span v-else class="i-lucide-image w-5 h-5 text-slate-300 dark:text-zinc-600 group-hover:scale-110 transition-transform duration-300" aria-hidden="true" />
             </div>
           </template>
 
           <template #name-cell="{ row }">
-            <div class="min-w-0" @click="router.push(`/admin/products/${row.original.id}`)" style="cursor: pointer">
+            <div class="min-w-0" @click="navigateTo(`/admin/products/${row.original.id}`)" style="cursor: pointer">
               <p class="font-medium text-surface-foreground truncate max-w-[260px] hover:text-primary-600 transition-colors">{{ row.original.name }}</p>
               <p class="text-xs text-slate-500 dark:text-zinc-400 truncate max-w-[260px] font-mono">{{ row.original.slug }}</p>
             </div>
@@ -383,7 +383,7 @@ const columns = ref<any[]>([
 
           <template #actions-cell="{ row }">
             <div class="flex items-center justify-end gap-1">
-              <UButton color="neutral" variant="ghost" icon="i-lucide-eye" size="sm" @click="() => { router.push(`/admin/products/${row.original.id}`) }" />
+              <UButton color="neutral" variant="ghost" icon="i-lucide-eye" size="sm" @click="() => { navigateTo(`/admin/products/${row.original.id}`) }" />
               <UButton color="neutral" variant="ghost" icon="i-lucide-pencil" size="sm" @click="openEdit(row.original)" />
               <UButton color="error" variant="ghost" icon="i-lucide-trash-2" size="sm" @click="() => { deleteTarget = row.original }" />
             </div>

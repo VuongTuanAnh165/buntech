@@ -3,7 +3,7 @@ import { MailCheck, ArrowLeft, Mail } from 'lucide-vue-next'
 const { t } = useI18n()
 const toast = useAppToast()
 
-useHead({ title: `${t('auth.forgotPassword')} - BunTech` })
+useSeoMeta({ title: `${t('auth.forgotPassword')} - BunTech` })
 definePageMeta({ layout: 'auth' })
 
 const email = ref('')

@@ -26,7 +26,7 @@ function toggleDark() {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
 }
 function handleLogout() {
-  router.push('/auth/login')
+  navigateTo('/auth/login')
   closeMenu()
 }
 

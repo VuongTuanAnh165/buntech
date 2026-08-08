@@ -230,8 +230,8 @@ onMounted(() => {
         :style="{ animationDelay: `${i * 60}ms` }"
         role="button"
         tabindex="0"
-        @click="router.push(`/driver/delivery/${order.id}`)"
-        @keydown.enter="router.push(`/driver/delivery/${order.id}`)"
+        @click="navigateTo(`/driver/delivery/${order.id}`)"
+        @keydown.enter="navigateTo(`/driver/delivery/${order.id}`)"
       >
         <!-- Left accent bar -->
         <div

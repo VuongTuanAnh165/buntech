@@ -145,7 +145,7 @@ function copyOrder() {
     sessionStorage.setItem('copyOrderData', JSON.stringify(copyData))
   }
   toast.add({ title: 'Đã sao chép đơn hàng', color: 'success' })
-  router.push('/admin/orders/create')
+  navigateTo('/admin/orders/create')
 }
 
 function printOrder() {
@@ -168,7 +168,7 @@ const breadcrumbItems = [
 
     <button
       class="flex items-center gap-1 text-sm text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 mb-4 min-h-[44px] px-2 transition-colors"
-      @click="router.push('/admin/orders')"
+      @click="navigateTo('/admin/orders')"
     >
       <UIcon name="i-lucide-arrow-left" class="w-4 h-4" /> Quay lại
     </button>

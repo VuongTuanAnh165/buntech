@@ -3,7 +3,7 @@ import { Grid2x2, LayoutGrid, Package, X, Search, ChevronDown } from 'lucide-vue
 
 const { formatVND } = useFormat()
 
-useHead({ title: 'Sản phẩm - BunTech' })
+useSeoMeta({ title: 'Sản phẩm - BunTech' })
 definePageMeta({ layout: 'default' })
 
 const loading = ref(true)

@@ -3,7 +3,7 @@ import { Package, Search, ChevronRight, Calendar, User, X } from 'lucide-vue-nex
 
 const { formatDate } = useFormat()
 
-useHead({ title: 'Tin tức - BunTech' })
+useSeoMeta({ title: 'Tin tức - BunTech' })
 definePageMeta({ layout: 'default' })
 
 const loading = ref(true)

@@ -205,7 +205,7 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
         :style="{ animationDelay: `${i * 50}ms` }"
         role="button"
         tabindex="0"
-        @click="router.push(`/driver/delivery/${order.id}`)"
+        @click="navigateTo(`/driver/delivery/${order.id}`)"
       >
         <div
           :class="['absolute left-0 top-0 bottom-0 w-1', order.status === OrderStatus.DELIVERED ? 'bg-success-500' : 'bg-error-500']"

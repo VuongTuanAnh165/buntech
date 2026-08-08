@@ -72,7 +72,7 @@ function confirmDelivery() {
     delivered.value = true
     showCollectModal.value = false
     toast.add({ title: 'Đã xác nhận giao hàng thành công!', color: 'success' })
-    setTimeout(() => router.push('/driver/delivery'), 2000)
+    setTimeout(() => navigateTo('/driver/delivery'), 2000)
   }, 1000)
 }
 
@@ -91,7 +91,7 @@ onMounted(() => {
     <!-- Back button -->
     <button
       class="flex items-center gap-1 text-sm text-slate-500 dark:text-zinc-400 hover:text-neutral-900 dark:hover:text-white mb-4 min-h-[44px] px-2 rounded-md transition-colors"
-      @click="router.push('/driver/delivery')"
+      @click="navigateTo('/driver/delivery')"
     >
       <UIcon name="i-lucide-arrow-left" class="w-4 h-4" /> Quay lại
     </button>

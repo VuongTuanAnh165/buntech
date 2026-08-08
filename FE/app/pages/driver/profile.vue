@@ -67,7 +67,7 @@ function copyPhone() {
 }
 
 function handleLogout() {
-  router.push('/auth/login')
+  navigateTo('/auth/login')
 }
 
 onMounted(() => {
@@ -212,7 +212,7 @@ onMounted(() => {
       </div>
 
       <!-- Vehicle Assignment -->
-      <div class="card card-hover p-5 mb-4 cursor-pointer" role="button" tabindex="0" @click="router.push('/driver/vehicle')" @keydown.enter="router.push('/driver/vehicle')">
+      <div class="card card-hover p-5 mb-4 cursor-pointer" role="button" tabindex="0" @click="navigateTo('/driver/vehicle')" @keydown.enter="navigateTo('/driver/vehicle')">
         <div class="flex items-center justify-between mb-4">
           <h2 class="font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
             <UIcon name="i-lucide-truck" class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
@@ -282,7 +282,7 @@ onMounted(() => {
             <UIcon name="i-lucide-clock" class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
             Hoạt động gần đây
           </h2>
-          <button class="text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline" @click="router.push('/driver/history')">Xem tất cả</button>
+          <button class="text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline" @click="navigateTo('/driver/history')">Xem tất cả</button>
         </div>
         <div class="relative">
           <div class="absolute left-[15px] top-2 bottom-2 w-px bg-neutral-200 dark:bg-neutral-800" />
