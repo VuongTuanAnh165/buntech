@@ -1,0 +1,33 @@
+import type { HttpContext } from '@adonisjs/core/http'
+import { inject } from '@adonisjs/core'
+import DriverOrderService from '#services/driver_order_service'
+import { deliverOrderValidator } from '#validators/driver_order_validator'
+import emitter from '@adonisjs/core/services/emitter'
+
+@inject()
+export default class DriverOrdersController {
+  constructor(protected driverOrderService: DriverOrderService) {}
+
+  /**
+   * @deliver
+   * @summary Chốt giao hàng thành công (Tài xế)
+   * @description Cập nhật đơn hàng thành DELIVERED, ghi nhận số tiền tài xế thu hộ, và tự động cập nhật Công Nợ của Khách hàng. Yêu cầu truyền `idempotencyKey` để chống double click.
+   * @paramPath id - ID đơn hàng
+   * @requestBody <deliverOrderValidator>
+   * @responseBody 200 - <OrderResponse>
+   */
+  async deliver({ auth, params, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+    const payload = await request.validateUsing(deliverOrderValidator)
+
+    const order = await this.driverOrderService.deliverOrder(params.id, user.id, payload)
+
+    emitter.emit('order:delivered', order)
+
+    return response.ok({
+      success: true,
+      message: 'Chốt giao hàng thành công, công nợ đã được tự động cập nhật',
+      data: order,
+    })
+  }
+}

@@ -1,0 +1,355 @@
+/*
+|--------------------------------------------------------------------------
+| Routes file
+|--------------------------------------------------------------------------
+|
+| The routes file is used for defining the HTTP routes.
+|
+*/
+
+import router from '@adonisjs/core/services/router'
+
+router.get('/', () => {
+  return { hello: 'world' }
+})
+
+// Swagger API Documentation (Only available in non-production environments)
+import env from '#start/env'
+
+if (env.get('NODE_ENV') !== 'production') {
+  router.get('/swagger', [() => import('#controllers/swagger_controller'), 'swagger'])
+  router.get('/docs', [() => import('#controllers/swagger_controller'), 'docs'])
+}
+
+import { middleware } from '#start/kernel'
+
+import { authThrottle, quickOrderThrottle } from '#start/limiter'
+
+router
+  .group(() => {
+    router
+      .post('/auth/login', [() => import('#controllers/auth_controller'), 'login'])
+      .use(authThrottle)
+    router
+      .post('/auth/refresh', [() => import('#controllers/auth_controller'), 'refresh'])
+      .use(authThrottle)
+    router
+      .get('/auth/me', [() => import('#controllers/auth_controller'), 'me'])
+      .use(middleware.auth())
+
+    // Master Data
+    router.get('/master-data/divisions/version', [
+      () => import('#controllers/master_data_controller'),
+      'getDivisionsVersion',
+    ])
+    router.get('/master-data/divisions', [
+      () => import('#controllers/master_data_controller'),
+      'getDivisions',
+    ])
+  })
+  .prefix('/api/v1')
+
+// Public Routes (Frontend Nuxt 4)
+router
+  .group(() => {
+    // Blog Categories
+    router.get('/blog-categories', [
+      () => import('#controllers/blog_categories_controller'),
+      'clientIndex',
+    ])
+
+    // Posts
+    router.get('/posts', [() => import('#controllers/posts_controller'), 'clientIndex'])
+    router.get('/posts/:id', [() => import('#controllers/posts_controller'), 'clientShow'])
+
+    // Categories
+    router.get('/categories', [() => import('#controllers/categories_controller'), 'clientIndex'])
+    router.get('/categories/:id', [
+      () => import('#controllers/categories_controller'),
+      'clientShow',
+    ])
+
+    // Products
+    router.get('/products', [() => import('#controllers/products_controller'), 'clientIndex'])
+    router.get('/products/:id', [() => import('#controllers/products_controller'), 'clientShow'])
+
+    // Product Reviews (Client)
+    router.get('/products/:id/reviews', [
+      () => import('#controllers/product_reviews_controller'),
+      'clientIndex',
+    ])
+    router
+      .post('/products/:id/reviews', [
+        () => import('#controllers/product_reviews_controller'),
+        'store',
+      ])
+      .use(middleware.auth())
+
+    // Quick Order
+    router
+      .post('/orders/quick', [() => import('#controllers/public_orders_controller'), 'quickOrder'])
+      .use(quickOrderThrottle)
+
+    // Constants
+    router.get('/constants', [() => import('#controllers/constants_controller'), 'index'])
+  })
+  .prefix('/api/v1')
+
+// Admin Routes (Yêu cầu Authentication)
+router
+  .group(() => {
+    // Blog Categories CRUD
+    router.get('/admin/blog-categories', [
+      () => import('#controllers/blog_categories_controller'),
+      'index',
+    ])
+    router.get('/admin/blog-categories/:id', [
+      () => import('#controllers/blog_categories_controller'),
+      'show',
+    ])
+    router.post('/admin/blog-categories', [
+      () => import('#controllers/blog_categories_controller'),
+      'store',
+    ])
+    router.put('/admin/blog-categories/:id', [
+      () => import('#controllers/blog_categories_controller'),
+      'update',
+    ])
+    router.delete('/admin/blog-categories/:id', [
+      () => import('#controllers/blog_categories_controller'),
+      'destroy',
+    ])
+
+    // Posts CRUD
+    router.get('/admin/posts', [() => import('#controllers/posts_controller'), 'index'])
+    router.get('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'show'])
+    router.post('/admin/posts', [() => import('#controllers/posts_controller'), 'store'])
+    router.put('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'update'])
+    router.delete('/admin/posts/:id', [() => import('#controllers/posts_controller'), 'destroy'])
+
+    // Categories CRUD
+    router.get('/admin/categories', [() => import('#controllers/categories_controller'), 'index'])
+    router.get('/admin/categories/:id', [
+      () => import('#controllers/categories_controller'),
+      'show',
+    ])
+    router.post('/admin/categories', [() => import('#controllers/categories_controller'), 'store'])
+    router.put('/admin/categories/:id', [
+      () => import('#controllers/categories_controller'),
+      'update',
+    ])
+    router.delete('/admin/categories/:id', [
+      () => import('#controllers/categories_controller'),
+      'destroy',
+    ])
+
+    // Products CRUD
+    router.get('/admin/products', [() => import('#controllers/products_controller'), 'index'])
+    router.get('/admin/products/:id', [() => import('#controllers/products_controller'), 'show'])
+    router.post('/admin/products', [() => import('#controllers/products_controller'), 'store'])
+    router.put('/admin/products/:id', [() => import('#controllers/products_controller'), 'update'])
+    router.delete('/admin/products/:id', [
+      () => import('#controllers/products_controller'),
+      'destroy',
+    ])
+
+    // Product Reviews CRUD
+    router.get('/admin/product-reviews', [
+      () => import('#controllers/product_reviews_controller'),
+      'index',
+    ])
+    router.patch('/admin/product-reviews/:id/approve', [
+      () => import('#controllers/product_reviews_controller'),
+      'approve',
+    ])
+    router.patch('/admin/product-reviews/:id/reply', [
+      () => import('#controllers/product_reviews_controller'),
+      'reply',
+    ])
+    router.delete('/admin/product-reviews/:id', [
+      () => import('#controllers/product_reviews_controller'),
+      'destroy',
+    ])
+
+    // Users CRUD
+    router.get('/admin/users', [() => import('#controllers/users_controller'), 'index'])
+    router.get('/admin/users/:id', [() => import('#controllers/users_controller'), 'show'])
+    router.post('/admin/users', [() => import('#controllers/users_controller'), 'store'])
+    router.put('/admin/users/:id', [() => import('#controllers/users_controller'), 'update'])
+    router.delete('/admin/users/:id', [() => import('#controllers/users_controller'), 'destroy'])
+    router.put('/admin/users/:id/change-password', [
+      () => import('#controllers/users_controller'),
+      'changePassword',
+    ])
+    router.put('/admin/users/:id/profile', [
+      () => import('#controllers/users_controller'),
+      'updateProfile',
+    ])
+
+    // Addresses CRUD (Nested under users)
+    router.get('/admin/users/:userId/addresses', [
+      () => import('#controllers/addresses_controller'),
+      'index',
+    ])
+    router.get('/admin/users/:userId/addresses/:id', [
+      () => import('#controllers/addresses_controller'),
+      'show',
+    ])
+    router.post('/admin/users/:userId/addresses', [
+      () => import('#controllers/addresses_controller'),
+      'store',
+    ])
+    router.put('/admin/users/:userId/addresses/:id', [
+      () => import('#controllers/addresses_controller'),
+      'update',
+    ])
+    router.delete('/admin/users/:userId/addresses/:id', [
+      () => import('#controllers/addresses_controller'),
+      'destroy',
+    ])
+
+    // Customer Prices CRUD (Nested under users)
+    router.get('/admin/users/:userId/custom-prices', [
+      () => import('#controllers/customer_prices_controller'),
+      'index',
+    ])
+    router.post('/admin/users/:userId/custom-prices', [
+      () => import('#controllers/customer_prices_controller'),
+      'upsert',
+    ])
+    router.delete('/admin/users/:userId/custom-prices/:productId', [
+      () => import('#controllers/customer_prices_controller'),
+      'destroy',
+    ])
+
+    // Finance & Transactions
+    router.get('/admin/transactions', [
+      () => import('#controllers/transactions_controller'),
+      'index',
+    ])
+    router.post('/admin/transactions/pay-debt', [
+      () => import('#controllers/transactions_controller'),
+      'payDebt',
+    ])
+    router.get('/admin/finance/debt-summary', [
+      () => import('#controllers/transactions_controller'),
+      'debtSummary',
+    ])
+
+    // Admin Orders (M5)
+    router.get('/admin/orders', [() => import('#controllers/admin_orders_controller'), 'index'])
+    router.get('/admin/orders/:id', [() => import('#controllers/admin_orders_controller'), 'show'])
+    router.post('/admin/orders', [() => import('#controllers/admin_orders_controller'), 'store'])
+    router.patch('/admin/orders/batch-assign', [
+      () => import('#controllers/admin_orders_controller'),
+      'batchAssign',
+    ])
+    router.patch('/admin/orders/:id/status', [
+      () => import('#controllers/admin_orders_controller'),
+      'updateStatus',
+    ])
+
+    // Upload API
+    router.post('/admin/upload', [() => import('#controllers/uploads_controller'), 'store'])
+
+    // System Configs CRUD
+    router.get('/admin/system-configs', [
+      () => import('#controllers/system_configs_controller'),
+      'index',
+    ])
+    router.get('/admin/system-configs/:id', [
+      () => import('#controllers/system_configs_controller'),
+      'show',
+    ])
+    router.post('/admin/system-configs', [
+      () => import('#controllers/system_configs_controller'),
+      'store',
+    ])
+    router.put('/admin/system-configs/:id', [
+      () => import('#controllers/system_configs_controller'),
+      'update',
+    ])
+    router.delete('/admin/system-configs/:id', [
+      () => import('#controllers/system_configs_controller'),
+      'destroy',
+    ])
+
+    // Raw Materials CRUD
+    router.get('/admin/raw-materials', [
+      () => import('#controllers/raw_materials_controller'),
+      'index',
+    ])
+    router.get('/admin/raw-materials/:id', [
+      () => import('#controllers/raw_materials_controller'),
+      'show',
+    ])
+    router.post('/admin/raw-materials', [
+      () => import('#controllers/raw_materials_controller'),
+      'store',
+    ])
+    router.put('/admin/raw-materials/:id', [
+      () => import('#controllers/raw_materials_controller'),
+      'update',
+    ])
+    router.delete('/admin/raw-materials/:id', [
+      () => import('#controllers/raw_materials_controller'),
+      'destroy',
+    ])
+
+    // Inventory
+    router.post('/admin/inventory/import', [
+      () => import('#controllers/inventory_controller'),
+      'importMaterial',
+    ])
+    router.post('/admin/inventory/export', [
+      () => import('#controllers/inventory_controller'),
+      'exportMaterial',
+    ])
+    router.get('/admin/inventory/loss-report', [
+      () => import('#controllers/inventory_controller'),
+      'lossReport',
+    ])
+
+    // Dashboard
+    router.get('/admin/dashboard/overview', [
+      () => import('#controllers/dashboard_controller'),
+      'overview',
+    ])
+    router.get('/admin/dashboard/top-buyers', [
+      () => import('#controllers/dashboard_controller'),
+      'topBuyers',
+    ])
+
+    // SSE
+    router.get('/admin/events/sse', [() => import('#controllers/events_controller'), 'stream'])
+
+    // Exports
+    router.get('/admin/exports/orders', [
+      () => import('#controllers/exports_controller'),
+      'exportOrders',
+    ])
+    router.get('/admin/exports/orders-today', [
+      () => import('#controllers/exports_controller'),
+      'exportOrdersToday',
+    ])
+  })
+  .prefix('/api/v1')
+  .use(middleware.auth())
+  .use(middleware.admin())
+
+// Driver Routes (Yêu cầu Authentication, Role: Driver - sẽ xử lý phân quyền bên trong controller/policy nếu cần, tạm thời tách khỏi admin middleware)
+router
+  .group(() => {
+    router.post('/device-tokens', [() => import('#controllers/device_tokens_controller'), 'store'])
+    router.get('/routes/today', [
+      () => import('#controllers/driver_routes_controller'),
+      'getTodayRoutes',
+    ])
+    router.patch('/orders/:id/deliver', [
+      () => import('#controllers/driver_orders_controller'),
+      'deliver',
+    ])
+  })
+  .prefix('/api/v1/driver')
+  .use(middleware.auth())
+  .use(middleware.driver())

@@ -1,0 +1,42 @@
+import { BaseSchema } from '@adonisjs/lucid/schema'
+
+export default class extends BaseSchema {
+  protected tableName = 'products'
+
+  async up() {
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id').primary()
+      table
+        .integer('category_id')
+        .unsigned()
+        .references('id')
+        .inTable('categories')
+        .onDelete('CASCADE')
+        .index()
+      table.string('name', 191).notNullable()
+      table.string('slug', 191).notNullable().unique()
+      table.decimal('base_price', 10, 2).notNullable()
+      table.string('unit', 20).notNullable()
+      table.string('thumbnail_url').nullable()
+      table.text('short_description').nullable()
+      table.text('content').nullable()
+      table.string('meta_title', 60).nullable()
+      table.string('meta_description', 160).nullable()
+      table.boolean('is_active').defaultTo(true)
+
+      // Denormalization for Product Reviews
+      table.decimal('average_rating', 3, 2).defaultTo(0.0)
+      table.integer('total_reviews').defaultTo(0).unsigned()
+
+      table.timestamp('created_at')
+      table.timestamp('updated_at')
+      table.timestamp('deleted_at').nullable()
+      table.integer('created_by').unsigned().nullable()
+      table.integer('updated_by').unsigned().nullable()
+    })
+  }
+
+  async down() {
+    this.schema.dropTable(this.tableName)
+  }
+}

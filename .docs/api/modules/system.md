@@ -19,7 +19,7 @@ API quản lý các cấu hình động dạng Key-Value (Ví dụ: `maintain_mo
 - **Request Body (JSON)**:
   - `key` (String, required, max 100, unique)
   - `value` (String, required)
-  - `description` (String, optional, max 255)
+  - `description` (String, optional, max 191)
 
 ### 1.3 Cập nhật, Xem, Xóa cấu hình
 - **Chi tiết**: `GET /api/v1/admin/system-configs/:id` (với `id` là key của cấu hình)
@@ -39,6 +39,14 @@ Các API này không trả về JSON mà trả về định dạng **File Stream
 - **URL**: `GET /api/v1/admin/exports/orders-today`
 - **Mục đích**: Xuất nhanh các đơn hàng trong ngày hôm nay.
 - **Response**: Trả về một file CSV đính kèm (Header `Content-Disposition: attachment; filename="Export_Orders_Today_YYYY_MM_DD.csv"`).
+
+### 2.2 Xuất đơn hàng theo khoảng thời gian
+- **URL**: `GET /api/v1/admin/exports/orders`
+- **Mục đích**: Lọc và xuất báo cáo đơn hàng (CSV) theo thời gian tùy chỉnh.
+- **Query Parameters**:
+  - `startDate` (String, optional): Ngày bắt đầu (YYYY-MM-DD).
+  - `endDate` (String, optional): Ngày kết thúc (YYYY-MM-DD).
+- **Response**: Trả về một file CSV đính kèm (Header `Content-Disposition: attachment; filename="Export_Orders_YYYY_MM_DD.csv"`).
 
 ---
 

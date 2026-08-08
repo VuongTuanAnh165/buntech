@@ -48,10 +48,8 @@ Toàn bộ API dưới đây có Prefix `/api/v1/admin/orders` và yêu cầu `B
 - **Request Body (JSON)**:
   - `userId` (Number, required, positive)
   - `shippingAddressId` (Number, required, positive)
-  - `paymentMethod` (String, required, max 50) - Ví dụ: CASH, BANK_TRANSFER, DEBT
-  - `amountPaid` (Number, required, min 0)
-  - `deliveryNote` (String, optional)
-  - `idempotencyKey` (String, required, max 100): Mã UUID sinh từ phía App. Dùng để chống lỗi "Double Click" (Tài xế bấm nhiều lần do lag mạng).
+  - `note` (String, optional)
+  - `deliveryDate` (Date, optional)
   - `items` (Array of Object `[{ productId, quantity }]`, required, min 1 item)
 - **Business Flow (Luồng xử lý CỰC KỲ QUAN TRỌNG)**:
   1. Payload validator. *(Lưu ý: Đối với tính năng "Copy đơn ngày hôm qua", Frontend tự parse dữ liệu cũ và gọi chung vào API `POST` này với format JSON đầy đủ, Backend không tạo API `/clone` riêng).*

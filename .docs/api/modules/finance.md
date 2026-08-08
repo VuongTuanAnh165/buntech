@@ -26,6 +26,7 @@ Trả về danh sách giao dịch phân trang. Mỗi dòng giao dịch (`transac
   - `userId`: ID Khách hàng
   - `amount`: Số tiền trả
   - `paymentMethod`: Phương thức (Tiền mặt, Chuyển khoản...)
+  - `referenceCode`: (Tùy chọn) Mã tham chiếu giao dịch (max 100)
   - `note`: Ghi chú (VD: "Khách CK trả nợ tháng 7")
   - `transactionDate`: (Tùy chọn) Ngày giao dịch thực tế
 - **Business Flow**:

@@ -49,8 +49,8 @@ Module này chịu trách nhiệm quản lý Danh mục sản phẩm (Categories
 - **Tạo sản phẩm**: `POST /api/v1/admin/products`
   - **Request Body (FormData)**:
     - `categoryId` (Number, optional)
-    - `name` (String, required, max 255)
-    - `slug` (String, required, max 255, unique)
+    - `name` (String, required, max 191)
+    - `slug` (String, required, max 191, unique)
     - `basePrice` (Number, required, min 0)
     - `unit` (String, required, max 20)
     - `shortDescription` (String, optional)

@@ -46,7 +46,7 @@ Thực hiện các thao tác tăng/giảm số lượng tồn kho của Nguyên 
 - **Request Body (JSON)**:
   - `materialId` (Number, required, positive)
   - `quantity` (Number, required, positive)
-  - `note` (String, optional, max 255)
+  - `note` (String, optional, max 191)
   - `referenceId` (String, optional, max 100) - Mã phiếu nhập tham chiếu.
 - **Business Flow**:
   1. Validator kiểm tra ID nguyên liệu và số lượng nhập.
@@ -60,7 +60,7 @@ Thực hiện các thao tác tăng/giảm số lượng tồn kho của Nguyên 
 - **Request Body (JSON)**:
   - `materialId` (Number, required, positive)
   - `quantity` (Number, required, positive)
-  - `note` (String, optional, max 255)
+  - `note` (String, optional, max 191)
   - `referenceId` (String, optional, max 100) - Mã phiếu xuất tham chiếu.
 - **Business Flow**:
   1. Validator kiểm tra ID nguyên liệu và số lượng xuất. Kiểm tra xem tồn kho hiện tại có đủ xuất không.

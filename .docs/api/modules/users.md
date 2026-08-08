@@ -39,8 +39,8 @@ Tất cả các API trong module này đều có prefix `/api/v1/admin/users` v�
 - **Method**: `PUT /:id/profile`
 - **Request Body (JSON)**:
   - `debtLimit` (Number, optional, min 0)
-  - `storeName` (String, optional, max 200)
-  - `zaloUserId` (String, optional)
+  - `storeName` (String, optional, max 191)
+  - `zaloUserId` (String, optional, max 191)
   - `avatarUrl` (String, optional)
 - **Mục đích**: Admin cập nhật các thông tin đặc thù của khách sỉ như Hạn mức nợ (`debtLimit`), Tên cửa hàng (`storeName`), Zalo ID...
 
@@ -66,7 +66,7 @@ Một user có thể có nhiều địa chỉ giao hàng. Các API này được
 ### 2.2 Tạo địa chỉ mới
 - **Method**: `POST /`
 - **Request Body (JSON)**:
-  - `addressLine` (String, required, max 255)
+  - `addressLine` (String, required, max 191)
   - `province` (String, optional, max 100)
   - `ward` (String, optional, max 100)
   - `latitude` (String, optional, max 50)
