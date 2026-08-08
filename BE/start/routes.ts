@@ -324,6 +324,10 @@ router
     router.get('/admin/events/sse', [() => import('#controllers/events_controller'), 'stream'])
 
     // Exports
+    router.get('/admin/exports/orders', [
+      () => import('#controllers/exports_controller'),
+      'exportOrders',
+    ])
     router.get('/admin/exports/orders-today', [
       () => import('#controllers/exports_controller'),
       'exportOrdersToday',

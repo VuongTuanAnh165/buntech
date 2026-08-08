@@ -8,7 +8,7 @@ export const createBlogCategoryValidator = vine.compile(
   vine.object({
     name: vine.string().maxLength(100),
     slug: vine.string().maxLength(100).unique({ table: 'blog_categories', column: 'slug' }),
-    description: vine.string().maxLength(255).optional(),
+    description: vine.string().maxLength(191).optional(),
   })
 )
 
@@ -31,6 +31,6 @@ export const updateBlogCategoryValidator = vine.withMetaData<{ categoryId: numbe
         return !match
       })
       .optional(),
-    description: vine.string().maxLength(255).optional(),
+    description: vine.string().maxLength(191).optional(),
   })
 )

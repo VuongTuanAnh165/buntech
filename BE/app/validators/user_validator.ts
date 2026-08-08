@@ -36,8 +36,8 @@ export const changePasswordValidator = vine.compile(
 export const updateUserProfileValidator = vine.compile(
   vine.object({
     debtLimit: vine.number().min(0).optional(),
-    storeName: vine.string().trim().maxLength(200).optional(),
-    zaloUserId: vine.string().trim().optional(),
+    storeName: vine.string().trim().maxLength(191).optional(),
+    zaloUserId: vine.string().trim().maxLength(191).optional(),
     avatarUrl: vine.string().trim().optional(),
   })
 )

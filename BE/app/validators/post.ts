@@ -6,8 +6,8 @@ import vine from '@vinejs/vine'
  */
 export const createPostValidator = vine.compile(
   vine.object({
-    title: vine.string().maxLength(255),
-    slug: vine.string().maxLength(255).unique({ table: 'posts', column: 'slug' }),
+    title: vine.string().maxLength(191),
+    slug: vine.string().maxLength(191).unique({ table: 'posts', column: 'slug' }),
     blogCategoryId: vine.number(),
     thumbnail: vine
       .file({
@@ -29,10 +29,10 @@ export const createPostValidator = vine.compile(
  */
 export const updatePostValidator = vine.withMetaData<{ postId: number }>().compile(
   vine.object({
-    title: vine.string().maxLength(255).optional(),
+    title: vine.string().maxLength(191).optional(),
     slug: vine
       .string()
-      .maxLength(255)
+      .maxLength(191)
       .unique(async (db, value, field) => {
         const match = await db
           .from('posts')

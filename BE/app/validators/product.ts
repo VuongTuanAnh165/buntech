@@ -6,8 +6,8 @@ import vine from '@vinejs/vine'
 export const createProductValidator = vine.compile(
   vine.object({
     categoryId: vine.number().optional(),
-    name: vine.string().maxLength(255),
-    slug: vine.string().maxLength(255).unique({ table: 'products', column: 'slug' }),
+    name: vine.string().maxLength(191),
+    slug: vine.string().maxLength(191).unique({ table: 'products', column: 'slug' }),
     basePrice: vine.number().min(0),
     unit: vine.string().maxLength(20),
     shortDescription: vine.string().optional(),
@@ -42,10 +42,10 @@ export const createProductValidator = vine.compile(
 export const updateProductValidator = vine.withMetaData<{ productId: number }>().compile(
   vine.object({
     categoryId: vine.number().optional(),
-    name: vine.string().maxLength(255).optional(),
+    name: vine.string().maxLength(191).optional(),
     slug: vine
       .string()
-      .maxLength(255)
+      .maxLength(191)
       .unique(async (db, value, field) => {
         const match = await db
           .from('products')

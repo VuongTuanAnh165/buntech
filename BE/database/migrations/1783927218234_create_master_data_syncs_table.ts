@@ -7,7 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
       table.string('type', 100).notNullable().index()
-      table.string('source_hash', 255).notNullable()
+      table.string('source_hash', 191).notNullable()
       table.timestamp('synced_at').notNullable()
       table.string('status', 50).notNullable()
 

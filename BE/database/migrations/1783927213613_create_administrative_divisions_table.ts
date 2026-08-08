@@ -7,8 +7,8 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.integer('code').primary()
       table.integer('parent_code').nullable().index()
-      table.string('name', 255).notNullable()
-      table.string('codename', 255).notNullable()
+      table.string('name', 191).notNullable()
+      table.string('codename', 191).notNullable()
       table.string('division_type', 100).notNullable()
       table.integer('phone_code').nullable()
       table.string('level', 50).notNullable().index()

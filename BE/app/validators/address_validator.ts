@@ -2,7 +2,7 @@ import vine from '@vinejs/vine'
 
 export const createAddressValidator = vine.compile(
   vine.object({
-    addressLine: vine.string().trim().maxLength(255),
+    addressLine: vine.string().trim().maxLength(191),
     province: vine.string().trim().maxLength(100).optional(),
     ward: vine.string().trim().maxLength(100).optional(),
     latitude: vine.string().trim().maxLength(50).optional(),
@@ -13,7 +13,7 @@ export const createAddressValidator = vine.compile(
 
 export const updateAddressValidator = vine.compile(
   vine.object({
-    addressLine: vine.string().trim().maxLength(255).optional(),
+    addressLine: vine.string().trim().maxLength(191).optional(),
     province: vine.string().trim().maxLength(100).optional(),
     ward: vine.string().trim().maxLength(100).optional(),
     latitude: vine.string().trim().maxLength(50).optional(),

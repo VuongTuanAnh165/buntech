@@ -6,7 +6,7 @@ export default class extends BaseSchema {
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
-      table.string('name', 255).notNullable()
+      table.string('name', 191).notNullable()
       table.string('unit', 20).notNullable()
       table.decimal('current_stock', 12, 2).defaultTo(0)
 

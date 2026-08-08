@@ -14,7 +14,7 @@ export default class extends BaseSchema {
         .inTable('users')
         .onDelete('CASCADE')
         .index()
-      table.string('fcm_token', 255).notNullable()
+      table.string('fcm_token', 191).notNullable()
       table.enum('device_type', Object.values(DeviceType)).notNullable()
 
       table.timestamp('created_at')

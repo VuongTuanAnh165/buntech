@@ -13,7 +13,7 @@ export default class extends BaseSchema {
         .inTable('users')
         .onDelete('CASCADE')
         .index()
-      table.string('token', 255).notNullable().unique()
+      table.string('token', 191).notNullable().unique()
       table.timestamp('expires_at').notNullable()
       table.boolean('is_revoked').defaultTo(false)
 

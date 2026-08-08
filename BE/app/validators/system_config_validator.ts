@@ -11,13 +11,13 @@ export const createSystemConfigValidator = vine.compile(
         return !existing
       }),
     value: vine.string().trim(),
-    description: vine.string().trim().maxLength(255).optional(),
+    description: vine.string().trim().maxLength(191).optional(),
   })
 )
 
 export const updateSystemConfigValidator = vine.compile(
   vine.object({
     value: vine.string().trim(),
-    description: vine.string().trim().maxLength(255).optional(),
+    description: vine.string().trim().maxLength(191).optional(),
   })
 )

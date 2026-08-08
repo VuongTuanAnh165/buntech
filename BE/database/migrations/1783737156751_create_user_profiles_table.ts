@@ -15,8 +15,8 @@ export default class extends BaseSchema {
         .primary()
       table.decimal('current_debt', 12, 2).defaultTo(0)
       table.decimal('debt_limit', 12, 2).defaultTo(0)
-      table.string('store_name', 255).nullable()
-      table.string('zalo_user_id', 255).nullable().unique()
+      table.string('store_name', 191).nullable()
+      table.string('zalo_user_id', 191).nullable().unique()
       table.text('avatar_url').nullable()
 
       table.timestamp('created_at')

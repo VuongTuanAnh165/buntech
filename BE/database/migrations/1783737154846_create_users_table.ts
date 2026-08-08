@@ -7,7 +7,8 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary()
       table.string('phone_number', 20).notNullable().unique()
-      table.string('password', 255).notNullable()
+      table.string('full_name', 191).notNullable()
+      table.string('password', 191).notNullable()
       table.enum('role', ['admin', 'driver', 'wholesale', 'retail', 'guest']).defaultTo('retail')
 
       table.timestamp('created_at')
