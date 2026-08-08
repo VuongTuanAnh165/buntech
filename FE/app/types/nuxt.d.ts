@@ -7,7 +7,7 @@ declare module '#app' {
       icon?: string
       timeout?: number
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      actions?: any[]
+      actions?: Record<string, unknown>[]
     }) => void
   }
 }

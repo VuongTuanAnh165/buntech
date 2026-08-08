@@ -115,7 +115,7 @@ onMounted(() => {
             <p class="text-xs text-white/80">{{ isOnline ? 'Sẵn sàng nhận đơn giao hàng' : 'Tạm dừng nhận đơn' }}</p>
           </div>
         </div>
-        <button
+        <UButton variant="ghost" color="neutral"
           class="relative w-12 h-7 rounded-full bg-white/25 backdrop-blur transition-all min-w-[44px] min-h-[28px]"
           :aria-label="isOnline ? 'Tắt trực tuyến' : 'Bật trực tuyến'"
           @click="toggleOnline"
@@ -126,7 +126,7 @@ onMounted(() => {
               isOnline ? 'left-[22px]' : 'left-0.5',
             ]"
           />
-        </button>
+        </UButton>
       </div>
     </div>
 
@@ -136,13 +136,13 @@ onMounted(() => {
         <h1 class="text-xl font-bold text-neutral-900 dark:text-white tracking-tight">Tuyến giao hôm nay</h1>
         <p class="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">{{ formatDate(new Date().toISOString()) }}</p>
       </div>
-      <button
+      <UButton variant="ghost" color="neutral"
         class="p-2.5 text-slate-500 dark:text-zinc-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
         :disabled="refreshing"
         @click="refresh"
       >
         <UIcon name="i-lucide-refresh-cw" :class="['w-5 h-5', refreshing ? 'animate-spin' : '']" />
-      </button>
+      </UButton>
     </div>
 
     <!-- Premium Stats Banner -->
@@ -187,7 +187,7 @@ onMounted(() => {
     <!-- Tab filter -->
     <div class="flex items-center gap-2 mb-4 overflow-x-auto">
       <div class="flex items-center gap-1 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-neutral-200 dark:border-neutral-800 flex-1 min-w-fit">
-        <button
+        <UButton variant="ghost" color="neutral"
           v-for="tab in [
             { accessorKey: 'all', header: 'Tất cả', count: driverOrders.length },
             { accessorKey: 'shipping', header: 'Đang giao', count: driverOrders.filter(o => o.status === OrderStatus.SHIPPING).length },
@@ -202,7 +202,7 @@ onMounted(() => {
               : 'text-slate-500 dark:text-zinc-400 hover:bg-neutral-100 dark:hover:bg-zinc-800',
           ]"
           @click="activeTab = tab.key as 'all' | 'shipping' | 'pending' | 'delivered'"
-        >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></button>
+        >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton>
       </div>
     </div>
 

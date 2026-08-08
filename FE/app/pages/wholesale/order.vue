@@ -21,13 +21,13 @@ const successOrderCode = ref('')
 const WHOLESALE_DISCOUNT = 0.1 // 10% discount
 
 const availableProducts = computed(() => {
-  let result = mockProducts.filter((p: any) => p.status === 'ACTIVE')
+  let result = mockProducts.filter((p: Product) => p.status === 'ACTIVE')
   if (search.value) {
     const q = search.value.toLowerCase()
-    result = result.filter((p: any) => p.name.toLowerCase().includes(q))
+    result = result.filter((p: Product) => p.name.toLowerCase().includes(q))
   }
   if (selectedCategory.value) {
-    result = result.filter((p: any) => p.category_id === selectedCategory.value)
+    result = result.filter((p: Product) => p.category_id === selectedCategory.value)
   }
   return result
 })
@@ -39,14 +39,14 @@ function getWholesalePrice(price: number): number {
 const total = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.price, 0))
 const totalSavings = computed(() => {
   const retailTotal = orderItems.value.reduce((sum, item) => {
-    const product = mockProducts.find((p: any) => p.id === item.product_id)
+    const product = mockProducts.find((p: Product) => p.id === item.product_id)
     return sum + (product ? Number(product.price) * item.quantity : 0)
   }, 0)
   return retailTotal - total.value
 })
 
 function addProduct(productId: string) {
-  const product = mockProducts.find((p: any) => p.id === productId)
+  const product = mockProducts.find((p: Product) => p.id === productId)
   if (!product) return
   const existing = orderItems.value.find(i => i.product_id === productId)
   if (existing) {
@@ -216,7 +216,7 @@ onMounted(() => {
             
             <!-- Category pills -->
             <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 mb-4">
-              <button
+              <UButton variant="ghost" color="neutral"
                 type="button"
                 :class="[
                   'px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap border min-h-[32px]',
@@ -225,8 +225,8 @@ onMounted(() => {
                 @click="selectedCategory = ''"
               >
                 Tất cả
-              </button>
-              <button
+              </UButton>
+              <UButton variant="ghost" color="neutral"
                 v-for="cat in mockCategories"
                 :key="cat.id"
                 type="button"
@@ -237,7 +237,7 @@ onMounted(() => {
                 @click="selectedCategory = cat.id"
               >
                 {{ cat.name }}
-              </button>
+              </UButton>
             </div>
 
             <!-- Product grid -->
@@ -252,7 +252,7 @@ onMounted(() => {
             </template>
             <template v-else-if="availableProducts.length">
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto pr-1">
-                <button
+                <UButton variant="ghost" color="neutral"
                   v-for="(product, i) in availableProducts"
                   :key="product.id"
                   type="button"
@@ -280,7 +280,7 @@ onMounted(() => {
                     <span class="text-[10px] text-slate-400 dark:text-zinc-500 line-through">{{ formatVND(Number(product.price)) }}</span>
                   </div>
                   <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">SL còn: {{ product.stock }}</p>
-                </button>
+                </UButton>
               </div>
             </template>
             <div v-else class="text-center py-8 text-sm text-slate-500 dark:text-zinc-400">Không tìm thấy sản phẩm</div>
@@ -295,14 +295,14 @@ onMounted(() => {
                 <UIcon name="i-lucide-shopping-cart" class="w-5 h-5" />
                 Giỏ hàng ({{ orderItems.length }})
               </h2>
-              <button
+              <UButton variant="ghost" color="neutral"
                 v-if="orderItems.length"
                 type="button"
                 class="text-xs text-slate-400 dark:text-zinc-500 hover:text-error-600 dark:hover:text-error-400 transition-colors min-h-[44px] px-2"
                 @click="clearCart"
               >
                 Xóa tất cả
-              </button>
+              </UButton>
             </div>
 
             <template v-if="orderItems.length">
@@ -317,29 +317,29 @@ onMounted(() => {
                     <p class="text-xs text-slate-400 dark:text-zinc-500">{{ formatVND(item.price) }} / {{ item.unit }}</p>
                   </div>
                   <div class="flex items-center gap-1 flex-shrink-0">
-                    <button
+                    <UButton variant="ghost" color="neutral"
                       type="button"
                       class="w-7 h-7 rounded-md bg-surface-hover hover:bg-surface-border text-surface-foreground flex items-center justify-center transition-colors min-w-[28px] min-h-[28px]"
                       @click="decrementQty(i)"
                     >
                       <UIcon name="i-lucide-minus" class="w-3.5 h-3.5" />
-                    </button>
+                    </UButton>
                     <span class="w-8 text-center text-sm font-medium text-surface-foreground tabular-nums">{{ item.quantity }}</span>
-                    <button
+                    <UButton variant="ghost" color="neutral"
                       type="button"
                       class="w-7 h-7 rounded-md bg-surface-hover hover:bg-surface-border text-surface-foreground flex items-center justify-center transition-colors min-w-[28px] min-h-[28px]"
                       @click="incrementQty(i)"
                     >
                       <UIcon name="i-lucide-plus" class="w-3.5 h-3.5" />
-                    </button>
+                    </UButton>
                   </div>
-                  <button
+                  <UButton variant="ghost" color="neutral"
                     type="button"
                     class="w-8 h-8 rounded-md text-slate-400 hover:text-error-600 hover:bg-error-50 dark:hover:bg-error-900/20 flex items-center justify-center transition-colors flex-shrink-0"
                     @click="removeItem(i)"
                   >
                     <UIcon name="i-lucide-trash-2" class="w-3.5 h-3.5" />
-                  </button>
+                  </UButton>
                 </div>
               </div>
 

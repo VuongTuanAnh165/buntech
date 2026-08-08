@@ -77,25 +77,25 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
         <p class="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">{{ unreadCount }} thông báo chưa đọc</p>
       </div>
       <div class="flex items-center gap-1">
-        <button
+        <UButton variant="ghost" color="neutral"
           class="p-2.5 text-slate-500 dark:text-zinc-400 hover:text-error-600 dark:hover:text-error-400 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
           @click="clearAllRead"
         >
           <UIcon name="i-lucide-trash-2" class="w-5 h-5" />
-        </button>
-        <button
+        </UButton>
+        <UButton variant="ghost" color="neutral"
           class="p-2.5 text-slate-500 dark:text-zinc-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
           @click="markAllRead"
         >
           <UIcon name="i-lucide-check-check" class="w-5 h-5" />
-        </button>
+        </UButton>
       </div>
     </div>
 
     <!-- Filter tabs -->
     <div class="flex items-center gap-2 mb-4">
       <div class="flex items-center gap-1 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-neutral-200 dark:border-neutral-800 flex-1">
-        <button
+        <UButton variant="ghost" color="neutral"
           v-for="tab in [
             { accessorKey: 'all', header: 'Tất cả', count: notifications.length },
             { accessorKey: 'unread', header: 'Chưa đọc', count: unreadCount },
@@ -109,7 +109,7 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
               : 'text-slate-500 dark:text-zinc-400 hover:bg-neutral-100 dark:hover:bg-zinc-800',
           ]"
           @click="filterTab = tab.key as FilterTab"
-        >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></button>
+        >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton>
       </div>
     </div>
 
@@ -125,7 +125,7 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
 
     <!-- Notification list -->
     <template v-else-if="filteredNotifications.length">
-      <button
+      <UButton variant="ghost" color="neutral"
         v-for="(n, i) in filteredNotifications"
         :key="n.id"
         type="button"
@@ -150,7 +150,7 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
             </div>
           </div>
         </div>
-      </button>
+      </UButton>
     </template>
 
     <!-- Empty -->

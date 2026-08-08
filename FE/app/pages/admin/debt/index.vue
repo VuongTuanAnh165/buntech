@@ -252,7 +252,7 @@ onMounted(() => {
 
       <!-- Quick Actions -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        <button
+        <UButton variant="ghost" color="neutral"
           v-for="(action, i) in quickActions"
           :key="i"
           class="card card-hover p-4 flex items-center gap-3 text-left transition-all duration-200 hover:shadow-md stagger-item"
@@ -267,7 +267,7 @@ onMounted(() => {
             <p class="text-xs text-slate-500 dark:text-zinc-400 truncate">{{ action.description }}</p>
           </div>
           <UIcon name="i-lucide-arrow-right" class="w-4 h-4 text-slate-400 dark:text-zinc-500 flex-shrink-0" />
-        </button>
+        </UButton>
       </div>
 
       <!-- Filter pills -->

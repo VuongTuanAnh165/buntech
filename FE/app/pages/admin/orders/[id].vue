@@ -166,12 +166,12 @@ const breadcrumbItems = [
   <div>
     <UBreadcrumb :items="breadcrumbItems" class="mb-4" />
 
-    <button
+    <UButton variant="ghost" color="neutral"
       class="flex items-center gap-1 text-sm text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 mb-4 min-h-[44px] px-2 transition-colors"
       @click="navigateTo('/admin/orders')"
     >
       <UIcon name="i-lucide-arrow-left" class="w-4 h-4" /> Quay lại
-    </button>
+    </UButton>
 
     <BaseEmptyState v-if="error" title="Lỗi tải dữ liệu" description="Không thể tải thông tin đơn hàng." @retry="loadOrder" />
 
@@ -231,7 +231,7 @@ const breadcrumbItems = [
                 </UButton>
                 <Transition name="fade">
                   <div v-if="showStatusMenu" class="absolute right-0 top-full mt-2 z-20 w-48 card p-1.5 shadow-lg">
-                    <button
+                    <UButton variant="ghost" color="neutral"
                       v-for="s in statusOptions"
                       :key="s"
                       class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-surface-foreground hover:bg-surface-hover transition-colors min-h-[40px]"
@@ -239,7 +239,7 @@ const breadcrumbItems = [
                     >
                       <UIcon :name="ORDER_STATUS_ICONS[s]" class="w-4 h-4" />
                       {{ ORDER_STATUS_LABELS[s] }}
-                    </button>
+                    </UButton>
                   </div>
                 </Transition>
               </div>
@@ -470,9 +470,9 @@ const breadcrumbItems = [
                 </div>
                 <h2 class="text-sm font-semibold text-surface-foreground">Giao hàng</h2>
               </div>
-              <button v-if="!driverName" class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1" @click="showAssignDriver = true">
+              <UButton variant="ghost" color="neutral" v-if="!driverName" class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1" @click="showAssignDriver = true">
                 <UIcon name="i-lucide-user-check" class="w-3.5 h-3.5" /> Gán tài xế
-              </button>
+              </UButton>
             </div>
 
             <div v-if="driverName" class="flex items-center gap-3 mb-4 pb-4 border-b border-surface-border">
@@ -520,7 +520,7 @@ const breadcrumbItems = [
         <div class="p-6 space-y-4">
           <h3 class="text-lg font-bold text-surface-foreground">Gán tài xế</h3>
           <div class="space-y-2 max-h-80 overflow-y-auto p-1">
-            <button
+            <UButton variant="ghost" color="neutral"
               v-for="drv in availableDrivers"
               :key="drv.id"
               :class="[
@@ -535,7 +535,7 @@ const breadcrumbItems = [
                 <p class="text-xs text-slate-500 dark:text-zinc-400 tabular-nums">{{ drv.phone || 'Chưa có SĐT' }}</p>
               </div>
               <UIcon v-if="selectedDriverId === drv.id" name="i-lucide-check-circle-2" class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ml-auto" />
-            </button>
+            </UButton>
           </div>
           <div class="flex justify-end gap-2 pt-2">
             <UButton variant="ghost" color="neutral" @click="showAssignDriver = false">Huỷ</UButton>

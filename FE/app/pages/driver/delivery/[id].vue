@@ -89,12 +89,12 @@ onMounted(() => {
 <template>
   <div class="p-4 pb-6">
     <!-- Back button -->
-    <button
+    <UButton variant="ghost" color="neutral"
       class="flex items-center gap-1 text-sm text-slate-500 dark:text-zinc-400 hover:text-neutral-900 dark:hover:text-white mb-4 min-h-[44px] px-2 rounded-md transition-colors"
       @click="navigateTo('/driver/delivery')"
     >
       <UIcon name="i-lucide-arrow-left" class="w-4 h-4" /> Quay lại
-    </button>
+    </UButton>
 
     <!-- Loading -->
     <template v-if="loading">
@@ -159,12 +159,12 @@ onMounted(() => {
             <p class="font-semibold text-neutral-900 dark:text-white">{{ order.customer_name || 'Khách vãng lai' }}</p>
             <p class="text-sm text-slate-500 dark:text-zinc-400 tabular-nums">{{ order.customer?.phone || 'Chưa có SĐT' }}</p>
           </div>
-          <button
+          <UButton variant="ghost" color="neutral"
             class="w-10 h-10 rounded-xl bg-success-50 dark:bg-success-900/20 flex items-center justify-center hover:bg-success-100 dark:hover:bg-success-900/30 transition-colors min-w-[44px] min-h-[44px]"
             @click="callCustomer"
           >
             <UIcon name="i-lucide-phone" class="w-5 h-5 text-success-600 dark:text-success-400" />
-          </button>
+          </UButton>
         </div>
         <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
           <UIcon name="i-lucide-star" class="w-3.5 h-3.5 fill-warning-400 text-warning-400" />
@@ -181,13 +181,13 @@ onMounted(() => {
             <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
             Địa chỉ giao hàng
           </h2>
-          <button
+          <UButton variant="ghost" color="neutral"
             class="flex items-center gap-1 text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline"
             @click="navigateToAddress"
           >
             <UIcon name="i-lucide-navigation" class="w-3.5 h-3.5" />
             Chỉ đường
-          </button>
+          </UButton>
         </div>
         <div class="flex items-start gap-3">
           <div class="w-10 h-10 rounded-xl bg-error-50 dark:bg-error-900/20 flex items-center justify-center flex-shrink-0">

@@ -322,12 +322,12 @@ onMounted(loadCustomer)
               <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <UCard class="stagger-item">
                   <div class="flex items-center gap-2 mb-3">
-                    <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-                      <span class="i-lucide-wallet w-4 h-4 text-red-600 dark:text-red-400" aria-hidden="true" />
+                    <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-error-900/20 flex items-center justify-center">
+                      <span class="i-lucide-wallet w-4 h-4 text-error-600 dark:text-error-400" aria-hidden="true" />
                     </div>
                     <h2 class="text-sm font-semibold text-surface-foreground">Công nợ hiện tại</h2>
                   </div>
-                  <p :class="['text-3xl font-bold tabular-nums', currentDebt > 0 ? 'text-red-600 dark:text-red-400' : 'text-success-600 dark:text-success-400']">
+                  <p :class="['text-3xl font-bold tabular-nums', currentDebt > 0 ? 'text-error-600 dark:text-error-400' : 'text-success-600 dark:text-success-400']">
                     {{ formatVND(currentDebt) }}
                   </p>
                   <p class="text-xs text-slate-500 dark:text-zinc-400 mt-1">Từ {{ debtTransactions.length }} giao dịch</p>
@@ -348,7 +348,7 @@ onMounted(loadCustomer)
                     </div>
                     <div class="h-2 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
                       <div
-                        :class="['h-full rounded-full transition-all duration-500', debtUtilization > 80 ? 'bg-red-500' : debtUtilization > 50 ? 'bg-amber-500' : 'bg-emerald-500']"
+                        :class="['h-full rounded-full transition-all duration-500', debtUtilization > 80 ? 'bg-error-500' : debtUtilization > 50 ? 'bg-amber-500' : 'bg-emerald-500']"
                         :style="{ width: `${debtUtilization}%` }"
                       />
                     </div>
@@ -382,17 +382,17 @@ onMounted(loadCustomer)
                       <div :class="[
                         'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
                         tx.type === TransactionType.DEBT_INCREASE
-                          ? 'bg-red-50 dark:bg-red-900/20'
+                          ? 'bg-red-50 dark:bg-error-900/20'
                           : tx.type === TransactionType.DEBT_PAYMENT || tx.type === TransactionType.PAYMENT
                             ? 'bg-emerald-50 dark:bg-emerald-900/20'
-                            : 'bg-blue-50 dark:bg-blue-900/20',
+                            : 'bg-blue-50 dark:bg-primary-900/20',
                       ]">
                         <span
                           :class="[
                             tx.type === TransactionType.DEBT_INCREASE ? 'i-lucide-trending-up' : 'i-lucide-trending-down',
                             'w-4 h-4',
                             tx.type === TransactionType.DEBT_INCREASE
-                              ? 'text-red-600 dark:text-red-400'
+                              ? 'text-error-600 dark:text-error-400'
                               : 'text-emerald-600 dark:text-emerald-400',
                           ]"
                           aria-hidden="true"
@@ -407,7 +407,7 @@ onMounted(loadCustomer)
                       </div>
                       <span :class="[
                         'text-sm font-semibold tabular-nums flex-shrink-0',
-                        tx.type === TransactionType.DEBT_INCREASE ? 'text-red-600 dark:text-red-400' : 'text-success-600 dark:text-success-400',
+                        tx.type === TransactionType.DEBT_INCREASE ? 'text-error-600 dark:text-error-400' : 'text-success-600 dark:text-success-400',
                       ]">
                         {{ tx.type === TransactionType.DEBT_INCREASE ? '+' : '-' }}{{ formatVND(tx.amount) }}
                       </span>

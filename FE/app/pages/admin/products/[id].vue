@@ -79,7 +79,7 @@ const stockState = computed(() => {
 
 const stockValue = computed(() => stock.value * price.value)
 
-const movementConfig: any = {
+const movementConfig: Record<string, unknown> = {
   [InventoryMovementType.IMPORT]: { icon: 'i-lucide-arrow-down-right', color: 'text-success-600 dark:text-success-400', bg: 'bg-success-50 dark:bg-success-900/20', sign: '+', label: 'Nhập kho' },
   [InventoryMovementType.EXPORT]: { icon: 'i-lucide-arrow-up-right', color: 'text-info-600 dark:text-info-400', bg: 'bg-info-50 dark:bg-info-900/20', sign: '-', label: 'Xuất kho' },
   [InventoryMovementType.LOSS]: { icon: 'i-lucide-alert-triangle', color: 'text-error-600 dark:text-error-400', bg: 'bg-error-50 dark:bg-error-900/20', sign: '-', label: 'Hao hụt' },
@@ -163,12 +163,12 @@ onMounted(loadProduct)
 
 <template>
   <div>
-    <button
+    <UButton variant="ghost" color="neutral"
       class="flex items-center gap-1 text-sm text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 mb-4 min-h-[44px] px-2 transition-colors"
       @click="navigateTo('/admin/products')"
     >
       <span class="i-lucide-arrow-left w-4 h-4" aria-hidden="true" /> Quay lại
-    </button>
+    </UButton>
 
     <BaseEmptyState v-if="error" title="Lỗi" description="Không thể tải sản phẩm." icon="i-lucide-alert-triangle" @action="loadProduct" action-label="Thử lại" />
 
@@ -212,7 +212,7 @@ onMounted(loadProduct)
                 <template #leading><span class="w-1.5 h-1.5 rounded-full bg-current" /></template>
                 {{ status === ProductStatus.ACTIVE ? 'Đang bán' : 'Ngưng bán' }}
               </UBadge>
-              <UBadge :color="(stockState.color as any)" variant="soft">{{ stockState.label }}</UBadge>
+              <UBadge :color="stockState.color" variant="soft">{{ stockState.label }}</UBadge>
             </div>
 
             <h1 class="text-2xl font-bold text-surface-foreground tracking-tight mb-1">{{ productName }}</h1>
@@ -238,9 +238,9 @@ onMounted(loadProduct)
             <p class="text-sm text-slate-600 dark:text-zinc-300 line-clamp-2 flex-1">{{ description }}</p>
 
             <div class="flex flex-wrap gap-2 mt-5">
-              <button class="px-2 py-1 bg-surface border border-surface-border rounded shadow-sm flex items-center justify-center hover:bg-surface-hover text-slate-600 dark:text-zinc-300 transition-colors" title="Sửa" @click="() => navigateTo(`/admin/products/${product?.id}/edit`)">
+              <UButton variant="ghost" color="neutral" class="px-2 py-1 bg-surface border border-surface-border rounded shadow-sm flex items-center justify-center hover:bg-surface-hover text-slate-600 dark:text-zinc-300 transition-colors" title="Sửa" @click="() => navigateTo(`/admin/products/${product?.id}/edit`)">
                 <UIcon name="i-lucide-pencil" class="w-3.5 h-3.5" />
-              </button>
+              </UButton>
               <UButton size="sm" color="error" @click="confirmDelete" icon="i-lucide-trash-2">Xoá</UButton>
               <UButton size="sm" color="neutral" variant="outline" icon="i-lucide-external-link">Xem trang bán</UButton>
             </div>
@@ -256,7 +256,7 @@ onMounted(loadProduct)
           { label: `Đánh giá (${reviews.length})`, slot: 'reviews', icon: 'i-lucide-star' },
           { label: 'Phân tích', slot: 'analytics', icon: 'i-lucide-bar-chart-3' }
         ]"
-        @change="(idx: number) => activeTab = ['overview', 'inventory', 'reviews', 'analytics'][idx] as any"
+        @change="(idx: number) => activeTab = (['overview', 'inventory', 'reviews', 'analytics'] as const)[idx]"
         class="mb-6 animate-fade-in-up"
         style="animation-delay: 60ms"
       />
@@ -341,7 +341,7 @@ onMounted(loadProduct)
             <div class="card p-5 lg:col-span-2 stagger-item">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-sm font-semibold text-surface-foreground">Tồn kho hiện tại</h2>
-                <UBadge :color="(stockState.color as any)" variant="subtle">
+                <UBadge :color="stockState.color" variant="subtle">
                   <template #leading><span class="w-1.5 h-1.5 rounded-full bg-current" /></template>{{ stockState.label }}
                 </UBadge>
               </div>

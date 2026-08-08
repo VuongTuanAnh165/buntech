@@ -60,18 +60,18 @@ const navItems = [
           <UIcon :name="isOnline ? 'i-lucide-wifi' : 'i-lucide-wifi-off'" class="w-3.5 h-3.5" />
           <span>{{ isOnline ? 'Online' : 'Offline' }}</span>
         </div>
-        <button
+        <UButton variant="ghost" color="neutral"
           class="p-2.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
           @click="toggleDark"
         >
           <UIcon :name="colorMode.value === 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'" class="w-5 h-5" />
-        </button>
-        <button
+        </UButton>
+        <UButton variant="ghost" color="neutral"
           class="text-slate-400 hover:text-white p-2.5 rounded-lg hover:bg-white/5 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
           @click="showMenu = !showMenu"
         >
           <UIcon :name="showMenu ? 'i-lucide-x' : 'i-lucide-menu'" class="w-5 h-5" />
-        </button>
+        </UButton>
       </div>
     </header>
 
@@ -100,13 +100,13 @@ const navItems = [
             <UIcon :name="item.icon" class="w-5 h-5" />
             {{ item.label }}
           </NuxtLink>
-          <button
+          <UButton variant="ghost" color="neutral"
             class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-error-400 hover:bg-error-500/10 transition-colors w-full min-h-[48px]"
             @click="handleLogout"
           >
             <UIcon name="i-lucide-log-out" class="w-5 h-5" />
             Đăng xuất
-          </button>
+          </UButton>
         </nav>
       </div>
     </Transition>

@@ -179,7 +179,7 @@ onMounted(() => {
               <p class="text-xs text-slate-500 dark:text-zinc-400">Số điện thoại</p>
               <p class="text-sm font-medium text-neutral-900 dark:text-white tabular-nums">{{ driver?.phone || 'Chưa có' }}</p>
             </div>
-            <button class="text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline" @click="copyPhone">Sao chép</button>
+            <UButton variant="ghost" color="neutral" class="text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline" @click="copyPhone">Sao chép</UButton>
           </div>
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
@@ -282,7 +282,7 @@ onMounted(() => {
             <UIcon name="i-lucide-clock" class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
             Hoạt động gần đây
           </h2>
-          <button class="text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline" @click="navigateTo('/driver/history')">Xem tất cả</button>
+          <UButton variant="ghost" color="neutral" class="text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline" @click="navigateTo('/driver/history')">Xem tất cả</UButton>
         </div>
         <div class="relative">
           <div class="absolute left-[15px] top-2 bottom-2 w-px bg-neutral-200 dark:bg-neutral-800" />
@@ -330,13 +330,13 @@ onMounted(() => {
           <span class="flex-1 text-sm font-medium text-neutral-900 dark:text-white">Thông báo</span>
           <UIcon name="i-lucide-chevron-right" class="w-5 h-5 text-slate-300 dark:text-zinc-600" />
         </NuxtLink>
-        <button class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20 transition-colors min-h-[44px]" @click="handleLogout">
+        <UButton variant="ghost" color="neutral" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20 transition-colors min-h-[44px]" @click="handleLogout">
           <div class="w-9 h-9 rounded-lg bg-error-50 dark:bg-error-900/20 flex items-center justify-center flex-shrink-0">
             <UIcon name="i-lucide-log-out" class="w-4.5 h-4.5 text-error-600 dark:text-error-400" />
           </div>
           <span class="flex-1 text-sm font-medium text-error-600 dark:text-error-400 text-left">Đăng xuất</span>
           <UIcon name="i-lucide-chevron-right" class="w-5 h-5 text-slate-300 dark:text-zinc-600" />
-        </button>
+        </UButton>
       </div>
     </template>
   </div>

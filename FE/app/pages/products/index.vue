@@ -85,12 +85,12 @@ onMounted(() => {
       <div class="flex flex-wrap items-center gap-3">
         <div class="flex-1 min-w-[200px] max-w-md relative">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-500" aria-hidden="true" />
-          <input
+          <UInput
             v-model="search"
             type="text"
             placeholder="Tìm kiếm sản phẩm..."
             class="form-input pl-10 pr-4 min-h-[44px]"
-          >
+           />
         </div>
         <div class="relative">
           <select
@@ -102,7 +102,7 @@ onMounted(() => {
           </select>
           <ChevronDown class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-500 pointer-events-none" aria-hidden="true" />
         </div>
-        <button
+        <UButton variant="ghost" color="neutral"
           v-if="hasActiveFilters"
           type="button"
           class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-zinc-400 hover:text-danger-600 dark:hover:text-danger-400 transition-colors min-h-[44px] px-2"
@@ -110,9 +110,9 @@ onMounted(() => {
         >
           <X class="w-4 h-4" aria-hidden="true" />
           Xóa lọc
-        </button>
+        </UButton>
         <div class="hidden sm:flex items-center gap-1 p-1 bg-surface-hover rounded-lg ml-auto">
-          <button
+          <UButton variant="ghost" color="neutral"
             type="button"
             :class="['p-2 rounded-md transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center', viewMode === 'grid' ? 'bg-surface text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-400 dark:text-zinc-500']"
             :aria-label="'Hiển thị dạng lưới'"
@@ -120,8 +120,8 @@ onMounted(() => {
             @click="viewMode = 'grid'"
           >
             <LayoutGrid class="w-4 h-4" aria-hidden="true" />
-          </button>
-          <button
+          </UButton>
+          <UButton variant="ghost" color="neutral"
             type="button"
             :class="['p-2 rounded-md transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center', viewMode === 'list' ? 'bg-surface text-primary-600 dark:text-primary-400 shadow-sm' : 'text-gray-400 dark:text-zinc-500']"
             :aria-label="'Hiển thị dạng danh sách'"
@@ -129,14 +129,14 @@ onMounted(() => {
             @click="viewMode = 'list'"
           >
             <Grid2x2 class="w-4 h-4" aria-hidden="true" />
-          </button>
+          </UButton>
         </div>
       </div>
     </div>
 
     <!-- Category Pills -->
     <div class="flex items-center gap-2 mb-6 overflow-x-auto scrollbar-hide pb-1">
-      <button
+      <UButton variant="ghost" color="neutral"
         type="button"
         :class="[
           'px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap min-h-[40px] border',
@@ -145,8 +145,8 @@ onMounted(() => {
         @click="selectedCategory = ''"
       >
         Tất cả
-      </button>
-      <button
+      </UButton>
+      <UButton variant="ghost" color="neutral"
         v-for="cat in mockCategories"
         :key="cat.id"
         type="button"
@@ -157,7 +157,7 @@ onMounted(() => {
         @click="selectedCategory = cat.id"
       >
         {{ cat.name }}
-      </button>
+      </UButton>
     </div>
 
     <!-- Results count -->
@@ -271,15 +271,15 @@ onMounted(() => {
 
     <!-- Pagination -->
     <div v-if="!loading && totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
-      <button
+      <UButton variant="ghost" color="neutral"
         type="button"
         :disabled="currentPage === 1"
         class="px-3 py-2 rounded-lg text-sm font-medium border border-surface-border bg-surface text-surface-foreground hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors min-h-[40px]"
         @click="currentPage--"
       >
         Trước
-      </button>
-      <button
+      </UButton>
+      <UButton variant="ghost" color="neutral"
         v-for="page in totalPages"
         :key="page"
         type="button"
@@ -288,15 +288,15 @@ onMounted(() => {
           currentPage === page ? 'bg-primary-600 text-white border-primary-600' : 'bg-surface text-surface-foreground border-surface-border hover:bg-surface-hover',
         ]"
         @click="currentPage = page"
-      >{{ page }}</button>
-      <button
+      >{{ page }}</UButton>
+      <UButton variant="ghost" color="neutral"
         type="button"
         :disabled="currentPage === totalPages"
         class="px-3 py-2 rounded-lg text-sm font-medium border border-surface-border bg-surface text-surface-foreground hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors min-h-[40px]"
         @click="currentPage++"
       >
         Sau
-      </button>
+      </UButton>
     </div>
   </div>
 </template>

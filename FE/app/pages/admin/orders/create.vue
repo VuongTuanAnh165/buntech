@@ -199,7 +199,7 @@ onMounted(loadInitData)
           </div>
 
           <div v-if="filteredProducts.length" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            <button
+            <UButton variant="ghost" color="neutral"
               v-for="p in filteredProducts" :key="p.id" type="button"
               :class="['p-3 text-left transition-all relative rounded-xl border', orderItems.some(i => i.product_id === p.id) ? 'border-primary-500 ring-1 ring-primary-500 bg-primary-50/50' : 'border-surface-border bg-surface hover:border-slate-300 shadow-sm']"
               @click="addProduct(p.id)"
@@ -216,7 +216,7 @@ onMounted(loadInitData)
                 <span class="text-xs font-semibold text-primary-600">{{ formatVND(p.price) }}</span>
                 <span class="text-[10px] text-slate-400">{{ p.stock }} {{ p.unit }}</span>
               </div>
-            </button>
+            </UButton>
           </div>
           <div v-else class="text-center py-8 text-slate-500 text-sm">Không tìm thấy sản phẩm</div>
         </div>
@@ -254,7 +254,7 @@ onMounted(loadInitData)
                 </div>
                 <div class="flex items-center gap-1 border border-surface-border rounded-lg bg-surface">
                   <UButton variant="ghost" color="neutral" size="xs" icon="i-lucide-minus" aria-label="Giảm" @click="updateQuantity(i, -1)" />
-                  <UInput :model-value="item.quantity" type="number" :min="1" size="xs" class="w-12 text-center" @update:model-value="(v: any) => { const num = Number(v); if (num > 0) item.quantity = num; }" />
+                  <UInput :model-value="item.quantity" type="number" :min="1" size="xs" class="w-12 text-center" @update:model-value="(v: string | number) => { const num = Number(v); if (num > 0) item.quantity = num; }" />
                   <UButton variant="ghost" color="neutral" size="xs" icon="i-lucide-plus" aria-label="Tăng" @click="updateQuantity(i, 1)" />
                 </div>
                 <div class="w-24 text-right">

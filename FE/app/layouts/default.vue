@@ -72,14 +72,14 @@ onUnmounted(() => {
           </nav>
 
           <div class="flex items-center gap-1.5">
-            <button
+            <UButton variant="ghost" color="neutral"
               class="p-2.5 text-surface-foreground hover:bg-surface-hover rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               :aria-label="colorMode === 'dark' ? 'Bật chế độ sáng' : 'Bật chế độ tối'"
               @click="toggleDark"
             >
               <Sun v-if="colorMode === 'dark'" class="w-5 h-5" aria-hidden="true" />
               <Moon v-else class="w-5 h-5" aria-hidden="true" />
-            </button>
+            </UButton>
             <template v-if="authStore.isAuthenticated">
               <NuxtLink
                 v-if="authStore.role === 'CUSTOMER'"
@@ -94,7 +94,7 @@ onUnmounted(() => {
                 <LayoutDashboard class="w-4 h-4" aria-hidden="true" /> {{ t('nav.dashboard') }}
               </NuxtLink>
               <div ref="userMenuRef" class="relative">
-                <button
+                <UButton variant="ghost" color="neutral"
                   class="flex items-center p-1 rounded-xl hover:bg-surface-hover transition-all duration-200 min-w-[44px] min-h-[44px] justify-center"
                   aria-haspopup="menu"
                   :aria-expanded="userMenuOpen"
@@ -102,7 +102,7 @@ onUnmounted(() => {
                   @click="userMenuOpen = !userMenuOpen"
                 >
                   <AppAvatar :name="authStore.user?.full_name" :src="authStore.user?.avatar_url" size="sm" />
-                </button>
+                </UButton>
                 <Transition name="dropdown">
                   <div
                     v-if="userMenuOpen"
@@ -116,9 +116,9 @@ onUnmounted(() => {
                     <NuxtLink v-if="authStore.role === 'CUSTOMER'" to="/portal" role="menuitem" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-surface-foreground hover:bg-surface-hover transition-colors min-h-[44px]" @click="userMenuOpen = false">
                       <User class="w-4 h-4 text-gray-400 dark:text-zinc-500" aria-hidden="true" /> {{ t('nav.myOrders') }}
                     </NuxtLink>
-                    <button role="menuitem" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors min-h-[44px]" @click="handleLogout">
+                    <UButton variant="ghost" color="neutral" role="menuitem" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors min-h-[44px]" @click="handleLogout">
                       <LogOut class="w-4 h-4" aria-hidden="true" /> {{ t('nav.logout') }}
-                    </button>
+                    </UButton>
                   </div>
                 </Transition>
               </div>
@@ -186,7 +186,7 @@ onUnmounted(() => {
 
     <!-- Scroll to top -->
     <Transition name="scroll-top">
-      <button
+      <UButton variant="ghost" color="neutral"
         v-if="showScrollTop"
         type="button"
         class="fixed bottom-20 md:bottom-6 right-4 z-40 w-11 h-11 rounded-full bg-primary-600 text-white shadow-lg shadow-primary-600/30 flex items-center justify-center hover:bg-primary-700 active:scale-90 transition-all duration-200"
@@ -194,7 +194,7 @@ onUnmounted(() => {
         @click="scrollToTop"
       >
         <ArrowUp class="w-5 h-5" aria-hidden="true" />
-      </button>
+      </UButton>
     </Transition>
 
     <!-- Bottom Navigation (mobile only) -->

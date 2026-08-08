@@ -174,16 +174,16 @@ onMounted(() => {
             <!-- Search -->
             <div class="relative mb-4">
               <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-500" aria-hidden="true" />
-              <input
+              <UInput
                 v-model="search"
                 type="text"
                 placeholder="Tìm sản phẩm..."
                 class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-surface-border bg-surface text-sm text-surface-foreground placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:border-primary-400 focus:ring-4 focus:ring-primary-500/10 transition-all min-h-[44px]"
-              >
+               />
             </div>
             <!-- Category pills -->
             <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 mb-4">
-              <button
+              <UButton variant="ghost" color="neutral"
                 type="button"
                 :class="[
                   'px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap border min-h-[32px]',
@@ -192,8 +192,8 @@ onMounted(() => {
                 @click="selectedCategory = ''"
               >
                 Tất cả
-              </button>
-              <button
+              </UButton>
+              <UButton variant="ghost" color="neutral"
                 v-for="cat in mockCategories"
                 :key="cat.id"
                 type="button"
@@ -204,7 +204,7 @@ onMounted(() => {
                 @click="selectedCategory = cat.id"
               >
                 {{ cat.name }}
-              </button>
+              </UButton>
             </div>
 
             <!-- Product grid -->
@@ -219,7 +219,7 @@ onMounted(() => {
             </template>
             <template v-else-if="availableProducts.length">
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[500px] overflow-y-auto pr-1">
-                <button
+                <UButton variant="ghost" color="neutral"
                   v-for="(product, i) in availableProducts"
                   :key="product.id"
                   type="button"
@@ -244,7 +244,7 @@ onMounted(() => {
                   <p class="text-xs font-medium text-surface-foreground truncate mb-0.5">{{ product.name }}</p>
                   <p class="text-sm font-bold text-primary-600 dark:text-primary-400">{{ formatVND(product.price) }}</p>
                   <p class="text-xs text-gray-400 dark:text-zinc-500">/{{ product.unit }}</p>
-                </button>
+                </UButton>
               </div>
             </template>
             <div v-else class="text-center py-8 text-sm text-gray-500 dark:text-zinc-400">Không tìm thấy sản phẩm</div>
@@ -260,14 +260,14 @@ onMounted(() => {
                 <ShoppingCart class="w-5 h-5" aria-hidden="true" />
                 Giỏ hàng ({{ orderItems.length }})
               </h2>
-              <button
+              <UButton variant="ghost" color="neutral"
                 v-if="orderItems.length"
                 type="button"
                 class="text-xs text-gray-400 dark:text-zinc-500 hover:text-danger-600 dark:hover:text-danger-400 transition-colors min-h-[44px] px-2"
                 @click="clearCart"
               >
                 Xóa tất cả
-              </button>
+              </UButton>
             </div>
 
             <template v-if="orderItems.length">
@@ -282,32 +282,32 @@ onMounted(() => {
                     <p class="text-xs text-gray-400 dark:text-zinc-500">{{ formatVND(item.price) }} / {{ item.unit }}</p>
                   </div>
                   <div class="flex items-center gap-1 flex-shrink-0">
-                    <button
+                    <UButton variant="ghost" color="neutral"
                       type="button"
                       class="w-8 h-8 rounded-md bg-surface-hover hover:bg-surface-border text-surface-foreground flex items-center justify-center transition-colors min-w-[36px] min-h-[36px]"
                       :aria-label="'Giảm số lượng'"
                       @click="decrementQty(i)"
                     >
                       <Minus class="w-3.5 h-3.5" aria-hidden="true" />
-                    </button>
+                    </UButton>
                     <span class="w-8 text-center text-sm font-medium text-surface-foreground tabular-nums">{{ item.quantity }}</span>
-                    <button
+                    <UButton variant="ghost" color="neutral"
                       type="button"
                       class="w-8 h-8 rounded-md bg-surface-hover hover:bg-surface-border text-surface-foreground flex items-center justify-center transition-colors min-w-[36px] min-h-[36px]"
                       :aria-label="'Tăng số lượng'"
                       @click="incrementQty(i)"
                     >
                       <Plus class="w-3.5 h-3.5" aria-hidden="true" />
-                    </button>
+                    </UButton>
                   </div>
-                  <button
+                  <UButton variant="ghost" color="neutral"
                     type="button"
                     class="w-8 h-8 rounded-md text-gray-400 hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex items-center justify-center transition-colors flex-shrink-0 min-w-[36px] min-h-[36px]"
                     :aria-label="'Xóa ' + item.product_name"
                     @click="removeItem(i)"
                   >
                     <Trash2 class="w-3.5 h-3.5" aria-hidden="true" />
-                  </button>
+                  </UButton>
                 </div>
               </div>
               <div class="flex justify-between items-center pt-3 border-t border-surface-border mb-4">
@@ -344,7 +344,7 @@ onMounted(() => {
               <!-- Honeypot -->
               <div style="opacity: 0; position: absolute; z-index: -1; left: -9999px;" aria-hidden="true">
                 <label>Website URL</label>
-                <input v-model="website_url" type="text" name="website_url" tabindex="-1" autocomplete="off">
+                <UInput v-model="website_url" type="text" name="website_url" tabindex="-1" autocomplete="off" />
               </div>
 
               <UButton type="submit" :loading="submitting" size="lg" class="w-full justify-center">

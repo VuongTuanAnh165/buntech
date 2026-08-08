@@ -109,30 +109,30 @@ useHead(() => ({
         </div>
         <div class="flex items-center gap-1">
           <span class="text-xs text-gray-400 dark:text-zinc-500 mr-1 hidden sm:inline">Chia sẻ:</span>
-          <button
+          <UButton variant="ghost" color="neutral"
             type="button"
-            class="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 dark:text-zinc-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all min-w-[36px] min-h-[36px]"
+            class="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 dark:text-zinc-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-blue-50 dark:hover:bg-primary-900/20 transition-all min-w-[36px] min-h-[36px]"
             aria-label="Chia sẻ Facebook"
             @click="shareFacebook"
           >
             <Facebook class="w-4 h-4" aria-hidden="true" />
-          </button>
-          <button
+          </UButton>
+          <UButton variant="ghost" color="neutral"
             type="button"
             class="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 dark:text-zinc-500 hover:text-sky-500 dark:hover:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-all min-w-[36px] min-h-[36px]"
             aria-label="Chia sẻ Twitter"
             @click="shareTwitter"
           >
             <Twitter class="w-4 h-4" aria-hidden="true" />
-          </button>
-          <button
+          </UButton>
+          <UButton variant="ghost" color="neutral"
             type="button"
             class="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 dark:text-zinc-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-surface-hover transition-all min-w-[36px] min-h-[36px]"
             aria-label="Sao chép link"
             @click="sharePost"
           >
             <Link2 class="w-4 h-4" aria-hidden="true" />
-          </button>
+          </UButton>
         </div>
       </div>
 

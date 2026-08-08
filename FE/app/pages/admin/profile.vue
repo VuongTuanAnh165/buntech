@@ -317,9 +317,9 @@ const personalInfo = computed(() => [
               </div>
               <h3 class="text-sm font-semibold text-surface-foreground">Thông tin cá nhân</h3>
             </div>
-            <button class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-0.5 transition-colors" @click="openEdit">
+            <UButton variant="ghost" color="neutral" class="text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium flex items-center gap-0.5 transition-colors" @click="openEdit">
               Sửa <UIcon name="i-lucide-chevron-right" class="w-3 h-3" />
-            </button>
+            </UButton>
           </div>
           <dl class="space-y-3">
             <div
@@ -456,10 +456,10 @@ const personalInfo = computed(() => [
           </ol>
 
           <div class="mt-4 pt-4 border-t border-surface-border flex justify-center">
-            <button class="text-xs text-slate-500 dark:text-zinc-400 hover:text-primary-600 dark:hover:text-primary-400 font-medium flex items-center gap-1 transition-colors">
+            <UButton variant="ghost" color="neutral" class="text-xs text-slate-500 dark:text-zinc-400 hover:text-primary-600 dark:hover:text-primary-400 font-medium flex items-center gap-1 transition-colors">
               Xem tất cả hoạt động
               <UIcon name="i-lucide-chevron-right" class="w-3.5 h-3.5" />
-            </button>
+            </UButton>
           </div>
         </UCard>
       </div>

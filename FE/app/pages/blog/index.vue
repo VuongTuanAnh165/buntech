@@ -66,14 +66,14 @@ onMounted(() => {
     <div class="flex flex-wrap items-center gap-3 mb-6">
       <div class="flex-1 min-w-[200px] max-w-md relative">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-500" aria-hidden="true" />
-        <input
+        <UInput
           v-model="search"
           type="text"
           placeholder="Tìm kiếm bài viết..."
           class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-surface-border bg-surface text-sm text-surface-foreground placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:border-primary-400 focus:ring-4 focus:ring-primary-500/10 transition-all min-h-[44px]"
-        >
+         />
       </div>
-      <button
+      <UButton variant="ghost" color="neutral"
         v-if="search || selectedCategory"
         type="button"
         class="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-zinc-400 hover:text-danger-600 dark:hover:text-danger-400 transition-colors min-h-[44px] px-2"
@@ -81,12 +81,12 @@ onMounted(() => {
       >
         <X class="w-4 h-4" aria-hidden="true" />
         Xóa lọc
-      </button>
+      </UButton>
     </div>
 
     <!-- Category pills -->
     <div class="flex items-center gap-2 mb-8 overflow-x-auto scrollbar-hide pb-1">
-      <button
+      <UButton variant="ghost" color="neutral"
         type="button"
         :class="[
           'px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap min-h-[40px] border',
@@ -95,8 +95,8 @@ onMounted(() => {
         @click="selectedCategory = ''"
       >
         Tất cả
-      </button>
-      <button
+      </UButton>
+      <UButton variant="ghost" color="neutral"
         v-for="cat in mockBlogCategories"
         :key="cat.id"
         type="button"
@@ -107,7 +107,7 @@ onMounted(() => {
         @click="selectedCategory = cat.id"
       >
         {{ cat.name }}
-      </button>
+      </UButton>
     </div>
 
     <!-- Loading -->
@@ -207,15 +207,15 @@ onMounted(() => {
 
       <!-- Pagination -->
       <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-8">
-        <button
+        <UButton variant="ghost" color="neutral"
           type="button"
           :disabled="currentPage === 1"
           class="px-3 py-2 rounded-lg text-sm font-medium border border-surface-border bg-surface text-surface-foreground hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors min-h-[40px]"
           @click="currentPage--"
         >
           Trước
-        </button>
-        <button
+        </UButton>
+        <UButton variant="ghost" color="neutral"
           v-for="page in totalPages"
           :key="page"
           type="button"
@@ -224,15 +224,15 @@ onMounted(() => {
             currentPage === page ? 'bg-primary-600 text-white border-primary-600' : 'bg-surface text-surface-foreground border-surface-border hover:bg-surface-hover',
           ]"
           @click="currentPage = page"
-        >{{ page }}</button>
-        <button
+        >{{ page }}</UButton>
+        <UButton variant="ghost" color="neutral"
           type="button"
           :disabled="currentPage === totalPages"
           class="px-3 py-2 rounded-lg text-sm font-medium border border-surface-border bg-surface text-surface-foreground hover:bg-surface-hover disabled:opacity-40 disabled:cursor-not-allowed transition-colors min-h-[40px]"
           @click="currentPage++"
         >
           Sau
-        </button>
+        </UButton>
       </div>
     </template>
 

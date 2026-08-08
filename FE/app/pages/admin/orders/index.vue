@@ -87,8 +87,8 @@ const filteredRows = computed(() => {
   }
 
   return [...rows].sort((a, b) => {
-    let av: any = a[sortBy.value]
-    let bv: any = b[sortBy.value]
+    let av = (a as Record<string, unknown>)[sortBy.value]
+    let bv = (b as Record<string, unknown>)[sortBy.value]
     if (typeof av === 'number' && typeof bv === 'number') {
       return sortDirection.value === 'asc' ? av - bv : bv - av
     }

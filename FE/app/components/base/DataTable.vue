@@ -8,7 +8,7 @@ interface Column {
 
 interface Props {
   columns: Column[]
-  rows: any[]
+  rows: Record<string, unknown>[]
   loading?: boolean
   loadingLines?: number
   emptyTitle?: string

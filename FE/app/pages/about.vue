@@ -212,7 +212,7 @@ const toggleFaq = (index: number) => {
           :key="i"
           class="card overflow-hidden"
         >
-          <button
+          <UButton variant="ghost" color="neutral"
             type="button"
             class="w-full p-4 flex items-center justify-between text-left font-medium text-surface-foreground hover:bg-surface-hover transition-colors min-h-[44px]"
             :aria-expanded="openFaq === i"
@@ -223,7 +223,7 @@ const toggleFaq = (index: number) => {
               :class="['w-4 h-4 text-gray-400 dark:text-zinc-500 transition-transform duration-300 flex-shrink-0 ml-2', openFaq === i ? 'rotate-90' : '']"
               aria-hidden="true"
             />
-          </button>
+          </UButton>
           <div
             v-show="openFaq === i"
             class="px-4 pb-4 text-sm text-gray-600 dark:text-zinc-300 leading-relaxed animate-fade-in"

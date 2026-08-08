@@ -21,7 +21,7 @@ export function useApi<T>(url: string, opts: CustomUseFetchOptions<T> = {}) {
   const defaultOptions: CustomUseFetchOptions<T> = {
     key: uniqueKey,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    $fetch: fetchWithAuth as any
+    $fetch: fetchWithAuth as typeof $fetch
   }
 
   return useFetch<T>(url, defu(opts, defaultOptions) as Parameters<typeof useFetch<T>>[1])

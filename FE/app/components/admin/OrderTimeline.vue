@@ -54,12 +54,12 @@ const getStepDate = (index: number) => {
         <div class="relative flex items-start group">
           <div class="absolute left-[11px] sm:left-[19px] top-8 bottom-[-32px] w-0.5 bg-gray-200 dark:bg-zinc-800"/>
           
-          <div class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 z-10 shrink-0 shadow-sm border-2 border-white dark:border-zinc-900">
+          <div class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-error-100 text-error-600 dark:bg-error-900/30 dark:text-error-400 z-10 shrink-0 shadow-sm border-2 border-white dark:border-zinc-900">
             <span class="i-lucide-x w-4 h-4 sm:w-5 sm:h-5"/>
           </div>
           
           <div class="ml-4 flex flex-col pt-1">
-            <span class="text-sm sm:text-base font-semibold text-red-600 dark:text-red-400">Đã hủy</span>
+            <span class="text-sm sm:text-base font-semibold text-error-600 dark:text-error-400">Đã hủy</span>
             <span class="text-xs sm:text-sm text-gray-500 mt-1">{{ formatDateTime(props.createdAt) }}</span>
           </div>
         </div>
@@ -77,7 +77,7 @@ const getStepDate = (index: number) => {
             class="absolute left-[11px] sm:left-[19px] top-8 bottom-[-32px] w-0.5 z-0"
             :class="[
               getStepStatus(step.value, index) === 'completed' 
-                ? 'bg-green-500' 
+                ? 'bg-success-500' 
                 : 'bg-transparent border-l-2 border-dashed border-gray-300 dark:border-gray-700 left-[10px] sm:left-[18px]'
             ]"
           />
@@ -87,7 +87,7 @@ const getStepDate = (index: number) => {
             class="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full z-10 shrink-0 border-2 border-white dark:border-zinc-900 transition-colors duration-300"
             :class="[
               getStepStatus(step.value, index) === 'completed' 
-                ? 'bg-green-500 text-white' 
+                ? 'bg-success-500 text-white' 
                 : getStepStatus(step.value, index) === 'active'
                   ? 'bg-primary text-white shadow-[0_0_0_4px_rgba(var(--color-primary-500),0.2)] animate-pulse'
                   : 'bg-gray-100 text-gray-400 dark:bg-zinc-800 dark:text-zinc-500'

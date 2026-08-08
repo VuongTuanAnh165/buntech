@@ -47,12 +47,12 @@ function toggleDark() {
             <span v-if="!sidebarCollapsed" class="text-white font-bold text-[15px] tracking-tight">BunTech</span>
           </Transition>
         </NuxtLink>
-        <button
+        <UButton variant="ghost" color="neutral"
           class="lg:hidden text-slate-400 hover:text-white p-2 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors"
           @click="closeMobile"
         >
           <UIcon name="i-lucide-x" class="w-5 h-5" aria-hidden="true" />
-        </button>
+        </UButton>
       </div>
 
       <!-- Nav -->
@@ -100,24 +100,24 @@ function toggleDark() {
       </nav>
 
       <!-- Collapse toggle -->
-      <button
+      <UButton variant="ghost" color="neutral"
         class="p-2.5 mx-3 mb-3 text-slate-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all duration-200 hidden lg:flex items-center justify-center active:scale-90"
         @click="toggleSidebar"
       >
         <UIcon :name="sidebarCollapsed ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'" class="w-5 h-5" aria-hidden="true" />
-      </button>
+      </UButton>
     </aside>
 
     <!-- Main content -->
     <div :class="['flex-1 transition-[margin] duration-300 ease-out min-h-screen', sidebarCollapsed ? 'lg:ml-[68px]' : 'lg:ml-[248px]']">
       <!-- Top bar -->
       <header class="h-16 glass border-b border-surface-border/50 sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 safe-area-top">
-        <button
+        <UButton variant="ghost" color="neutral"
           class="lg:hidden text-surface-foreground p-2.5 -ml-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-surface-hover transition-colors"
           @click="mobileSidebarOpen = true"
         >
           <UIcon name="i-lucide-menu" class="w-5 h-5" aria-hidden="true" />
-        </button>
+        </UButton>
 
         <!-- Search hint -->
         <div class="hidden lg:flex items-center gap-2 text-sm text-slate-400 dark:text-zinc-500">
@@ -129,21 +129,21 @@ function toggleDark() {
 
         <div class="flex items-center gap-1.5">
           <!-- Dark mode -->
-          <button
+          <UButton variant="ghost" color="neutral"
             class="p-2.5 text-surface-foreground hover:bg-surface-hover rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             @click="toggleDark"
           >
             <UIcon :name="colorMode.value === 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'" class="w-[18px] h-[18px]" aria-hidden="true" />
-          </button>
+          </UButton>
 
           <!-- Notifications -->
-          <button
+          <UButton variant="ghost" color="neutral"
             class="relative p-2.5 text-surface-foreground hover:bg-surface-hover rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             <UIcon name="i-lucide-bell" class="w-[18px] h-[18px]" aria-hidden="true" />
             <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-500 ring-2 ring-surface" />
             <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-500 animate-ping opacity-60" />
-          </button>
+          </UButton>
 
           <!-- User menu -->
           <div class="relative ml-1">
@@ -159,14 +159,14 @@ function toggleDark() {
               ]"
               :ui="{ content: 'w-56' }"
             >
-              <button class="flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-surface-hover transition-all duration-200 min-h-[44px]">
+              <UButton variant="ghost" color="neutral" class="flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-surface-hover transition-all duration-200 min-h-[44px]">
                 <UAvatar :src="mockAdminUser.avatar_url" :alt="mockAdminUser.full_name" size="sm" />
                 <div class="hidden sm:block text-left">
                   <p class="text-sm font-medium text-surface-foreground leading-tight">{{ mockAdminUser.full_name }}</p>
                   <p class="text-xs text-slate-400 dark:text-zinc-500 leading-tight">{{ mockAdminUser.phone }}</p>
                 </div>
                 <UIcon name="i-lucide-chevron-down" class="w-4 h-4 text-slate-400 dark:text-zinc-500 hidden sm:block transition-transform" aria-hidden="true" />
-              </button>
+              </UButton>
             </UDropdownMenu>
           </div>
         </div>

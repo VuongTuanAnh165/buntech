@@ -26,7 +26,7 @@ const handleCancel = () => {
             :name="options.icon"
             class="size-6"
             :class="options.variant === 'danger'
-              ? 'text-red-600 dark:text-red-400'
+              ? 'text-error-600 dark:text-error-400'
               : 'text-primary-600 dark:text-primary-400'"
           />
         </div>

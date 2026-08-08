@@ -170,7 +170,7 @@ useHead(() => ({
           </div>
           <!-- Thumbnails -->
           <div class="grid grid-cols-4 gap-2 sm:gap-3">
-            <button
+            <UButton variant="ghost" color="neutral"
               v-for="(img, i) in galleryImages.slice(0, 4)"
               :key="i"
               type="button"
@@ -185,7 +185,7 @@ useHead(() => ({
               <div v-else class="w-full h-full flex items-center justify-center bg-surface-muted">
                 <Package class="w-6 h-6 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
               </div>
-            </button>
+            </UButton>
           </div>
           <!-- Trust badges -->
           <div class="grid grid-cols-3 gap-2 sm:gap-3 pt-2">
@@ -242,7 +242,7 @@ useHead(() => ({
           <div class="flex items-center gap-4 mb-6">
             <label class="text-sm font-medium text-surface-foreground">Số lượng:</label>
             <div class="flex items-center gap-1 border border-surface-border rounded-lg overflow-hidden">
-              <button
+              <UButton variant="ghost" color="neutral"
                 type="button"
                 class="w-11 h-11 flex items-center justify-center hover:bg-surface-hover transition-colors disabled:opacity-40 min-w-[44px] min-h-[44px]"
                 :disabled="quantity <= 1"
@@ -250,9 +250,9 @@ useHead(() => ({
                 @click="decrementQty"
               >
                 <Minus class="w-4 h-4" aria-hidden="true" />
-              </button>
+              </UButton>
               <span class="w-12 text-center text-base font-semibold text-surface-foreground tabular-nums">{{ quantity }}</span>
-              <button
+              <UButton variant="ghost" color="neutral"
                 type="button"
                 class="w-11 h-11 flex items-center justify-center hover:bg-surface-hover transition-colors disabled:opacity-40 min-w-[44px] min-h-[44px]"
                 :disabled="quantity >= product.stock"
@@ -260,7 +260,7 @@ useHead(() => ({
                 @click="incrementQty"
               >
                 <Plus class="w-4 h-4" aria-hidden="true" />
-              </button>
+              </UButton>
             </div>
             <span class="text-sm text-gray-400 dark:text-zinc-500">Tổng: {{ formatVND(product.price * quantity) }}</span>
           </div>
@@ -276,7 +276,7 @@ useHead(() => ({
               Đặt hàng nhanh
               <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </UButton>
-            <button
+            <UButton variant="ghost" color="neutral"
               type="button"
               :class="[
                 'w-12 h-12 rounded-xl border border-surface-border flex items-center justify-center transition-all duration-200 min-w-[44px] min-h-[44px] flex-shrink-0',
@@ -287,15 +287,15 @@ useHead(() => ({
               @click="toggleWishlist"
             >
               <Heart :class="['w-5 h-5', isWishlisted ? 'fill-current' : '']" aria-hidden="true" />
-            </button>
-            <button
+            </UButton>
+            <UButton variant="ghost" color="neutral"
               type="button"
               class="w-12 h-12 rounded-xl border border-surface-border flex items-center justify-center text-gray-400 dark:text-zinc-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-surface-hover transition-all duration-200 min-w-[44px] min-h-[44px] flex-shrink-0"
               aria-label="Chia sẻ sản phẩm"
               @click="shareProduct"
             >
               <Share2 class="w-5 h-5" aria-hidden="true" />
-            </button>
+            </UButton>
           </div>
 
           <!-- Quick info -->
@@ -319,7 +319,7 @@ useHead(() => ({
       <!-- Tabs -->
       <div class="mt-12">
         <div class="flex items-center gap-1 border-b border-surface-border mb-6 overflow-x-auto scrollbar-hide" role="tablist">
-          <button
+          <UButton variant="ghost" color="neutral"
             v-for="tab in [
               { accessorKey: 'description', header: 'Mô tả sản phẩm' },
               { accessorKey: 'reviews', header: `Đánh giá (${reviews.length})` },
@@ -332,7 +332,7 @@ useHead(() => ({
             role="tab"
             :aria-selected="activeTab === tab.key"
             @click="activeTab = tab.key as 'description' | 'reviews'"
-          >{{ tab.label }}</button>
+          >{{ tab.label }}</UButton>
         </div>
 
         <!-- Description -->

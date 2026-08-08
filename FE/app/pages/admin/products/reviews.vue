@@ -145,7 +145,7 @@ function ratingStars(rating: number) {
 
     <!-- Filter Tabs -->
     <div class="flex items-center gap-1 bg-surface-hover rounded-lg p-1 w-fit mb-4 animate-fade-in-up">
-      <button
+      <UButton variant="ghost" color="neutral"
         v-for="f in filters"
         :key="f.key"
         :class="[
@@ -165,7 +165,7 @@ function ratingStars(rating: number) {
               : 'bg-surface-border/40 text-slate-500 dark:text-zinc-400',
           ]"
         >{{ f.count }}</span>
-      </button>
+      </UButton>
     </div>
 
     <!-- Reviews List -->
@@ -252,26 +252,26 @@ function ratingStars(rating: number) {
                 </span>
 
                 <div class="flex items-center gap-1 ml-auto">
-                  <button
+                  <UButton variant="ghost" color="neutral"
                     v-if="!review.is_approved"
                     class="flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-success-600 dark:text-success-400 hover:bg-success-50 dark:hover:bg-success-900/20 rounded-lg min-h-[36px] transition-colors"
                     @click="toggleApprove(review, true)"
                   >
                     <span class="i-lucide-check w-3.5 h-3.5" aria-hidden="true" /> Duyệt
-                  </button>
-                  <button
+                  </UButton>
+                  <UButton variant="ghost" color="neutral"
                     v-else
                     class="flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/20 rounded-lg min-h-[36px] transition-colors"
                     @click="toggleApprove(review, false)"
                   >
                     <span class="i-lucide-x w-3.5 h-3.5" aria-hidden="true" /> Bỏ duyệt
-                  </button>
-                  <button
+                  </UButton>
+                  <UButton variant="ghost" color="neutral"
                     class="flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-900/20 rounded-lg min-h-[36px] transition-colors"
                     @click="startReply(review)"
                   >
                     <span class="i-lucide-message-square-text w-3.5 h-3.5" aria-hidden="true" /> {{ review.reply ? 'Sửa phản hồi' : 'Phản hồi' }}
-                  </button>
+                  </UButton>
                 </div>
               </div>
             </div>

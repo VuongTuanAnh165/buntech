@@ -180,20 +180,20 @@ const isDeleteModalOpen = computed({
               </div>
             </div>
             <div class="flex gap-1 flex-shrink-0">
-              <button
+              <UButton variant="ghost" color="neutral"
                 class="p-2 min-w-[36px] min-h-[36px] text-slate-400 dark:text-zinc-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg flex items-center justify-center transition-colors"
                 aria-label="Sửa danh mục"
                 @click="openEdit(cat)"
               >
                 <span class="i-lucide-pencil w-4 h-4" aria-hidden="true" />
-              </button>
-              <button
+              </UButton>
+              <UButton variant="ghost" color="neutral"
                 class="p-2 min-w-[36px] min-h-[36px] text-slate-400 dark:text-zinc-500 hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 rounded-lg flex items-center justify-center transition-colors"
                 aria-label="Xóa danh mục"
                 @click="deleteTarget = cat"
               >
                 <span class="i-lucide-trash-2 w-4 h-4" aria-hidden="true" />
-              </button>
+              </UButton>
             </div>
           </div>
 

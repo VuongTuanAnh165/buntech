@@ -19,8 +19,8 @@ const colorMap: Record<string, string> = {
   primary: 'bg-primary-50 text-primary-600 dark:bg-primary-950/30 dark:text-primary-400',
   success: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400',
   warning: 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400',
-  error: 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400',
-  info: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'
+  error: 'bg-red-50 text-error-600 dark:bg-red-950/30 dark:text-error-400',
+  info: 'bg-blue-50 text-primary-600 dark:bg-blue-950/30 dark:text-primary-400'
 }
 
 /* Count-up animation */
@@ -78,7 +78,7 @@ watch(() => props.loading, (newVal, oldVal) => {
         <p
           v-if="props.trend && !props.loading"
           class="mt-1 flex items-center gap-1 text-xs font-medium"
-          :class="props.trend.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'"
+          :class="props.trend.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-error-600 dark:text-error-400'"
         >
           <UIcon
             :name="props.trend.isPositive ? 'i-lucide-trending-up' : 'i-lucide-trending-down'"

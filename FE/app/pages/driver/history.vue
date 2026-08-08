@@ -87,20 +87,20 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
         <h1 class="text-xl font-bold text-neutral-900 dark:text-white tracking-tight">Lịch sử giao hàng</h1>
         <p class="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">Xem lại các chuyến giao đã hoàn thành</p>
       </div>
-      <button
+      <UButton variant="ghost" color="neutral"
         class="p-2.5 text-slate-500 dark:text-zinc-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-neutral-100 dark:hover:bg-zinc-800 rounded-xl transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
         :disabled="refreshing"
         @click="refresh"
       >
         <UIcon name="i-lucide-refresh-cw" :class="['w-5 h-5', refreshing ? 'animate-spin' : '']" />
-      </button>
+      </UButton>
     </div>
 
     <!-- Date range filter -->
     <div class="flex items-center gap-2 mb-4">
       <UIcon name="i-lucide-calendar" class="w-4 h-4 text-slate-400 dark:text-zinc-500 flex-shrink-0" />
       <div class="flex-1 flex items-center gap-2 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-x-auto">
-        <button
+        <UButton variant="ghost" color="neutral"
           v-for="opt in [
             { accessorKey: 'today', header: 'Hôm nay' },
             { accessorKey: '7days', header: '7 ngày' },
@@ -114,7 +114,7 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
               : 'text-slate-500 dark:text-zinc-400 hover:bg-neutral-100 dark:hover:bg-zinc-800',
           ]"
           @click="setRange(opt.key as DateRange)"
-        >{{ opt.label }}</button>
+        >{{ opt.label }}</UButton>
       </div>
     </div>
 
@@ -166,7 +166,7 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
     <div class="flex items-center gap-2 mb-4 overflow-x-auto">
       <UIcon name="i-lucide-filter" class="w-4 h-4 text-slate-400 dark:text-zinc-500 flex-shrink-0" />
       <div class="flex items-center gap-2 p-1 bg-white dark:bg-zinc-900 rounded-xl border border-neutral-200 dark:border-neutral-800 flex-1">
-        <button
+        <UButton variant="ghost" color="neutral"
           v-for="tab in [
             { accessorKey: 'all', header: 'Tất cả', count: stats.total },
             { accessorKey: 'delivered', header: 'Đã giao', count: stats.delivered },
@@ -180,7 +180,7 @@ onMounted(() => { setTimeout(() => { loading.value = false }, 500) })
               : 'text-slate-500 dark:text-zinc-400 hover:bg-neutral-100 dark:hover:bg-zinc-800',
           ]"
           @click="setStatusFilter(tab.key as StatusFilter)"
-        >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></button>
+        >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton>
       </div>
     </div>
 

@@ -46,7 +46,7 @@ function handleInput(e: Event) {
     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
       <span class="text-neutral-500 font-medium">đ</span>
     </div>
-    <input 
+    <UInput 
       type="text" 
       inputmode="numeric"
       :value="displayValue"
