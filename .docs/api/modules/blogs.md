@@ -48,7 +48,7 @@ Các API được chia làm 2 phần: **Client (Public)** cho người dùng đ�
 - **Request Body (JSON)**:
   - `name` (String, required, max 100)
   - `slug` (String, required, max 100, unique)
-  - `description` (String, optional, max 255)
+  - `description` (String, optional, max 191)
 
 ### 1.4 Cập nhật danh mục (Admin)
 
@@ -98,8 +98,8 @@ Dữ liệu được phân trang theo chuẩn (`data` và `meta` object).
 - **URL**: `POST /api/v1/admin/posts`
 - **Authentication**: `Bearer Token` (Role: ADMIN)
 - **Request Body (FormData)**:
-  - `title` (String, required, max 255)
-  - `slug` (String, required, max 255, unique)
+  - `title` (String, required, max 191)
+  - `slug` (String, required, max 191, unique)
   - `blogCategoryId` (Number, required)
   - `thumbnail` (File, optional, max 5MB, định dạng: jpg, png, jpeg, webp)
   - `content` (String, optional)

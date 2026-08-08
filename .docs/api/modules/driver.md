@@ -10,7 +10,7 @@ Tất cả các API trong module này yêu cầu quyền `DRIVER` (`Bearer Token
 - **URL**: `POST /api/v1/driver/device-tokens`
 - **Mục đích**: Lưu `deviceToken` (FCM/APNS) của điện thoại tài xế để hệ thống Backend có thể push thông báo (VD: "Bạn được phân công giao 1 đơn mới").
 - **Request Body (JSON)**:
-  - `fcmToken` (String, required, max 255): Mã token sinh ra từ Firebase/APNS.
+  - `fcmToken` (String, required, max 191): Mã token sinh ra từ Firebase/APNS.
   - `deviceType` (String, required, max 50): Ví dụ: `ANDROID`, `IOS`, `WEB`...
 - **Response (200 OK)**:
 ```json
@@ -40,6 +40,8 @@ Trả về mảng (danh sách) các đơn hàng và thông tin khách hàng, s�
 - **Request Body**:
   - `idempotencyKey` (String, required): Mã UUID sinh từ phía App FE. Dùng để chống lỗi "Double Click" (Tài xế bấm nhiều lần do lag mạng, app crash).
   - `amountCollected` (Number, required): Số tiền thực tế tài xế thu của khách. (Truyền `0` nếu khách ghi nợ 100%, truyền bằng `tổng bill` nếu khách trả đủ).
+  - `paymentMethod` (String, optional, max 50): Phương thức thanh toán thực tế của khách.
+  - `deliveryNote` (String, optional): Ghi chú giao hàng từ tài xế.
   - `updatedAt` (String, required): Khóa chống ghi đè (Optimistic Locking). Bắt buộc phải truyền đúng `updatedAt` của order hiện tại để chống xung đột thao tác với Admin trên Web.
 
 - **Business Flow (Luồng xử lý CỰC KỲ QUAN TRỌNG)**:
