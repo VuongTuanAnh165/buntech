@@ -26,7 +26,7 @@ interface RefreshState {
 const ssrStateMap = new WeakMap<object, RefreshState>()
 const clientState: RefreshState = { isRefreshing: false, queue: [] }
 
-function getRefreshState(): RefreshState {
+const getRefreshState = (): RefreshState => {
   if (import.meta.client) return clientState
   const nuxtApp = tryUseNuxtApp()
   if (nuxtApp) {
@@ -42,7 +42,7 @@ function getRefreshState(): RefreshState {
 
 const abortControllers = new Map<string, AbortController>()
 
-function generateIdempotencyKey(): string {
+const generateIdempotencyKey = (): string => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID()
   }
@@ -58,7 +58,7 @@ export function hasResponseMessage(data: unknown): data is { message: string } {
   )
 }
 
-async function refreshAccessToken(failedToken?: string): Promise<string> {
+const refreshAccessToken = async (failedToken?: string): Promise<string> => {
   const state = getRefreshState()
 
   if (state.isRefreshing) {

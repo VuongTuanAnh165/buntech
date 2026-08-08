@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware((to) => {
   const isDriverRoute = to.path.startsWith('/driver')
   const isCustomerPortal = to.path.startsWith('/portal')
   const isAuthRoute = to.path.startsWith('/auth')
-
+  return
   if (import.meta.server) {
     if (isAdminRoute) return navigateTo('/auth/admin/login')
     if (isDriverRoute) return navigateTo('/auth/driver/login')

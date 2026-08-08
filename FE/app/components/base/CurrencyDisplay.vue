@@ -1,38 +1,37 @@
 <script setup lang="ts">
-/**
- * Component hiển thị tiền VNĐ đã format.
- * Tự động đổi màu đỏ nếu số âm (nợ).
- *
- * @example
- * <BaseCurrencyDisplay :value="1500000" />        → "1.500.000 ₫" (xanh)
- * <BaseCurrencyDisplay :value="-200000" />         → "-200.000 ₫" (đỏ)
- * <BaseCurrencyDisplay :value="0" show-zero-as="-" /> → "-"
- */
-import { formatCurrency } from '~/utils/format'
-
 interface Props {
-  /** Giá trị tiền (number) */
-  value: number | null | undefined
-  /** Hiển thị thay thế khi giá trị là 0 hoặc null */
-  showZeroAs?: string
+  amount: number
+  size?: 'sm' | 'md' | 'lg'
+  highlight?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showZeroAs: undefined
+  size: 'md',
+  highlight: false
 })
 
-const displayValue = computed(() => {
-  if ((!props.value || props.value === 0) && props.showZeroAs) {
-    return props.showZeroAs
+const { formatVND } = useFormat()
+
+const sizeClass = computed(() => {
+  const map: Record<string, string> = {
+    sm: 'text-sm',
+    md: 'text-base',
+    lg: 'text-lg font-bold'
   }
-  return formatCurrency(props.value)
+  return map[props.size]
 })
-
-const isNegative = computed(() => (props.value ?? 0) < 0)
 </script>
 
 <template>
-  <span :class="[isNegative ? 'text-error' : 'text-default', 'tabular-nums']">
-    {{ displayValue }}
+  <span
+    class="tabular-nums"
+    :class="[
+      sizeClass,
+      props.highlight
+        ? 'font-semibold text-primary-600 dark:text-primary-400'
+        : 'text-surface-foreground'
+    ]"
+  >
+    {{ formatVND(props.amount) }}
   </span>
 </template>

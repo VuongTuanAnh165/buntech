@@ -4,9 +4,9 @@ export default defineAppConfig({
     // 🎨 Brand Colors
     // ══════════════════════════════════════════════
     colors: {
-      primary: 'emerald', // Xanh lá — gợi nhớ thực phẩm sạch / bún tươi
+      primary: 'terracotta',
       secondary: 'sky',
-      success: 'green',
+      success: 'emerald',
       info: 'blue',
       warning: 'amber',
       error: 'red',
@@ -32,29 +32,50 @@ export default defineAppConfig({
     // ══════════════════════════════════════════════
     button: {
       defaultVariants: {
-        size: 'md',
+        size: 'lg',
         color: 'primary',
         variant: 'solid'
+      },
+      slots: {
+        base: '!shadow-sm active:!scale-[0.98] !transition-all !duration-200 focus-visible:!ring-2 focus-visible:!ring-offset-2 focus-visible:!ring-offset-surface font-medium'
       }
     },
     input: {
       defaultVariants: {
-        size: 'md'
+        size: 'lg'
+      },
+      slots: {
+        root: 'w-full',
+        base: '!w-full !rounded-lg !border !border-solid !border-surface-border !bg-surface !px-3.5 !py-2.5 !text-[14px] !text-surface-foreground !shadow-none focus:!outline-none focus:!border-primary-400 focus:!ring-4 focus:!ring-primary-500/10 !transition-all'
       }
     },
     select: {
       defaultVariants: {
-        size: 'md'
+        size: 'lg'
+      },
+      slots: {
+        root: 'w-full',
+        base: '!w-full !rounded-lg !border !border-solid !border-surface-border !bg-surface !px-3.5 !py-2.5 !text-[14px] !text-surface-foreground !shadow-none focus:!outline-none focus:!border-primary-400 focus:!ring-4 focus:!ring-primary-500/10 !transition-all'
       }
     },
     selectMenu: {
       defaultVariants: {
-        size: 'md'
+        size: 'lg'
       }
     },
     textarea: {
       defaultVariants: {
-        size: 'md'
+        size: 'lg'
+      },
+      slots: {
+        root: 'w-full',
+        base: '!w-full !rounded-lg !border !border-solid !border-surface-border !bg-surface !px-3.5 !py-2.5 !text-[14px] !text-surface-foreground !shadow-none focus:!outline-none focus:!border-primary-400 focus:!ring-4 focus:!ring-primary-500/10 !transition-all'
+      }
+    },
+    formField: {
+      slots: {
+        root: 'mb-4',
+        label: 'block text-[13px] font-medium text-surface-foreground mb-1.5'
       }
     },
     badge: {

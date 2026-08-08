@@ -96,10 +96,7 @@ export default defineNuxtConfig({
     process.env.NODE_ENV === 'production'
       ? {
           '/': { swr: 3600 }, // Cache trang chủ 1 tiếng trên server
-          '/gioi-thieu': { static: true },
-          '/admin': { redirect: '/admin/customers' }
+          '/gioi-thieu': { static: true }
         }
-      : {
-          '/admin': { redirect: '/admin/customers' }
-        }
+      : {}
 })

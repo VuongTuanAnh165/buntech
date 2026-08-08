@@ -1,51 +1,76 @@
 <script setup lang="ts">
-/**
- * Component loading cho page — hiển thị khi đang fetch dữ liệu.
- *
- * @example
- * <BasePageLoading />
- * <BasePageLoading text="Đang tải đơn hàng..." />
- * <BasePageLoading :skeleton="true" />
- */
-
 interface Props {
-  /** Văn bản hiển thị bên dưới spinner */
-  text?: string
-  /** Hiển thị skeleton thay vì spinner */
-  skeleton?: boolean
-  /** Chiều cao tối thiểu */
-  minHeight?: string
+  lines?: number
+  variant?: 'table' | 'form' | 'cards' | 'detail'
 }
 
-withDefaults(defineProps<Props>(), {
-  text: 'Đang tải dữ liệu...',
-  skeleton: false,
-  minHeight: '200px'
+const props = withDefaults(defineProps<Props>(), {
+  lines: 5,
+  variant: 'table'
 })
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center py-12" :style="{ minHeight }">
-    <!-- Skeleton Mode -->
-    <template v-if="skeleton">
-      <div class="w-full space-y-4 px-4">
-        <USkeleton class="h-8 w-1/3" />
-        <USkeleton class="h-4 w-full" />
-        <USkeleton class="h-4 w-full" />
-        <USkeleton class="h-4 w-2/3" />
-        <div class="flex gap-4 pt-2">
-          <USkeleton class="h-10 w-1/4" />
-          <USkeleton class="h-10 w-1/4" />
+  <!-- Table skeleton -->
+  <div v-if="props.variant === 'table'" class="animate-fade-in space-y-3">
+    <!-- Header row -->
+    <div class="flex items-center justify-between">
+      <div class="skeleton h-8 w-48" />
+      <div class="skeleton h-9 w-32 rounded-lg" />
+    </div>
+    <!-- Table header -->
+    <div class="flex gap-4 border-b border-surface-border pb-3">
+      <div class="skeleton h-4 w-1/4" />
+      <div class="skeleton h-4 w-1/6" />
+      <div class="skeleton h-4 w-1/6" />
+      <div class="skeleton h-4 w-1/6" />
+      <div class="skeleton h-4 w-1/6" />
+    </div>
+    <!-- Table rows -->
+    <div
+      v-for="i in props.lines"
+      :key="i"
+      class="flex items-center gap-4 py-3"
+    >
+      <div class="skeleton h-4 w-1/4" />
+      <div class="skeleton h-4 w-1/6" />
+      <div class="skeleton h-4 w-1/6" />
+      <div class="skeleton h-4 w-1/6" />
+      <div class="skeleton h-4 w-1/6" />
+    </div>
+  </div>
+
+  <!-- Form skeleton -->
+  <div v-else-if="props.variant === 'form'" class="animate-fade-in space-y-5">
+    <div v-for="i in props.lines" :key="i" class="space-y-2">
+      <div class="skeleton h-4 w-24" />
+      <div class="skeleton h-10 w-full rounded-lg" />
+    </div>
+    <div class="skeleton h-10 w-32 rounded-lg" />
+  </div>
+
+  <!-- Cards skeleton -->
+  <div v-else-if="props.variant === 'cards'" class="animate-fade-in grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div v-for="i in props.lines" :key="i" class="card space-y-3 p-4">
+      <div class="skeleton h-32 w-full rounded-lg" />
+      <div class="skeleton h-5 w-3/4" />
+      <div class="skeleton h-4 w-1/2" />
+    </div>
+  </div>
+
+  <!-- Detail skeleton -->
+  <div v-else class="animate-fade-in space-y-6">
+    <div class="card p-6">
+      <div class="flex items-center gap-4">
+        <div class="skeleton size-16 rounded-full" />
+        <div class="flex-1 space-y-2">
+          <div class="skeleton h-6 w-48" />
+          <div class="skeleton h-4 w-32" />
         </div>
       </div>
-    </template>
-
-    <!-- Spinner Mode -->
-    <template v-else>
-      <div class="relative mb-4">
-        <UIcon name="i-lucide-loader-circle" class="text-primary size-10 animate-spin" />
-      </div>
-      <p class="text-muted text-sm">{{ text }}</p>
-    </template>
+    </div>
+    <div class="card space-y-4 p-6">
+      <div v-for="i in props.lines" :key="i" class="skeleton h-4 w-full" />
+    </div>
   </div>
 </template>

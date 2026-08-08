@@ -1,9 +1,5 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-/**
- * Menu điều hướng Sidebar Admin.
- * Tập trung cấu hình 1 nơi — mọi thay đổi menu chỉ sửa file này.
- */
 export const adminNavigationItems: NavigationMenuItem[][] = [
   [
     {
@@ -19,16 +15,16 @@ export const adminNavigationItems: NavigationMenuItem[][] = [
     {
       label: 'Đơn hàng',
       icon: 'i-lucide-shopping-cart',
-      to: '/admin/orders',
+      to: '/admin/orders'
+    },
+    {
+      label: 'Sản phẩm',
+      icon: 'i-lucide-package',
+      to: '/admin/products',
       children: [
-        {
-          label: 'Danh sách đơn',
-          to: '/admin/orders'
-        },
-        {
-          label: 'POS bán lẻ',
-          to: '/admin/orders/pos'
-        }
+        { label: 'Danh sách SP', to: '/admin/products' },
+        { label: 'Danh mục', to: '/admin/products/categories' },
+        { label: 'Đánh giá', to: '/admin/products/reviews' }
       ]
     },
     {
@@ -41,7 +37,22 @@ export const adminNavigationItems: NavigationMenuItem[][] = [
     {
       label: 'Kho / Nguyên liệu',
       icon: 'i-lucide-warehouse',
-      to: '/admin/inventory'
+      to: '/admin/inventory',
+      children: [
+        { label: 'Tồn kho', to: '/admin/inventory' },
+        { label: 'Nhập kho', to: '/admin/inventory/import' },
+        { label: 'Xuất kho', to: '/admin/inventory/export' },
+        { label: 'Báo cáo hao hụt', to: '/admin/inventory/loss-report' }
+      ]
+    },
+    {
+      label: 'Blog',
+      icon: 'i-lucide-file-text',
+      to: '/admin/blog',
+      children: [
+        { label: 'Bài viết', to: '/admin/blog' },
+        { label: 'Danh mục', to: '/admin/blog/categories' }
+      ]
     },
     {
       label: 'Thống kê',
@@ -51,9 +62,6 @@ export const adminNavigationItems: NavigationMenuItem[][] = [
   ]
 ]
 
-/**
- * Menu điều hướng Bottom Bar cho Driver App.
- */
 export const driverNavigationItems: NavigationMenuItem[] = [
   {
     label: 'Giao hàng',
@@ -66,8 +74,26 @@ export const driverNavigationItems: NavigationMenuItem[] = [
     to: '/driver/history'
   },
   {
+    label: 'Thông báo',
+    icon: 'i-lucide-bell',
+    to: '/driver/notifications'
+  },
+  {
+    label: 'Phương tiện',
+    icon: 'i-lucide-car',
+    to: '/driver/vehicle'
+  },
+  {
     label: 'Tài khoản',
     icon: 'i-lucide-user',
-    to: '/driver/account'
+    to: '/driver/profile'
   }
+]
+
+export const publicNavigationItems: NavigationMenuItem[] = [
+  { label: 'Trang chủ', icon: 'i-lucide-home', to: '/' },
+  { label: 'Sản phẩm', icon: 'i-lucide-package', to: '/products' },
+  { label: 'Đặt hàng', icon: 'i-lucide-shopping-cart', to: '/quick-order' },
+  { label: 'Tin tức', icon: 'i-lucide-newspaper', to: '/blog' },
+  { label: 'Giới thiệu', icon: 'i-lucide-info', to: '/gioi-thieu' },
 ]

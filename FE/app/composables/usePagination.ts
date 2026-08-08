@@ -1,104 +1,55 @@
-import type { PaginationMeta } from '~/types/api'
+import { ref, computed } from 'vue'
 
-/**
- * Composable quản lý state phân trang.
- * Tự động sync với URL query params.
- *
- * @example
- * const { page, pageSize, total, from, to, updateMeta } = usePagination()
- */
-export const usePagination = (defaultPageSize = 20) => {
-  const route = useRoute()
-  const router = useRouter()
+export interface PaginationParams {
+  page: number
+  limit: number
+  search: string
+  sortBy: string
+  sortDirection: 'asc' | 'desc'
+}
 
-  // --- State (đọc từ URL hoặc dùng mặc định) ---
-  const page = ref(Number(route.query.page) || 1)
-  const pageSize = ref(Number(route.query.limit) || defaultPageSize)
+export function usePagination(initialLimit = 10) {
+  const page = ref(1)
+  const limit = ref(initialLimit)
   const total = ref(0)
-  const totalPages = ref(0)
+  const search = ref('')
+  const sortBy = ref('')
+  const sortDirection = ref<'asc' | 'desc'>('desc')
 
-  // --- Computed ---
-
-  /** Bản ghi bắt đầu hiển thị (1-indexed). VD: "Xem từ 21..." */
-  const from = computed(() => {
-    if (total.value === 0) return 0
-    return (page.value - 1) * pageSize.value + 1
-  })
-
-  /** Bản ghi kết thúc hiển thị. VD: "...đến 40" */
-  const to = computed(() => {
-    return Math.min(page.value * pageSize.value, total.value)
-  })
-
-  // --- Methods ---
-
-  /**
-   * Sync state phân trang lên URL query params.
-   */
-  const syncToUrl = () => {
-    router.replace({
-      query: {
-        ...route.query,
-        page: page.value.toString(),
-        limit: pageSize.value.toString()
-      }
-    })
-  }
-
-  const goToPage = (p: number) => {
-    page.value = Math.max(1, Math.min(p, totalPages.value || 1))
-    syncToUrl()
-  }
+  const totalPages = computed(() => Math.max(1, Math.ceil(total.value / limit.value)))
+  const hasNext = computed(() => page.value < totalPages.value)
+  const hasPrev = computed(() => page.value > 1)
+  const from = computed(() => (page.value - 1) * limit.value)
+  const to = computed(() => Math.min(from.value + limit.value - 1, total.value - 1))
 
   const nextPage = () => {
-    if (page.value < totalPages.value) goToPage(page.value + 1)
+    if (hasNext.value) page.value++
   }
-
   const prevPage = () => {
-    if (page.value > 1) goToPage(page.value - 1)
+    if (hasPrev.value) page.value--
   }
-
-  const changePageSize = (size: number) => {
-    pageSize.value = size
-    page.value = 1 // Reset về trang 1 khi đổi page size
-    syncToUrl()
+  const goToPage = (p: number) => {
+    page.value = Math.max(1, Math.min(p, totalPages.value))
   }
-
-  /**
-   * Cập nhật meta từ API response.
-   * Gọi sau mỗi lần fetch data thành công.
-   */
-  const updateMeta = (meta: PaginationMeta) => {
-    total.value = meta.total
-    totalPages.value = meta.lastPage
-    page.value = meta.currentPage
-    pageSize.value = meta.perPage
-  }
-
-  /**
-   * Reset về trang 1 (dùng khi search/filter thay đổi).
-   */
-  const resetPage = () => {
+  const changeLimit = (l: number) => {
+    limit.value = l
     page.value = 1
-    syncToUrl()
+  }
+  const reset = () => {
+    page.value = 1
+  }
+  const toggleSort = (column: string) => {
+    if (sortBy.value === column) {
+      sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+    } else {
+      sortBy.value = column
+      sortDirection.value = 'asc'
+    }
   }
 
   return {
-    // State
-    page: readonly(page),
-    pageSize: readonly(pageSize),
-    limit: readonly(pageSize),
-    total: readonly(total),
-    totalPages: readonly(totalPages),
-    // Computed
-    from,
-    to,
-    // Methods
-    goToPage,
-    nextPage,
-    prevPage,
-    changePageSize,
-    updateMeta,
-    resetPage
+    page, limit, total, search, sortBy, sortDirection,
+    totalPages, hasNext, hasPrev, from, to,
+    nextPage, prevPage, goToPage, changeLimit, reset, toggleSort,
   }
 }

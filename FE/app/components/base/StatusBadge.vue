@@ -1,47 +1,64 @@
 <script setup lang="ts">
-/**
- * Component hiển thị trạng thái dưới dạng Badge màu.
- * Tự động map trạng thái sang màu sắc và label tương ứng.
- *
- * @example
- * <BaseStatusBadge
- *   status="delivered"
- *   :status-map="{
- *     pending: { label: 'Chờ xử lý', color: 'warning' },
- *     delivered: { label: 'Đã giao', color: 'success' },
- *     cancelled: { label: 'Đã hủy', color: 'error' }
- *   }"
- * />
- */
-
-interface StatusConfig {
-  label: string
-  color: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'neutral'
-  icon?: string
-}
-
 interface Props {
-  /** Giá trị trạng thái hiện tại */
   status: string
-  /** Bản đồ trạng thái → { label, color, icon? } */
-  statusMap: Record<string, StatusConfig>
+  type?: 'order' | 'user' | 'product' | 'blog'
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  type: 'order'
+})
 
-const config = computed(() => {
-  return (
-    props.statusMap[props.status] || {
-      label: props.status,
-      color: 'neutral' as const
+type BadgeColor = 'primary' | 'success' | 'warning' | 'error' | 'info' | 'neutral'
+
+const statusConfig = computed<{ label: string; color: BadgeColor }>(() => {
+  if (props.type === 'order') {
+    const map: Record<string, { label: string; color: BadgeColor }> = {
+      PENDING: { label: 'Chờ xử lý', color: 'warning' },
+      PROCESSING: { label: 'Đang xử lý', color: 'info' },
+      SHIPPING: { label: 'Đang giao', color: 'primary' },
+      DELIVERED: { label: 'Đã giao', color: 'success' },
+      CANCELLED: { label: 'Đã hủy', color: 'error' }
     }
-  )
+    return map[props.status] ?? { label: props.status, color: 'neutral' }
+  }
+
+  if (props.type === 'user') {
+    const map: Record<string, { label: string; color: BadgeColor }> = {
+      ACTIVE: { label: 'Hoạt động', color: 'success' },
+      INACTIVE: { label: 'Ngừng HĐ', color: 'error' },
+      PENDING: { label: 'Chờ duyệt', color: 'warning' }
+    }
+    return map[props.status] ?? { label: props.status, color: 'neutral' }
+  }
+
+  if (props.type === 'product') {
+    const map: Record<string, { label: string; color: BadgeColor }> = {
+      ACTIVE: { label: 'Đang bán', color: 'success' },
+      INACTIVE: { label: 'Ngừng bán', color: 'error' },
+      OUT_OF_STOCK: { label: 'Hết hàng', color: 'warning' }
+    }
+    return map[props.status] ?? { label: props.status, color: 'neutral' }
+  }
+
+  if (props.type === 'blog') {
+    const map: Record<string, { label: string; color: BadgeColor }> = {
+      DRAFT: { label: 'Nháp', color: 'neutral' },
+      PUBLISHED: { label: 'Đã xuất bản', color: 'success' }
+    }
+    return map[props.status] ?? { label: props.status, color: 'neutral' }
+  }
+
+  return { label: props.status, color: 'neutral' }
 })
 </script>
 
 <template>
-  <UBadge :color="config.color" variant="subtle" size="sm">
-    <UIcon v-if="config.icon" :name="config.icon" class="mr-1 size-3" />
-    {{ config.label }}
+  <UBadge
+    :color="statusConfig.color"
+    variant="subtle"
+    size="sm"
+    class="transition-colors duration-200"
+  >
+    {{ statusConfig.label }}
   </UBadge>
 </template>

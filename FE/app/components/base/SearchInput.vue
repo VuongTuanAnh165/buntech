@@ -1,72 +1,58 @@
 <script setup lang="ts">
-import { watchDebounced } from '@vueuse/core'
-/**
- * Search Input — input tìm kiếm có debounce tích hợp.
- *
- * @example
- * <BaseSearchInput v-model="search" placeholder="Tìm khách hàng..." />
- */
-
 interface Props {
-  /** Placeholder text */
+  modelValue: string
   placeholder?: string
-  /** Thời gian debounce (ms) */
-  debounce?: number
-  /** Icon */
-  icon?: string
+  debounceMs?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   placeholder: 'Tìm kiếm...',
-  debounce: 300,
-  icon: 'i-lucide-search'
+  debounceMs: 300
 })
 
-const model = defineModel<string>({ default: '' })
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
-const localValue = ref(model.value)
+const localValue = ref(props.modelValue)
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
-watch(model, (newVal) => {
-  // Sync từ ngoài vào (reset, v.v.)
-  if (newVal !== localValue.value) {
-    localValue.value = newVal
-  }
-})
-
-watchDebounced(
-  localValue,
-  (value) => {
-    model.value = value
-  },
-  { debounce: props.debounce }
-)
-
-const onInput = (value: string) => {
+const handleInput = (value: string) => {
   localValue.value = value
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    emit('update:modelValue', value)
+  }, props.debounceMs)
 }
 
-const clear = () => {
+const clearSearch = () => {
   localValue.value = ''
-  model.value = ''
+  emit('update:modelValue', '')
 }
+
+watch(() => props.modelValue, (val) => {
+  localValue.value = val
+})
+
+onUnmounted(() => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+})
 </script>
 
 <template>
   <UInput
     :model-value="localValue"
-    :placeholder="placeholder"
-    :icon="icon"
-    @update:model-value="onInput"
+    :placeholder="props.placeholder"
+    icon="i-lucide-search"
+    class="w-full sm:max-w-xs"
+    @update:model-value="handleInput"
   >
     <template v-if="localValue" #trailing>
       <UButton
         icon="i-lucide-x"
-        size="xs"
         color="neutral"
-        variant="ghost"
-        class="-mr-1"
+        variant="link"
+        size="xs"
         aria-label="Xóa tìm kiếm"
-        @click="clear"
+        @click="clearSearch"
       />
     </template>
   </UInput>
