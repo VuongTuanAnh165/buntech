@@ -4,6 +4,7 @@ import ProductService from '#services/product_service'
 import { createProductValidator, updateProductValidator } from '#validators/product'
 import { paginationValidator } from '#validators/pagination'
 import { Pagination } from '#enums/pagination'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class ProductsController {
@@ -26,18 +27,11 @@ export default class ProductsController {
     const limitNum = limit || Pagination.DEFAULT_LIMIT
 
     const products = await this.productService.paginate(pageNum, limitNum)
-    const meta = products.getMeta()
 
     return response.json({
       success: true,
       message: 'Lấy danh sách thành công',
-      data: products.all(),
-      meta: {
-        page: meta.currentPage,
-        pageSize: meta.perPage,
-        total: meta.total,
-        totalPages: meta.lastPage,
-      },
+      data: formatPagination(products),
     })
   }
 
@@ -64,18 +58,11 @@ export default class ProductsController {
       limitNum,
       categoryId ? Number(categoryId) : undefined
     )
-    const meta = products.getMeta()
 
     return response.json({
       success: true,
       message: 'Lấy danh sách thành công',
-      data: products.all(),
-      meta: {
-        page: meta.currentPage,
-        pageSize: meta.perPage,
-        total: meta.total,
-        totalPages: meta.lastPage,
-      },
+      data: formatPagination(products),
     })
   }
 

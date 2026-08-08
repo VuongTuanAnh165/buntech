@@ -1,6 +1,9 @@
 # Pagination (Phân trang)
 
-Hệ thống Buntech Backend sử dụng tính năng `.paginate(page, limit)` mặc định của **Lucid ORM**.
+Hệ thống Buntech Backend sử dụng tính năng `.paginate(page, limit)` mặc định của **Lucid ORM**. Tuy nhiên, để đảm bảo tính đồng nhất (tránh lỗi snake_case của Lucid), BE cung cấp hàm chuẩn hóa.
+
+> [!IMPORTANT]
+> **BẮT BUỘC:** Tất cả các lập trình viên Backend khi trả về danh sách phân trang **PHẢI** bọc kết quả qua hàm `formatPagination` từ thư mục `#utils/pagination`. Tuyệt đối không trả về `data: paginator` trực tiếp hay tự ý tách `meta` ra ngoài.
 
 ## Cấu trúc Response Phân Trang
 

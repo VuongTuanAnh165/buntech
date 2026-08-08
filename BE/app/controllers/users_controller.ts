@@ -7,6 +7,7 @@ import {
   changePasswordValidator,
   updateUserProfileValidator,
 } from '#validators/user_validator'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class UsersController {
@@ -31,7 +32,7 @@ export default class UsersController {
     return response.ok({
       success: true,
       message: 'Lấy danh sách người dùng thành công',
-      data: users,
+      data: formatPagination(users),
     })
   }
 

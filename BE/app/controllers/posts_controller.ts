@@ -5,6 +5,7 @@ import { createPostValidator, updatePostValidator } from '#validators/post'
 import { HttpStatus } from '#enums/http_status'
 import { Pagination } from '#enums/pagination'
 import { paginationValidator } from '#validators/pagination'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class PostsController {
@@ -33,17 +34,10 @@ export default class PostsController {
       categoryId: categoryId ? Number(categoryId) : undefined,
     })
 
-    const meta = posts.getMeta()
     return response.json({
       success: true,
       message: 'Lấy danh sách bài viết thành công',
-      data: posts.all(),
-      meta: {
-        page: meta.currentPage,
-        pageSize: meta.perPage,
-        total: meta.total,
-        totalPages: meta.lastPage,
-      },
+      data: formatPagination(posts),
     })
   }
 
@@ -85,17 +79,10 @@ export default class PostsController {
       categoryId: categoryId ? Number(categoryId) : undefined,
     })
 
-    const meta = posts.getMeta()
     return response.json({
       success: true,
       message: 'Lấy danh sách bài viết thành công',
-      data: posts.all(),
-      meta: {
-        page: meta.currentPage,
-        pageSize: meta.perPage,
-        total: meta.total,
-        totalPages: meta.lastPage,
-      },
+      data: formatPagination(posts),
     })
   }
 

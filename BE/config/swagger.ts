@@ -49,10 +49,11 @@ export default {
       PaginationMeta: {
         type: 'object',
         properties: {
-          page: { type: 'number', example: 1 },
-          pageSize: { type: 'number', example: 10 },
           total: { type: 'number', example: 100 },
-          totalPages: { type: 'number', example: 10 },
+          perPage: { type: 'number', example: 10 },
+          currentPage: { type: 'number', example: 1 },
+          lastPage: { type: 'number', example: 10 },
+          firstPage: { type: 'number', example: 1 },
         },
       },
       SuccessResponse: {

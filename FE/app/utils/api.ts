@@ -58,6 +58,45 @@ export function hasResponseMessage(data: unknown): data is { message: string } {
   )
 }
 
+/**
+ * Hàm chuẩn hóa Pagination Response từ Backend.
+ * Do Backend đôi khi trả meta ở root level (cùng với data) hoặc lồng bên trong data.data,
+ * và tên field thỉnh thoảng dùng snake_case (per_page) hoặc camelCase (perPage).
+ */
+export function normalizePaginationResponse<T>(res: any): { data: T[]; meta: import('~/types/api').PaginationMeta } {
+  let items: T[] = []
+  const meta: import('~/types/api').PaginationMeta = {
+    total: 0,
+    perPage: 10,
+    currentPage: 1,
+    lastPage: 1,
+    firstPage: 1
+  }
+
+  if (!res) return { data: items, meta }
+
+  // Trường hợp 1: BE trả meta ngang hàng data (Ví dụ: categories_controller)
+  if (Array.isArray(res.data) && res.meta) {
+    items = res.data
+    meta.currentPage = res.meta.page ?? res.meta.currentPage ?? 1
+    meta.perPage = res.meta.pageSize ?? res.meta.perPage ?? 10
+    meta.total = res.meta.total ?? 0
+    meta.lastPage = res.meta.totalPages ?? res.meta.lastPage ?? 1
+  }
+  // Trường hợp 2: BE trả lồng meta theo chuẩn mặc định của Lucid (Ví dụ: users_controller)
+  else if (res.data && res.data.meta && Array.isArray(res.data.data)) {
+    items = res.data.data
+    const rawMeta = res.data.meta
+    meta.currentPage = rawMeta.currentPage ?? rawMeta.current_page ?? 1
+    meta.perPage = rawMeta.perPage ?? rawMeta.per_page ?? 10
+    meta.total = rawMeta.total ?? 0
+    meta.lastPage = rawMeta.lastPage ?? rawMeta.last_page ?? 1
+    meta.firstPage = rawMeta.firstPage ?? rawMeta.first_page ?? 1
+  }
+
+  return { data: items, meta }
+}
+
 const refreshAccessToken = async (failedToken?: string): Promise<string> => {
   const state = getRefreshState()
 

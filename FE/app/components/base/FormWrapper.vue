@@ -16,11 +16,23 @@ const emit = defineEmits<{ submit: [data: Record<string, unknown>] }>()
 
 const formRef = ref()
 
+const setErrors = (errors: { path: string; message: string }[]) => {
+  formRef.value?.setErrors?.(errors)
+}
+
+const clearErrors = () => {
+  if (formRef.value?.clear) {
+    formRef.value.clear()
+  } else if (formRef.value?.clearErrors) {
+    formRef.value.clearErrors()
+  }
+}
+
 const onSubmit = () => {
   emit('submit', props.state)
 }
 
-defineExpose({ formRef })
+defineExpose({ formRef, setErrors, clearErrors })
 </script>
 
 <template>

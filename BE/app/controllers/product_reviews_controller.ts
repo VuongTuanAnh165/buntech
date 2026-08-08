@@ -9,6 +9,7 @@ import {
 import { HttpStatus } from '#enums/http_status'
 import { Pagination } from '#enums/pagination'
 import { paginationValidator } from '#validators/pagination'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class ProductReviewsController {
@@ -33,17 +34,10 @@ export default class ProductReviewsController {
 
     const reviews = await this.productReviewService.clientList(params.id, pageNum, limitNum)
 
-    const meta = reviews.getMeta()
     return response.json({
       success: true,
       message: 'Lấy danh sách đánh giá thành công',
-      data: reviews.all(),
-      meta: {
-        page: meta.currentPage,
-        pageSize: meta.perPage,
-        total: meta.total,
-        totalPages: meta.lastPage,
-      },
+      data: formatPagination(reviews),
     })
   }
 
@@ -86,17 +80,10 @@ export default class ProductReviewsController {
 
     const reviews = await this.productReviewService.adminList(pageNum, limitNum)
 
-    const meta = reviews.getMeta()
     return response.json({
       success: true,
       message: 'Lấy danh sách đánh giá thành công',
-      data: reviews.all(),
-      meta: {
-        page: meta.currentPage,
-        pageSize: meta.perPage,
-        total: meta.total,
-        totalPages: meta.lastPage,
-      },
+      data: formatPagination(reviews),
     })
   }
 

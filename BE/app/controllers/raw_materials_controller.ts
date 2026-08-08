@@ -5,6 +5,7 @@ import {
   createRawMaterialValidator,
   updateRawMaterialValidator,
 } from '#validators/raw_material_validator'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class RawMaterialsController {
@@ -29,7 +30,7 @@ export default class RawMaterialsController {
     return response.ok({
       success: true,
       message: 'Lấy danh sách nguyên vật liệu thành công',
-      data: rawMaterials,
+      data: formatPagination(rawMaterials),
     })
   }
 

@@ -5,6 +5,7 @@ import {
   createSystemConfigValidator,
   updateSystemConfigValidator,
 } from '#validators/system_config_validator'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class SystemConfigsController {
@@ -26,7 +27,7 @@ export default class SystemConfigsController {
     return response.ok({
       success: true,
       message: 'Lấy danh sách cấu hình hệ thống thành công',
-      data: configs,
+      data: formatPagination(configs),
     })
   }
 

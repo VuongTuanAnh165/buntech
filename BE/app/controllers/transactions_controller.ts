@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import TransactionService from '#services/transaction_service'
 import { payDebtValidator } from '#validators/transaction_validator'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class TransactionsController {
@@ -31,7 +32,7 @@ export default class TransactionsController {
     return response.ok({
       success: true,
       message: 'Lấy danh sách giao dịch thành công',
-      data: transactions,
+      data: formatPagination(transactions),
     })
   }
 

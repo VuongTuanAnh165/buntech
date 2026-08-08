@@ -4,7 +4,7 @@ import { watch } from 'vue'
 export function useSyncQuery(params: {
   search?: ReturnType<typeof ref<string>>
   sortBy?: ReturnType<typeof ref<string>>
-  sortDirection?: ReturnType<typeof ref<'asc' | 'desc'>>
+  sortOrder?: ReturnType<typeof ref<'asc' | 'desc'>>
   page?: ReturnType<typeof ref<number>>
   limit?: ReturnType<typeof ref<number>>
   statusFilter?: ReturnType<typeof ref<string>>
@@ -20,8 +20,8 @@ export function useSyncQuery(params: {
     const q = route.query
     if (params.search && typeof q.search === 'string') params.search.value = q.search
     if (params.sortBy && typeof q.sortBy === 'string') params.sortBy.value = q.sortBy
-    if (params.sortDirection && typeof q.sortDirection === 'string') {
-      params.sortDirection.value = q.sortDirection as 'asc' | 'desc'
+    if (params.sortOrder && typeof q.sortOrder === 'string') {
+      params.sortOrder.value = q.sortOrder as 'asc' | 'desc'
     }
     if (params.page && q.page) params.page.value = Number(q.page) || 1
     if (params.limit && q.limit) params.limit.value = Number(q.limit) || 10
@@ -36,7 +36,7 @@ export function useSyncQuery(params: {
     const query: Record<string, string> = {}
     if (params.search?.value) query.search = params.search.value
     if (params.sortBy?.value) query.sortBy = params.sortBy.value
-    if (params.sortDirection?.value) query.sortDirection = params.sortDirection.value
+    if (params.sortOrder?.value) query.sortOrder = params.sortOrder.value
     if (params.page?.value && params.page.value > 1) query.page = String(params.page.value)
     if (params.limit?.value && params.limit.value !== 10) query.limit = String(params.limit.value)
     if (params.statusFilter?.value) query.status = params.statusFilter.value

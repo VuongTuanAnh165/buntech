@@ -5,7 +5,7 @@ export interface PaginationParams {
   limit: number
   search: string
   sortBy: string
-  sortDirection: 'asc' | 'desc'
+  sortOrder: 'asc' | 'desc'
 }
 
 export function usePagination(initialLimit = 10) {
@@ -14,7 +14,7 @@ export function usePagination(initialLimit = 10) {
   const total = ref(0)
   const search = ref('')
   const sortBy = ref('')
-  const sortDirection = ref<'asc' | 'desc'>('desc')
+  const sortOrder = ref<'asc' | 'desc'>('desc')
 
   const totalPages = computed(() => Math.max(1, Math.ceil(total.value / limit.value)))
   const hasNext = computed(() => page.value < totalPages.value)
@@ -40,15 +40,15 @@ export function usePagination(initialLimit = 10) {
   }
   const toggleSort = (column: string) => {
     if (sortBy.value === column) {
-      sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+      sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
     } else {
       sortBy.value = column
-      sortDirection.value = 'asc'
+      sortOrder.value = 'asc'
     }
   }
 
   return {
-    page, limit, total, search, sortBy, sortDirection,
+    page, limit, total, search, sortBy, sortOrder,
     totalPages, hasNext, hasPrev, from, to,
     nextPage, prevPage, goToPage, changeLimit, reset, toggleSort,
   }

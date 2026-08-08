@@ -4,6 +4,7 @@ import CustomerPriceService from '#services/customer_price_service'
 import { upsertCustomerPriceValidator } from '#validators/customer_price_validator'
 import { paginationValidator } from '#validators/pagination'
 import { Pagination } from '#enums/pagination'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class CustomerPricesController {
@@ -27,18 +28,11 @@ export default class CustomerPricesController {
     const limitNum = limit || Pagination.DEFAULT_LIMIT
 
     const prices = await this.customerPriceService.getUserPrices(params.userId, pageNum, limitNum)
-    const meta = prices.getMeta()
 
     return response.ok({
       success: true,
       message: 'Lấy bảng giá riêng thành công',
-      data: prices.all(),
-      meta: {
-        page: meta.currentPage,
-        pageSize: meta.perPage,
-        total: meta.total,
-        totalPages: meta.lastPage,
-      },
+      data: formatPagination(prices),
     })
   }
 

@@ -7,6 +7,7 @@ import {
   batchAssignDriverValidator,
 } from '#validators/admin_order_validator'
 import emitter from '@adonisjs/core/services/emitter'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class AdminOrdersController {
@@ -39,7 +40,7 @@ export default class AdminOrdersController {
     return response.ok({
       success: true,
       message: 'Lấy danh sách đơn hàng thành công',
-      data: orders,
+      data: formatPagination(orders),
     })
   }
 

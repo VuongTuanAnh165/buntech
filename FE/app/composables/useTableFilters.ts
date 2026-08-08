@@ -23,7 +23,7 @@ export const useTableFilters = <F extends Record<string, unknown> = Record<strin
 
   // --- Initialize Pagination ---
   if (route.query.sortBy) pagination.sortBy.value = route.query.sortBy as string
-  if (route.query.sortOrder) pagination.sortDirection.value = route.query.sortOrder as 'asc' | 'desc'
+  if (route.query.sortOrder) pagination.sortOrder.value = route.query.sortOrder as 'asc' | 'desc'
   if (route.query.page) pagination.page.value = Number(route.query.page)
   if (route.query.limit) pagination.limit.value = Number(route.query.limit)
 
@@ -64,7 +64,7 @@ export const useTableFilters = <F extends Record<string, unknown> = Record<strin
 
     if (pagination.sortBy.value) {
       query.sortBy = pagination.sortBy.value
-      query.sortOrder = pagination.sortDirection.value
+      query.sortOrder = pagination.sortOrder.value
     }
 
     router.replace({ query })
@@ -85,7 +85,7 @@ export const useTableFilters = <F extends Record<string, unknown> = Record<strin
     limit: pagination.limit.value,
     search: debouncedSearch.value || undefined,
     sortBy: pagination.sortBy.value || undefined,
-    sortOrder: pagination.sortBy.value ? pagination.sortDirection.value : undefined,
+    sortOrder: pagination.sortBy.value ? pagination.sortOrder.value : undefined,
     ...filters.value
   }))
 
@@ -96,7 +96,7 @@ export const useTableFilters = <F extends Record<string, unknown> = Record<strin
     searchQuery.value = ''
     debouncedSearch.value = ''
     pagination.sortBy.value = ''
-    pagination.sortDirection.value = 'desc'
+    pagination.sortOrder.value = 'desc'
     filters.value = { ...defaultFilters } as F
     pagination.reset()
     syncToUrl()

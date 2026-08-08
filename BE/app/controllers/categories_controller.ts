@@ -4,6 +4,7 @@ import CategoryService from '#services/category_service'
 import { createCategoryValidator, updateCategoryValidator } from '#validators/category'
 import { Pagination } from '#enums/pagination'
 import { paginationValidator } from '#validators/pagination'
+import { formatPagination } from '#utils/pagination'
 
 @inject()
 export default class CategoriesController {
@@ -27,17 +28,10 @@ export default class CategoriesController {
 
     const categories = await this.categoryService.paginate(pageNum, limitNum)
 
-    const meta = categories.getMeta()
     return response.json({
       success: true,
       message: 'Lấy danh sách thành công',
-      data: categories.all(),
-      meta: {
-        page: meta.currentPage,
-        pageSize: meta.perPage,
-        total: meta.total,
-        totalPages: meta.lastPage,
-      },
+      data: formatPagination(categories),
     })
   }
 
