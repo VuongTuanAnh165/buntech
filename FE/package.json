@@ -18,12 +18,10 @@
     "@nuxt/image": "^2.0.0",
     "@nuxt/ui": "^4.9.0",
     "@pinia/nuxt": "^0.11.3",
-    "@types/dompurify": "^3.0.5",
     "@vite-pwa/nuxt": "^1.1.1",
     "dayjs": "^1.11.21",
     "dompurify": "^3.4.13",
     "echarts": "^6.1.0",
-    "idb-keyval": "^6.3.0",
     "lucide-vue-next": "^1.0.0",
     "nuxt": "^4.4.8",
     "nuxt-security": "^2.6.0",
@@ -33,11 +31,9 @@
     "vue": "^3.5.38",
     "vue-echarts": "^8.1.0",
     "vue-router": "^5.1.0",
-    "xlsx": "^0.18.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.122",
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/test-utils": "^4.0.3",
     "@nuxtjs/google-fonts": "^3.2.0",
@@ -45,11 +41,9 @@
     "@vue/test-utils": "^2.4.11",
     "eslint": "^10.6.0",
     "happy-dom": "^20.11.1",
-    "pdf-parse": "^2.4.5",
     "prettier": "^3.9.4",
     "prettier-plugin-tailwindcss": "^0.8.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.10",
-    "vue-tsc": "^3.3.6"
+    "vitest": "^4.1.10"
   }
 }
