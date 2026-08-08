@@ -1,96 +1,111 @@
 <script setup lang="ts">
-import { Plus, Trash2, Minus, CheckCircle2, Package, Search, ShoppingCart } from 'lucide-vue-next'
+import { mockProducts, mockCategories } from '~/utils/mockData'
 
-const toast = useAppToast()
+const toast = useToast()
 const { formatVND } = useFormat()
 
-useHead({ title: 'Đặt hàng nhanh - BunTech' })
+useSeoMeta({ title: 'Đặt hàng sỉ - BunTech' })
 definePageMeta({ layout: 'default' })
 
 const loading = ref(true)
 const search = ref('')
 const selectedCategory = ref('')
 const orderItems = ref<{ product_id: string; product_name: string; quantity: number; price: number; stock: number; unit: string }[]>([])
-const website_url = ref('')
-const form = ref({ name: '', phone: '', address: '', note: '' })
+const note = ref('')
+const form = ref({ name: '', phone: '', address: '', delivery_date: '' })
 const errors = ref<Record<string, string>>({})
 const submitting = ref(false)
 const success = ref(false)
 const successOrderCode = ref('')
 
+const WHOLESALE_DISCOUNT = 0.1 // 10% discount
+
 const availableProducts = computed(() => {
-  let result = mockProducts.filter(p => p.status === 'ACTIVE')
+  let result = mockProducts.filter((p: any) => p.status === 'ACTIVE')
   if (search.value) {
     const q = search.value.toLowerCase()
-    result = result.filter(p => p.name.toLowerCase().includes(q))
+    result = result.filter((p: any) => p.name.toLowerCase().includes(q))
   }
   if (selectedCategory.value) {
-    result = result.filter(p => p.category_id === selectedCategory.value)
+    result = result.filter((p: any) => p.category_id === selectedCategory.value)
   }
   return result
 })
 
-const total = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.price, 0))
+function getWholesalePrice(price: number): number {
+  return Math.round(price * (1 - WHOLESALE_DISCOUNT))
+}
 
-const addProduct = (productId: string) => {
-  const product = mockProducts.find(p => p.id === productId)
+const total = computed(() => orderItems.value.reduce((sum, item) => sum + item.quantity * item.price, 0))
+const totalSavings = computed(() => {
+  const retailTotal = orderItems.value.reduce((sum, item) => {
+    const product = mockProducts.find((p: any) => p.id === item.product_id)
+    return sum + (product ? Number(product.price) * item.quantity : 0)
+  }, 0)
+  return retailTotal - total.value
+})
+
+function addProduct(productId: string) {
+  const product = mockProducts.find((p: any) => p.id === productId)
   if (!product) return
   const existing = orderItems.value.find(i => i.product_id === productId)
   if (existing) {
     if (existing.quantity >= existing.stock) {
-      toast.warning('Đã đạt giới hạn tồn kho')
+      toast.add({ title: 'Đã đạt giới hạn tồn kho', color: 'warning' })
       return
     }
     existing.quantity++
-    toast.success(`Đã thêm ${product.name}`)
+    toast.add({ title: `Đã thêm ${product.name}`, color: 'success' })
     return
   }
   orderItems.value.push({
-    product_id: productId,
+    product_id: productId as string,
     product_name: product.name,
     quantity: 1,
-    price: Number(product.price),
+    price: getWholesalePrice(Number(product.price)),
     stock: Number(product.stock),
-    unit: product.unit,
+    unit: product.unit || 'Phần',
   })
-  toast.success(`Đã thêm ${product.name}`)
+  toast.add({ title: `Đã thêm ${product.name}`, color: 'success' })
 }
 
-const incrementQty = (index: number) => {
-  const item = orderItems.value[index]!
-  if (item.quantity >= item.stock) {
-    toast.warning('Đã đạt giới hạn tồn kho')
+function incrementQty(index: number) {
+  const item = orderItems.value[index]
+  if (item && item.quantity >= item.stock) {
+    toast.add({ title: 'Đã đạt giới hạn tồn kho', color: 'warning' })
     return
   }
-  item.quantity++
+  if (item) item.quantity++
 }
 
-const decrementQty = (index: number) => {
-  if (orderItems.value[index]!.quantity > 1) {
-    orderItems.value[index]!.quantity--
+function decrementQty(index: number) {
+  const item = orderItems.value[index]
+  if (item && item.quantity > 1) {
+    item.quantity--
   }
 }
 
-const removeItem = (index: number) => {
-  const item = orderItems.value[index]!
-  orderItems.value.splice(index, 1)
-  toast.info(`Đã xóa ${item.product_name}`)
+function removeItem(index: number) {
+  const item = orderItems.value[index]
+  if(item) {
+    orderItems.value.splice(index, 1)
+    toast.add({ title: `Đã xóa ${item.product_name}`, color: 'info' })
+  }
 }
 
-const clearCart = () => {
+function clearCart() {
   orderItems.value = []
-  toast.info('Đã xóa giỏ hàng')
+  toast.add({ title: 'Đã xóa giỏ hàng', color: 'info' })
 }
 
-const submitOrder = () => {
+function submitOrder() {
   errors.value = {}
-  if (website_url.value) return
   if (!form.value.name) errors.value.name = 'Vui lòng nhập họ tên'
   if (!form.value.phone) errors.value.phone = 'Vui lòng nhập số điện thoại'
   else if (!/^(0[0-9]{9,10})$/.test(form.value.phone)) errors.value.phone = 'Số điện thoại không hợp lệ'
   if (!form.value.address) errors.value.address = 'Vui lòng nhập địa chỉ'
   if (orderItems.value.length === 0) {
-    toast.error('Vui lòng chọn ít nhất một sản phẩm')
+    toast.add({ title: 'Vui lòng chọn ít nhất một sản phẩm', color: 'error' })
     return
   }
   if (Object.keys(errors.value).length) return
@@ -100,14 +115,15 @@ const submitOrder = () => {
     successOrderCode.value = 'BT' + Math.random().toString(36).substring(2, 8).toUpperCase()
     submitting.value = false
     success.value = true
-    toast.success('Đặt hàng thành công!')
+    toast.add({ title: 'Đặt hàng sỉ thành công!', color: 'success' })
   }, 1200)
 }
 
-const resetForm = () => {
+function resetForm() {
   success.value = false
   orderItems.value = []
-  form.value = { name: '', phone: '', address: '', note: '' }
+  form.value = { name: '', phone: '', address: '', delivery_date: '' }
+  note.value = ''
   search.value = ''
   selectedCategory.value = ''
 }
@@ -118,69 +134,86 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-12">
+    <!-- Back -->
+    <UButton
+      to="/wholesale"
+      variant="ghost"
+      color="neutral"
+      icon="i-lucide-arrow-left"
+      class="mb-4"
+    >
+      Quay lại
+    </UButton>
+
     <!-- Header -->
-    <nav aria-label="Breadcrumb" class="mb-4">
-      <ol class="flex items-center gap-1.5 text-sm">
-        <li><NuxtLink to="/" class="text-gray-500 dark:text-zinc-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Trang chủ</NuxtLink></li>
-        <li class="text-gray-300 dark:text-zinc-600" aria-hidden="true">/</li>
-        <li aria-current="page" class="text-surface-foreground font-medium">Đặt hàng nhanh</li>
-      </ol>
-    </nav>
-    <h1 class="text-2xl sm:text-3xl font-bold text-surface-foreground tracking-tight mb-2">Đặt hàng nhanh</h1>
-    <p class="text-sm text-gray-500 dark:text-zinc-400 mb-8">Chọn sản phẩm, điền thông tin — giao hàng tận nơi trong 2 giờ</p>
+    <div class="flex items-center gap-3 mb-2">
+      <div class="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+        <UIcon name="i-lucide-tag" class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+      </div>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-surface-foreground tracking-tight">Đặt hàng sỉ</h1>
+        <p class="text-sm text-slate-500 dark:text-zinc-400">Giá sỉ giảm 10% — đặt số lượng lớn, giao tận nơi</p>
+      </div>
+    </div>
+
+    <!-- Discount banner -->
+    <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/10 text-success-700 dark:text-success-400 text-sm font-medium mb-6 animate-fade-in-up">
+      <UIcon name="i-lucide-percent" class="w-4 h-4" />
+      Giảm 10% cho đơn hàng sỉ — áp dụng tự động khi thêm vào giỏ
+    </div>
 
     <!-- Success state -->
     <template v-if="success">
       <div class="card p-8 sm:p-12 text-center max-w-lg mx-auto animate-fade-in-up">
         <div class="w-20 h-20 rounded-full bg-success-100 dark:bg-success-900/30 flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 class="w-10 h-10 text-success-600 dark:text-success-400" aria-hidden="true" />
+          <UIcon name="i-lucide-check-circle-2" class="w-10 h-10 text-success-600 dark:text-success-400" />
         </div>
-        <h2 class="text-2xl font-bold text-surface-foreground mb-2">Đặt hàng thành công!</h2>
-        <p class="text-sm text-gray-500 dark:text-zinc-400 mb-2">Mã đơn hàng của bạn:</p>
+        <h2 class="text-2xl font-bold text-surface-foreground mb-2">Đặt hàng sỉ thành công!</h2>
+        <p class="text-sm text-slate-500 dark:text-zinc-400 mb-2">Mã đơn hàng:</p>
         <p class="text-xl font-mono font-bold text-primary-600 dark:text-primary-400 mb-6">{{ successOrderCode }}</p>
-        <div class="card p-4 mb-6 text-left bg-surface-muted">
+        
+        <div class="card p-4 mb-6 text-left bg-surface-muted border-0 shadow-none">
           <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-500 dark:text-zinc-400">Khách hàng</span>
+            <span class="text-slate-500 dark:text-zinc-400">Khách hàng</span>
             <span class="font-medium text-surface-foreground">{{ form.name }}</span>
           </div>
           <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-500 dark:text-zinc-400">Số điện thoại</span>
+            <span class="text-slate-500 dark:text-zinc-400">Số điện thoại</span>
             <span class="font-medium text-surface-foreground">{{ form.phone }}</span>
           </div>
           <div class="flex justify-between text-sm mb-2">
-            <span class="text-gray-500 dark:text-zinc-400">Số sản phẩm</span>
+            <span class="text-slate-500 dark:text-zinc-400">Số loại sản phẩm</span>
             <span class="font-medium text-surface-foreground">{{ orderItems.length }} loại</span>
           </div>
           <div class="flex justify-between text-sm pt-2 border-t border-surface-border">
-            <span class="font-semibold text-surface-foreground">Tổng tiền</span>
+            <span class="font-semibold text-surface-foreground">Tổng cộng</span>
             <span class="font-bold text-primary-600 dark:text-primary-400">{{ formatVND(total) }}</span>
           </div>
         </div>
-        <p class="text-sm text-gray-500 dark:text-zinc-400 mb-6">Chúng tôi sẽ liên hệ với bạn trong vòng 15 phút để xác nhận đơn hàng.</p>
+        
+        <p class="text-sm text-slate-500 dark:text-zinc-400 mb-6">Chúng tôi sẽ liên hệ để xác nhận đơn hàng và thời gian giao hàng.</p>
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
-          <NuxtLink to="/products"><UButton variant="outline">Tiếp tục mua sắm</UButton></NuxtLink>
+          <UButton variant="outline" color="neutral" to="/wholesale">Về cổng khách hàng</UButton>
           <UButton @click="resetForm">Đặt đơn mới</UButton>
         </div>
       </div>
     </template>
 
-    <!-- Order form -->
     <template v-else>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Product selection -->
-        <div class="lg:col-span-2 space-y-4">
+        <div class="lg:col-span-2">
           <div class="card p-4">
             <!-- Search -->
-            <div class="relative mb-4">
-              <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-500" aria-hidden="true" />
-              <input
-                v-model="search"
-                type="text"
-                placeholder="Tìm sản phẩm..."
-                class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-surface-border bg-surface text-sm text-surface-foreground placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:border-primary-400 focus:ring-4 focus:ring-primary-500/10 transition-all min-h-[44px]"
-              >
-            </div>
+            <UInput
+              v-model="search"
+              icon="i-lucide-search"
+              placeholder="Tìm sản phẩm..."
+              size="lg"
+              class="mb-4"
+            />
+            
             <!-- Category pills -->
             <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 mb-4">
               <button
@@ -223,13 +256,13 @@ onMounted(() => {
                   v-for="(product, i) in availableProducts"
                   :key="product.id"
                   type="button"
-                  class="text-left p-3 border border-surface-border rounded-lg hover:border-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group stagger-item min-h-[44px]"
+                  class="text-left p-3 border border-surface-border rounded-lg hover:border-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all group min-h-[44px] relative"
                   :style="{ animationDelay: `${Math.min(i * 20, 200)}ms` }"
                   :disabled="product.stock <= 0"
-                  :class="{ 'opacity-50 cursor-not-allowed': product.stock <= 0 }"
+                  :class="{ 'opacity-50 cursor-not-allowed': product.stock <= 0, 'animate-fade-in-up': true }"
                   @click="addProduct(product.id)"
                 >
-                  <div class="aspect-square rounded-md bg-surface-muted overflow-hidden mb-2">
+                  <div class="aspect-square rounded-md bg-surface-muted overflow-hidden mb-2 relative">
                     <NuxtImg
                       v-if="product.image_url"
                       :src="product.image_url"
@@ -238,32 +271,34 @@ onMounted(() => {
                       loading="lazy"
                     />
                     <div v-else class="w-full h-full flex items-center justify-center">
-                      <Package class="w-8 h-8 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
+                      <UIcon name="i-lucide-package" class="w-8 h-8 text-slate-300 dark:text-zinc-600" />
                     </div>
                   </div>
                   <p class="text-xs font-medium text-surface-foreground truncate mb-0.5">{{ product.name }}</p>
-                  <p class="text-sm font-bold text-primary-600 dark:text-primary-400">{{ formatVND(product.price) }}</p>
-                  <p class="text-xs text-gray-400 dark:text-zinc-500">/{{ product.unit }}</p>
+                  <div class="flex items-baseline gap-1">
+                    <p class="text-sm font-bold text-primary-600 dark:text-primary-400">{{ formatVND(getWholesalePrice(Number(product.price))) }}</p>
+                    <span class="text-[10px] text-slate-400 dark:text-zinc-500 line-through">{{ formatVND(Number(product.price)) }}</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">SL còn: {{ product.stock }}</p>
                 </button>
               </div>
             </template>
-            <div v-else class="text-center py-8 text-sm text-gray-500 dark:text-zinc-400">Không tìm thấy sản phẩm</div>
+            <div v-else class="text-center py-8 text-sm text-slate-500 dark:text-zinc-400">Không tìm thấy sản phẩm</div>
           </div>
         </div>
 
         <!-- Cart + Form -->
         <div class="space-y-4">
-          <!-- Cart -->
           <div class="card p-4 sticky top-4">
             <div class="flex items-center justify-between mb-4">
               <h2 class="font-semibold text-surface-foreground flex items-center gap-2">
-                <ShoppingCart class="w-5 h-5" aria-hidden="true" />
+                <UIcon name="i-lucide-shopping-cart" class="w-5 h-5" />
                 Giỏ hàng ({{ orderItems.length }})
               </h2>
               <button
                 v-if="orderItems.length"
                 type="button"
-                class="text-xs text-gray-400 dark:text-zinc-500 hover:text-danger-600 dark:hover:text-danger-400 transition-colors min-h-[44px] px-2"
+                class="text-xs text-slate-400 dark:text-zinc-500 hover:text-error-600 dark:hover:text-error-400 transition-colors min-h-[44px] px-2"
                 @click="clearCart"
               >
                 Xóa tất cả
@@ -271,7 +306,7 @@ onMounted(() => {
             </div>
 
             <template v-if="orderItems.length">
-              <div class="space-y-2 max-h-64 overflow-y-auto pr-1 mb-4">
+              <div class="space-y-2 max-h-48 overflow-y-auto pr-1 mb-4">
                 <div
                   v-for="(item, i) in orderItems"
                   :key="item.product_id"
@@ -279,37 +314,41 @@ onMounted(() => {
                 >
                   <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-surface-foreground truncate">{{ item.product_name }}</p>
-                    <p class="text-xs text-gray-400 dark:text-zinc-500">{{ formatVND(item.price) }} / {{ item.unit }}</p>
+                    <p class="text-xs text-slate-400 dark:text-zinc-500">{{ formatVND(item.price) }} / {{ item.unit }}</p>
                   </div>
                   <div class="flex items-center gap-1 flex-shrink-0">
                     <button
                       type="button"
-                      class="w-8 h-8 rounded-md bg-surface-hover hover:bg-surface-border text-surface-foreground flex items-center justify-center transition-colors min-w-[36px] min-h-[36px]"
-                      :aria-label="'Giảm số lượng'"
+                      class="w-7 h-7 rounded-md bg-surface-hover hover:bg-surface-border text-surface-foreground flex items-center justify-center transition-colors min-w-[28px] min-h-[28px]"
                       @click="decrementQty(i)"
                     >
-                      <Minus class="w-3.5 h-3.5" aria-hidden="true" />
+                      <UIcon name="i-lucide-minus" class="w-3.5 h-3.5" />
                     </button>
                     <span class="w-8 text-center text-sm font-medium text-surface-foreground tabular-nums">{{ item.quantity }}</span>
                     <button
                       type="button"
-                      class="w-8 h-8 rounded-md bg-surface-hover hover:bg-surface-border text-surface-foreground flex items-center justify-center transition-colors min-w-[36px] min-h-[36px]"
-                      :aria-label="'Tăng số lượng'"
+                      class="w-7 h-7 rounded-md bg-surface-hover hover:bg-surface-border text-surface-foreground flex items-center justify-center transition-colors min-w-[28px] min-h-[28px]"
                       @click="incrementQty(i)"
                     >
-                      <Plus class="w-3.5 h-3.5" aria-hidden="true" />
+                      <UIcon name="i-lucide-plus" class="w-3.5 h-3.5" />
                     </button>
                   </div>
                   <button
                     type="button"
-                    class="w-8 h-8 rounded-md text-gray-400 hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex items-center justify-center transition-colors flex-shrink-0 min-w-[36px] min-h-[36px]"
-                    :aria-label="'Xóa ' + item.product_name"
+                    class="w-8 h-8 rounded-md text-slate-400 hover:text-error-600 hover:bg-error-50 dark:hover:bg-error-900/20 flex items-center justify-center transition-colors flex-shrink-0"
                     @click="removeItem(i)"
                   >
-                    <Trash2 class="w-3.5 h-3.5" aria-hidden="true" />
+                    <UIcon name="i-lucide-trash-2" class="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
+
+              <!-- Savings -->
+              <div v-if="totalSavings > 0" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-400 text-sm mb-3">
+                <UIcon name="i-lucide-percent" class="w-4 h-4" />
+                Tiết kiệm {{ formatVND(totalSavings) }} với giá sỉ
+              </div>
+
               <div class="flex justify-between items-center pt-3 border-t border-surface-border mb-4">
                 <span class="font-semibold text-surface-foreground">Tổng cộng</span>
                 <span class="text-xl font-bold text-primary-600 dark:text-primary-400">{{ formatVND(total) }}</span>
@@ -317,39 +356,31 @@ onMounted(() => {
             </template>
             <div v-else class="flex flex-col items-center justify-center py-8 text-center">
               <div class="w-14 h-14 rounded-full bg-surface-hover flex items-center justify-center mb-3">
-                <Package class="w-7 h-7 text-gray-400 dark:text-zinc-500" aria-hidden="true" />
+                <UIcon name="i-lucide-package" class="w-7 h-7 text-slate-400 dark:text-zinc-500" />
               </div>
-              <p class="text-sm text-gray-500 dark:text-zinc-400">Chưa có sản phẩm nào</p>
-              <p class="text-xs text-gray-400 dark:text-zinc-500 mt-1">Chọn sản phẩm bên cạnh để thêm vào giỏ</p>
+              <p class="text-sm text-slate-500 dark:text-zinc-400">Chưa có sản phẩm</p>
             </div>
 
-            <!-- Customer form -->
-            <form v-if="orderItems.length" class="space-y-3 mt-4 pt-4 border-t border-surface-border" @submit.prevent="submitOrder">
+            <!-- Delivery form -->
+            <form v-if="orderItems.length" class="space-y-4 mt-4 pt-4 border-t border-surface-border" @submit.prevent="submitOrder">
               <UFormField label="Họ và tên" :error="errors.name">
                 <UInput v-model="form.name" placeholder="Nguyễn Văn A" class="w-full" />
               </UFormField>
-              
               <UFormField label="Số điện thoại" :error="errors.phone">
                 <UInput v-model="form.phone" placeholder="0901234567" class="w-full" />
               </UFormField>
-              
               <UFormField label="Địa chỉ giao hàng" :error="errors.address">
                 <UInput v-model="form.address" placeholder="123 Lê Lợi, Q.1, TP.HCM" class="w-full" />
               </UFormField>
-              
               <UFormField label="Ghi chú (tùy chọn)">
-                <UInput v-model="form.note" placeholder="Giao trước 9h sáng" class="w-full" />
+                <UInput v-model="note" placeholder="Giao trước 9h sáng" class="w-full" />
               </UFormField>
 
-              <!-- Honeypot -->
-              <div style="opacity: 0; position: absolute; z-index: -1; left: -9999px;" aria-hidden="true">
-                <label>Website URL</label>
-                <input v-model="website_url" type="text" name="website_url" tabindex="-1" autocomplete="off">
-              </div>
-
-              <UButton type="submit" :loading="submitting" size="lg" class="w-full justify-center">
-                <ShoppingCart class="w-5 h-5 mr-2" aria-hidden="true" />
-                Đặt hàng — {{ formatVND(total) }}
+              <UButton type="submit" :loading="submitting" size="lg" block>
+                <template #leading>
+                  <UIcon name="i-lucide-truck" class="w-5 h-5" />
+                </template>
+                Đặt hàng sỉ — {{ formatVND(total) }}
               </UButton>
             </form>
           </div>

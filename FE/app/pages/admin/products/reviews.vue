@@ -74,9 +74,9 @@ const stats = computed(() => [
 ])
 
 const filters = computed(() => [
-  { key: 'pending' as const, label: 'Chờ duyệt', count: pendingCount.value },
-  { key: 'approved' as const, label: 'Đã duyệt', count: approvedCount.value },
-  { key: 'all' as const, label: 'Tất cả', count: totalReviews.value },
+  { accessorKey: 'pending' as const, header: 'Chờ duyệt', count: pendingCount.value },
+  { accessorKey: 'approved' as const, header: 'Đã duyệt', count: approvedCount.value },
+  { accessorKey: 'all' as const, header: 'Tất cả', count: totalReviews.value },
 ])
 
 // ─── Actions ────────────────────────────────────────────

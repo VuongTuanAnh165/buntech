@@ -149,13 +149,13 @@ useHead(() => ({
         <!-- Gallery -->
         <div class="space-y-3">
           <div class="aspect-square bg-surface-muted rounded-2xl overflow-hidden shadow-md relative group">
-            <img
+            <NuxtImg
               v-if="galleryImages[activeImage]"
               :src="galleryImages[activeImage] || ''"
               :alt="product.name"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="eager"
-            >
+            />
             <div v-else class="w-full h-full flex items-center justify-center">
               <Package class="w-24 h-24 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
             </div>
@@ -181,7 +181,7 @@ useHead(() => ({
               :aria-label="`Xem ảnh ${i + 1}`"
               @click="activeImage = i"
             >
-              <img v-if="img" :src="img" :alt="`Ảnh ${i + 1}`" class="w-full h-full object-cover">
+              <NuxtImg v-if="img" :src="img" :alt="`Ảnh ${i + 1}`" class="w-full h-full object-cover"/>
               <div v-else class="w-full h-full flex items-center justify-center bg-surface-muted">
                 <Package class="w-6 h-6 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
               </div>
@@ -321,8 +321,8 @@ useHead(() => ({
         <div class="flex items-center gap-1 border-b border-surface-border mb-6 overflow-x-auto scrollbar-hide" role="tablist">
           <button
             v-for="tab in [
-              { key: 'description', label: 'Mô tả sản phẩm' },
-              { key: 'reviews', label: `Đánh giá (${reviews.length})` },
+              { accessorKey: 'description', header: 'Mô tả sản phẩm' },
+              { accessorKey: 'reviews', header: `Đánh giá (${reviews.length})` },
             ]"
             :key="tab.key"
             :class="[
@@ -412,13 +412,13 @@ useHead(() => ({
             :style="{ animationDelay: `${i * 60}ms` }"
           >
             <div class="aspect-square rounded-lg bg-surface-muted overflow-hidden mb-3">
-              <img
+              <NuxtImg
                 v-if="rp.image_url"
                 :src="rp.image_url"
                 :alt="rp.name"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
-              >
+              />
               <div v-else class="w-full h-full flex items-center justify-center">
                 <Package class="w-12 h-12 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
               </div>

@@ -59,7 +59,7 @@ const testimonials = [
     <!-- Hero -->
     <section class="relative overflow-hidden min-h-[640px] flex items-center">
       <div class="absolute inset-0">
-        <img :src="heroImage" alt="" class="w-full h-full object-cover" aria-hidden="true" >
+        <NuxtImg :src="heroImage" alt="" class="w-full h-full object-cover" aria-hidden="true" />
         <div class="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-900/75 to-slate-900/40" />
       </div>
 
@@ -182,13 +182,13 @@ const testimonials = [
           :style="{ animationDelay: `${i * 60}ms` }"
         >
           <div class="aspect-square rounded-lg bg-surface-muted overflow-hidden mb-3 relative">
-            <img
+            <NuxtImg
               v-if="product.image_url"
               :src="product.image_url"
               :alt="product.name"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
-            >
+            />
             <div v-else class="w-full h-full flex items-center justify-center">
               <Package class="w-12 h-12 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
             </div>
@@ -292,13 +292,13 @@ const testimonials = [
             class="card card-hover overflow-hidden group"
           >
             <div class="aspect-[16/9] bg-surface-muted overflow-hidden">
-              <img
+              <NuxtImg
                 v-if="post.image_url"
                 :src="post.image_url"
                 :alt="post.title"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
-              >
+              />
               <div v-else class="w-full h-full flex items-center justify-center">
                 <Package class="w-12 h-12 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
               </div>

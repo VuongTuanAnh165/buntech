@@ -189,13 +189,13 @@ onMounted(() => {
           :style="{ animationDelay: `${Math.min(i * 40, 400)}ms` }"
         >
           <div class="aspect-[4/5] rounded-xl bg-surface-muted overflow-hidden mb-3 relative">
-            <img
+            <NuxtImg
               v-if="product.image_url"
               :src="product.image_url"
               :alt="product.name"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
-            >
+            />
             <div v-else class="w-full h-full flex items-center justify-center">
               <Package class="w-12 h-12 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
             </div>
@@ -235,13 +235,13 @@ onMounted(() => {
           :style="{ animationDelay: `${Math.min(i * 40, 400)}ms` }"
         >
           <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-surface-muted overflow-hidden flex-shrink-0">
-            <img
+            <NuxtImg
               v-if="product.image_url"
               :src="product.image_url"
               :alt="product.name"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
-            >
+            />
             <div v-else class="w-full h-full flex items-center justify-center">
               <Package class="w-8 h-8 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
             </div>

@@ -56,12 +56,12 @@ const totalRevenue = computed(() =>
 const statusPills = computed(() => {
   const list = allOrders.value
   return [
-    { key: 'ALL' as const, label: 'Tất cả', count: list.length },
-    { key: OrderStatus.PENDING, label: 'Chờ xử lý', count: list.filter(o => o.status === OrderStatus.PENDING).length },
-    { key: OrderStatus.PROCESSING, label: 'Đang chuẩn bị', count: list.filter(o => o.status === OrderStatus.PROCESSING).length },
-    { key: OrderStatus.SHIPPING, label: 'Đang giao', count: list.filter(o => o.status === OrderStatus.SHIPPING).length },
-    { key: OrderStatus.DELIVERED, label: 'Đã giao', count: list.filter(o => o.status === OrderStatus.DELIVERED).length },
-    { key: OrderStatus.CANCELLED, label: 'Đã hủy', count: list.filter(o => o.status === OrderStatus.CANCELLED).length },
+    { accessorKey: 'ALL' as const, header: 'Tất cả', count: list.length },
+    { accessorKey: OrderStatus.PENDING, header: 'Chờ xử lý', count: list.filter(o => o.status === OrderStatus.PENDING).length },
+    { accessorKey: OrderStatus.PROCESSING, header: 'Đang chuẩn bị', count: list.filter(o => o.status === OrderStatus.PROCESSING).length },
+    { accessorKey: OrderStatus.SHIPPING, header: 'Đang giao', count: list.filter(o => o.status === OrderStatus.SHIPPING).length },
+    { accessorKey: OrderStatus.DELIVERED, header: 'Đã giao', count: list.filter(o => o.status === OrderStatus.DELIVERED).length },
+    { accessorKey: OrderStatus.CANCELLED, header: 'Đã hủy', count: list.filter(o => o.status === OrderStatus.CANCELLED).length },
   ]
 })
 

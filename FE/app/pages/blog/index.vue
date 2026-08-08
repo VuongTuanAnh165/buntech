@@ -142,13 +142,13 @@ onMounted(() => {
       >
         <div class="grid grid-cols-1 lg:grid-cols-2">
           <div class="aspect-[16/9] lg:aspect-auto bg-surface-muted overflow-hidden">
-            <img
+            <NuxtImg
               v-if="featuredPost.image_url"
               :src="featuredPost.image_url"
               :alt="featuredPost.title"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="eager"
-            >
+            />
             <div v-else class="w-full h-full flex items-center justify-center">
               <Package class="w-16 h-16 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
             </div>
@@ -178,13 +178,13 @@ onMounted(() => {
           :style="{ animationDelay: `${Math.min(i * 50, 300)}ms` }"
         >
           <div class="aspect-[16/9] bg-surface-muted overflow-hidden">
-            <img
+            <NuxtImg
               v-if="post.image_url"
               :src="post.image_url"
               :alt="post.title"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
-            >
+            />
             <div v-else class="w-full h-full flex items-center justify-center">
               <Package class="w-12 h-12 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
             </div>

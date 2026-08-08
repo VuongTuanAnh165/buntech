@@ -51,11 +51,30 @@ export function useFormat() {
       .replace(/^-+|-+$/g, '')
   }
 
+  const formatTimeAgo = (iso: string | null | undefined): string => {
+    if (!iso) return ''
+    const diff = Date.now() - new Date(iso).getTime()
+    const mins = Math.floor(diff / 60000)
+    const hours = Math.floor(mins / 60)
+    const days = Math.floor(hours / 24)
+    if (days > 0) return `${days} ngày trước`
+    if (hours > 0) return `${hours} giờ trước`
+    if (mins > 0) return `${mins} phút trước`
+    return 'Vừa xong'
+  }
+
+  const formatPhone = (phone: string | null | undefined): string => {
+    if (!phone) return ''
+    return phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3')
+  }
+
   return {
     formatVND,
     formatNumber,
     formatDate,
     formatDateTime,
+    formatTimeAgo,
+    formatPhone,
     parseVNDInput,
     formatVNDInput,
     slugify,

@@ -96,7 +96,7 @@ useHead(() => ({
 
       <!-- Featured image -->
       <div v-if="post.image_url" class="aspect-[16/9] rounded-2xl overflow-hidden mb-8 bg-surface-muted">
-        <img :src="post.image_url" :alt="post.title" class="w-full h-full object-cover" loading="eager">
+        <NuxtImg :src="post.image_url" :alt="post.title" class="w-full h-full object-cover" loading="eager"/>
       </div>
 
       <!-- Share + category -->
@@ -166,13 +166,13 @@ useHead(() => ({
             :style="{ animationDelay: `${i * 60}ms` }"
           >
             <div class="aspect-[16/9] bg-surface-muted overflow-hidden">
-              <img
+              <NuxtImg
                 v-if="rp.image_url"
                 :src="rp.image_url"
                 :alt="rp.title"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 loading="lazy"
-              >
+              />
               <div v-else class="w-full h-full flex items-center justify-center">
                 <Package class="w-10 h-10 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
               </div>

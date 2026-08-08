@@ -56,7 +56,7 @@ const toggleFaq = (index: number) => {
     <!-- Hero -->
     <section class="relative overflow-hidden min-h-[480px] flex items-center">
       <div class="absolute inset-0">
-        <img :src="heroImage" alt="" class="w-full h-full object-cover" aria-hidden="true" >
+        <NuxtImg :src="heroImage" alt="" class="w-full h-full object-cover" aria-hidden="true" />
         <div class="absolute inset-0 bg-gradient-to-br from-gray-900/95 via-gray-900/80 to-primary-950/70" />
       </div>
       <div class="absolute top-1/4 -left-20 w-72 h-72 rounded-full bg-primary-500/20 blur-3xl" aria-hidden="true" />
@@ -99,7 +99,7 @@ const toggleFaq = (index: number) => {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div class="relative">
           <div class="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
-            <img src="https://images.pexels.com/photos/6711687/pexels-photo-6711687.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Xưởng bún BunTech" class="w-full h-full object-cover" loading="lazy" >
+            <NuxtImg src="https://images.pexels.com/photos/6711687/pexels-photo-6711687.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Xưởng bún BunTech" class="w-full h-full object-cover" loading="lazy" />
           </div>
           <div class="absolute -bottom-4 -right-4 w-32 h-32 rounded-2xl bg-primary-600 -z-10 hidden sm:block" aria-hidden="true" />
           <div class="absolute -top-4 -left-4 w-24 h-24 rounded-full bg-accent-400/20 -z-10 hidden sm:block" aria-hidden="true" />

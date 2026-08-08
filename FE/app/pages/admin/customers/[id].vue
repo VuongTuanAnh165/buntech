@@ -287,11 +287,11 @@ onMounted(loadCustomer)
             <div v-if="item.value === 'orders'" key="orders" class="animate-fade-in-up">
               <BaseDataTable
                 :columns="[
-                  { key: 'id', label: 'Mã đơn' },
-                  { key: 'status', label: 'Trạng thái' },
-                  { key: 'total', label: 'Tổng tiền', class: 'text-right' },
-                  { key: 'amount_collected', label: 'Đã thu', class: 'text-right' },
-                  { key: 'created_at', label: 'Ngày đặt' },
+                  { accessorKey: 'id', header: 'Mã đơn' },
+                  { accessorKey: 'status', header: 'Trạng thái' },
+                  { accessorKey: 'total', header: 'Tổng tiền', class: 'text-right' },
+                  { accessorKey: 'amount_collected', header: 'Đã thu', class: 'text-right' },
+                  { accessorKey: 'created_at', header: 'Ngày đặt' },
                 ]"
                 :rows="orders"
                 empty-title="Chưa có đơn hàng"
@@ -465,12 +465,12 @@ onMounted(loadCustomer)
               </div>
               <BaseDataTable
                 :columns="[
-                  { key: 'product', label: 'Sản phẩm' },
-                  { key: 'unit', label: 'Đơn vị' },
-                  { key: 'default_price', label: 'Giá gốc' },
-                  { key: 'price', label: 'Giá riêng' },
-                  { key: 'discount', label: 'Chiết khấu' },
-                  { key: 'actions', label: '' },
+                  { accessorKey: 'product', header: 'Sản phẩm' },
+                  { accessorKey: 'unit', header: 'Đơn vị' },
+                  { accessorKey: 'default_price', header: 'Giá gốc' },
+                  { accessorKey: 'price', header: 'Giá riêng' },
+                  { accessorKey: 'discount', header: 'Chiết khấu' },
+                  { accessorKey: 'actions', header: '' },
                 ]"
                 :rows="customPrices"
                 empty-title="Chưa có giá riêng"

@@ -6,6 +6,7 @@ import { ORDER_STATUS_COLORS, ORDER_STATUS_ICONS, ORDER_STATUS_LABELS, ORDER_STA
 
 const toast = useToast()
 const route = useRoute()
+const router = useRouter()
 const { formatVND, formatDateTime } = useFormat()
 
 definePageMeta({ layout: 'admin' })
@@ -17,6 +18,7 @@ const loading = ref(true)
 const error = ref(false)
 const order = ref<Order | null>(null)
 const items = ref<OrderItem[]>([])
+const showStatusMenu = ref(false)
 const changingStatus = ref(false)
 const showAssignDriver = ref(false)
 const selectedDriverId = ref('')
@@ -36,7 +38,7 @@ const remaining = computed(() => Math.max(0, total.value - amountCollected.value
 const paymentState = computed(() => {
   if (amountCollected.value >= total.value && total.value > 0) return { label: 'Đã thanh toán đủ', color: 'success' as const }
   if (amountCollected.value > 0) return { label: 'Thanh toán một phần', color: 'warning' as const }
-  return { label: 'Chưa thanh toán', color: 'error' as const } // v4 uses error, not danger
+  return { label: 'Chưa thanh toán', color: 'error' as const }
 })
 
 const customer = computed(() => order.value?.user as Profile | null | undefined)
@@ -48,6 +50,7 @@ const driverName = computed(() => driver.value?.full_name)
 const orderNotes = computed(() => order.value?.note || 'Không có ghi chú cho đơn hàng này.')
 
 const availableDrivers = computed(() => mockProfiles.filter(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE))
+const statusOptions = computed(() => Object.values(OrderStatus).filter(s => s !== order.value?.status))
 
 // History
 const orderHistory = ref<{ status: string; at: string; note: string }[]>([])
@@ -110,6 +113,7 @@ function loadOrder() {
 // Actions
 function changeStatus(newStatus: string) {
   if (!order.value) return
+  showStatusMenu.value = false
   changingStatus.value = true
   order.value.status = newStatus as OrderStatus
   setTimeout(() => {
@@ -141,7 +145,7 @@ function copyOrder() {
     sessionStorage.setItem('copyOrderData', JSON.stringify(copyData))
   }
   toast.add({ title: 'Đã sao chép đơn hàng', color: 'success' })
-  navigateTo('/admin/orders/create')
+  router.push('/admin/orders/create')
 }
 
 function printOrder() {
@@ -151,47 +155,45 @@ function printOrder() {
 useSeoMeta({ title: () => `Đơn hàng #${String(orderId).slice(0, 8)} - BunTech Admin` })
 onMounted(loadOrder)
 
-const statusOptions = computed(() => {
-  return Object.values(OrderStatus)
-    .filter(s => s !== order.value?.status)
-    .map(s => ({
-      label: ORDER_STATUS_LABELS[s],
-      icon: ORDER_STATUS_ICONS[s],
-      onSelect: () => changeStatus(s)
-    }))
-})
-
-const orderActions = computed(() => [
-  [
-    { label: 'Sao chép', icon: 'i-lucide-copy', onSelect: copyOrder },
-    { label: 'In', icon: 'i-lucide-printer', onSelect: printOrder }
-  ]
-])
-
+const breadcrumbItems = [
+  { label: 'Admin', to: '/admin' },
+  { label: 'Đơn hàng', to: '/admin/orders' },
+  { label: `#${String(orderId).slice(0, 8)}` },
+]
 </script>
 
 <template>
-  <div class="pb-20 lg:pb-0">
-    <div class="mb-4">
-      <UButton
-        variant="ghost"
-        color="neutral"
-        icon="i-lucide-arrow-left"
-        @click="navigateTo('/admin/orders')"
-      >
-        Quay lại
-      </UButton>
-    </div>
+  <div>
+    <UBreadcrumb :items="breadcrumbItems" class="mb-4" />
+
+    <button
+      class="flex items-center gap-1 text-sm text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 mb-4 min-h-[44px] px-2 transition-colors"
+      @click="router.push('/admin/orders')"
+    >
+      <UIcon name="i-lucide-arrow-left" class="w-4 h-4" /> Quay lại
+    </button>
 
     <BaseEmptyState v-if="error" title="Lỗi tải dữ liệu" description="Không thể tải thông tin đơn hàng." @retry="loadOrder" />
 
     <template v-else-if="loading">
-      <BasePageLoading />
+      <div class="space-y-4">
+        <div class="skeleton h-32 w-full rounded-2xl" />
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-6">
+            <div class="skeleton h-72 w-full rounded-2xl" />
+            <div class="skeleton h-40 w-full rounded-2xl" />
+          </div>
+          <div class="space-y-6">
+            <div class="skeleton h-48 w-full rounded-2xl" />
+            <div class="skeleton h-48 w-full rounded-2xl" />
+          </div>
+        </div>
+      </div>
     </template>
 
     <template v-else-if="order">
       <!-- Order header card -->
-      <UCard class="mb-6 relative overflow-hidden bg-surface">
+      <div class="card p-6 mb-6 animate-fade-in-up relative overflow-hidden">
         <div class="absolute -top-12 -right-12 w-48 h-48 bg-primary-500/5 dark:bg-primary-400/5 rounded-full blur-2xl pointer-events-none" />
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative">
           <div class="flex-1 min-w-0">
@@ -205,8 +207,8 @@ const orderActions = computed(() => [
               Đơn hàng #{{ String(orderId).slice(-6) }}
             </h1>
             <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-zinc-400 flex-wrap">
-              <span class="flex items-center gap-1.5"><div class="i-lucide-clock w-4 h-4" /> {{ formatDateTime(order.created_at) }}</span>
-              <span class="flex items-center gap-1.5"><div class="i-lucide-shopping-bag w-4 h-4" /> {{ items.length }} sản phẩm</span>
+              <span class="flex items-center gap-1.5"><UIcon name="i-lucide-clock" class="w-4 h-4" /> {{ formatDateTime(order.created_at) }}</span>
+              <span class="flex items-center gap-1.5"><UIcon name="i-lucide-shopping-bag" class="w-4 h-4" /> {{ items.length }} sản phẩm</span>
             </div>
           </div>
 
@@ -216,35 +218,48 @@ const orderActions = computed(() => [
               <p class="text-3xl font-bold text-primary-600 dark:text-primary-400 tabular-nums">{{ formatVND(total) }}</p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <UDropdownMenu :items="orderActions">
-                <UButton variant="outline" color="neutral">
-                  Thao tác <div class="i-lucide-chevron-down w-4 h-4 ml-1" />
+              <UButton size="sm" variant="outline" color="neutral" @click="copyOrder">
+                <UIcon name="i-lucide-copy" class="w-4 h-4" /> Sao chép
+              </UButton>
+              <UButton size="sm" variant="outline" color="neutral" @click="printOrder">
+                <UIcon name="i-lucide-printer" class="w-4 h-4" /> In
+              </UButton>
+              <div class="relative">
+                <UButton size="sm" :loading="changingStatus" @click="showStatusMenu = !showStatusMenu">
+                  <UIcon name="i-lucide-refresh-cw" class="w-4 h-4" /> Đổi trạng thái
+                  <UIcon name="i-lucide-chevron-right" class="w-3.5 h-3.5 transition-transform" :class="showStatusMenu ? 'rotate-90' : ''" />
                 </UButton>
-              </UDropdownMenu>
-              <UDropdownMenu :items="[statusOptions]">
-                <UButton :loading="changingStatus" icon="i-lucide-refresh-cw">
-                  Đổi trạng thái
-                </UButton>
-              </UDropdownMenu>
+                <Transition name="fade">
+                  <div v-if="showStatusMenu" class="absolute right-0 top-full mt-2 z-20 w-48 card p-1.5 shadow-lg">
+                    <button
+                      v-for="s in statusOptions"
+                      :key="s"
+                      class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-surface-foreground hover:bg-surface-hover transition-colors min-h-[40px]"
+                      @click="changeStatus(s as string)"
+                    >
+                      <UIcon :name="ORDER_STATUS_ICONS[s]" class="w-4 h-4" />
+                      {{ ORDER_STATUS_LABELS[s] }}
+                    </button>
+                  </div>
+                </Transition>
+              </div>
             </div>
           </div>
         </div>
-      </UCard>
+      </div>
 
       <!-- 3-column layout -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left (main) -->
         <div class="lg:col-span-2 space-y-6">
           <!-- Order items -->
-          <UCard class="animate-fade-in-up bg-surface">
-            <template #header>
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                  <div class="i-lucide-shopping-bag w-4 h-4 text-primary-600 dark:text-primary-400" />
-                </div>
-                <h2 class="text-sm font-semibold text-surface-foreground">Sản phẩm trong đơn</h2>
+          <div class="card p-5 animate-fade-in-up" style="animation-delay: 40ms">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                <UIcon name="i-lucide-shopping-bag" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
               </div>
-            </template>
+              <h2 class="text-sm font-semibold text-surface-foreground">Sản phẩm trong đơn</h2>
+            </div>
 
             <template v-if="items.length">
               <div class="hidden sm:grid grid-cols-12 gap-3 px-3 pb-2 mb-1 border-b border-surface-border text-xs font-medium text-slate-500 dark:text-zinc-400">
@@ -267,7 +282,7 @@ const orderActions = computed(() => [
                       :alt="item.product?.name || item.product_name"
                       class="w-full h-full object-cover"
                     />
-                    <div v-else class="i-lucide-package w-5 h-5 text-gray-300 dark:text-zinc-600" />
+                    <UIcon v-else name="i-lucide-package" class="w-5 h-5 text-slate-300 dark:text-zinc-600" />
                   </div>
                   <div class="min-w-0">
                     <p class="text-sm font-medium text-surface-foreground truncate">{{ item.product?.name || item.product_name }}</p>
@@ -289,60 +304,74 @@ const orderActions = computed(() => [
               </div>
             </template>
             <BaseEmptyState v-else title="Không có sản phẩm" description="Đơn hàng này chưa có sản phẩm nào" />
-          </UCard>
+          </div>
 
           <!-- Order notes -->
-          <UCard class="animate-fade-in-up bg-surface" style="animation-delay: 80ms">
-            <template #header>
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-warning-50 dark:bg-warning-900/20 flex items-center justify-center">
-                  <div class="i-lucide-sticky-note w-4 h-4 text-warning-600 dark:text-warning-400" />
-                </div>
-                <h2 class="text-sm font-semibold text-surface-foreground">Ghi chú đơn hàng</h2>
+          <div class="card p-5 animate-fade-in-up" style="animation-delay: 80ms">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-7 h-7 rounded-lg bg-warning-50 dark:bg-warning-900/20 flex items-center justify-center">
+                <UIcon name="i-lucide-sticky-note" class="w-4 h-4 text-warning-600 dark:text-warning-400" />
               </div>
-            </template>
+              <h2 class="text-sm font-semibold text-surface-foreground">Ghi chú đơn hàng</h2>
+            </div>
             <div class="bg-surface-hover rounded-lg p-4">
               <p class="text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">{{ orderNotes }}</p>
             </div>
-          </UCard>
+          </div>
 
           <!-- Status timeline -->
-          <UCard class="animate-fade-in-up bg-surface" style="animation-delay: 120ms">
-            <template #header>
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-info-50 dark:bg-info-900/20 flex items-center justify-center">
-                  <div class="i-lucide-git-commit w-4 h-4 text-info-600 dark:text-info-400" />
-                </div>
-                <h2 class="text-sm font-semibold text-surface-foreground">Tiến trình đơn hàng</h2>
+          <div class="card p-5 animate-fade-in-up" style="animation-delay: 120ms">
+            <div class="flex items-center gap-2 mb-5">
+              <div class="w-7 h-7 rounded-lg bg-info-50 dark:bg-info-900/20 flex items-center justify-center">
+                <UIcon name="i-lucide-truck" class="w-4 h-4 text-info-600 dark:text-info-400" />
               </div>
-            </template>
+              <h2 class="text-sm font-semibold text-surface-foreground">Tiến trình đơn hàng</h2>
+            </div>
 
-            <div v-if="!isCancelled" class="mb-12">
-              <BaseStepper :steps="deliveryTimeline" />
+            <div v-if="!isCancelled" class="flex items-center justify-between relative mb-2">
+              <div class="absolute top-5 left-5 right-5 h-0.5 bg-surface-border" />
+              <div
+                class="absolute top-5 left-5 h-0.5 bg-gradient-to-r from-primary-500 to-success-500 transition-all duration-700"
+                :style="{ width: `calc((100% - 2.5rem) * ${currentStatusIndex >= 0 ? currentStatusIndex / (statusFlow.length - 1) : 0})` }"
+              />
+              <div
+                v-for="(step, i) in deliveryTimeline"
+                :key="step.label"
+                class="relative flex flex-col items-center gap-2 z-10 flex-1"
+              >
+                <div :class="[
+                  'w-10 h-10 rounded-full flex items-center justify-center ring-4 ring-surface transition-all',
+                  step.done ? 'bg-success-500 text-white' : 'bg-surface-hover text-slate-400 dark:text-zinc-500',
+                ]">
+                  <UIcon :name="ORDER_STATUS_ICONS[statusFlow[i]]" class="w-5 h-5" />
+                </div>
+                <div class="text-center">
+                  <p :class="['text-xs font-medium', step.done ? 'text-surface-foreground' : 'text-slate-400 dark:text-zinc-500']">{{ step.label }}</p>
+                  <p class="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5 hidden sm:block">{{ step.desc }}</p>
+                </div>
+              </div>
             </div>
 
             <div v-else class="flex items-center gap-3 p-4 rounded-lg bg-error-50 dark:bg-error-900/20">
               <div class="w-10 h-10 rounded-full bg-error-500 text-white flex items-center justify-center flex-shrink-0">
-                <div class="i-lucide-x-circle w-5 h-5" />
+                <UIcon name="i-lucide-x-circle" class="w-5 h-5" />
               </div>
               <div>
                 <p class="text-sm font-semibold text-error-700 dark:text-error-300">Đơn hàng đã bị hủy</p>
                 <p class="text-xs text-error-600 dark:text-error-400">Quy trình giao hàng đã dừng lại</p>
               </div>
             </div>
-          </UCard>
+          </div>
 
           <!-- Order history -->
-          <UCard class="animate-fade-in-up bg-surface" style="animation-delay: 160ms">
-            <template #header>
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-secondary-50 dark:bg-secondary-900/20 flex items-center justify-center">
-                  <div class="i-lucide-history w-4 h-4 text-secondary-600 dark:text-secondary-400" />
-                </div>
-                <h2 class="text-sm font-semibold text-surface-foreground">Lịch sử thay đổi</h2>
+          <div class="card p-5 animate-fade-in-up" style="animation-delay: 160ms">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 rounded-lg bg-secondary-50 dark:bg-secondary-900/20 flex items-center justify-center">
+                <UIcon name="i-lucide-history" class="w-4 h-4 text-secondary-600 dark:text-secondary-400" />
               </div>
-            </template>
-            <ol class="relative space-y-0 p-2">
+              <h2 class="text-sm font-semibold text-surface-foreground">Lịch sử thay đổi</h2>
+            </div>
+            <ol class="relative space-y-0">
               <li v-for="(h, i) in orderHistory" :key="i" class="flex gap-4 pb-4 last:pb-0 relative">
                 <div v-if="i < orderHistory.length - 1" class="absolute left-[15px] top-8 bottom-0 w-px bg-surface-border" />
                 <div :class="[
@@ -350,8 +379,7 @@ const orderActions = computed(() => [
                   h.status === OrderStatus.CANCELLED ? 'bg-error-50 dark:bg-error-900/20' :
                   h.status === OrderStatus.DELIVERED ? 'bg-success-50 dark:bg-success-900/20' : 'bg-primary-50 dark:bg-primary-900/20',
                 ]">
-                  <div :class="[
-                    statusIcons[h.status],
+                  <UIcon :name="ORDER_STATUS_ICONS[h.status]" :class="[
                     'w-4 h-4',
                     h.status === OrderStatus.CANCELLED ? 'text-error-600 dark:text-error-400' :
                     h.status === OrderStatus.DELIVERED ? 'text-success-600 dark:text-success-400' : 'text-primary-600 dark:text-primary-400',
@@ -366,26 +394,24 @@ const orderActions = computed(() => [
                 </div>
               </li>
             </ol>
-          </UCard>
+          </div>
         </div>
 
         <!-- Right (sidebar) -->
         <div class="space-y-6">
           <!-- Customer information -->
-          <UCard class="animate-fade-in-up bg-surface" style="animation-delay: 40ms">
-            <template #header>
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-success-50 dark:bg-success-900/20 flex items-center justify-center">
-                  <div class="i-lucide-user w-4 h-4 text-success-600 dark:text-success-400" />
-                </div>
-                <h2 class="text-sm font-semibold text-surface-foreground">Khách hàng</h2>
+          <div class="card p-5 animate-fade-in-up" style="animation-delay: 40ms">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 rounded-lg bg-success-50 dark:bg-success-900/20 flex items-center justify-center">
+                <UIcon name="i-lucide-user" class="w-4 h-4 text-success-600 dark:text-success-400" />
               </div>
-            </template>
+              <h2 class="text-sm font-semibold text-surface-foreground">Khách hàng</h2>
+            </div>
             <div class="flex items-center gap-3 mb-4">
               <UAvatar :alt="customerName" size="lg" :src="customer?.avatar_url" />
               <div class="min-w-0">
                 <p class="text-sm font-semibold text-surface-foreground truncate">{{ customerName }}</p>
-                <NuxtLink v-if="order.user_id" :to="`/admin/customers/${order.user_id}`" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">
+                <NuxtLink v-if="order?.user_id" :to="`/admin/customers/${order.user_id}`" class="text-xs text-primary-600 dark:text-primary-400 hover:underline">
                   Xem hồ sơ khách
                 </NuxtLink>
                 <span v-else class="text-xs text-slate-400 dark:text-zinc-500">Khách lẻ</span>
@@ -393,26 +419,24 @@ const orderActions = computed(() => [
             </div>
             <dl class="space-y-3 text-sm">
               <div class="flex items-center gap-2.5">
-                <div class="i-lucide-phone w-4 h-4 text-slate-400 flex-shrink-0" />
+                <UIcon name="i-lucide-phone" class="w-4 h-4 text-slate-400 flex-shrink-0" />
                 <span class="text-slate-600 dark:text-zinc-300 tabular-nums">{{ customerPhone }}</span>
               </div>
               <div class="flex items-start gap-2.5">
-                <div class="i-lucide-map-pin w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
                 <span class="text-slate-600 dark:text-zinc-300">{{ shippingAddress }}</span>
               </div>
             </dl>
-          </UCard>
+          </div>
 
           <!-- Payment -->
-          <UCard class="animate-fade-in-up bg-surface" style="animation-delay: 80ms">
-            <template #header>
-              <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
-                  <div class="i-lucide-wallet w-4 h-4 text-primary-600 dark:text-primary-400" />
-                </div>
-                <h2 class="text-sm font-semibold text-surface-foreground">Thanh toán</h2>
+          <div class="card p-5 animate-fade-in-up" style="animation-delay: 80ms">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                <UIcon name="i-lucide-wallet" class="w-4 h-4 text-primary-600 dark:text-primary-400" />
               </div>
-            </template>
+              <h2 class="text-sm font-semibold text-surface-foreground">Thanh toán</h2>
+            </div>
             <div class="flex items-center justify-between mb-4">
               <span class="text-xs text-slate-500 dark:text-zinc-400">Trạng thái</span>
               <UBadge :color="paymentState.color" variant="subtle">{{ paymentState.label }}</UBadge>
@@ -428,30 +452,28 @@ const orderActions = computed(() => [
               </div>
               <div class="flex items-center justify-between pt-2.5 border-t border-surface-border">
                 <dt class="text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
-                  <div class="i-lucide-credit-card w-3.5 h-3.5" /> Còn nợ
+                  <UIcon name="i-lucide-credit-card" class="w-3.5 h-3.5" /> Còn nợ
                 </dt>
                 <dd :class="['font-semibold tabular-nums', remaining > 0 ? 'text-error-600 dark:text-error-400' : 'text-surface-foreground']">
                   {{ formatVND(remaining) }}
                 </dd>
               </div>
             </dl>
-          </UCard>
+          </div>
 
           <!-- Delivery -->
-          <UCard class="animate-fade-in-up bg-surface" style="animation-delay: 120ms">
-            <template #header>
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-lg bg-info-50 dark:bg-info-900/20 flex items-center justify-center">
-                    <div class="i-lucide-truck w-4 h-4 text-info-600 dark:text-info-400" />
-                  </div>
-                  <h2 class="text-sm font-semibold text-surface-foreground">Giao hàng</h2>
+          <div class="card p-5 animate-fade-in-up" style="animation-delay: 120ms">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-info-50 dark:bg-info-900/20 flex items-center justify-center">
+                  <UIcon name="i-lucide-truck" class="w-4 h-4 text-info-600 dark:text-info-400" />
                 </div>
-                <UButton v-if="!driverName" variant="ghost" color="primary" size="sm" icon="i-lucide-user-check" @click="showAssignDriver = true">
-                  Gán tài xế
-                </UButton>
+                <h2 class="text-sm font-semibold text-surface-foreground">Giao hàng</h2>
               </div>
-            </template>
+              <button v-if="!driverName" class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1" @click="showAssignDriver = true">
+                <UIcon name="i-lucide-user-check" class="w-3.5 h-3.5" /> Gán tài xế
+              </button>
+            </div>
 
             <div v-if="driverName" class="flex items-center gap-3 mb-4 pb-4 border-b border-surface-border">
               <UAvatar :alt="driverName" size="md" :src="driver?.avatar_url" />
@@ -461,70 +483,64 @@ const orderActions = computed(() => [
               </div>
             </div>
             <div v-else class="flex items-center gap-2 mb-4 pb-4 border-b border-surface-border text-sm text-slate-400 dark:text-zinc-500">
-              <div class="i-lucide-alert-circle w-4 h-4" /> Chưa gán tài xế
+              <UIcon name="i-lucide-alert-circle" class="w-4 h-4" /> Chưa gán tài xế
             </div>
 
             <div class="mb-4">
               <p class="text-xs text-slate-500 dark:text-zinc-400 mb-1.5 flex items-center gap-1.5">
-                <span class="i-lucide-map-pin w-3.5 h-3.5" /> Địa chỉ giao hàng
+                <UIcon name="i-lucide-map-pin" class="w-3.5 h-3.5" /> Địa chỉ giao hàng
               </p>
               <p class="text-sm text-slate-600 dark:text-zinc-300">{{ shippingAddress }}</p>
             </div>
 
-            <div class="relative pl-3 space-y-6">
-              <!-- Vertical line -->
-              <div class="absolute left-[17px] top-2 bottom-2 w-0.5 bg-surface-border rounded-full" />
+            <div class="space-y-3">
               <div
-                v-for="(step, index) in deliveryTimeline"
+                v-for="step in deliveryTimeline"
                 :key="step.label"
-                class="relative flex items-center gap-4"
+                class="flex items-center gap-3"
               >
-                <!-- Dot -->
-                <div 
-                  :class="[
-                    'absolute -left-[9px] w-3 h-3 rounded-full border-2 border-surface', 
-                    step.done ? 'bg-success-500' : 'bg-surface-border'
-                  ]" 
-                />
-                
-                <div class="flex-1 min-w-0 py-0.5">
+                <div :class="['w-2.5 h-2.5 rounded-full flex-shrink-0', step.done ? 'bg-success-500' : 'bg-surface-border']" />
+                <div class="flex-1 min-w-0">
                   <p :class="['text-sm', step.done ? 'font-medium text-surface-foreground' : 'text-slate-400 dark:text-zinc-500']">{{ step.label }}</p>
                   <p class="text-xs text-slate-400 dark:text-zinc-500">{{ step.desc }}</p>
                 </div>
-                <div v-if="step.done" class="i-lucide-check-circle-2 w-4 h-4 text-success-500 flex-shrink-0" />
+                <UIcon v-if="step.done" name="i-lucide-check-circle-2" class="w-4 h-4 text-success-500 flex-shrink-0" />
               </div>
             </div>
-          </UCard>
+          </div>
         </div>
       </div>
     </template>
 
+    <BaseEmptyState v-else title="Không tìm thấy đơn hàng" description="Đơn hàng không tồn tại hoặc đã bị xoá" />
+
     <!-- Assign Driver Modal -->
-    <UModal v-model:open="showAssignDriver" title="Gán tài xế">
-      <template #body>
-        <div class="space-y-2 max-h-80 overflow-y-auto p-1">
-          <button
-            v-for="drv in availableDrivers"
-            :key="drv.id"
-            :class="[
-              'w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left',
-              selectedDriverId === drv.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-surface-border hover:bg-surface-hover',
-            ]"
-            @click="selectedDriverId = drv.id"
-          >
-            <UAvatar :alt="drv.full_name" size="sm" :src="drv.avatar_url" />
-            <div class="min-w-0">
-              <p class="text-sm font-medium text-surface-foreground truncate">{{ drv.full_name }}</p>
-              <p class="text-xs text-slate-500 dark:text-zinc-400 tabular-nums">{{ drv.phone || 'Chưa có SĐT' }}</p>
-            </div>
-            <div v-if="selectedDriverId === drv.id" class="i-lucide-check-circle-2 w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ml-auto" />
-          </button>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" color="neutral" @click="showAssignDriver = false">Huỷ</UButton>
-          <UButton :disabled="!selectedDriverId" @click="assignDriver">Gán tài xế</UButton>
+    <UModal v-model:open="showAssignDriver">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <h3 class="text-lg font-bold text-surface-foreground">Gán tài xế</h3>
+          <div class="space-y-2 max-h-80 overflow-y-auto p-1">
+            <button
+              v-for="drv in availableDrivers"
+              :key="drv.id"
+              :class="[
+                'w-full flex items-center gap-3 p-3 rounded-lg border transition-colors text-left',
+                selectedDriverId === drv.id ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-surface-border hover:bg-surface-hover',
+              ]"
+              @click="selectedDriverId = drv.id"
+            >
+              <UAvatar :alt="drv.full_name" size="sm" :src="drv.avatar_url" />
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-surface-foreground truncate">{{ drv.full_name }}</p>
+                <p class="text-xs text-slate-500 dark:text-zinc-400 tabular-nums">{{ drv.phone || 'Chưa có SĐT' }}</p>
+              </div>
+              <UIcon v-if="selectedDriverId === drv.id" name="i-lucide-check-circle-2" class="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ml-auto" />
+            </button>
+          </div>
+          <div class="flex justify-end gap-2 pt-2">
+            <UButton variant="ghost" color="neutral" @click="showAssignDriver = false">Huỷ</UButton>
+            <UButton :disabled="!selectedDriverId" @click="assignDriver">Gán tài xế</UButton>
+          </div>
         </div>
       </template>
     </UModal>

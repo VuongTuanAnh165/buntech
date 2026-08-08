@@ -78,13 +78,13 @@ watch([debouncedSearch, roleFilter, statusFilter], () => { page.value = 1 })
 
 // Columns
 const columns = [
-  { key: 'full_name', label: 'Khách hàng' },
-  { key: 'phone', label: 'Điện thoại' },
-  { key: 'role', label: 'Vai trò' },
-  { key: 'status', label: 'Trạng thái' },
-  { key: 'debt_limit', label: 'Hạn mức nợ' },
-  { key: 'created_at', label: 'Ngày tạo' },
-  { key: 'actions', label: 'Thao tác' }
+  { accessorKey: 'full_name', header: 'Khách hàng' },
+  { accessorKey: 'phone', header: 'Điện thoại' },
+  { accessorKey: 'role', header: 'Vai trò' },
+  { accessorKey: 'status', header: 'Trạng thái' },
+  { accessorKey: 'debt_limit', header: 'Hạn mức nợ' },
+  { accessorKey: 'created_at', header: 'Ngày tạo' },
+  { accessorKey: 'actions', header: 'Thao tác' }
 ]
 
 // CRUD
