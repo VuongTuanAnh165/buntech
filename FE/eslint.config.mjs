@@ -5,6 +5,10 @@ export default withNuxt(
     ignores: ['.agents/**', 'all_*.txt', 'template/**']
   },
   {
-    rules: {}
+    rules: {
+      'no-console': 'warn',
+      'no-debugger': 'error',
+      '@typescript-eslint/no-explicit-any': 'error'
+    }
   }
 )

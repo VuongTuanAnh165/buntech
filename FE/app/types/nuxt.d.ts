@@ -6,7 +6,7 @@ declare module '#app' {
       color?: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'error' | 'neutral'
       icon?: string
       timeout?: number
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       actions?: Record<string, unknown>[]
     }) => void
   }

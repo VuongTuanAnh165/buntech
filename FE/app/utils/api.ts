@@ -78,7 +78,10 @@ export function hasResponseMessage(data: unknown): data is { message: string } {
  * Do Backend đôi khi trả meta ở root level (cùng với data) hoặc lồng bên trong data.data,
  * và tên field thỉnh thoảng dùng snake_case (per_page) hoặc camelCase (perPage).
  */
-export function normalizePaginationResponse<T>(res: any): { data: T[]; meta: import('~/types/api').PaginationMeta } {
+export function normalizePaginationResponse<T>(res: unknown): {
+  data: T[]
+  meta: import('~/types/api').PaginationMeta
+} {
   let items: T[] = []
   const meta: import('~/types/api').PaginationMeta = {
     total: 0,
@@ -88,20 +91,22 @@ export function normalizePaginationResponse<T>(res: any): { data: T[]; meta: imp
     firstPage: 1
   }
 
-  if (!res) return { data: items, meta }
+  if (!res || typeof res !== 'object') return { data: items, meta }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const response = res as any
 
   // Trường hợp 1: BE trả meta ngang hàng data (Ví dụ: categories_controller)
-  if (Array.isArray(res.data) && res.meta) {
-    items = res.data
-    meta.currentPage = res.meta.page ?? res.meta.currentPage ?? 1
-    meta.perPage = res.meta.pageSize ?? res.meta.perPage ?? 10
-    meta.total = res.meta.total ?? 0
-    meta.lastPage = res.meta.totalPages ?? res.meta.lastPage ?? 1
+  if (Array.isArray(response.data) && response.meta) {
+    items = response.data
+    meta.currentPage = response.meta.page ?? response.meta.currentPage ?? 1
+    meta.perPage = response.meta.pageSize ?? response.meta.perPage ?? 10
+    meta.total = response.meta.total ?? 0
+    meta.lastPage = response.meta.totalPages ?? response.meta.lastPage ?? 1
   }
   // Trường hợp 2: BE trả lồng meta theo chuẩn mặc định của Lucid (Ví dụ: users_controller)
-  else if (res.data && res.data.meta && Array.isArray(res.data.data)) {
-    items = res.data.data
-    const rawMeta = res.data.meta
+  else if (response.data && response.data.meta && Array.isArray(response.data.data)) {
+    items = response.data.data
+    const rawMeta = response.data.meta
     meta.currentPage = rawMeta.currentPage ?? rawMeta.current_page ?? 1
     meta.perPage = rawMeta.perPage ?? rawMeta.per_page ?? 10
     meta.total = rawMeta.total ?? 0
@@ -494,7 +499,7 @@ export const ApiClient = {
         if (token) {
           xhr.setRequestHeader('Authorization', `Bearer ${token}`)
         }
-        
+
         xhr.setRequestHeader('Idempotency-Key', generateIdempotencyKey())
 
         if (xhr.upload && onProgress) {
@@ -612,16 +617,17 @@ export const ApiClient = {
 
     const currentToken = useCookie('auth_token').value
     return executeDownload(currentToken).catch(async (error: unknown) => {
-      const fetchError = error as { response?: { status?: number }; message?: string } | null | undefined
+      const fetchError = error as
+        { response?: { status?: number }; message?: string } | null | undefined
       if (fetchError?.message === 'AbortError' || (error as Error)?.name === 'AbortError') {
         throw error
       }
-      
+
       if (fetchError?.response?.status === HttpStatus.UNAUTHORIZED) {
         const newToken = await refreshAccessToken(currentToken || undefined)
         return executeDownload(newToken)
       }
-      
+
       console.error('[API_DOWNLOAD_ERROR]', error)
       throw error
     })

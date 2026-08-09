@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { driverNavigationItems } from '~/utils/navigation'
+import { _driverNavigationItems } from '~/utils/navigation'
 
 const route = useRoute()
-const router = useRouter()
+const _router = useRouter()
 const colorMode = useColorMode()
 const isOnline = ref(true)
 const showMenu = ref(false)
 
-const handleOnline = () => { isOnline.value = true }
-const handleOffline = () => { isOnline.value = false }
+const handleOnline = () => {
+  isOnline.value = true
+}
+const handleOffline = () => {
+  isOnline.value = false
+}
 
 onMounted(() => {
   isOnline.value = navigator.onLine
@@ -21,7 +25,9 @@ onUnmounted(() => {
   window.removeEventListener('offline', handleOffline)
 })
 
-function closeMenu() { showMenu.value = false }
+function closeMenu() {
+  showMenu.value = false
+}
 function toggleDark() {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
 }
@@ -35,42 +41,57 @@ const navItems = [
   { to: '/driver/history', label: 'Lịch sử', icon: 'i-lucide-history' },
   { to: '/driver/notifications', label: 'Thông báo', icon: 'i-lucide-bell' },
   { to: '/driver/vehicle', label: 'Phương tiện', icon: 'i-lucide-bike' },
-  { to: '/driver/profile', label: 'Hồ sơ', icon: 'i-lucide-user' },
+  { to: '/driver/profile', label: 'Hồ sơ', icon: 'i-lucide-user' }
 ]
 </script>
 
 <template>
-  <div class="min-h-screen bg-neutral-100 dark:bg-zinc-900 flex flex-col max-w-md mx-auto relative shadow-2xl shadow-slate-900/5">
+  <div
+    class="relative mx-auto flex min-h-screen max-w-md flex-col bg-neutral-100 shadow-2xl shadow-slate-900/5 dark:bg-zinc-900"
+  >
     <!-- Premium header with gradient -->
-    <header class="bg-gradient-to-br from-slate-900 via-slate-900 to-primary-950/90 text-white px-4 py-4 flex items-center justify-between sticky top-0 z-40">
+    <header
+      class="to-primary-950/90 sticky top-0 z-40 flex items-center justify-between bg-gradient-to-br from-slate-900 via-slate-900 px-4 py-4 text-white"
+    >
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold shadow-md shadow-primary-600/25">B</div>
+        <div
+          class="from-primary-500 to-primary-600 shadow-primary-600/25 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white shadow-md"
+        >
+          B
+        </div>
         <div>
-          <p class="font-bold text-sm leading-tight">BunTech Driver</p>
-          <p class="text-[11px] text-slate-400 leading-tight mt-0.5">Tài xế Tâm</p>
+          <p class="text-sm leading-tight font-bold">BunTech Driver</p>
+          <p class="mt-0.5 text-[11px] leading-tight text-slate-400">Tài xế Tâm</p>
         </div>
       </div>
       <div class="flex items-center gap-1">
         <div
           :class="[
-            'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors',
-            isOnline ? 'bg-success-500/15 text-success-400' : 'bg-error-500/15 text-error-400',
+            'flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors',
+            isOnline ? 'bg-success-500/15 text-success-400' : 'bg-error-500/15 text-error-400'
           ]"
         >
-          <UIcon :name="isOnline ? 'i-lucide-wifi' : 'i-lucide-wifi-off'" class="w-3.5 h-3.5" />
+          <UIcon :name="isOnline ? 'i-lucide-wifi' : 'i-lucide-wifi-off'" class="h-3.5 w-3.5" />
           <span>{{ isOnline ? 'Online' : 'Offline' }}</span>
         </div>
-        <UButton variant="ghost" color="neutral"
-          class="p-2.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+        <UButton
+          variant="ghost"
+          color="neutral"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
           @click="toggleDark"
         >
-          <UIcon :name="colorMode.value === 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'" class="w-5 h-5" />
+          <UIcon
+            :name="colorMode.value === 'dark' ? 'i-lucide-sun' : 'i-lucide-moon'"
+            class="h-5 w-5"
+          />
         </UButton>
-        <UButton variant="ghost" color="neutral"
-          class="text-slate-400 hover:text-white p-2.5 rounded-lg hover:bg-white/5 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+        <UButton
+          variant="ghost"
+          color="neutral"
+          class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
           @click="showMenu = !showMenu"
         >
-          <UIcon :name="showMenu ? 'i-lucide-x' : 'i-lucide-menu'" class="w-5 h-5" />
+          <UIcon :name="showMenu ? 'i-lucide-x' : 'i-lucide-menu'" class="h-5 w-5" />
         </UButton>
       </div>
     </header>
@@ -84,79 +105,95 @@ const navItems = [
       leave-from-class="transform translate-y-0 opacity-100"
       leave-to-class="transform -translate-y-4 opacity-0"
     >
-      <div v-if="showMenu" class="absolute top-[72px] left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-xl">
-        <nav class="px-4 py-3 space-y-1" @click="closeMenu">
+      <div
+        v-if="showMenu"
+        class="absolute top-[72px] right-0 left-0 z-50 border-b border-white/10 bg-slate-900/95 shadow-xl backdrop-blur-md"
+      >
+        <nav class="space-y-1 px-4 py-3" @click="closeMenu">
           <NuxtLink
             v-for="item in navItems"
             :key="item.to"
             :to="item.to"
             :class="[
-              'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors min-h-[48px]',
-              route.path === item.to || (item.to !== '/driver/delivery' && route.path.startsWith(item.to))
+              'flex min-h-[48px] items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors',
+              route.path === item.to ||
+              (item.to !== '/driver/delivery' && route.path.startsWith(item.to))
                 ? 'bg-primary-500/15 text-primary-400'
-                : 'text-slate-300 hover:bg-white/5',
+                : 'text-slate-300 hover:bg-white/5'
             ]"
           >
-            <UIcon :name="item.icon" class="w-5 h-5" />
+            <UIcon :name="item.icon" class="h-5 w-5" />
             {{ item.label }}
           </NuxtLink>
-          <UButton variant="ghost" color="neutral"
-            class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-error-400 hover:bg-error-500/10 transition-colors w-full min-h-[48px]"
+          <UButton
+            variant="ghost"
+            color="neutral"
+            class="text-error-400 hover:bg-error-500/10 flex min-h-[48px] w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors"
             @click="handleLogout"
           >
-            <UIcon name="i-lucide-log-out" class="w-5 h-5" />
+            <UIcon name="i-lucide-log-out" class="h-5 w-5" />
             Đăng xuất
           </UButton>
         </nav>
       </div>
     </Transition>
 
-    <main class="flex-1 pb-20 relative">
+    <main class="relative flex-1 pb-20">
       <slot />
     </main>
 
     <!-- Bottom nav -->
-    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-t border-neutral-200 dark:border-neutral-800 z-40 safe-area-bottom">
+    <nav
+      class="safe-area-bottom fixed bottom-0 left-1/2 z-40 w-full max-w-md -translate-x-1/2 border-t border-neutral-200 bg-white/80 backdrop-blur-md dark:border-neutral-800 dark:bg-zinc-900/80"
+    >
       <div class="flex items-center justify-around px-2 py-2">
         <NuxtLink
           to="/driver/delivery"
           :class="[
-            'flex flex-col items-center gap-1 px-3 py-2 rounded-lg min-w-[56px] min-h-[48px] justify-center transition-all duration-200 active:scale-90',
-            route.path.startsWith('/driver/delivery') ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 dark:text-zinc-500 hover:text-primary-400',
+            'flex min-h-[48px] min-w-[56px] flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-all duration-200 active:scale-90',
+            route.path.startsWith('/driver/delivery')
+              ? 'text-primary-600 dark:text-primary-400'
+              : 'hover:text-primary-400 text-slate-400 dark:text-zinc-500'
           ]"
         >
-          <UIcon name="i-lucide-route" class="w-5 h-5" />
+          <UIcon name="i-lucide-route" class="h-5 w-5" />
           <span class="text-[10px] font-medium">Tuyến giao</span>
         </NuxtLink>
         <NuxtLink
           to="/driver/history"
           :class="[
-            'flex flex-col items-center gap-1 px-3 py-2 rounded-lg min-w-[56px] min-h-[48px] justify-center transition-all duration-200 active:scale-90',
-            route.path.startsWith('/driver/history') ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 dark:text-zinc-500 hover:text-primary-400',
+            'flex min-h-[48px] min-w-[56px] flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-all duration-200 active:scale-90',
+            route.path.startsWith('/driver/history')
+              ? 'text-primary-600 dark:text-primary-400'
+              : 'hover:text-primary-400 text-slate-400 dark:text-zinc-500'
           ]"
         >
-          <UIcon name="i-lucide-history" class="w-5 h-5" />
+          <UIcon name="i-lucide-history" class="h-5 w-5" />
           <span class="text-[10px] font-medium">Lịch sử</span>
         </NuxtLink>
         <NuxtLink
           to="/driver/notifications"
           :class="[
-            'flex flex-col items-center gap-1 px-3 py-2 rounded-lg min-w-[56px] min-h-[48px] justify-center transition-all duration-200 active:scale-90 relative',
-            route.path.startsWith('/driver/notifications') ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 dark:text-zinc-500 hover:text-primary-400',
+            'relative flex min-h-[48px] min-w-[56px] flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-all duration-200 active:scale-90',
+            route.path.startsWith('/driver/notifications')
+              ? 'text-primary-600 dark:text-primary-400'
+              : 'hover:text-primary-400 text-slate-400 dark:text-zinc-500'
           ]"
         >
-          <UIcon name="i-lucide-bell" class="w-5 h-5" />
-          <span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-error-500" />
+          <UIcon name="i-lucide-bell" class="h-5 w-5" />
+          <span class="bg-error-500 absolute top-1 right-2 h-2 w-2 rounded-full" />
           <span class="text-[10px] font-medium">Thông báo</span>
         </NuxtLink>
         <NuxtLink
           to="/driver/profile"
           :class="[
-            'flex flex-col items-center gap-1 px-3 py-2 rounded-lg min-w-[56px] min-h-[48px] justify-center transition-all duration-200 active:scale-90',
-            route.path.startsWith('/driver/profile') ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400 dark:text-zinc-500 hover:text-primary-400',
+            'flex min-h-[48px] min-w-[56px] flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-all duration-200 active:scale-90',
+            route.path.startsWith('/driver/profile')
+              ? 'text-primary-600 dark:text-primary-400'
+              : 'hover:text-primary-400 text-slate-400 dark:text-zinc-500'
           ]"
         >
-          <UIcon name="i-lucide-user" class="w-5 h-5" />
+          <UIcon name="i-lucide-user" class="h-5 w-5" />
           <span class="text-[10px] font-medium">Hồ sơ</span>
         </NuxtLink>
       </div>

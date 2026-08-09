@@ -19,7 +19,7 @@ const isConfirmed = ref(false)
 const trackWidth = ref(0)
 const thumbWidth = 56 // Fixed thumb width (14 * 4 = 56px)
 const maxOffset = computed(() => Math.max(0, trackWidth.value - thumbWidth))
-const progress = computed(() => {
+const _progress = computed(() => {
   if (isConfirmed.value) return 1
   if (!maxOffset.value) return 0
   return dragOffset.value / maxOffset.value
@@ -34,7 +34,7 @@ function handleStart(e: MouseEvent | TouchEvent) {
   if (trackRef.value) {
     trackWidth.value = trackRef.value.offsetWidth
   }
-  
+
   window.addEventListener('mousemove', handleMove)
   window.addEventListener('touchmove', handleMove, { passive: false })
   window.addEventListener('mouseup', handleEnd)
@@ -52,7 +52,7 @@ function handleMove(e: MouseEvent | TouchEvent) {
 function handleEnd() {
   if (!isDragging.value) return
   isDragging.value = false
-  
+
   if (dragOffset.value >= maxOffset.value * 0.8) {
     // Snap to end and confirm
     dragOffset.value = maxOffset.value
@@ -62,7 +62,7 @@ function handleEnd() {
     // Snap back
     dragOffset.value = 0
   }
-  
+
   window.removeEventListener('mousemove', handleMove)
   window.removeEventListener('touchmove', handleMove)
   window.removeEventListener('mouseup', handleEnd)
@@ -71,67 +71,77 @@ function handleEnd() {
 </script>
 
 <template>
-  <div 
+  <div
     ref="trackRef"
-    class="relative h-14 w-full rounded-full overflow-hidden select-none transition-all duration-300"
+    class="relative h-14 w-full overflow-hidden rounded-full transition-all duration-300 select-none"
     :class="[
-      disabled ? 'bg-slate-100 dark:bg-zinc-800 opacity-70 cursor-not-allowed' : 'bg-primary-50 dark:bg-primary-950/30 ring-1 ring-inset ring-primary-200/50 dark:ring-primary-900/50',
+      disabled
+        ? 'cursor-not-allowed bg-slate-100 opacity-70 dark:bg-zinc-800'
+        : 'bg-primary-50 dark:bg-primary-950/30 ring-primary-200/50 dark:ring-primary-900/50 ring-1 ring-inset',
       isConfirmed ? 'bg-success-500 ring-success-500' : ''
     ]"
   >
     <!-- Background Progress Gradient -->
-    <div 
-      class="absolute inset-y-0 left-0 bg-primary-100 dark:bg-primary-900/50 transition-all"
+    <div
+      v-if="!isConfirmed && !disabled"
+      class="bg-primary-100 dark:bg-primary-900/50 absolute inset-y-0 left-0 transition-all"
       :class="isDragging ? 'duration-0' : 'duration-300 ease-out'"
       :style="{ width: `${(dragOffset / maxOffset) * 100}%` }"
-      v-if="!isConfirmed && !disabled"
     />
 
     <!-- Shimmer Effect -->
-    <div 
+    <div
       v-if="!disabled && !isConfirmed"
-      class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-shimmer pointer-events-none"
+      class="animate-shimmer pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent"
     />
 
     <!-- Text -->
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-      <span 
+    <div class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+      <span
         class="text-sm font-semibold transition-colors duration-300"
         :class="[
-          disabled ? 'text-slate-400' : (isConfirmed ? 'text-white' : 'text-primary-700 dark:text-primary-400'),
+          disabled
+            ? 'text-slate-400'
+            : isConfirmed
+              ? 'text-white'
+              : 'text-primary-700 dark:text-primary-400',
           isConfirmed ? 'animate-fade-in-up' : ''
         ]"
       >
-        {{ isConfirmed ? (successText || 'Đã xác nhận') : (text || 'Vuốt để xác nhận') }}
+        {{ isConfirmed ? successText || 'Đã xác nhận' : text || 'Vuốt để xác nhận' }}
       </span>
     </div>
 
     <!-- Thumb -->
-    <div 
+    <div
       ref="thumbRef"
-      class="absolute left-0 top-0 bottom-0 w-14 rounded-full flex items-center justify-center transition-all z-20"
+      class="absolute top-0 bottom-0 left-0 z-20 flex w-14 items-center justify-center rounded-full transition-all"
       :class="[
-        disabled ? 'bg-slate-200 dark:bg-zinc-700 text-slate-400' : (isConfirmed ? 'bg-white text-success-500 shadow-md' : 'bg-primary-500 text-white shadow-lg shadow-primary-500/30 cursor-grab active:cursor-grabbing'),
-        isDragging ? 'duration-0 scale-95' : 'duration-300 ease-spring',
+        disabled
+          ? 'bg-slate-200 text-slate-400 dark:bg-zinc-700'
+          : isConfirmed
+            ? 'text-success-500 bg-white shadow-md'
+            : 'bg-primary-500 shadow-primary-500/30 cursor-grab text-white shadow-lg active:cursor-grabbing',
+        isDragging ? 'scale-95 duration-0' : 'ease-spring duration-300',
         isConfirmed ? 'scale-0 opacity-0' : '' // Hide thumb when confirmed
       ]"
       :style="{ transform: `translateX(${dragOffset}px) ${isDragging ? 'scale(0.95)' : ''}` }"
       @mousedown="handleStart"
       @touchstart.passive="handleStart"
     >
-      <UIcon 
-        :name="disabled ? 'i-lucide-lock' : 'i-lucide-chevron-right'" 
-        class="w-6 h-6 transition-transform duration-300"
+      <UIcon
+        :name="disabled ? 'i-lucide-lock' : 'i-lucide-chevron-right'"
+        class="h-6 w-6 transition-transform duration-300"
         :class="isDragging ? 'translate-x-1' : ''"
       />
     </div>
 
     <!-- Checkmark (Shows on confirm) -->
-    <div 
-      class="absolute left-4 top-0 bottom-0 flex items-center z-20 pointer-events-none transition-all duration-500"
-      :class="isConfirmed ? 'opacity-100 scale-100' : 'opacity-0 scale-50'"
+    <div
+      class="pointer-events-none absolute top-0 bottom-0 left-4 z-20 flex items-center transition-all duration-500"
+      :class="isConfirmed ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
     >
-      <UIcon name="i-lucide-check-circle-2" class="w-6 h-6 text-white" />
+      <UIcon name="i-lucide-check-circle-2" class="h-6 w-6 text-white" />
     </div>
   </div>
 </template>

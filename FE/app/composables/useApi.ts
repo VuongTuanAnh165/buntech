@@ -20,7 +20,7 @@ export function useApi<T>(url: string, opts: CustomUseFetchOptions<T> = {}) {
 
   const defaultOptions: CustomUseFetchOptions<T> = {
     key: uniqueKey,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     $fetch: fetchWithAuth as typeof $fetch
   }
 

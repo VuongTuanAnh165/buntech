@@ -3,22 +3,24 @@ import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Hồ sơ tài xế - BunTech Driver' })
-const router = useRouter()
+const _router = useRouter()
 const toast = useToast()
 const loading = ref(true)
-const driver = computed(() =>
-  mockProfiles.find(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) || mockProfiles[2]
+const driver = computed(
+  () =>
+    mockProfiles.find((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) ||
+    mockProfiles[2]
 )
 const driverOrders = computed(() => {
   const id = driver.value?.id
   if (!id) return []
   return mockOrders
-    .filter(o => o.driver_id === id)
+    .filter((o) => o.driver_id === id)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 })
 const stats = computed(() => {
   const orders = driverOrders.value
-  const delivered = orders.filter(o => o.status === OrderStatus.DELIVERED)
+  const delivered = orders.filter((o) => o.status === OrderStatus.DELIVERED)
   const totalEarnings = delivered.reduce((sum, o) => sum + Math.round(o.total_amount * 0.03), 0)
   const successRate = orders.length ? Math.round((delivered.length / orders.length) * 100) : 0
   return { totalDeliveries: delivered.length, successRate, totalEarnings, rating: 4.8 }
@@ -35,22 +37,33 @@ const weeklyData = computed(() => {
   })
 })
 const stableWeekly = ref<{ day: string; count: number; isToday: boolean }[]>([])
-const maxWeekly = computed(() => Math.max(...stableWeekly.value.map(d => d.count), 1))
+const maxWeekly = computed(() => Math.max(...stableWeekly.value.map((d) => d.count), 1))
 // Recent activity timeline
 const recentActivity = computed(() =>
-  driverOrders.value.slice(0, 6).map(o => ({
+  driverOrders.value.slice(0, 6).map((o) => ({
     id: o.id,
-    type: o.status === OrderStatus.DELIVERED ? 'delivered' : o.status === OrderStatus.CANCELLED ? 'cancelled' : 'shipping',
-    label: o.status === OrderStatus.DELIVERED ? `Giao thành công #${o.id}` : o.status === OrderStatus.CANCELLED ? `Đơn hủy #${o.id}` : `Đang giao #${o.id}`,
+    type:
+      o.status === OrderStatus.DELIVERED
+        ? 'delivered'
+        : o.status === OrderStatus.CANCELLED
+          ? 'cancelled'
+          : 'shipping',
+    label:
+      o.status === OrderStatus.DELIVERED
+        ? `Giao thành công #${o.id}`
+        : o.status === OrderStatus.CANCELLED
+          ? `Đơn hủy #${o.id}`
+          : `Đang giao #${o.id}`,
     customer: o.customer_name || 'Khách vãng lai',
     address: o.shipping_address,
     amount: o.amount_collected || 0,
-    time: o.created_at,
+    time: o.created_at
   }))
 )
 function copyPhone() {
   if (driver.value?.phone) {
-    navigator.clipboard?.writeText(driver.value.phone)
+    navigator.clipboard
+      ?.writeText(driver.value.phone)
       .then(() => toast.add({ title: 'Đã sao chép số điện thoại', color: 'success' }))
       .catch(() => toast.add({ title: 'Không thể sao chép', color: 'error' }))
   }
@@ -69,13 +82,17 @@ onMounted(() => {
   <div class="p-4">
     <!-- Header -->
     <div class="mb-4">
-      <h1 class="text-xl font-bold text-neutral-900 dark:text-white tracking-tight">Hồ sơ tài xế</h1>
-      <p class="text-sm text-slate-500 dark:text-zinc-400 mt-0.5">Thông tin và thành tích của bạn</p>
+      <h1 class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
+        Hồ sơ tài xế
+      </h1>
+      <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">
+        Thông tin và thành tích của bạn
+      </p>
     </div>
     <!-- Loading -->
     <template v-if="loading">
-      <div class="skeleton h-44 w-full rounded-2xl mb-4" />
-      <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="skeleton mb-4 h-44 w-full rounded-2xl" />
+      <div class="mb-4 grid grid-cols-2 gap-3">
         <div class="skeleton h-24 w-full rounded-xl" />
         <div class="skeleton h-24 w-full rounded-xl" />
         <div class="skeleton h-24 w-full rounded-xl" />
@@ -85,19 +102,37 @@ onMounted(() => {
     </template>
     <template v-else>
       <!-- Profile header card -->
-      <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-primary-950 rounded-2xl p-5 mb-4 text-white relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-40 h-40 rounded-full bg-primary-500/15 blur-3xl" />
+      <div
+        class="to-primary-950 relative mb-4 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 p-5 text-white"
+      >
+        <div class="bg-primary-500/15 absolute top-0 right-0 h-40 w-40 rounded-full blur-3xl" />
         <div class="relative">
-          <div class="flex items-center gap-4 mb-4">
-            <UAvatar :src="driver?.avatar_url || ''" :alt="driver?.full_name || 'Tài xế'" size="lg" />
-            <div class="flex-1 min-w-0">
-              <p class="text-lg font-bold truncate">{{ driver?.full_name }}</p>
-              <p class="text-xs text-slate-400 font-mono">{{ driver?.id }}</p>
-              <div class="flex items-center gap-2 mt-1.5">
+          <div class="mb-4 flex items-center gap-4">
+            <UAvatar
+              :src="driver?.avatar_url || ''"
+              :alt="driver?.full_name || 'Tài xế'"
+              size="lg"
+            />
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-lg font-bold">{{ driver?.full_name }}</p>
+              <p class="font-mono text-xs text-slate-400">{{ driver?.id }}</p>
+              <div class="mt-1.5 flex items-center gap-2">
                 <UBadge color="success" variant="solid" size="xs">Đang hoạt động</UBadge>
                 <span class="flex items-center gap-0.5 text-xs">
-                  <UIcon v-for="i in 5" :key="i" name="i-lucide-star" :class="['w-3.5 h-3.5', i <= Math.round(stats.rating) ? 'fill-warning-400 text-warning-400' : 'text-slate-600']" />
-                  <span class="ml-1 font-medium text-warning-400 tabular-nums">{{ stats.rating.toFixed(1) }}</span>
+                  <UIcon
+                    v-for="i in 5"
+                    :key="i"
+                    name="i-lucide-star"
+                    :class="[
+                      'h-3.5 w-3.5',
+                      i <= Math.round(stats.rating)
+                        ? 'fill-warning-400 text-warning-400'
+                        : 'text-slate-600'
+                    ]"
+                  />
+                  <span class="text-warning-400 ml-1 font-medium tabular-nums">{{
+                    stats.rating.toFixed(1)
+                  }}</span>
                 </span>
               </div>
             </div>
@@ -105,216 +140,329 @@ onMounted(() => {
         </div>
       </div>
       <!-- Stats row -->
-      <div class="grid grid-cols-2 gap-3 mb-4">
-        <div class="card p-4 relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-20 h-20 rounded-full bg-primary-500/5 blur-xl" />
+      <div class="mb-4 grid grid-cols-2 gap-3">
+        <div class="card relative overflow-hidden p-4">
+          <div class="bg-primary-500/5 absolute top-0 right-0 h-20 w-20 rounded-full blur-xl" />
           <div class="relative">
-            <div class="flex items-center gap-1.5 mb-1">
-              <UIcon name="i-lucide-package" class="w-3.5 h-3.5 text-primary-500" />
+            <div class="mb-1 flex items-center gap-1.5">
+              <UIcon name="i-lucide-package" class="text-primary-500 h-3.5 w-3.5" />
               <span class="text-xs text-slate-500 dark:text-zinc-400">Tổng chuyến</span>
             </div>
-            <p class="text-2xl font-bold text-neutral-900 dark:text-white tabular-nums">{{ formatNumber(stats.totalDeliveries) }}</p>
+            <p class="text-2xl font-bold text-neutral-900 tabular-nums dark:text-white">
+              {{ formatNumber(stats.totalDeliveries) }}
+            </p>
           </div>
         </div>
-        <div class="card p-4 relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-20 h-20 rounded-full bg-success-500/5 blur-xl" />
+        <div class="card relative overflow-hidden p-4">
+          <div class="bg-success-500/5 absolute top-0 right-0 h-20 w-20 rounded-full blur-xl" />
           <div class="relative">
-            <div class="flex items-center gap-1.5 mb-1">
-              <UIcon name="i-lucide-trending-up" class="w-3.5 h-3.5 text-success-500" />
+            <div class="mb-1 flex items-center gap-1.5">
+              <UIcon name="i-lucide-trending-up" class="text-success-500 h-3.5 w-3.5" />
               <span class="text-xs text-slate-500 dark:text-zinc-400">Tỷ lệ thành công</span>
             </div>
-            <p class="text-2xl font-bold text-success-600 dark:text-success-400 tabular-nums">{{ stats.successRate }}%</p>
+            <p class="text-success-600 dark:text-success-400 text-2xl font-bold tabular-nums">
+              {{ stats.successRate }}%
+            </p>
           </div>
         </div>
-        <div class="card p-4 relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-20 h-20 rounded-full bg-warning-500/5 blur-xl" />
+        <div class="card relative overflow-hidden p-4">
+          <div class="bg-warning-500/5 absolute top-0 right-0 h-20 w-20 rounded-full blur-xl" />
           <div class="relative">
-            <div class="flex items-center gap-1.5 mb-1">
-              <UIcon name="i-lucide-wallet" class="w-3.5 h-3.5 text-warning-500" />
+            <div class="mb-1 flex items-center gap-1.5">
+              <UIcon name="i-lucide-wallet" class="text-warning-500 h-3.5 w-3.5" />
               <span class="text-xs text-slate-500 dark:text-zinc-400">Tổng thu nhập</span>
             </div>
-            <p class="text-lg font-bold text-neutral-900 dark:text-white tabular-nums truncate">{{ formatVND(stats.totalEarnings) }}</p>
+            <p class="truncate text-lg font-bold text-neutral-900 tabular-nums dark:text-white">
+              {{ formatVND(stats.totalEarnings) }}
+            </p>
           </div>
         </div>
-        <div class="card p-4 relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-20 h-20 rounded-full bg-info-500/5 blur-xl" />
+        <div class="card relative overflow-hidden p-4">
+          <div class="bg-info-500/5 absolute top-0 right-0 h-20 w-20 rounded-full blur-xl" />
           <div class="relative">
-            <div class="flex items-center gap-1.5 mb-1">
-              <UIcon name="i-lucide-star" class="w-3.5 h-3.5 text-info-500" />
+            <div class="mb-1 flex items-center gap-1.5">
+              <UIcon name="i-lucide-star" class="text-info-500 h-3.5 w-3.5" />
               <span class="text-xs text-slate-500 dark:text-zinc-400">Điểm đánh giá</span>
             </div>
-            <p class="text-2xl font-bold text-info-600 dark:text-info-400 tabular-nums">{{ stats.rating.toFixed(1) }}<span class="text-sm font-medium text-slate-400">/5</span></p>
+            <p class="text-info-600 dark:text-info-400 text-2xl font-bold tabular-nums">
+              {{ stats.rating.toFixed(1)
+              }}<span class="text-sm font-medium text-slate-400">/5</span>
+            </p>
           </div>
         </div>
       </div>
       <!-- Personal Information -->
-      <div class="card p-5 mb-4">
-        <h2 class="font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
-          <UIcon name="i-lucide-id-card" class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
+      <div class="card mb-4 p-5">
+        <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
+          <UIcon name="i-lucide-id-card" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
           Thông tin cá nhân
         </h2>
         <div class="space-y-3.5">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-              <UIcon name="i-lucide-phone" class="w-4 h-4 text-slate-500 dark:text-zinc-400" />
+            <div
+              class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100 dark:bg-zinc-800"
+            >
+              <UIcon name="i-lucide-phone" class="h-4 w-4 text-slate-500 dark:text-zinc-400" />
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Số điện thoại</p>
-              <p class="text-sm font-medium text-neutral-900 dark:text-white tabular-nums">{{ driver?.phone || 'Chưa có' }}</p>
+              <p class="text-sm font-medium text-neutral-900 tabular-nums dark:text-white">
+                {{ driver?.phone || 'Chưa có' }}
+              </p>
             </div>
-            <UButton variant="ghost" color="neutral" class="text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline" @click="copyPhone">Sao chép</UButton>
+            <UButton
+              variant="ghost"
+              color="neutral"
+              class="text-primary-600 dark:text-primary-400 text-xs font-medium hover:underline"
+              @click="copyPhone"
+              >Sao chép</UButton
+            >
           </div>
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-              <UIcon name="i-lucide-mail" class="w-4 h-4 text-slate-500 dark:text-zinc-400" />
+            <div
+              class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100 dark:bg-zinc-800"
+            >
+              <UIcon name="i-lucide-mail" class="h-4 w-4 text-slate-500 dark:text-zinc-400" />
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Email</p>
-              <p class="text-sm font-medium text-neutral-900 dark:text-white truncate">{{ driver?.phone ? `driver${driver.phone.slice(-4)}@buntech.vn` : 'Chưa có' }}</p>
+              <p class="truncate text-sm font-medium text-neutral-900 dark:text-white">
+                {{ driver?.phone ? `driver${driver.phone.slice(-4)}@buntech.vn` : 'Chưa có' }}
+              </p>
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-              <UIcon name="i-lucide-id-card" class="w-4 h-4 text-slate-500 dark:text-zinc-400" />
+            <div
+              class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100 dark:bg-zinc-800"
+            >
+              <UIcon name="i-lucide-id-card" class="h-4 w-4 text-slate-500 dark:text-zinc-400" />
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Số giấy phép lái</p>
-              <p class="text-sm font-medium text-neutral-900 dark:text-white tabular-nums">B2-0{{ (driver?.phone || '000').slice(-6) }}</p>
+              <p class="text-sm font-medium text-neutral-900 tabular-nums dark:text-white">
+                B2-0{{ (driver?.phone || '000').slice(-6) }}
+              </p>
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-              <UIcon name="i-lucide-calendar" class="w-4 h-4 text-slate-500 dark:text-zinc-400" />
+            <div
+              class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100 dark:bg-zinc-800"
+            >
+              <UIcon name="i-lucide-calendar" class="h-4 w-4 text-slate-500 dark:text-zinc-400" />
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Ngày tham gia</p>
-              <p class="text-sm font-medium text-neutral-900 dark:text-white">{{ formatDate(driver?.created_at) }}</p>
+              <p class="text-sm font-medium text-neutral-900 dark:text-white">
+                {{ formatDate(driver?.created_at) }}
+              </p>
             </div>
           </div>
         </div>
       </div>
       <!-- Vehicle Assignment -->
-      <div class="card card-hover p-5 mb-4 cursor-pointer" role="button" tabindex="0" @click="navigateTo('/driver/vehicle')" @keydown.enter="navigateTo('/driver/vehicle')">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-lucide-truck" class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
+      <div
+        class="card card-hover mb-4 cursor-pointer p-5"
+        role="button"
+        tabindex="0"
+        @click="navigateTo('/driver/vehicle')"
+        @keydown.enter="navigateTo('/driver/vehicle')"
+      >
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
+            <UIcon name="i-lucide-truck" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
             Phương tiện được phân công
           </h2>
-          <UIcon name="i-lucide-chevron-right" class="w-5 h-5 text-slate-300 dark:text-zinc-600" />
+          <UIcon name="i-lucide-chevron-right" class="h-5 w-5 text-slate-300 dark:text-zinc-600" />
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
-            <UIcon name="i-lucide-truck" class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+          <div
+            class="bg-primary-50 dark:bg-primary-900/20 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl"
+          >
+            <UIcon name="i-lucide-truck" class="text-primary-600 dark:text-primary-400 h-6 w-6" />
           </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-base font-bold text-neutral-900 dark:text-white tabular-nums">51F-1234</p>
+          <div class="min-w-0 flex-1">
+            <p class="text-base font-bold text-neutral-900 tabular-nums dark:text-white">
+              51F-1234
+            </p>
             <p class="text-xs text-slate-500 dark:text-zinc-400">Honda Blade 110 · 2022</p>
           </div>
           <UBadge color="success" variant="subtle" size="xs">Hoạt động</UBadge>
         </div>
       </div>
       <!-- Performance card -->
-      <div class="card p-5 mb-4">
-        <h2 class="font-semibold text-neutral-900 dark:text-white mb-4 flex items-center gap-2">
-          <UIcon name="i-lucide-award" class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
+      <div class="card mb-4 p-5">
+        <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
+          <UIcon name="i-lucide-award" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
           Hiệu suất
         </h2>
         <!-- Weekly chart -->
         <div class="mb-5">
-          <div class="flex items-center justify-between mb-3">
-            <p class="text-xs text-slate-500 dark:text-zinc-400">Chuyến giao theo ngày (tuần này)</p>
-            <p class="text-xs font-medium text-neutral-900 dark:text-white tabular-nums">{{ stableWeekly.reduce((s, d) => s + d.count, 0) }} chuyến</p>
+          <div class="mb-3 flex items-center justify-between">
+            <p class="text-xs text-slate-500 dark:text-zinc-400">
+              Chuyến giao theo ngày (tuần này)
+            </p>
+            <p class="text-xs font-medium text-neutral-900 tabular-nums dark:text-white">
+              {{ stableWeekly.reduce((s, d) => s + d.count, 0) }} chuyến
+            </p>
           </div>
-          <div class="flex items-end justify-between gap-2 h-32">
-            <div v-for="d in stableWeekly" :key="d.day" class="flex-1 flex flex-col items-center gap-2">
-              <div class="w-full flex-1 flex items-end">
+          <div class="flex h-32 items-end justify-between gap-2">
+            <div
+              v-for="d in stableWeekly"
+              :key="d.day"
+              class="flex flex-1 flex-col items-center gap-2"
+            >
+              <div class="flex w-full flex-1 items-end">
                 <div
-                  :class="['w-full rounded-t-md transition-all duration-500', d.isToday ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-900/40']"
+                  :class="[
+                    'w-full rounded-t-md transition-all duration-500',
+                    d.isToday ? 'bg-primary-600' : 'bg-primary-200 dark:bg-primary-900/40'
+                  ]"
                   :style="{ height: `${Math.max((d.count / maxWeekly) * 100, 6)}%` }"
                 >
-                  <p v-if="d.count > 0" class="text-[10px] font-bold text-center text-white pt-1 tabular-nums">{{ d.count }}</p>
+                  <p
+                    v-if="d.count > 0"
+                    class="pt-1 text-center text-[10px] font-bold text-white tabular-nums"
+                  >
+                    {{ d.count }}
+                  </p>
                 </div>
               </div>
-              <span :class="['text-[11px]', d.isToday ? 'font-bold text-primary-600 dark:text-primary-400' : 'text-slate-400 dark:text-zinc-500']">{{ d.day }}</span>
+              <span
+                :class="[
+                  'text-[11px]',
+                  d.isToday
+                    ? 'text-primary-600 dark:text-primary-400 font-bold'
+                    : 'text-slate-400 dark:text-zinc-500'
+                ]"
+                >{{ d.day }}</span
+              >
             </div>
           </div>
         </div>
         <!-- Performance metrics -->
-        <div class="grid grid-cols-3 gap-3 pt-4 border-t border-neutral-100 dark:border-neutral-800">
+        <div
+          class="grid grid-cols-3 gap-3 border-t border-neutral-100 pt-4 dark:border-neutral-800"
+        >
           <div class="text-center">
-            <p class="text-xs text-slate-500 dark:text-zinc-400 mb-1">Tỷ lệ hoàn thành</p>
-            <p class="text-lg font-bold text-success-600 dark:text-success-400 tabular-nums">{{ stats.successRate }}%</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">Tỷ lệ hoàn thành</p>
+            <p class="text-success-600 dark:text-success-400 text-lg font-bold tabular-nums">
+              {{ stats.successRate }}%
+            </p>
           </div>
           <div class="text-center">
-            <p class="text-xs text-slate-500 dark:text-zinc-400 mb-1">TB thời gian giao</p>
-            <p class="text-lg font-bold text-neutral-900 dark:text-white tabular-nums">24<span class="text-xs font-medium text-slate-400"> phút</span></p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">TB thời gian giao</p>
+            <p class="text-lg font-bold text-neutral-900 tabular-nums dark:text-white">
+              24<span class="text-xs font-medium text-slate-400"> phút</span>
+            </p>
           </div>
           <div class="text-center">
-            <p class="text-xs text-slate-500 dark:text-zinc-400 mb-1">Điểm đánh giá</p>
-            <p class="text-lg font-bold text-info-600 dark:text-info-400 tabular-nums">{{ stats.rating.toFixed(1) }}</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">Điểm đánh giá</p>
+            <p class="text-info-600 dark:text-info-400 text-lg font-bold tabular-nums">
+              {{ stats.rating.toFixed(1) }}
+            </p>
           </div>
         </div>
       </div>
       <!-- Recent Activity timeline -->
-      <div class="card p-5 mb-4">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="font-semibold text-neutral-900 dark:text-white flex items-center gap-2">
-            <UIcon name="i-lucide-clock" class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
+      <div class="card mb-4 p-5">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
+            <UIcon name="i-lucide-clock" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
             Hoạt động gần đây
           </h2>
-          <UButton variant="ghost" color="neutral" class="text-xs text-primary-600 dark:text-primary-400 font-medium hover:underline" @click="navigateTo('/driver/history')">Xem tất cả</UButton>
+          <UButton
+            variant="ghost"
+            color="neutral"
+            class="text-primary-600 dark:text-primary-400 text-xs font-medium hover:underline"
+            @click="navigateTo('/driver/history')"
+            >Xem tất cả</UButton
+          >
         </div>
         <div class="relative">
-          <div class="absolute left-[15px] top-2 bottom-2 w-px bg-neutral-200 dark:bg-neutral-800" />
+          <div
+            class="absolute top-2 bottom-2 left-[15px] w-px bg-neutral-200 dark:bg-neutral-800"
+          />
           <div class="space-y-4">
             <div v-for="a in recentActivity" :key="a.id" class="relative flex gap-3 pl-1">
               <div
                 :class="[
-                  'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ring-4 ring-white dark:ring-zinc-900 relative z-10',
-                  a.type === 'delivered' ? 'bg-success-100 dark:bg-success-900/30' : a.type === 'cancelled' ? 'bg-error-100 dark:bg-error-900/30' : 'bg-primary-100 dark:bg-primary-900/30',
+                  'relative z-10 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ring-4 ring-white dark:ring-zinc-900',
+                  a.type === 'delivered'
+                    ? 'bg-success-100 dark:bg-success-900/30'
+                    : a.type === 'cancelled'
+                      ? 'bg-error-100 dark:bg-error-900/30'
+                      : 'bg-primary-100 dark:bg-primary-900/30'
                 ]"
               >
                 <UIcon
                   v-if="a.type === 'delivered'"
                   name="i-lucide-check-circle-2"
-                  class="w-4 h-4 text-success-600 dark:text-success-400"
+                  class="text-success-600 dark:text-success-400 h-4 w-4"
                 />
                 <UIcon
                   v-else-if="a.type === 'shipping'"
                   name="i-lucide-package"
-                  class="w-4 h-4 text-primary-600 dark:text-primary-400"
+                  class="text-primary-600 dark:text-primary-400 h-4 w-4"
                 />
-                <span v-else class="w-4 h-4 text-error-600 dark:text-error-400 font-bold text-xs flex items-center justify-center">×</span>
+                <span
+                  v-else
+                  class="text-error-600 dark:text-error-400 flex h-4 w-4 items-center justify-center text-xs font-bold"
+                  >×</span
+                >
               </div>
               <div class="flex-1 pb-1">
                 <p class="text-sm font-medium text-neutral-900 dark:text-white">{{ a.label }}</p>
                 <p class="text-xs text-slate-500 dark:text-zinc-400">{{ a.customer }}</p>
-                <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-400 dark:text-zinc-500">
-                  <span class="flex items-center gap-1"><UIcon name="i-lucide-map-pin" class="w-3 h-3" />{{ a.address.slice(0, 24) }}…</span>
+                <div
+                  class="mt-1 flex items-center gap-2 text-[11px] text-slate-400 dark:text-zinc-500"
+                >
+                  <span class="flex items-center gap-1"
+                    ><UIcon name="i-lucide-map-pin" class="h-3 w-3" />{{
+                      a.address.slice(0, 24)
+                    }}…</span
+                  >
                   <span>·</span>
                   <span>{{ formatTimeAgo(a.time) }}</span>
                 </div>
               </div>
-              <span v-if="a.amount > 0" class="text-xs font-semibold text-neutral-900 dark:text-white tabular-nums flex-shrink-0">{{ formatVND(a.amount) }}</span>
+              <span
+                v-if="a.amount > 0"
+                class="flex-shrink-0 text-xs font-semibold text-neutral-900 tabular-nums dark:text-white"
+                >{{ formatVND(a.amount) }}</span
+              >
             </div>
           </div>
         </div>
       </div>
       <!-- Settings links -->
-      <div class="card p-2 mb-4">
-        <NuxtLink to="/driver/notifications" class="flex items-center gap-3 p-3 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-800 transition-colors min-h-[44px]">
-          <div class="w-9 h-9 rounded-lg bg-info-50 dark:bg-info-900/20 flex items-center justify-center flex-shrink-0">
-            <UIcon name="i-lucide-bell" class="w-4.5 h-4.5 text-info-600 dark:text-info-400" />
+      <div class="card mb-4 p-2">
+        <NuxtLink
+          to="/driver/notifications"
+          class="flex min-h-[44px] items-center gap-3 rounded-lg p-3 transition-colors hover:bg-neutral-100 dark:hover:bg-zinc-800"
+        >
+          <div
+            class="bg-info-50 dark:bg-info-900/20 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
+          >
+            <UIcon name="i-lucide-bell" class="text-info-600 dark:text-info-400 h-4.5 w-4.5" />
           </div>
           <span class="flex-1 text-sm font-medium text-neutral-900 dark:text-white">Thông báo</span>
-          <UIcon name="i-lucide-chevron-right" class="w-5 h-5 text-slate-300 dark:text-zinc-600" />
+          <UIcon name="i-lucide-chevron-right" class="h-5 w-5 text-slate-300 dark:text-zinc-600" />
         </NuxtLink>
-        <UButton variant="ghost" color="neutral" class="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20 transition-colors min-h-[44px]" @click="handleLogout">
-          <div class="w-9 h-9 rounded-lg bg-error-50 dark:bg-error-900/20 flex items-center justify-center flex-shrink-0">
-            <UIcon name="i-lucide-log-out" class="w-4.5 h-4.5 text-error-600 dark:text-error-400" />
+        <UButton
+          variant="ghost"
+          color="neutral"
+          class="hover:bg-error-50 dark:hover:bg-error-900/20 flex min-h-[44px] w-full items-center gap-3 rounded-lg p-3 transition-colors"
+          @click="handleLogout"
+        >
+          <div
+            class="bg-error-50 dark:bg-error-900/20 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
+          >
+            <UIcon name="i-lucide-log-out" class="text-error-600 dark:text-error-400 h-4.5 w-4.5" />
           </div>
-          <span class="flex-1 text-sm font-medium text-error-600 dark:text-error-400 text-left">Đăng xuất</span>
-          <UIcon name="i-lucide-chevron-right" class="w-5 h-5 text-slate-300 dark:text-zinc-600" />
+          <span class="text-error-600 dark:text-error-400 flex-1 text-left text-sm font-medium"
+            >Đăng xuất</span
+          >
+          <UIcon name="i-lucide-chevron-right" class="h-5 w-5 text-slate-300 dark:text-zinc-600" />
         </UButton>
       </div>
     </template>

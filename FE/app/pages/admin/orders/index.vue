@@ -8,7 +8,9 @@ useSeoMeta({ title: 'Đơn hàng - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
 // State
 const allOrders = ref<Order[]>([...mockOrders])
-const drivers = ref<Profile[]>(mockProfiles.filter(p => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE))
+const drivers = ref<Profile[]>(
+  mockProfiles.filter((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE)
+)
 const loading = ref(true)
 // Filters
 const search = ref('')
@@ -26,57 +28,104 @@ const batchDriverId = ref('')
 const batchAssigning = ref(false)
 const exporting = ref(false)
 onMounted(() => {
-  setTimeout(() => { loading.value = false }, 300)
+  setTimeout(() => {
+    loading.value = false
+  }, 300)
 })
 const kpiStats = computed(() => {
   const list = allOrders.value
-  const pending = list.filter(o => o.status === OrderStatus.PENDING).length
-  const shipping = list.filter(o => o.status === OrderStatus.SHIPPING).length
-  const delivered = list.filter(o => o.status === OrderStatus.DELIVERED).length
+  const pending = list.filter((o) => o.status === OrderStatus.PENDING).length
+  const shipping = list.filter((o) => o.status === OrderStatus.SHIPPING).length
+  const delivered = list.filter((o) => o.status === OrderStatus.DELIVERED).length
   return [
-    { title: 'Tổng đơn hàng', value: list.length, icon: 'i-lucide-shopping-bag', color: 'primary' as const, trend: { value: 15, isPositive: true } },
-    { title: 'Chờ xử lý', value: pending, icon: 'i-lucide-clock', color: 'warning' as const, trend: { value: 3, isPositive: true } },
-    { title: 'Đang giao', value: shipping, icon: 'i-lucide-truck', color: 'info' as const, trend: { value: 7, isPositive: true } },
-    { title: 'Đã giao', value: delivered, icon: 'i-lucide-package-check', color: 'success' as const, trend: { value: 12, isPositive: true } },
+    {
+      title: 'Tổng đơn hàng',
+      value: list.length,
+      icon: 'i-lucide-shopping-bag',
+      color: 'primary' as const,
+      trend: { value: 15, isPositive: true }
+    },
+    {
+      title: 'Chờ xử lý',
+      value: pending,
+      icon: 'i-lucide-clock',
+      color: 'warning' as const,
+      trend: { value: 3, isPositive: true }
+    },
+    {
+      title: 'Đang giao',
+      value: shipping,
+      icon: 'i-lucide-truck',
+      color: 'info' as const,
+      trend: { value: 7, isPositive: true }
+    },
+    {
+      title: 'Đã giao',
+      value: delivered,
+      icon: 'i-lucide-package-check',
+      color: 'success' as const,
+      trend: { value: 12, isPositive: true }
+    }
   ]
 })
 const totalRevenue = computed(() =>
-  allOrders.value.filter(o => o.status === OrderStatus.DELIVERED).reduce((s, o) => s + o.total, 0)
+  allOrders.value.filter((o) => o.status === OrderStatus.DELIVERED).reduce((s, o) => s + o.total, 0)
 )
 const statusPills = computed(() => {
   const list = allOrders.value
   return [
     { accessorKey: 'ALL' as const, header: 'Tất cả', count: list.length },
-    { accessorKey: OrderStatus.PENDING, header: 'Chờ xử lý', count: list.filter(o => o.status === OrderStatus.PENDING).length },
-    { accessorKey: OrderStatus.PROCESSING, header: 'Đang chuẩn bị', count: list.filter(o => o.status === OrderStatus.PROCESSING).length },
-    { accessorKey: OrderStatus.SHIPPING, header: 'Đang giao', count: list.filter(o => o.status === OrderStatus.SHIPPING).length },
-    { accessorKey: OrderStatus.DELIVERED, header: 'Đã giao', count: list.filter(o => o.status === OrderStatus.DELIVERED).length },
-    { accessorKey: OrderStatus.CANCELLED, header: 'Đã hủy', count: list.filter(o => o.status === OrderStatus.CANCELLED).length },
+    {
+      accessorKey: OrderStatus.PENDING,
+      header: 'Chờ xử lý',
+      count: list.filter((o) => o.status === OrderStatus.PENDING).length
+    },
+    {
+      accessorKey: OrderStatus.PROCESSING,
+      header: 'Đang chuẩn bị',
+      count: list.filter((o) => o.status === OrderStatus.PROCESSING).length
+    },
+    {
+      accessorKey: OrderStatus.SHIPPING,
+      header: 'Đang giao',
+      count: list.filter((o) => o.status === OrderStatus.SHIPPING).length
+    },
+    {
+      accessorKey: OrderStatus.DELIVERED,
+      header: 'Đã giao',
+      count: list.filter((o) => o.status === OrderStatus.DELIVERED).length
+    },
+    {
+      accessorKey: OrderStatus.CANCELLED,
+      header: 'Đã hủy',
+      count: list.filter((o) => o.status === OrderStatus.CANCELLED).length
+    }
   ]
 })
 const filteredRows = computed(() => {
   let rows = allOrders.value
   if (search.value) {
     const q = search.value.toLowerCase()
-    rows = rows.filter(o =>
-      o.id.toLowerCase().includes(q) ||
-      (o.user?.full_name || '').toLowerCase().includes(q) ||
-      (o.guest_info?.name || '').toLowerCase().includes(q) ||
-      o.shipping_address.toLowerCase().includes(q)
+    rows = rows.filter(
+      (o) =>
+        o.id.toLowerCase().includes(q) ||
+        (o.user?.full_name || '').toLowerCase().includes(q) ||
+        (o.guest_info?.name || '').toLowerCase().includes(q) ||
+        o.shipping_address.toLowerCase().includes(q)
     )
   }
-  if (statusFilter.value !== 'ALL') rows = rows.filter(o => o.status === statusFilter.value)
+  if (statusFilter.value !== 'ALL') rows = rows.filter((o) => o.status === statusFilter.value)
   if (startDate.value) {
     const s = new Date(startDate.value).toISOString()
-    rows = rows.filter(o => o.created_at >= s)
+    rows = rows.filter((o) => o.created_at >= s)
   }
   if (endDate.value) {
     const e = new Date(endDate.value + 'T23:59:59').toISOString()
-    rows = rows.filter(o => o.created_at <= e)
+    rows = rows.filter((o) => o.created_at <= e)
   }
   return [...rows].sort((a, b) => {
-    let av = (a as Record<string, unknown>)[sortBy.value]
-    let bv = (b as Record<string, unknown>)[sortBy.value]
+    const av = (a as Record<string, unknown>)[sortBy.value]
+    const bv = (b as Record<string, unknown>)[sortBy.value]
     if (typeof av === 'number' && typeof bv === 'number') {
       return sortDirection.value === 'asc' ? av - bv : bv - av
     }
@@ -90,15 +139,17 @@ const pagedRows = computed(() => {
   const start = (page.value - 1) * limit.value
   return filteredRows.value.slice(start, start + limit.value)
 })
-watch([search, statusFilter, startDate, endDate], () => { page.value = 1 })
+watch([search, statusFilter, startDate, endDate], () => {
+  page.value = 1
+})
 function toggleSelectOrder(id: string, checked: boolean) {
   if (checked) selectedOrders.value.add(id)
   else selectedOrders.value.delete(id)
   selectedOrders.value = new Set(selectedOrders.value)
 }
-function toggleAll(v: boolean | 'indeterminate') {
+function _toggleAll(v: boolean | 'indeterminate') {
   if (v === true) {
-    filteredRows.value.forEach(o => selectedOrders.value.add(o.id))
+    filteredRows.value.forEach((o) => selectedOrders.value.add(o.id))
   } else {
     selectedOrders.value.clear()
   }
@@ -112,10 +163,16 @@ function batchAssign() {
   batchAssigning.value = true
   setTimeout(() => {
     const ids = Array.from(selectedOrders.value)
-    const driver = drivers.value.find(d => d.id === batchDriverId.value) || null
-    allOrders.value = allOrders.value.map(o =>
+    const driver = drivers.value.find((d) => d.id === batchDriverId.value) || null
+    allOrders.value = allOrders.value.map((o) =>
       ids.includes(o.id)
-        ? { ...o, driver_id: batchDriverId.value, driver, status: OrderStatus.SHIPPING, updated_at: new Date().toISOString() }
+        ? {
+            ...o,
+            driver_id: batchDriverId.value,
+            driver,
+            status: OrderStatus.SHIPPING,
+            updated_at: new Date().toISOString()
+          }
         : o
     )
     toast.add({ title: `Đã điều phối ${ids.length} đơn hàng`, color: 'success' })
@@ -161,58 +218,94 @@ const columns = [
     <BasePageHeader title="Đơn hàng" description="Quản lý đơn hàng, điều phối tài xế và doanh thu">
       <template #actions>
         <UButton
-          class="lg:hidden relative"
+          class="relative lg:hidden"
           variant="outline"
           color="neutral"
           icon="i-lucide-filter"
           aria-label="Lọc"
           @click="showFilters = !showFilters"
         >
-          <span v-if="activeFilterCount > 0" class="absolute -top-1 -right-1 w-4 h-4 bg-primary-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{{ activeFilterCount }}</span>
+          <span
+            v-if="activeFilterCount > 0"
+            class="bg-primary-600 absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white"
+            >{{ activeFilterCount }}</span
+          >
         </UButton>
-        <UButton variant="outline" color="neutral" :loading="exporting" class="hidden sm:inline-flex" @click="exportCSV">
-          <div class="i-lucide-download w-4 h-4 mr-1" /> <span class="hidden md:inline">Xuất CSV</span>
+        <UButton
+          variant="outline"
+          color="neutral"
+          :loading="exporting"
+          class="hidden sm:inline-flex"
+          @click="exportCSV"
+        >
+          <div class="i-lucide-download mr-1 h-4 w-4" />
+          <span class="hidden md:inline">Xuất CSV</span>
         </UButton>
-        <UButton variant="outline" color="primary" :disabled="selectedOrders.size === 0" class="hidden md:inline-flex" @click="showBatchModal = true">
-          <div class="i-lucide-truck w-4 h-4 mr-1" /> Điều phối ({{ selectedOrders.size }})
+        <UButton
+          variant="outline"
+          color="primary"
+          :disabled="selectedOrders.size === 0"
+          class="hidden md:inline-flex"
+          @click="showBatchModal = true"
+        >
+          <div class="i-lucide-truck mr-1 h-4 w-4" />
+          Điều phối ({{ selectedOrders.size }})
         </UButton>
         <UButton to="/admin/orders/create">
-          <div class="i-lucide-plus w-4 h-4 mr-1" /> <span class="hidden sm:inline">Tạo đơn</span>
+          <div class="i-lucide-plus mr-1 h-4 w-4" />
+          <span class="hidden sm:inline">Tạo đơn</span>
         </UButton>
       </template>
     </BasePageHeader>
     <template v-if="loading">
       <BasePageLoading />
     </template>
-    
+
     <template v-else>
       <!-- KPI Row -->
       <div class="mb-6">
         <BaseStatsGrid :stats="kpiStats" :loading="loading" />
       </div>
       <!-- Revenue banner -->
-      <div class="card p-4 mb-4 stagger-item flex items-center justify-between" style="animation-delay: 180ms">
+      <div
+        class="card stagger-item mb-4 flex items-center justify-between p-4"
+        style="animation-delay: 180ms"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-success-50 dark:bg-success-900/20 flex items-center justify-center ring-1 ring-success-100 dark:ring-success-900/30">
-            <div class="i-lucide-banknote w-5 h-5 text-success-600 dark:text-success-400" />
+          <div
+            class="bg-success-50 dark:bg-success-900/20 ring-success-100 dark:ring-success-900/30 flex h-10 w-10 items-center justify-center rounded-lg ring-1"
+          >
+            <div class="i-lucide-banknote text-success-600 dark:text-success-400 h-5 w-5" />
           </div>
           <div>
-            <p class="text-xs text-slate-500 dark:text-zinc-400 font-medium">Tổng doanh thu (đã giao)</p>
-            <p class="text-lg font-bold text-success-600 dark:text-success-400 tabular-nums">{{ formatVND(totalRevenue) }}</p>
+            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">
+              Tổng doanh thu (đã giao)
+            </p>
+            <p class="text-success-600 dark:text-success-400 text-lg font-bold tabular-nums">
+              {{ formatVND(totalRevenue) }}
+            </p>
           </div>
         </div>
         <div class="flex items-center gap-2">
           <span class="relative flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75" />
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-success-500" />
+            <span
+              class="bg-success-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+            />
+            <span class="bg-success-500 relative inline-flex h-2.5 w-2.5 rounded-full" />
           </span>
-          <span class="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1 hidden sm:flex">
-            <div class="i-lucide-radio w-3.5 h-3.5" /> Cập nhật theo thời gian thực
+          <span
+            class="flex hidden items-center gap-1 text-xs text-slate-500 sm:flex dark:text-zinc-400"
+          >
+            <div class="i-lucide-radio h-3.5 w-3.5" />
+            Cập nhật theo thời gian thực
           </span>
         </div>
       </div>
       <!-- Status pills -->
-      <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 stagger-item" style="animation-delay: 220ms">
+      <div
+        class="stagger-item mb-4 flex items-center gap-2 overflow-x-auto pb-1"
+        style="animation-delay: 220ms"
+      >
         <UButton
           v-for="pill in statusPills"
           :key="pill.key"
@@ -223,21 +316,47 @@ const columns = [
           @click="statusFilter = pill.key"
         >
           {{ pill.label }}
-          <UBadge :color="statusFilter === pill.key ? 'neutral' : 'neutral'" variant="subtle" size="sm" class="ml-1">{{ pill.count }}</UBadge>
+          <UBadge
+            :color="statusFilter === pill.key ? 'neutral' : 'neutral'"
+            variant="subtle"
+            size="sm"
+            class="ml-1"
+            >{{ pill.count }}</UBadge
+          >
         </UButton>
       </div>
       <!-- Desktop filter bar -->
-      <div class="hidden lg:flex flex-wrap items-center gap-3 mb-4 animate-fade-in-up" style="animation-delay: 240ms">
-        <div class="flex-1 min-w-[200px] max-w-xs">
-          <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm theo mã đơn, khách hàng, địa chỉ..." />
+      <div
+        class="animate-fade-in-up mb-4 hidden flex-wrap items-center gap-3 lg:flex"
+        style="animation-delay: 240ms"
+      >
+        <div class="max-w-xs min-w-[200px] flex-1">
+          <UInput
+            v-model="search"
+            icon="i-lucide-search"
+            placeholder="Tìm theo mã đơn, khách hàng, địa chỉ..."
+          />
         </div>
         <UInput v-model="startDate" type="date" />
         <UInput v-model="endDate" type="date" />
-        <UButton v-if="activeFilterCount > 0" variant="ghost" color="error" size="sm" icon="i-lucide-x" @click="clearFilters">Xóa lọc</UButton>
+        <UButton
+          v-if="activeFilterCount > 0"
+          variant="ghost"
+          color="error"
+          size="sm"
+          icon="i-lucide-x"
+          @click="clearFilters"
+          >Xóa lọc</UButton
+        >
       </div>
       <!-- Mobile search -->
-      <div class="lg:hidden mb-4">
-        <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm đơn hàng..." class="w-full" />
+      <div class="mb-4 lg:hidden">
+        <UInput
+          v-model="search"
+          icon="i-lucide-search"
+          placeholder="Tìm đơn hàng..."
+          class="w-full"
+        />
       </div>
       <!-- Mobile filter slideover -->
       <USlideover v-model:open="showFilters" side="bottom" title="Bộ lọc">
@@ -266,52 +385,87 @@ const columns = [
           </div>
         </template>
         <template #footer>
-          <div class="flex gap-3 w-full">
-            <UButton variant="ghost" color="error" class="flex-1 justify-center" @click="clearFilters">Xóa lọc</UButton>
-            <UButton color="primary" class="flex-1 justify-center" @click="showFilters = false">Áp dụng</UButton>
+          <div class="flex w-full gap-3">
+            <UButton
+              variant="ghost"
+              color="error"
+              class="flex-1 justify-center"
+              @click="clearFilters"
+              >Xóa lọc</UButton
+            >
+            <UButton color="primary" class="flex-1 justify-center" @click="showFilters = false"
+              >Áp dụng</UButton
+            >
           </div>
         </template>
       </USlideover>
       <!-- Batch selection bar -->
       <Transition name="fade">
-        <div v-if="selectedOrders.size > 0" class="card p-3 mb-3 flex items-center justify-between bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800">
+        <div
+          v-if="selectedOrders.size > 0"
+          class="card bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 mb-3 flex items-center justify-between p-3"
+        >
           <div class="flex items-center gap-2">
-            <div class="i-lucide-check-circle-2 w-5 h-5 text-primary-600 dark:text-primary-400" />
-            <span class="text-sm font-medium text-primary-700 dark:text-primary-300">Đã chọn {{ selectedOrders.size }} đơn</span>
+            <div class="i-lucide-check-circle-2 text-primary-600 dark:text-primary-400 h-5 w-5" />
+            <span class="text-primary-700 dark:text-primary-300 text-sm font-medium"
+              >Đã chọn {{ selectedOrders.size }} đơn</span
+            >
           </div>
           <div class="flex items-center gap-2">
-            <UButton variant="ghost" color="neutral" size="sm" @click="clearSelection">Bỏ chọn</UButton>
+            <UButton variant="ghost" color="neutral" size="sm" @click="clearSelection"
+              >Bỏ chọn</UButton
+            >
             <UButton size="sm" @click="showBatchModal = true">
-              <div class="i-lucide-truck w-3.5 h-3.5 mr-1" /> Điều phối
+              <div class="i-lucide-truck mr-1 h-3.5 w-3.5" />
+              Điều phối
             </UButton>
           </div>
         </div>
       </Transition>
       <!-- Table -->
-      <div class="animate-fade-in-up bg-surface ring-1 ring-surface-border rounded-xl overflow-hidden" style="animation-delay: 280ms">
+      <div
+        class="animate-fade-in-up bg-surface ring-surface-border overflow-hidden rounded-xl ring-1"
+        style="animation-delay: 280ms"
+      >
         <UTable :columns="columns" :data="pagedRows">
           <template #select-cell="{ row }">
             <UCheckbox
-              v-if="row.original.status === OrderStatus.PROCESSING || row.original.status === OrderStatus.PENDING"
+              v-if="
+                row.original.status === OrderStatus.PROCESSING ||
+                row.original.status === OrderStatus.PENDING
+              "
               :model-value="selectedOrders.has(row.original.id)"
               @update:model-value="(v: boolean) => toggleSelectOrder(row.original.id, v)"
               @click.stop
             />
           </template>
           <template #id-cell="{ row }">
-            <span class="font-mono text-xs text-slate-500 dark:text-zinc-400">{{ row.original.id.slice(0, 8) }}</span>
+            <span class="font-mono text-xs text-slate-500 dark:text-zinc-400">{{
+              row.original.id.slice(0, 8)
+            }}</span>
           </template>
           <template #user-cell="{ row }">
-            <div class="flex items-center gap-2 min-w-0">
+            <div class="flex min-w-0 items-center gap-2">
               <UAvatar
-                :alt="row.original.user?.full_name || row.original.guest_info?.name || 'Khách vãng lai'"
+                :alt="
+                  row.original.user?.full_name || row.original.guest_info?.name || 'Khách vãng lai'
+                "
                 :src="row.original.user?.avatar_url"
                 size="sm"
               />
               <div class="min-w-0">
-                <p class="text-sm text-surface-foreground truncate max-w-[180px]">{{ row.original.user?.full_name || row.original.guest_info?.name || 'Khách vãng lai' }}</p>
-                <p v-if="row.original.driver" class="text-xs text-slate-500 dark:text-zinc-400 truncate flex items-center gap-1">
-                  <span class="i-lucide-truck w-3 h-3" /> {{ row.original.driver?.full_name }}
+                <p class="text-surface-foreground max-w-[180px] truncate text-sm">
+                  {{
+                    row.original.user?.full_name ||
+                    row.original.guest_info?.name ||
+                    'Khách vãng lai'
+                  }}
+                </p>
+                <p
+                  v-if="row.original.driver"
+                  class="flex items-center gap-1 truncate text-xs text-slate-500 dark:text-zinc-400"
+                >
+                  <span class="i-lucide-truck h-3 w-3" /> {{ row.original.driver?.full_name }}
                 </p>
               </div>
             </div>
@@ -322,35 +476,51 @@ const columns = [
             </UBadge>
           </template>
           <template #total-cell="{ row }">
-            <span class="font-semibold text-surface-foreground tabular-nums">{{ formatVND(row.original.total) }}</span>
+            <span class="text-surface-foreground font-semibold tabular-nums">{{
+              formatVND(row.original.total)
+            }}</span>
           </template>
           <template #amount_collected-cell="{ row }">
-            <span :class="['tabular-nums', row.original.amount_collected > 0 ? 'text-success-600 dark:text-success-400 font-medium' : 'text-slate-400 dark:text-zinc-500']">
-              {{ row.original.amount_collected > 0 ? formatVND(row.original.amount_collected) : '—' }}
+            <span
+              :class="[
+                'tabular-nums',
+                row.original.amount_collected > 0
+                  ? 'text-success-600 dark:text-success-400 font-medium'
+                  : 'text-slate-400 dark:text-zinc-500'
+              ]"
+            >
+              {{
+                row.original.amount_collected > 0 ? formatVND(row.original.amount_collected) : '—'
+              }}
             </span>
           </template>
           <template #created_at-cell="{ row }">
-            <span class="text-slate-500 dark:text-zinc-400 text-sm tabular-nums">{{ formatDate(row.original.created_at) }}</span>
+            <span class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">{{
+              formatDate(row.original.created_at)
+            }}</span>
           </template>
           <template #actions-cell="{ row }">
-            <UButton color="neutral" variant="ghost" size="sm" :to="`/admin/orders/${row.original.id}`">
-              <div class="i-lucide-eye w-4 h-4 mr-1" /> Xem
+            <UButton
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              :to="`/admin/orders/${row.original.id}`"
+            >
+              <div class="i-lucide-eye mr-1 h-4 w-4" />
+              Xem
             </UButton>
           </template>
         </UTable>
-        <div v-if="pagedRows.length === 0" class="p-8 text-center text-surface-500">
+        <div v-if="pagedRows.length === 0" class="text-surface-500 p-8 text-center">
           Không tìm thấy đơn hàng nào.
         </div>
-        <div class="p-4 border-t border-surface-border flex items-center justify-between">
+        <div class="border-surface-border flex items-center justify-between border-t p-4">
           <div class="flex items-center gap-3">
             <span class="text-sm text-slate-500 dark:text-zinc-400">
-              {{ Math.min((page - 1) * limit + 1, total) }}-{{ Math.min(page * limit, total) }} / {{ total }}
+              {{ Math.min((page - 1) * limit + 1, total) }}-{{ Math.min(page * limit, total) }} /
+              {{ total }}
             </span>
-            <USelectMenu
-              v-model="limit"
-              :options="[10, 20, 50]"
-              class="w-32"
-            >
+            <USelectMenu v-model="limit" :options="[10, 20, 50]" class="w-32">
               <template #label>{{ limit }} / trang</template>
             </USelectMenu>
           </div>
@@ -362,16 +532,19 @@ const columns = [
     <UModal v-model:open="showBatchModal" title="Điều phối đơn hàng">
       <template #body>
         <div class="space-y-4">
-          <div class="flex items-center gap-2 p-3 rounded-lg bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
-            <div class="i-lucide-truck w-5 h-5 text-primary-600 dark:text-primary-400" />
-            <p class="text-[13px] text-primary-700 dark:text-primary-300">
-              Đã chọn <strong class="font-bold">{{ selectedOrders.size }}</strong> đơn hàng để điều phối
+          <div
+            class="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 flex items-center gap-2 rounded-lg border p-3"
+          >
+            <div class="i-lucide-truck text-primary-600 dark:text-primary-400 h-5 w-5" />
+            <p class="text-primary-700 dark:text-primary-300 text-[13px]">
+              Đã chọn <strong class="font-bold">{{ selectedOrders.size }}</strong> đơn hàng để điều
+              phối
             </p>
           </div>
           <UFormField label="Chọn tài xế" required>
             <USelectMenu
               v-model="batchDriverId"
-              :items="drivers.map(d => ({ value: d.id, label: d.full_name }))"
+              :items="drivers.map((d) => ({ value: d.id, label: d.full_name }))"
               value-key="value"
               label-key="label"
               placeholder="Chọn tài xế giao hàng"
@@ -381,8 +554,21 @@ const columns = [
       </template>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <UButton variant="ghost" color="neutral" @click="() => { showBatchModal = false }">Hủy</UButton>
-          <UButton :loading="batchAssigning" :disabled="!batchDriverId || selectedOrders.size === 0" @click="batchAssign">
+          <UButton
+            variant="ghost"
+            color="neutral"
+            @click="
+              () => {
+                showBatchModal = false
+              }
+            "
+            >Hủy</UButton
+          >
+          <UButton
+            :loading="batchAssigning"
+            :disabled="!batchDriverId || selectedOrders.size === 0"
+            @click="batchAssign"
+          >
             Điều phối ngay
           </UButton>
         </div>

@@ -1,5 +1,20 @@
 <script setup lang="ts">
-import { Home, Package, FileText, ShoppingCart, User, LogOut, LayoutDashboard, Sun, Moon, ArrowUp, Facebook, Phone, Mail, MapPin } from 'lucide-vue-next'
+import {
+  Home,
+  Package,
+  FileText,
+  ShoppingCart,
+  User,
+  LogOut,
+  LayoutDashboard,
+  Sun,
+  Moon,
+  ArrowUp,
+  Facebook,
+  Phone,
+  Mail,
+  MapPin
+} from 'lucide-vue-next'
 const { t } = useI18n()
 const authStore = useAuthStore()
 const userMenuOpen = ref(false)
@@ -28,7 +43,7 @@ const bottomNavItems = computed(() => [
   { label: t('nav.products'), to: '/products', icon: Package },
   { label: t('customer.quickOrder'), to: '/quick-order', icon: ShoppingCart },
   { label: t('nav.news'), to: '/blog', icon: FileText },
-  { label: t('nav.about'), to: '/about', icon: User },
+  { label: t('nav.about'), to: '/about', icon: User }
 ])
 
 const onOutsideClick = (e: MouseEvent) => {
@@ -53,80 +68,112 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-surface-muted">
-    <header class="sticky top-0 z-40 glass border-b border-surface-border/50 safe-area-top">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+  <div class="bg-surface-muted flex min-h-screen flex-col">
+    <header class="glass border-surface-border/50 safe-area-top sticky top-0 z-40 border-b">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-16 items-center justify-between">
           <NuxtLink to="/" class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold shadow-sm shadow-primary-600/20">B</div>
-            <span class="text-lg font-bold text-surface-foreground tracking-tight">BunTech</span>
+            <div
+              class="from-primary-500 to-primary-600 shadow-primary-600/20 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white shadow-sm"
+            >
+              B
+            </div>
+            <span class="text-surface-foreground text-lg font-bold tracking-tight">BunTech</span>
           </NuxtLink>
 
-          <nav class="hidden md:flex items-center gap-0.5" aria-label="Main navigation">
+          <nav class="hidden items-center gap-0.5 md:flex" aria-label="Main navigation">
             <NuxtLink
               v-for="item in bottomNavItems"
               :key="item.to"
               :to="item.to"
-              class="px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-zinc-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200"
+              class="hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg px-3.5 py-2 text-sm font-medium text-gray-600 transition-all duration-200 dark:text-zinc-300"
               active-class="text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20"
               :aria-current="$route.path === item.to ? 'page' : undefined"
-            >{{ item.label }}</NuxtLink>
+              >{{ item.label }}</NuxtLink
+            >
           </nav>
 
           <div class="flex items-center gap-1.5">
-            <UButton variant="ghost" color="neutral"
-              class="p-2.5 text-surface-foreground hover:bg-surface-hover rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            <UButton
+              variant="ghost"
+              color="neutral"
+              class="text-surface-foreground hover:bg-surface-hover flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 transition-colors"
               :aria-label="colorMode.value === 'dark' ? 'Bật chế độ sáng' : 'Bật chế độ tối'"
               @click="toggleDark"
             >
-              <Sun v-if="colorMode.value === 'dark'" class="w-5 h-5" aria-hidden="true" />
-              <Moon v-else class="w-5 h-5" aria-hidden="true" />
+              <Sun v-if="colorMode.value === 'dark'" class="h-5 w-5" aria-hidden="true" />
+              <Moon v-else class="h-5 w-5" aria-hidden="true" />
             </UButton>
             <template v-if="authStore.isAuthenticated">
               <NuxtLink
                 v-if="authStore.role === 'CUSTOMER'"
                 to="/portal"
-                class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200 min-h-[44px]"
-              >{{ t('nav.myOrders') }}</NuxtLink>
+                class="text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 hidden min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200 sm:inline-flex"
+                >{{ t('nav.myOrders') }}</NuxtLink
+              >
               <NuxtLink
                 v-else-if="authStore.role === 'ADMIN'"
                 to="/admin"
-                class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200 min-h-[44px]"
+                class="text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 hidden min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200 sm:inline-flex"
               >
-                <LayoutDashboard class="w-4 h-4" aria-hidden="true" /> {{ t('nav.dashboard') }}
+                <LayoutDashboard class="h-4 w-4" aria-hidden="true" /> {{ t('nav.dashboard') }}
               </NuxtLink>
               <div ref="userMenuRef" class="relative">
-                <UButton variant="ghost" color="neutral"
-                  class="flex items-center p-1 rounded-xl hover:bg-surface-hover transition-all duration-200 min-w-[44px] min-h-[44px] justify-center"
+                <UButton
+                  variant="ghost"
+                  color="neutral"
+                  class="hover:bg-surface-hover flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-1 transition-all duration-200"
                   aria-haspopup="menu"
                   :aria-expanded="userMenuOpen"
                   aria-controls="user-menu"
                   @click="userMenuOpen = !userMenuOpen"
                 >
-                  <AppAvatar :name="authStore.user?.full_name" :src="authStore.user?.avatar_url" size="sm" />
+                  <AppAvatar
+                    :name="authStore.user?.full_name"
+                    :src="authStore.user?.avatar_url"
+                    size="sm"
+                  />
                 </UButton>
                 <Transition name="dropdown">
                   <div
                     v-if="userMenuOpen"
                     id="user-menu"
                     role="menu"
-                    class="absolute right-0 top-full mt-2 w-56 bg-surface rounded-xl shadow-lg border border-surface-border py-1.5 z-50"
+                    class="bg-surface border-surface-border absolute top-full right-0 z-50 mt-2 w-56 rounded-xl border py-1.5 shadow-lg"
                   >
-                    <div class="px-4 py-2.5 border-b border-surface-border">
-                      <p class="text-sm font-semibold text-surface-foreground">{{ authStore.user?.full_name }}</p>
+                    <div class="border-surface-border border-b px-4 py-2.5">
+                      <p class="text-surface-foreground text-sm font-semibold">
+                        {{ authStore.user?.full_name }}
+                      </p>
                     </div>
-                    <NuxtLink v-if="authStore.role === 'CUSTOMER'" to="/portal" role="menuitem" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-surface-foreground hover:bg-surface-hover transition-colors min-h-[44px]" @click="userMenuOpen = false">
-                      <User class="w-4 h-4 text-gray-400 dark:text-zinc-500" aria-hidden="true" /> {{ t('nav.myOrders') }}
+                    <NuxtLink
+                      v-if="authStore.role === 'CUSTOMER'"
+                      to="/portal"
+                      role="menuitem"
+                      class="text-surface-foreground hover:bg-surface-hover flex min-h-[44px] items-center gap-2.5 px-4 py-2.5 text-sm transition-colors"
+                      @click="userMenuOpen = false"
+                    >
+                      <User class="h-4 w-4 text-gray-400 dark:text-zinc-500" aria-hidden="true" />
+                      {{ t('nav.myOrders') }}
                     </NuxtLink>
-                    <UButton variant="ghost" color="neutral" role="menuitem" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors min-h-[44px]" @click="handleLogout">
-                      <LogOut class="w-4 h-4" aria-hidden="true" /> {{ t('nav.logout') }}
+                    <UButton
+                      variant="ghost"
+                      color="neutral"
+                      role="menuitem"
+                      class="text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex min-h-[44px] w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors"
+                      @click="handleLogout"
+                    >
+                      <LogOut class="h-4 w-4" aria-hidden="true" /> {{ t('nav.logout') }}
                     </UButton>
                   </div>
                 </Transition>
               </div>
             </template>
             <template v-else>
-              <NuxtLink to="/auth/customer/login" class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 px-3.5 py-2.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200 min-h-[44px] flex items-center">
+              <NuxtLink
+                to="/auth/customer/login"
+                class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 flex min-h-[44px] items-center rounded-lg px-3.5 py-2.5 text-sm font-medium transition-all duration-200"
+              >
                 {{ t('customer.customerLogin') }}
               </NuxtLink>
             </template>
@@ -139,48 +186,86 @@ onUnmounted(() => {
       <slot />
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 mt-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer class="mt-16 bg-slate-900 text-slate-400">
+      <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div class="md:col-span-2">
-            <div class="flex items-center gap-2.5 mb-4">
-              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold">B</div>
-              <span class="text-lg font-bold text-white tracking-tight">BunTech</span>
+            <div class="mb-4 flex items-center gap-2.5">
+              <div
+                class="from-primary-500 to-primary-600 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white"
+              >
+                B
+              </div>
+              <span class="text-lg font-bold tracking-tight text-white">BunTech</span>
             </div>
-            <p class="text-sm max-w-md leading-relaxed mb-4">{{ t('app.tagline') }}</p>
+            <p class="mb-4 max-w-md text-sm leading-relaxed">{{ t('app.tagline') }}</p>
             <div class="flex items-center gap-3">
-              <a href="https://facebook.com" target="_blank" rel="noopener" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all duration-200 hover:scale-105" aria-label="Facebook">
-                <Facebook class="w-4 h-4" aria-hidden="true" />
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener"
+                class="hover:bg-primary-600 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all duration-200 hover:scale-105 hover:text-white"
+                aria-label="Facebook"
+              >
+                <Facebook class="h-4 w-4" aria-hidden="true" />
               </a>
-              <a href="tel:+84901234567" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all duration-200 hover:scale-105" aria-label="Điện thoại">
-                <Phone class="w-4 h-4" aria-hidden="true" />
+              <a
+                href="tel:+84901234567"
+                class="hover:bg-primary-600 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all duration-200 hover:scale-105 hover:text-white"
+                aria-label="Điện thoại"
+              >
+                <Phone class="h-4 w-4" aria-hidden="true" />
               </a>
-              <a href="mailto:support@buntech.vn" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-primary-600 flex items-center justify-center text-slate-400 hover:text-white transition-all duration-200 hover:scale-105" aria-label="Email">
-                <Mail class="w-4 h-4" aria-hidden="true" />
+              <a
+                href="mailto:support@buntech.vn"
+                class="hover:bg-primary-600 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all duration-200 hover:scale-105 hover:text-white"
+                aria-label="Email"
+              >
+                <Mail class="h-4 w-4" aria-hidden="true" />
               </a>
             </div>
           </div>
           <div>
-            <h4 class="text-white font-semibold mb-3 text-sm">{{ t('nav.products') }}</h4>
+            <h4 class="mb-3 text-sm font-semibold text-white">{{ t('nav.products') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><NuxtLink to="/products" class="hover:text-white transition-colors">{{ t('nav.products') }}</NuxtLink></li>
-              <li><NuxtLink to="/quick-order" class="hover:text-white transition-colors">{{ t('customer.quickOrder') }}</NuxtLink></li>
-              <li><NuxtLink to="/about" class="hover:text-white transition-colors">{{ t('nav.about') }}</NuxtLink></li>
+              <li>
+                <NuxtLink to="/products" class="transition-colors hover:text-white">{{
+                  t('nav.products')
+                }}</NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/quick-order" class="transition-colors hover:text-white">{{
+                  t('customer.quickOrder')
+                }}</NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/about" class="transition-colors hover:text-white">{{
+                  t('nav.about')
+                }}</NuxtLink>
+              </li>
             </ul>
           </div>
           <div>
-            <h4 class="text-white font-semibold mb-3 text-sm">{{ t('nav.about') }}</h4>
+            <h4 class="mb-3 text-sm font-semibold text-white">{{ t('nav.about') }}</h4>
             <ul class="space-y-2 text-sm">
-              <li><NuxtLink to="/blog" class="hover:text-white transition-colors">{{ t('nav.news') }}</NuxtLink></li>
-              <li><NuxtLink to="/auth/driver/login" class="hover:text-white transition-colors">{{ t('nav.driverApp') }}</NuxtLink></li>
+              <li>
+                <NuxtLink to="/blog" class="transition-colors hover:text-white">{{
+                  t('nav.news')
+                }}</NuxtLink>
+              </li>
+              <li>
+                <NuxtLink to="/auth/driver/login" class="transition-colors hover:text-white">{{
+                  t('nav.driverApp')
+                }}</NuxtLink>
+              </li>
             </ul>
             <div class="mt-4 flex items-start gap-2 text-xs text-slate-500">
-              <MapPin class="w-3.5 h-3.5 flex-shrink-0 mt-0.5" aria-hidden="true" />
+              <MapPin class="mt-0.5 h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
               <span>123 Nguyễn Trãi, Thanh Xuân, Hà Nội</span>
             </div>
           </div>
         </div>
-        <div class="mt-8 pt-8 border-t border-white/10 text-sm text-center text-slate-500">
+        <div class="mt-8 border-t border-white/10 pt-8 text-center text-sm text-slate-500">
           &copy; {{ new Date().getFullYear() }} BunTech. {{ t('app.tagline') }}
         </div>
       </div>
@@ -188,30 +273,35 @@ onUnmounted(() => {
 
     <!-- Scroll to top -->
     <Transition name="scroll-top">
-      <UButton variant="ghost" color="neutral"
+      <UButton
         v-if="showScrollTop"
+        variant="ghost"
+        color="neutral"
         type="button"
-        class="fixed bottom-20 md:bottom-6 right-4 z-40 w-11 h-11 rounded-full bg-primary-600 text-white shadow-lg shadow-primary-600/30 flex items-center justify-center hover:bg-primary-700 active:scale-90 transition-all duration-200"
+        class="bg-primary-600 shadow-primary-600/30 hover:bg-primary-700 fixed right-4 bottom-20 z-40 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200 active:scale-90 md:bottom-6"
         aria-label="Lên đầu trang"
         @click="scrollToTop"
       >
-        <ArrowUp class="w-5 h-5" aria-hidden="true" />
+        <ArrowUp class="h-5 w-5" aria-hidden="true" />
       </UButton>
     </Transition>
 
     <!-- Bottom Navigation (mobile only) -->
-    <nav class="fixed bottom-0 left-0 right-0 z-50 glass border-t border-surface-border/50 md:hidden safe-area-bottom" aria-label="Bottom navigation">
+    <nav
+      class="glass border-surface-border/50 safe-area-bottom fixed right-0 bottom-0 left-0 z-50 border-t md:hidden"
+      aria-label="Bottom navigation"
+    >
       <div class="flex items-stretch justify-around px-2 py-1.5">
         <NuxtLink
           v-for="item in bottomNavItems"
           :key="item.to"
           :to="item.to"
-          class="flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-lg min-w-[52px] min-h-[52px] transition-colors duration-200"
+          class="flex min-h-[52px] min-w-[52px] flex-col items-center justify-center gap-0.5 rounded-lg px-2 py-1.5 transition-colors duration-200"
           active-class="text-primary-600 dark:text-primary-400"
           :aria-current="$route.path === item.to ? 'page' : undefined"
         >
-          <component :is="item.icon" class="w-5 h-5" aria-hidden="true" />
-          <span class="text-[10px] font-medium leading-tight text-center">{{ item.label }}</span>
+          <component :is="item.icon" class="h-5 w-5" aria-hidden="true" />
+          <span class="text-center text-[10px] leading-tight font-medium">{{ item.label }}</span>
         </NuxtLink>
       </div>
     </nav>

@@ -13,7 +13,10 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const errorConfig: Record<number, { title: string; description: string; icon: string; color: 'primary' | 'warning' | 'error' }> = {
+const errorConfig: Record<
+  number,
+  { title: string; description: string; icon: string; color: 'primary' | 'warning' | 'error' }
+> = {
   404: {
     title: 'Không tìm thấy trang',
     description: 'Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.',
@@ -59,37 +62,60 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-muted flex items-center justify-center p-4 relative overflow-hidden">
+  <div
+    class="bg-surface-muted relative flex min-h-screen items-center justify-center overflow-hidden p-4"
+  >
     <!-- Animated background -->
-    <div 
-      class="absolute inset-0 pointer-events-none transition-transform duration-1000 ease-out"
+    <div
+      class="pointer-events-none absolute inset-0 transition-transform duration-1000 ease-out"
       :style="{ transform: `translate(${mouseX * -20}px, ${mouseY * -20}px)` }"
     >
-      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-soft" />
-      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-soft" style="animation-delay: 2s" />
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-error-500/10 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-soft" style="animation-delay: 4s" />
+      <div
+        class="bg-primary-500/10 animate-pulse-soft absolute top-1/4 left-1/4 h-96 w-96 rounded-full opacity-70 mix-blend-multiply blur-3xl filter"
+      />
+      <div
+        class="bg-secondary-500/10 animate-pulse-soft absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full opacity-70 mix-blend-multiply blur-3xl filter"
+        style="animation-delay: 2s"
+      />
+      <div
+        class="bg-error-500/10 animate-pulse-soft absolute top-1/2 left-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-70 mix-blend-multiply blur-3xl filter"
+        style="animation-delay: 4s"
+      />
     </div>
 
-    <div class="card p-10 sm:p-14 max-w-lg w-full text-center relative z-10 glass shadow-xl border border-white/20 dark:border-white/5 animate-fade-in-up">
+    <div
+      class="card glass animate-fade-in-up relative z-10 w-full max-w-lg border border-white/20 p-10 text-center shadow-xl sm:p-14 dark:border-white/5"
+    >
       <!-- Error Code -->
       <div class="relative mb-8 inline-block">
-        <h1 class="text-8xl sm:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-br from-primary-400 to-primary-600 dark:from-primary-300 dark:to-primary-500 opacity-20 select-none">
+        <h1
+          class="from-primary-400 to-primary-600 dark:from-primary-300 dark:to-primary-500 bg-gradient-to-br bg-clip-text text-8xl font-black text-transparent opacity-20 select-none sm:text-9xl"
+        >
           {{ error.statusCode }}
         </h1>
         <div class="absolute inset-0 flex items-center justify-center">
-          <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-white dark:bg-surface flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
-            <UIcon :name="config.icon" :class="['w-10 h-10 sm:w-12 sm:h-12 text-' + config.color + '-500']" />
+          <div
+            class="dark:bg-surface flex h-20 w-20 rotate-3 transform items-center justify-center rounded-3xl bg-white shadow-lg transition-transform duration-300 hover:rotate-0 sm:h-24 sm:w-24"
+          >
+            <UIcon
+              :name="config.icon"
+              :class="['text- h-10 w-10 sm:h-12 sm:w-12' + config.color + '-500']"
+            />
           </div>
         </div>
       </div>
 
       <!-- Message -->
-      <h2 class="text-2xl sm:text-3xl font-bold text-surface-foreground tracking-tight mb-3">{{ config.title }}</h2>
-      <p class="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mb-8 max-w-md mx-auto">{{ config.description }}</p>
+      <h2 class="text-surface-foreground mb-3 text-2xl font-bold tracking-tight sm:text-3xl">
+        {{ config.title }}
+      </h2>
+      <p class="mx-auto mb-8 max-w-md text-sm text-slate-500 sm:text-base dark:text-zinc-400">
+        {{ config.description }}
+      </p>
 
       <!-- Actions -->
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <UButton size="lg" icon="i-lucide-home" @click="handleGoHome" class="w-full sm:w-auto">
+      <div class="flex flex-col justify-center gap-3 sm:flex-row">
+        <UButton size="lg" icon="i-lucide-home" class="w-full sm:w-auto" @click="handleGoHome">
           Quay về trang chủ
         </UButton>
         <UButton
@@ -97,11 +123,14 @@ onMounted(() => {
           icon="i-lucide-refresh-cw"
           color="neutral"
           variant="outline"
+          class="group w-full sm:w-auto"
           @click="clearError()"
-          class="w-full sm:w-auto group"
         >
           <template #leading>
-            <UIcon name="i-lucide-refresh-cw" class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+            <UIcon
+              name="i-lucide-refresh-cw"
+              class="h-5 w-5 transition-transform duration-500 group-hover:rotate-180"
+            />
           </template>
           Thử lại
         </UButton>
@@ -112,8 +141,15 @@ onMounted(() => {
 
 <style scoped>
 @keyframes pulse-soft {
-  0%, 100% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.05); opacity: 0.5; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.5;
+  }
 }
 .animate-pulse-soft {
   animation: pulse-soft 6s infinite ease-in-out;
