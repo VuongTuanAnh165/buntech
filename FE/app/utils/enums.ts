@@ -1,7 +1,7 @@
 export enum Role {
-  ADMIN = 'ADMIN',
-  DRIVER = 'DRIVER',
-  CUSTOMER = 'CUSTOMER',
+  ADMIN = 'admin',
+  DRIVER = 'driver',
+  CUSTOMER = 'customer'
 }
 
 export enum OrderStatus {
@@ -9,41 +9,41 @@ export enum OrderStatus {
   PROCESSING = 'PROCESSING',
   SHIPPING = 'SHIPPING',
   DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED',
+  CANCELLED = 'CANCELLED'
 }
 
 export enum TransactionType {
   PAYMENT = 'PAYMENT',
   REFUND = 'REFUND',
   DEBT_INCREASE = 'DEBT_INCREASE',
-  DEBT_PAYMENT = 'DEBT_PAYMENT',
+  DEBT_PAYMENT = 'DEBT_PAYMENT'
 }
 
 export enum InventoryMovementType {
   IMPORT = 'IMPORT',
   EXPORT = 'EXPORT',
-  LOSS = 'LOSS',
+  LOSS = 'LOSS'
 }
 
 export enum ProductStatus {
   ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
+  INACTIVE = 'INACTIVE'
 }
 
 export enum UserStatus {
   ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
+  INACTIVE = 'INACTIVE'
 }
 
 export enum BlogStatus {
   DRAFT = 'DRAFT',
-  PUBLISHED = 'PUBLISHED',
+  PUBLISHED = 'PUBLISHED'
 }
 
 export enum VehicleStatus {
   ACTIVE = 'ACTIVE',
   MAINTENANCE = 'MAINTENANCE',
-  INACTIVE = 'INACTIVE',
+  INACTIVE = 'INACTIVE'
 }
 
 export enum NotificationType {
@@ -52,7 +52,5 @@ export enum NotificationType {
   ORDER_CANCELLED = 'ORDER_CANCELLED',
   LOW_STOCK = 'LOW_STOCK',
   NEW_REVIEW = 'NEW_REVIEW',
-  SYSTEM = 'SYSTEM',
+  SYSTEM = 'SYSTEM'
 }
-
-

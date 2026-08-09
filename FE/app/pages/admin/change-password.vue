@@ -1,16 +1,54 @@
 <script setup lang="ts">
-import { _Role } from '~/utils/enums'
+import { changePasswordSchema } from '~~/core/validators/auth.validator'
+import { authService } from '~~/core/services/auth.service'
+import type { z } from 'zod'
 
-const authStore = useAuthStore()
 const toast = useToast()
 useSeoMeta({ title: 'Đổi mật khẩu - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
 
-const oldPassword = ref('')
-const newPassword = ref('')
-const confirmPassword = ref('')
-const errors = ref<Record<string, string>>({})
-const saving = ref(false)
+type Schema = z.output<typeof changePasswordSchema>
+
+const state = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const {
+  submit: handleChangePassword,
+  saving,
+  formRef
+} = useFormSubmit<Schema>(
+  async (data) => {
+    await authService.changePassword({
+      oldPassword: data.oldPassword,
+      newPassword: data.newPassword
+    })
+  },
+  {
+    onSuccess() {
+      toast.add({ title: 'Đổi mật khẩu thành công', color: 'success' })
+      state.oldPassword = ''
+      state.newPassword = ''
+      state.confirmPassword = ''
+
+      // Update history mock
+      passwordHistory.value.unshift({
+        id: `ph-${Date.now()}`,
+        date: new Date().toISOString(),
+        label: 'Đổi mật khẩu',
+        note: 'Tự đổi từ trang Bảo mật',
+        current: true
+      })
+      passwordHistory.value = passwordHistory.value.map((h, i) => ({ ...h, current: i === 0 }))
+    },
+    onError(error) {
+      toast.add({ title: 'Đổi mật khẩu thất bại', description: error.message, color: 'error' })
+    }
+  }
+)
+
 const showStrength = ref(false)
 
 // Password strength
@@ -26,11 +64,11 @@ const requirements: Requirement[] = [
   { label: 'Có ký tự đặc biệt', test: (pw) => /[^A-Za-z0-9]/.test(pw) }
 ]
 
-const metRequirements = computed(() => requirements.map((r) => r.test(newPassword.value)))
+const metRequirements = computed(() => requirements.map((r) => r.test(state.newPassword)))
 const metCount = computed(() => metRequirements.value.filter(Boolean).length)
 
 const strengthLevel = computed(() => {
-  if (!newPassword.value) return 0
+  if (!state.newPassword) return 0
   return metCount.value
 })
 
@@ -187,55 +225,12 @@ const securityBadgeColor: Record<string, 'success' | 'warning' | 'info' | 'prima
   primary: 'primary'
 }
 
-async function handleSubmit() {
-  errors.value = {}
-  if (!oldPassword.value) {
-    errors.value.oldPassword = 'Bắt buộc nhập'
-    return
+watch(
+  () => state.newPassword,
+  (val) => {
+    showStrength.value = val.length > 0
   }
-  if (newPassword.value.length < 6) {
-    errors.value.newPassword = 'Mật khẩu quá ngắn'
-    return
-  }
-  if (newPassword.value !== confirmPassword.value) {
-    errors.value.confirmPassword = 'Mật khẩu không khớp'
-    return
-  }
-  if (newPassword.value === oldPassword.value) {
-    errors.value.newPassword = 'Mật khẩu mới phải khác mật khẩu cũ'
-    return
-  }
-  saving.value = true
-  try {
-    if (authStore.changePassword) {
-      await authStore.changePassword(oldPassword.value, newPassword.value)
-    } else {
-      await new Promise((r) => setTimeout(r, 800))
-    }
-    toast.add({ title: 'Đổi mật khẩu thành công', color: 'success' })
-    oldPassword.value = ''
-    newPassword.value = ''
-    confirmPassword.value = ''
-    showStrength.value = false
-    // Prepend new entry to history
-    passwordHistory.value.unshift({
-      id: `ph-${Date.now()}`,
-      date: new Date().toISOString(),
-      label: 'Đổi mật khẩu',
-      note: 'Tự đổi từ trang Bảo mật',
-      current: true
-    })
-    passwordHistory.value = passwordHistory.value.map((h, i) => ({ ...h, current: i === 0 }))
-  } catch {
-    toast.add({ title: 'Lưu thất bại', color: 'error' })
-  } finally {
-    saving.value = false
-  }
-}
-
-watch(newPassword, (val) => {
-  showStrength.value = val.length > 0
-})
+)
 </script>
 
 <template>
@@ -282,28 +277,24 @@ watch(newPassword, (val) => {
           </div>
 
           <UForm
+            ref="formRef"
             class="space-y-4"
-            :state="{ oldPassword, newPassword, confirmPassword }"
-            @submit="handleSubmit"
+            :schema="changePasswordSchema"
+            :state="state"
+            @submit="handleChangePassword"
           >
             <UFormField
               label="Mật khẩu hiện tại"
               name="oldPassword"
               required
-              :error="errors.oldPassword"
               help="Nhập mật khẩu hiện tại của bạn"
             >
-              <UInput v-model="oldPassword" type="password" class="w-full" />
+              <UInput v-model="state.oldPassword" type="password" class="w-full" />
             </UFormField>
 
             <div>
-              <UFormField
-                label="Mật khẩu mới"
-                name="newPassword"
-                required
-                :error="errors.newPassword"
-              >
-                <UInput v-model="newPassword" type="password" class="w-full" />
+              <UFormField label="Mật khẩu mới" name="newPassword" required>
+                <UInput v-model="state.newPassword" type="password" class="w-full" />
               </UFormField>
 
               <!-- Strength meter -->
@@ -328,13 +319,8 @@ watch(newPassword, (val) => {
               </Transition>
             </div>
 
-            <UFormField
-              label="Xác nhận mật khẩu"
-              name="confirmPassword"
-              required
-              :error="errors.confirmPassword"
-            >
-              <UInput v-model="confirmPassword" type="password" class="w-full" />
+            <UFormField label="Xác nhận mật khẩu" name="confirmPassword" required>
+              <UInput v-model="state.confirmPassword" type="password" class="w-full" />
             </UFormField>
 
             <!-- Requirements checklist -->

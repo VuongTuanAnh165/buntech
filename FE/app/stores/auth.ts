@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { AuthService } from '~/services/authService'
+import { authService } from '~~/core/services/auth.service'
 import type { LoginPayload } from '~/types/auth'
 import type { CurrentUser } from '~/types/common'
-import { Role } from '~/enums/role'
+import { Role } from '~/utils/enums'
 
 export const useAuthStore = defineStore('auth', () => {
   // --- State ---
@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     isLoading.value = true
     try {
-      const res = await AuthService.getCurrentUser()
+      const res = await authService.getCurrentUser()
       if (res.data) {
         user.value = res.data
       }
@@ -56,7 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
   const login = async (payload: LoginPayload) => {
     isLoading.value = true
     try {
-      const res = await AuthService.login(payload)
+      const res = await authService.login(payload)
       if (res.data) {
         const config = useRuntimeConfig()
         const isProd = config.public.apiBaseUrl?.includes('https')
@@ -73,10 +73,10 @@ export const useAuthStore = defineStore('auth', () => {
 
         const route = useRoute()
         const redirectPath = route.query.redirect as string | undefined
-        
+
         // redirect based on role
         if (!redirectPath) {
-          if (isAdmin.value) navigateTo('/admin')
+          if (isAdmin.value) navigateTo('/admin/dashboard/overview')
           else if (isDriver.value) navigateTo('/driver')
           else navigateTo('/')
         } else {
@@ -84,6 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('[useAuthStore] Login failed:', error)
       throw error
     } finally {
@@ -106,10 +107,6 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = { ...user.value, ...updates } as CurrentUser
   }
 
-  const changePassword = async (_oldPassword: string, _newPassword: string) => {
-    // Mock — always succeeds
-  }
-
   return {
     isLoading,
     user,
@@ -124,7 +121,6 @@ export const useAuthStore = defineStore('auth', () => {
     fetchUser,
     login,
     logout,
-    updateProfile,
-    changePassword,
+    updateProfile
   }
 })

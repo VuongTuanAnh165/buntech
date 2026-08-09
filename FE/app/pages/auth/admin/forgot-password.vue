@@ -1,95 +1,123 @@
 <script setup lang="ts">
-import { MailCheck, ArrowLeft, Mail } from 'lucide-vue-next'
+import { MailCheck, ArrowLeft, Phone } from 'lucide-vue-next'
+import { forgotPasswordSchema } from '~~/core/validators/auth.validator'
+import { authService } from '~~/core/services/auth.service'
+import type { z } from 'zod'
+
 const { t } = useI18n()
 const toast = useToast()
 
 useSeoMeta({ title: `${t('auth.forgotPassword')} - BunTech` })
 definePageMeta({ layout: 'auth' })
 
-const email = ref('')
-const error = ref('')
-const loading = ref(false)
 const sent = ref(false)
+const state = reactive({
+  phoneNumber: ''
+})
 
-const validateEmail = (val: string): string | undefined => {
-  if (!val) return t('auth.emailRequired')
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return t('auth.emailInvalid')
-  return undefined
-}
+type Schema = z.output<typeof forgotPasswordSchema>
 
-const handleSubmit = async () => {
-  error.value = validateEmail(email.value) || ''
-  if (error.value) return
-
-  loading.value = true
-  try {
-    // TODO: Connect to Supabase auth.resetPasswordForEmail
-    await new Promise(resolve => setTimeout(resolve, 1200))
-    sent.value = true
-    toast.add({ title: 'Thành công', description: '', color: '' })
-  } catch {
-    toast.add({ title: 'Thất bại', description: '', color: '' })
-  } finally {
-    loading.value = false
+const { submit: handleForgotPassword, saving: loading } = useFormSubmit<Schema>(
+  async (data) => {
+    // Calling auth service to send OTP
+    const res = await authService.forgotPassword({ phoneNumber: data.phoneNumber })
+    return res
+  },
+  {
+    onSuccess(res) {
+      sent.value = true
+      // If dev mode returns OTP, you could log it or show it for testing
+      if ((res as { otp?: string })?.otp) {
+        toast.add({
+          title: 'Mã OTP (Test)',
+          description: String((res as { otp?: string }).otp),
+          color: 'info'
+        })
+      }
+    },
+    onError(err) {
+      toast.add({ title: 'Có lỗi xảy ra', description: err.message, color: 'error' })
+    }
   }
-}
+)
 </script>
 
 <template>
   <div>
     <!-- Back link -->
-    <NuxtLink to="/auth/admin/login" class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-surface-foreground transition-colors mb-6 min-h-[44px] px-2 -ml-2 rounded-md">
-      <ArrowLeft class="w-4 h-4" aria-hidden="true" />
+    <NuxtLink
+      to="/auth/admin/login"
+      class="hover:text-surface-foreground mb-6 -ml-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-2 text-sm text-gray-500 transition-colors dark:text-zinc-400"
+    >
+      <ArrowLeft class="h-4 w-4" aria-hidden="true" />
       {{ t('common.back') }}
     </NuxtLink>
 
     <!-- Header -->
     <div class="mb-8">
-      <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-sm font-medium mb-4">
-        <Mail class="w-4 h-4" aria-hidden="true" />
+      <div
+        class="bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium"
+      >
+        <Phone class="h-4 w-4" aria-hidden="true" />
         {{ t('auth.forgotPassword') }}
       </div>
-      <h2 class="text-2xl font-bold text-surface-foreground mb-2 tracking-tight">{{ t('auth.forgotPasswordTitle') }}</h2>
+      <h2 class="text-surface-foreground mb-2 text-2xl font-bold tracking-tight">
+        {{ t('auth.forgotPasswordTitle') }}
+      </h2>
       <p class="text-sm text-gray-500 dark:text-zinc-400">{{ t('auth.forgotPasswordSubtitle') }}</p>
     </div>
 
     <!-- Success state -->
     <Transition name="fade" mode="out-in">
-      <div v-if="sent" key="success" class="text-center py-8 animate-scale-in">
-        <div class="w-16 h-16 rounded-full bg-success-100 dark:bg-success-900/30 flex items-center justify-center mx-auto mb-4">
-          <MailCheck class="w-8 h-8 text-success-600 dark:text-success-400" aria-hidden="true" />
+      <div v-if="sent" key="success" class="animate-scale-in py-8 text-center">
+        <div
+          class="bg-success-100 dark:bg-success-900/30 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full"
+        >
+          <MailCheck class="text-success-600 dark:text-success-400 h-8 w-8" aria-hidden="true" />
         </div>
-        <h3 class="text-lg font-semibold text-surface-foreground mb-2">{{ t('auth.checkYourEmail') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-zinc-400 max-w-xs mx-auto mb-6">
-          {{ t('auth.resetLinkSentDesc') || 'Chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn. Vui lòng kiểm tra hộp thư.' }}
+        <h3 class="text-surface-foreground mb-2 text-lg font-semibold">
+          {{ t('auth.checkYourEmail') }}
+        </h3>
+        <p class="mx-auto mb-6 max-w-xs text-sm text-gray-500 dark:text-zinc-400">
+          Vui lòng kiểm tra điện thoại của bạn, chúng tôi đã gửi mã xác thực (OTP) qua tin nhắn.
         </p>
-        <UButton variant="outline" class="w-full" to="/auth/admin/login">
-          {{ t('common.back') }}
+        <UButton variant="outline" class="w-full" to="/auth/admin/reset-password">
+          Chuyển đến trang Đặt lại mật khẩu
         </UButton>
       </div>
 
       <!-- Form -->
-      <form v-else key="form" class="space-y-5" novalidate @submit.prevent="handleSubmit">
-        <UFormField :label="t('auth.email')" :error="error">
+      <UForm
+        v-else
+        key="form"
+        class="space-y-5"
+        :schema="forgotPasswordSchema"
+        :state="state"
+        @submit="handleForgotPassword"
+      >
+        <UFormField label="Số điện thoại" name="phoneNumber">
           <UInput
-            v-model="email"
-            type="email"
-            placeholder="admin@buntech.vn"
-            autocomplete="email"
+            v-model="state.phoneNumber"
+            type="tel"
+            placeholder="0901234567"
+            autocomplete="tel"
             class="w-full"
-            @blur="error = validateEmail(email) || ''"
           />
         </UFormField>
 
-        <UButton type="submit" :loading="loading" class="w-full !mt-8" size="lg">
-          {{ t('auth.sendResetLink') }}
+        <UButton type="submit" :loading="loading" class="!mt-8 w-full" size="lg">
+          Lấy mã xác thực (OTP)
         </UButton>
-      </form>
+      </UForm>
     </Transition>
 
-    <p class="text-center text-xs text-gray-400 dark:text-zinc-500 mt-8">
+    <p class="mt-8 text-center text-xs text-gray-400 dark:text-zinc-500">
       {{ t('auth.rememberPassword') || 'Nhớ mật khẩu?' }}
-      <NuxtLink to="/auth/admin/login" class="text-primary-600 dark:text-primary-400 font-medium hover:underline">{{ t('auth.loginTitle') }}</NuxtLink>
+      <NuxtLink
+        to="/auth/admin/login"
+        class="text-primary-600 dark:text-primary-400 font-medium hover:underline"
+        >{{ t('auth.loginTitle') }}</NuxtLink
+      >
     </p>
   </div>
 </template>

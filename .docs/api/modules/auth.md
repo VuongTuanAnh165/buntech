@@ -135,3 +135,105 @@ Module này cung cấp các API để xác thực người dùng (đăng nhập,
 }
 ```
 *(Trường `profile` có thể `null` nếu user chưa thiết lập hồ sơ)*.
+
+---
+
+## 4. Cập nhật hồ sơ (Update Profile)
+
+- **Module**: Auth
+- **URL**: `/api/v1/auth/me`
+- **Method**: `PUT`
+- **Authentication**: `Bearer Token`
+- **Mục đích**: User đang đăng nhập cập nhật thông tin cá nhân.
+
+### Request Body
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `fullName` | string | Có | Họ tên mới |
+| `avatarUrl` | string | Không | Link ảnh đại diện mới |
+
+### Response
+**200 OK**
+Trả về data tương tự như GET `/api/v1/auth/me`.
+
+---
+
+## 5. Quên mật khẩu (Forgot Password)
+
+- **Module**: Auth
+- **URL**: `/api/v1/auth/forgot-password`
+- **Method**: `POST`
+- **Rate Limit**: `authThrottle`
+- **Authentication**: Public API
+- **Mục đích**: Gửi mã xác thực (OTP) đến số điện thoại để khôi phục mật khẩu.
+
+### Request Body
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `phoneNumber` | string | Có | Số điện thoại đăng ký |
+
+### Response
+**200 OK**
+```json
+{
+  "success": true,
+  "message": "Nếu số điện thoại tồn tại, mã OTP đã được gửi",
+  "otp": "123456" // (Chỉ hiển thị trong môi trường DEV)
+}
+```
+
+---
+
+## 6. Khôi phục mật khẩu (Reset Password)
+
+- **Module**: Auth
+- **URL**: `/api/v1/auth/reset-password`
+- **Method**: `POST`
+- **Rate Limit**: `authThrottle`
+- **Authentication**: Public API
+- **Mục đích**: Cập nhật mật khẩu mới bằng mã OTP.
+
+### Request Body
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `phoneNumber` | string | Có | Số điện thoại |
+| `token` | string | Có | Mã OTP đã nhận được |
+| `newPassword` | string | Có | Mật khẩu mới (tối thiểu 6 ký tự) |
+
+### Response
+**200 OK**
+```json
+{
+  "success": true,
+  "message": "Khôi phục mật khẩu thành công"
+}
+```
+
+---
+
+## 7. Đổi mật khẩu (Change Password)
+
+- **Module**: Auth
+- **URL**: `/api/v1/auth/change-password`
+- **Method**: `PUT`
+- **Authentication**: `Bearer Token`
+- **Mục đích**: Dành cho user đang đăng nhập đổi sang mật khẩu mới.
+
+### Request Body
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `oldPassword` | string | Có | Mật khẩu hiện tại |
+| `newPassword` | string | Có | Mật khẩu mới (tối thiểu 6 ký tự) |
+
+### Response
+**200 OK**
+```json
+{
+  "success": true,
+  "message": "Đổi mật khẩu thành công"
+}
+```

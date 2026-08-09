@@ -1,6 +1,8 @@
 import { inject } from '@adonisjs/core'
 import User from '#models/user'
 import RefreshToken from '#models/refresh_token'
+import PasswordReset from '#models/password_reset'
+import UserProfile from '#models/user_profile'
 import hash from '@adonisjs/core/services/hash'
 import BusinessException from '#exceptions/business_exception'
 import { Exception } from '@adonisjs/core/exceptions'
@@ -121,5 +123,112 @@ export default class AuthService {
   public async logout(user: User, currentAccessTokenId: number) {
     // Thu hồi Opaque Token hiện tại
     await User.accessTokens.delete(user, currentAccessTokenId)
+  }
+
+  /**
+   * Yêu cầu quên mật khẩu (Tạo OTP)
+   */
+  public async forgotPassword(phoneNumber: string) {
+    const user = await User.query().where('phone_number', phoneNumber).first()
+    if (!user) {
+      // Do not reveal if user exists or not for security, but we need to return something
+      return { success: true, message: 'Nếu số điện thoại tồn tại, mã OTP đã được gửi' }
+    }
+
+    // Xóa OTP cũ nếu có
+    await PasswordReset.query().where('phone_number', phoneNumber).delete()
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString() // 6 digits
+
+    await PasswordReset.create({
+      phoneNumber,
+      token: otp,
+      expiresAt: DateTime.now().plus({ minutes: 15 }),
+    })
+
+    // In a real app, send OTP via SMS here
+    // For now, we will return the OTP in the response just for development purpose
+    return { 
+      success: true, 
+      message: 'Mã xác thực đã được gửi',
+      otp: process.env.NODE_ENV !== 'production' ? otp : undefined 
+    }
+  }
+
+  /**
+   * Khôi phục mật khẩu (Sử dụng OTP)
+   */
+  public async resetPassword(phoneNumber: string, token: string, newPasswordText: string) {
+    const resetRecord = await PasswordReset.query()
+      .where('phone_number', phoneNumber)
+      .where('token', token)
+      .first()
+
+    if (!resetRecord) {
+      throw new BusinessException('Mã xác thực không chính xác', HttpStatus.BAD_REQUEST)
+    }
+
+    if (resetRecord.expiresAt < DateTime.now()) {
+      throw new BusinessException('Mã xác thực đã hết hạn', HttpStatus.BAD_REQUEST)
+    }
+
+    const user = await User.query().where('phone_number', phoneNumber).firstOrFail()
+    user.password = newPasswordText
+    await user.save()
+
+    await resetRecord.delete()
+  }
+
+  /**
+   * Đổi mật khẩu (Cho user đang đăng nhập)
+   */
+  public async changePassword(userId: number, oldPasswordText: string, newPasswordText: string) {
+    const user = await User.findOrFail(userId)
+
+    const isPasswordValid = await hash.verify(user.password, oldPasswordText)
+    if (!isPasswordValid) {
+      throw new BusinessException('Mật khẩu cũ không chính xác', HttpStatus.BAD_REQUEST)
+    }
+
+    user.password = newPasswordText
+    await user.save()
+
+    // Thu hồi toàn bộ Access Tokens để ép đăng nhập lại?
+    // Có thể thực hiện nếu hệ thống yêu cầu bảo mật cao, tạm thời không bắt buộc.
+  }
+
+  /**
+   * Cập nhật Profile (Cho user đang đăng nhập)
+   */
+  public async updateProfile(userId: number, fullName: string, avatarUrl?: string) {
+    const trx = await db.transaction()
+    try {
+      const user = await User.findOrFail(userId, { client: trx })
+      user.fullName = fullName
+      await user.save()
+
+      if (avatarUrl !== undefined) {
+        let profile = await UserProfile.query({ client: trx }).where('user_id', userId).first()
+        if (profile) {
+          profile.avatarUrl = avatarUrl
+          await profile.save()
+        } else {
+          profile = new UserProfile()
+          profile.useTransaction(trx)
+          profile.userId = userId
+          profile.avatarUrl = avatarUrl
+          await profile.save()
+        }
+      }
+
+      await trx.commit()
+
+      // Return updated user payload
+      await user.load('profile')
+      return user
+    } catch (error) {
+      await trx.rollback()
+      throw error
+    }
   }
 }

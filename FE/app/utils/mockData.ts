@@ -767,7 +767,7 @@ export const mockInventoryMovements: InventoryMovement[] = Array.from({ length: 
     inventory_item: item,
     type,
     quantity: randInt(20, 200),
-    note: movementNotes[i % movementNotes.length],
+    note: movementNotes[i % movementNotes.length] || '',
     created_at: iso(Math.max(0, 30 - Math.floor(i / 3)))
   }
 })

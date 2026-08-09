@@ -117,4 +117,98 @@ export default class AuthController {
       data,
     })
   }
+
+  /**
+   * @forgotPassword
+   * @summary Quên mật khẩu (Gửi OTP)
+   * @description Gửi mã OTP về số điện thoại để khôi phục mật khẩu
+   * @requestBody <forgotPasswordValidator>
+   * @responseBody 200 - { success: true, message: string }
+   */
+  async forgotPassword({ request, response }: HttpContext) {
+    const { forgotPasswordValidator } = await import('#validators/auth_validator')
+    const payload = await request.validateUsing(forgotPasswordValidator)
+
+    const result = await this.authService.forgotPassword(payload.phoneNumber)
+
+    return response.json(result)
+  }
+
+  /**
+   * @resetPassword
+   * @summary Khôi phục mật khẩu
+   * @description Sử dụng OTP để đổi mật khẩu mới
+   * @requestBody <resetPasswordValidator>
+   * @responseBody 200 - { success: true, message: string }
+   */
+  async resetPassword({ request, response }: HttpContext) {
+    const { resetPasswordValidator } = await import('#validators/auth_validator')
+    const payload = await request.validateUsing(resetPasswordValidator)
+
+    await this.authService.resetPassword(payload.phoneNumber, payload.token, payload.newPassword)
+
+    return response.json({
+      success: true,
+      message: 'Khôi phục mật khẩu thành công',
+    })
+  }
+
+  /**
+   * @changePassword
+   * @summary Đổi mật khẩu
+   * @description Dành cho user đang đăng nhập
+   * @requestBody <changePasswordValidator>
+   * @responseBody 200 - { success: true, message: string }
+   */
+  async changePassword({ auth, request, response }: HttpContext) {
+    const { changePasswordValidator } = await import('#validators/auth_validator')
+    const payload = await request.validateUsing(changePasswordValidator)
+
+    await this.authService.changePassword(auth.user!.id, payload.oldPassword, payload.newPassword)
+
+    return response.json({
+      success: true,
+      message: 'Đổi mật khẩu thành công',
+    })
+  }
+
+  /**
+   * @updateProfile
+   * @summary Cập nhật hồ sơ cá nhân
+   * @description Dành cho user đang đăng nhập
+   * @requestBody <updateProfileValidator>
+   * @responseBody 200 - { success: true, message: string, data: object }
+   */
+  async updateProfile({ auth, request, response }: HttpContext) {
+    const { updateProfileValidator } = await import('#validators/auth_validator')
+    const payload = await request.validateUsing(updateProfileValidator)
+
+    const user = await this.authService.updateProfile(
+      auth.user!.id,
+      payload.fullName,
+      payload.avatarUrl
+    )
+
+    const data = {
+      id: user.id,
+      fullName: user.fullName,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      profile: user.profile
+        ? {
+            avatarUrl: user.profile.avatarUrl,
+            storeName: user.profile.storeName,
+            currentDebt: user.profile.currentDebt,
+            debtLimit: user.profile.debtLimit,
+            zaloUserId: user.profile.zaloUserId,
+          }
+        : null,
+    }
+
+    return response.json({
+      success: true,
+      message: 'Cập nhật hồ sơ thành công',
+      data,
+    })
+  }
 }

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { Role } from '~/utils/enums'
-import type { Profile } from '~/utils/types'
-import { mockProfiles } from '~/utils/mockData'
+import type { CurrentUser } from '~/types/common'
+import { updateProfileSchema } from '~~/core/validators/auth.validator'
+import { authService } from '~~/core/services/auth.service'
+import type { z } from 'zod'
+
 const authStore = useAuthStore()
 const toast = useToast()
 const ROLE_LABELS: Record<string, string> = {
@@ -17,22 +20,18 @@ const ROLE_COLORS = {
   [Role.CUSTOMER]: 'success'
 }
 const user = computed(() => {
-  const authUser = authStore.user as Profile | null
-  if (authUser && authUser.full_name) return authUser
-  return (mockProfiles.find((p) => p.role === Role.ADMIN) as Profile) || null
+  return authStore.user as CurrentUser | null
 })
 // Derived email from login convention
 const email = computed(() => {
   if (!user.value) return '—'
   if (user.value.role === Role.ADMIN) return 'admin@buntech.vn'
   if (user.value.role === Role.DRIVER) return 'driver@buntech.vn'
-  return `${user.value.full_name.toLowerCase().replace(/\s+/g, '.')}@buntech.vn`
+  return `${user.value.fullName.toLowerCase().replace(/\s+/g, '.')}@buntech.vn`
 })
 // Account age in days
 const accountAgeDays = computed(() => {
-  if (!user.value?.created_at) return 0
-  const diff = Date.now() - new Date(user.value.created_at).getTime()
-  return Math.max(0, Math.floor(diff / 86400000))
+  return 0 // Removed since created_at is not in CurrentUser right now
 })
 const accountAgeLabel = computed(() => {
   const days = accountAgeDays.value
@@ -65,7 +64,7 @@ const stats = computed(() => [
     value: accountAgeLabel.value,
     icon: 'i-lucide-calendar-days',
     color: 'accent' as const,
-    hint: `Từ ${formatDate(user.value?.created_at || new Date().toISOString())}`
+    hint: `Từ lâu`
   }
 ])
 const colorMap = {
@@ -219,39 +218,45 @@ const sessions = ref([
 const passwordLastChanged = new Date(Date.now() - 7 * 86400000).toISOString()
 const twoFAEnabled = ref(false)
 const showEditModal = ref(false)
-const editForm = ref({ full_name: '', phone: '' })
-const saving = ref(false)
+
+type Schema = z.output<typeof updateProfileSchema>
+
+const editForm = reactive({
+  fullName: '',
+  phone: ''
+})
+
 function openEdit() {
-  editForm.value = {
-    full_name: user.value?.full_name || '',
-    phone: user.value?.phone || ''
-  }
+  editForm.fullName = user.value?.fullName || ''
+  editForm.phone = user.value?.phoneNumber || ''
   showEditModal.value = true
 }
-async function saveProfile() {
-  if (!editForm.value.full_name.trim()) return
-  saving.value = true
-  try {
-    if (authStore.updateProfile) {
-      await authStore.updateProfile({
-        full_name: editForm.value.full_name.trim(),
-        phone: editForm.value.phone.trim()
-      })
-    } else {
-      await new Promise((r) => setTimeout(r, 600))
+
+const { submit: saveProfile, saving } = useFormSubmit<Schema>(
+  async (data) => {
+    const res = await authService.updateProfile({
+      fullName: data.fullName
+    })
+
+    // update store manually or just re-fetch
+    if (res.data) {
+      await authStore.fetchUser()
     }
-    showEditModal.value = false
-    toast.add({ title: 'Đã cập nhật hồ sơ', color: 'success' })
-  } catch {
-    toast.add({ title: 'Lưu thất bại', color: 'error' })
-  } finally {
-    saving.value = false
+  },
+  {
+    onSuccess() {
+      showEditModal.value = false
+      toast.add({ title: 'Đã cập nhật hồ sơ', color: 'success' })
+    },
+    onError(err) {
+      toast.add({ title: 'Cập nhật thất bại', description: err.message, color: 'error' })
+    }
   }
-}
+)
 // Personal info rows
 const personalInfo = computed(() => [
-  { label: 'Họ và tên', value: user.value?.full_name || '—', icon: 'i-lucide-user-cog' },
-  { label: 'Số điện thoại', value: user.value?.phone || '—', icon: 'i-lucide-phone' },
+  { label: 'Họ và tên', value: user.value?.fullName || '—', icon: 'i-lucide-user-cog' },
+  { label: 'Số điện thoại', value: user.value?.phoneNumber || '—', icon: 'i-lucide-phone' },
   { label: 'Email', value: email.value, icon: 'i-lucide-mail' },
   {
     label: 'Vai trò',
@@ -260,13 +265,8 @@ const personalInfo = computed(() => [
   },
   {
     label: 'Trạng thái',
-    value: user.value?.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động',
+    value: 'Hoạt động',
     icon: 'i-lucide-circle-dot'
-  },
-  {
-    label: 'Ngày tạo',
-    value: user.value ? formatDate(user.value.created_at) : '—',
-    icon: 'i-lucide-calendar-days'
   }
 ])
 </script>
@@ -314,7 +314,7 @@ const personalInfo = computed(() => [
         <div class="min-w-0 flex-1">
           <div class="mb-1 flex flex-wrap items-center gap-2">
             <h2 class="text-surface-foreground text-2xl font-bold tracking-tight">
-              {{ user?.full_name }}
+              {{ user?.fullName }}
             </h2>
             <UBadge
               :color="
@@ -332,7 +332,7 @@ const personalInfo = computed(() => [
           >
             <span class="flex items-center gap-1.5">
               <UIcon name="i-lucide-phone" class="h-3.5 w-3.5" />
-              {{ user?.phone || '—' }}
+              {{ user?.phoneNumber || '—' }}
             </span>
             <span class="flex items-center gap-1.5">
               <UIcon name="i-lucide-mail" class="h-3.5 w-3.5" />
@@ -345,9 +345,7 @@ const personalInfo = computed(() => [
           </div>
         </div>
         <div class="hidden flex-col items-end gap-1 lg:flex">
-          <UBadge :color="user?.status === 'ACTIVE' ? 'success' : 'error'" variant="soft">
-            {{ user?.status === 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động' }}
-          </UBadge>
+          <UBadge color="success" variant="soft"> Hoạt động </UBadge>
           <span class="text-xs text-slate-400 dark:text-zinc-500"
             >ID: {{ user?.id?.slice(0, 12) }}</span
           >
@@ -533,12 +531,21 @@ const personalInfo = computed(() => [
     <!-- Edit Modal -->
     <UModal v-model:open="showEditModal" title="Chỉnh sửa hồ sơ" :ui="{ content: 'sm:max-w-md' }">
       <template #body>
-        <UForm class="space-y-4" :state="editForm" @submit="saveProfile">
-          <UFormField label="Họ và tên" name="full_name" required>
-            <UInput v-model="editForm.full_name" class="w-full" />
+        <UForm
+          class="space-y-4"
+          :schema="updateProfileSchema"
+          :state="editForm"
+          @submit="saveProfile"
+        >
+          <UFormField label="Họ và tên" name="fullName" required>
+            <UInput v-model="editForm.fullName" class="w-full" />
           </UFormField>
-          <UFormField label="Số điện thoại" name="phone" help="SĐT liên hệ của bạn">
-            <UInput v-model="editForm.phone" type="tel" class="w-full" />
+          <UFormField
+            label="Số điện thoại (Chỉ xem)"
+            name="phone"
+            help="SĐT được dùng để đăng nhập"
+          >
+            <UInput v-model="editForm.phone" type="tel" class="w-full" disabled />
           </UFormField>
         </UForm>
       </template>

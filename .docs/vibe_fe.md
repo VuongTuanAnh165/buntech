@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 1: Nền tảng lõi, Quản lý Khách hàng & Cấu hình
-1. Khởi tạo: npx nuxi init FE, cài đặt ESLint + Husky khắt khe.
+2. Màn hình Login, Quên mật khẩu, Đổi mật khẩu và Cập nhật Profile.
 
 ==================================================
 

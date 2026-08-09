@@ -1,4 +1,4 @@
-import type { Role } from '~/enums/role'
+import type { Role } from '~/utils/enums'
 
 /**
  * Entity gốc — Mọi entity trong hệ thống đều kế thừa từ đây.

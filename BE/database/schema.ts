@@ -309,6 +309,23 @@ export class OrderSchema extends BaseModel {
   declare userId: number | null
 }
 
+export class PasswordResetSchema extends BaseModel {
+  static $columns = ['createdAt', 'expiresAt', 'id', 'phoneNumber', 'token', 'updatedAt'] as const
+  $columns = PasswordResetSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime | null
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare phoneNumber: string
+  @column()
+  declare token: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+}
+
 export class PostSchema extends BaseModel {
   static $columns = ['authorId', 'blogCategoryId', 'content', 'createdAt', 'id', 'isPublished', 'metaDescription', 'metaTitle', 'publishedAt', 'slug', 'thumbnailUrl', 'title', 'updatedAt'] as const
   $columns = PostSchema.$columns
