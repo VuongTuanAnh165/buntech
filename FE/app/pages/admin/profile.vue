@@ -29,64 +29,7 @@ const email = computed(() => {
   if (user.value.role === Role.DRIVER) return 'driver@buntech.vn'
   return `${user.value.fullName.toLowerCase().replace(/\s+/g, '.')}@buntech.vn`
 })
-// Account age in days
-const accountAgeDays = computed(() => {
-  return 0 // Removed since created_at is not in CurrentUser right now
-})
-const accountAgeLabel = computed(() => {
-  const days = accountAgeDays.value
-  if (days < 30) return `${days} ngày`
-  const months = Math.floor(days / 30)
-  const remDays = days % 30
-  if (months < 12) return `${months} tháng${remDays ? ` ${remDays} ngày` : ''}`
-  const years = Math.floor(months / 12)
-  const remMonths = months % 12
-  return `${years} năm${remMonths ? ` ${remMonths} tháng` : ''}`
-})
-// Stats
-const stats = computed(() => [
-  {
-    label: 'Tổng thao tác',
-    value: '1.248',
-    icon: 'i-lucide-zap',
-    color: 'primary' as const,
-    hint: 'Trong 30 ngày qua'
-  },
-  {
-    label: 'Đăng nhập gần nhất',
-    value: '2 giờ trước',
-    icon: 'i-lucide-log-in',
-    color: 'success' as const,
-    hint: formatDateTime(new Date(Date.now() - 2 * 3600000).toISOString())
-  },
-  {
-    label: 'Tuổi tài khoản',
-    value: accountAgeLabel.value,
-    icon: 'i-lucide-calendar-days',
-    color: 'accent' as const,
-    hint: `Từ lâu`
-  }
-])
-const colorMap = {
-  primary: {
-    bg: 'bg-primary-50 dark:bg-primary-900/20',
-    text: 'text-primary-600 dark:text-primary-400',
-    ring: 'ring-primary-100 dark:ring-primary-900/30',
-    bar: 'bg-gradient-to-r from-primary-500 to-primary-400'
-  },
-  success: {
-    bg: 'bg-success-50 dark:bg-success-900/20',
-    text: 'text-success-600 dark:text-success-400',
-    ring: 'ring-success-100 dark:ring-success-900/30',
-    bar: 'bg-gradient-to-r from-success-500 to-success-400'
-  },
-  accent: {
-    bg: 'bg-accent-50 dark:bg-accent-900/20',
-    text: 'text-accent-600 dark:text-accent-400',
-    ring: 'ring-accent-100 dark:ring-accent-900/30',
-    bar: 'bg-gradient-to-r from-accent-500 to-accent-400'
-  }
-}
+
 // Activity timeline mock data
 interface ActivityEntry {
   id: string
@@ -196,27 +139,7 @@ function _relativeTime(isoStr: string): string {
   if (days < 7) return `${days} ngày trước`
   return formatDate(isoStr)
 }
-// Security / sessions mock data
-const sessions = ref([
-  {
-    id: 's1',
-    device: 'Windows · Chrome',
-    location: 'TP. HCM, Việt Nam',
-    current: true,
-    icon: 'i-lucide-monitor',
-    lastActive: 'Đang hoạt động'
-  },
-  {
-    id: 's2',
-    device: 'iPhone 15 · Safari',
-    location: 'TP. HCM, Việt Nam',
-    current: false,
-    icon: 'i-lucide-smartphone',
-    lastActive: '2 giờ trước'
-  }
-])
-const passwordLastChanged = new Date(Date.now() - 7 * 86400000).toISOString()
-const twoFAEnabled = ref(false)
+
 const showEditModal = ref(false)
 
 type Schema = z.output<typeof updateProfileSchema>
@@ -232,8 +155,9 @@ function openEdit() {
   showEditModal.value = true
 }
 
-const { submit: saveProfile, saving } = useFormSubmit<Schema>(
-  async (data) => {
+const { handleSubmit, isSubmitting: saving } = useFormSubmit()
+const saveProfile = handleSubmit(
+  async (data: Schema) => {
     const res = await authService.updateProfile({
       fullName: data.fullName
     })
@@ -248,7 +172,7 @@ const { submit: saveProfile, saving } = useFormSubmit<Schema>(
       showEditModal.value = false
       toast.add({ title: 'Đã cập nhật hồ sơ', color: 'success' })
     },
-    onError(err) {
+    onError(err: Error) {
       toast.add({ title: 'Cập nhật thất bại', description: err.message, color: 'error' })
     }
   }
@@ -300,8 +224,7 @@ const personalInfo = computed(() => [
       <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
         <div class="relative flex-shrink-0">
           <UAvatar
-            :alt="user?.full_name"
-            :src="user?.avatar_url || ''"
+            :alt="user?.fullName"
             size="3xl"
             class="ring-primary-100 dark:ring-primary-900/30 ring-4"
           />
@@ -340,45 +263,20 @@ const personalInfo = computed(() => [
             </span>
             <span class="flex items-center gap-1.5">
               <UIcon name="i-lucide-calendar-days" class="h-3.5 w-3.5" />
-              Thành viên từ {{ formatDate(user?.created_at || new Date().toISOString()) }}
+              Thành viên từ {{ formatDate(new Date().toISOString()) }}
             </span>
           </div>
         </div>
         <div class="hidden flex-col items-end gap-1 lg:flex">
           <UBadge color="success" variant="soft"> Hoạt động </UBadge>
           <span class="text-xs text-slate-400 dark:text-zinc-500"
-            >ID: {{ user?.id?.slice(0, 12) }}</span
+            >ID: {{ user?.id?.toString().slice(0, 12) }}</span
           >
         </div>
       </div>
     </div>
     <!-- Stats Row -->
-    <div class="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
-      <div
-        v-for="(stat, i) in stats"
-        :key="stat.label"
-        class="card card-hover stagger-item group relative overflow-hidden p-5"
-        :style="{ animationDelay: `${i * 50 + 40}ms` }"
-      >
-        <div :class="['kpi-accent', colorMap[stat.color].bar]" />
-        <div class="mb-2.5 flex items-start justify-between">
-          <div
-            :class="[
-              'flex h-10 w-10 items-center justify-center rounded-xl ring-1 transition-transform duration-200 group-hover:scale-110',
-              colorMap[stat.color].bg,
-              colorMap[stat.color].ring
-            ]"
-          >
-            <UIcon :name="stat.icon" :class="['h-5 w-5', colorMap[stat.color].text]" />
-          </div>
-        </div>
-        <p class="mb-1 text-[13px] font-medium text-slate-500 dark:text-zinc-400">
-          {{ stat.label }}
-        </p>
-        <p class="text-surface-foreground text-2xl font-bold tracking-tight">{{ stat.value }}</p>
-        <p class="mt-1 truncate text-xs text-slate-400 dark:text-zinc-500">{{ stat.hint }}</p>
-      </div>
-    </div>
+    <ProfileStatsRow />
     <!-- 2-column grid -->
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
       <!-- Left Column -->
@@ -425,106 +323,7 @@ const personalInfo = computed(() => [
             </div>
           </dl>
         </UCard>
-        <!-- Security Card -->
-        <UCard class="stagger-item" style="animation-delay: 260ms">
-          <div class="mb-4 flex items-center gap-2.5">
-            <div
-              class="bg-success-50 dark:bg-success-900/20 ring-success-100 dark:ring-success-900/30 flex h-8 w-8 items-center justify-center rounded-lg ring-1"
-            >
-              <UIcon
-                name="i-lucide-shield"
-                class="text-success-600 dark:text-success-400 h-4 w-4"
-              />
-            </div>
-            <h3 class="text-surface-foreground text-sm font-semibold">Bảo mật</h3>
-          </div>
-          <div class="space-y-4">
-            <!-- Password last changed -->
-            <div class="flex items-start justify-between gap-3">
-              <div class="flex min-w-0 items-start gap-2.5">
-                <UIcon
-                  name="i-lucide-key-round"
-                  class="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-400 dark:text-zinc-500"
-                />
-                <div>
-                  <p class="text-surface-foreground text-sm font-medium">Mật khẩu</p>
-                  <p class="text-xs text-slate-500 dark:text-zinc-400">
-                    Đổi lần cuối {{ formatDate(passwordLastChanged) }}
-                  </p>
-                </div>
-              </div>
-              <NuxtLink
-                to="/admin/change-password"
-                class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex-shrink-0 text-xs font-medium"
-              >
-                Đổi
-              </NuxtLink>
-            </div>
-            <!-- 2FA -->
-            <div
-              class="border-surface-border flex items-center justify-between gap-3 border-y py-3"
-            >
-              <div class="flex min-w-0 items-center gap-2.5">
-                <UIcon
-                  name="i-lucide-smartphone"
-                  class="h-4 w-4 flex-shrink-0 text-slate-400 dark:text-zinc-500"
-                />
-                <div>
-                  <p class="text-surface-foreground text-sm font-medium">Xác thực 2 bước</p>
-                  <p class="text-xs text-slate-500 dark:text-zinc-400">
-                    Bảo vệ tài khoản thêm một lớp
-                  </p>
-                </div>
-              </div>
-              <UBadge :color="twoFAEnabled ? 'success' : 'warning'" variant="soft">
-                {{ twoFAEnabled ? 'Bật' : 'Tắt' }}
-              </UBadge>
-            </div>
-            <!-- Active sessions -->
-            <div>
-              <div class="mb-2.5 flex items-center gap-2.5">
-                <UIcon name="i-lucide-monitor" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-                <p class="text-surface-foreground text-sm font-medium">Phiên hoạt động</p>
-                <span class="text-xs text-slate-400 dark:text-zinc-500"
-                  >({{ sessions.length }})</span
-                >
-              </div>
-              <div class="space-y-2">
-                <div
-                  v-for="session in sessions"
-                  :key="session.id"
-                  class="bg-surface-hover/60 flex items-center gap-3 rounded-lg p-2.5"
-                >
-                  <div
-                    class="bg-surface ring-surface-border flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ring-1"
-                  >
-                    <UIcon
-                      :name="session.icon"
-                      class="h-3.5 w-3.5 text-slate-500 dark:text-zinc-400"
-                    />
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p class="text-surface-foreground truncate text-xs font-medium">
-                      {{ session.device }}
-                    </p>
-                    <p
-                      class="flex items-center gap-1 truncate text-xs text-slate-500 dark:text-zinc-400"
-                    >
-                      <UIcon name="i-lucide-map-pin" class="h-3 w-3 flex-shrink-0" />
-                      {{ session.location }}
-                    </p>
-                  </div>
-                  <UBadge v-if="session.current" color="success" variant="soft">{{
-                    session.lastActive
-                  }}</UBadge>
-                  <span v-else class="flex-shrink-0 text-xs text-slate-400 dark:text-zinc-500">{{
-                    session.lastActive
-                  }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </UCard>
+        <ProfileSecurityCard class="stagger-item" style="animation-delay: 260ms" />
       </div>
       <AdminActivityTimeline :activities="activities" />
     </div>
@@ -535,7 +334,7 @@ const personalInfo = computed(() => [
           class="space-y-4"
           :schema="updateProfileSchema"
           :state="editForm"
-          @submit="saveProfile"
+          @submit="(e: any) => saveProfile(e.data)"
         >
           <UFormField label="Họ và tên" name="fullName" required>
             <UInput v-model="editForm.fullName" class="w-full" />
@@ -561,7 +360,7 @@ const personalInfo = computed(() => [
             "
             >Huỷ</UButton
           >
-          <UButton :loading="saving" @click="saveProfile">Lưu</UButton>
+          <UButton :loading="saving" @click="() => saveProfile(editForm as any)">Lưu</UButton>
         </div>
       </template>
     </UModal>

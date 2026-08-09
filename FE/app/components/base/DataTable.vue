@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const mappedColumns = computed(() => {
-  return props.columns.map(col => ({
+  return props.columns.map((col) => ({
     accessorKey: col.key,
     header: col.label,
     ...col
@@ -36,21 +36,13 @@ const mappedColumns = computed(() => {
 <template>
   <div>
     <!-- Loading state -->
-    <BasePageLoading
-      v-if="props.loading"
-      variant="table"
-      :lines="props.loadingLines"
-    />
+    <BasePageLoading v-if="props.loading" variant="table" :lines="props.loadingLines" />
 
     <!-- Data table -->
     <template v-else-if="props.rows.length">
       <UTable :columns="mappedColumns" :data="props.rows">
         <!-- Forward all column slots -->
-        <template
-          v-for="col in props.columns"
-          :key="col.key"
-          #[`${col.key}-cell`]="{ row }"
-        >
+        <template v-for="col in props.columns" :key="col.key" #[`${col.key}-cell`]="{ row }">
           <slot :name="`${col.key}-cell`" :row="row.original ? row.original : row">
             {{ row.original ? row.original[col.key] : row[col.key] }}
           </slot>

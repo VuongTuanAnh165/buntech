@@ -5,13 +5,15 @@ export function useExportCSV() {
     const csvRows = [
       headers.join(','),
       ...data.map((row) =>
-        headers.map((h) => {
-          const val = row[h]
-          if (val === null || val === undefined) return ''
-          const str = String(val).replace(/"/g, '""')
-          return `"${str}"`
-        }).join(','),
-      ),
+        headers
+          .map((h) => {
+            const val = row[h]
+            if (val === null || val === undefined) return ''
+            const str = String(val).replace(/"/g, '""')
+            return `"${str}"`
+          })
+          .join(',')
+      )
     ]
     const csv = csvRows.join('\n')
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })

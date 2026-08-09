@@ -102,7 +102,11 @@ onMounted(() => {
             ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
             : 'bg-surface text-surface-foreground border-surface-border hover:border-primary-300'
         ]"
-        @click="selectedCategory = ''"
+        @click="
+          () => {
+            selectedCategory = ''
+          }
+        "
       >
         Tất cả
       </UButton>
@@ -118,7 +122,11 @@ onMounted(() => {
             ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
             : 'bg-surface text-surface-foreground border-surface-border hover:border-primary-300'
         ]"
-        @click="selectedCategory = cat.id"
+        @click="
+          () => {
+            selectedCategory = cat.id
+          }
+        "
       >
         {{ cat.name }}
       </UButton>
@@ -250,7 +258,11 @@ onMounted(() => {
           type="button"
           :disabled="currentPage === 1"
           class="border-surface-border bg-surface text-surface-foreground hover:bg-surface-hover min-h-[40px] rounded-lg border px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-          @click="currentPage--"
+          @click="
+            () => {
+              currentPage--
+            }
+          "
         >
           Trước
         </UButton>
@@ -266,7 +278,11 @@ onMounted(() => {
               ? 'bg-primary-600 border-primary-600 text-white'
               : 'bg-surface text-surface-foreground border-surface-border hover:bg-surface-hover'
           ]"
-          @click="currentPage = page"
+          @click="
+            () => {
+              currentPage = page
+            }
+          "
           >{{ page }}</UButton
         >
         <UButton
@@ -275,7 +291,11 @@ onMounted(() => {
           type="button"
           :disabled="currentPage === totalPages"
           class="border-surface-border bg-surface text-surface-foreground hover:bg-surface-hover min-h-[40px] rounded-lg border px-3 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
-          @click="currentPage++"
+          @click="
+            () => {
+              currentPage++
+            }
+          "
         >
           Sau
         </UButton>

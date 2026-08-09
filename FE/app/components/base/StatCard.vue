@@ -57,9 +57,12 @@ onMounted(() => {
   if (!props.loading) animateCountUp()
 })
 
-watch(() => props.loading, (newVal, oldVal) => {
-  if (oldVal && !newVal) animateCountUp()
-})
+watch(
+  () => props.loading,
+  (newVal, oldVal) => {
+    if (oldVal && !newVal) animateCountUp()
+  }
+)
 </script>
 
 <template>
@@ -72,13 +75,17 @@ watch(() => props.loading, (newVal, oldVal) => {
         <template v-if="props.loading">
           <div class="skeleton mt-2 h-7 w-24" />
         </template>
-        <p v-else class="mt-1 text-xl font-bold tabular-nums text-surface-foreground sm:text-2xl">
+        <p v-else class="text-surface-foreground mt-1 text-xl font-bold tabular-nums sm:text-2xl">
           {{ typeof targetValue === 'number' ? displayValue : props.value }}
         </p>
         <p
           v-if="props.trend && !props.loading"
           class="mt-1 flex items-center gap-1 text-xs font-medium"
-          :class="props.trend.isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-error-600 dark:text-error-400'"
+          :class="
+            props.trend.isPositive
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-error-600 dark:text-error-400'
+          "
         >
           <UIcon
             :name="props.trend.isPositive ? 'i-lucide-trending-up' : 'i-lucide-trending-down'"

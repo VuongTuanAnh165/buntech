@@ -117,4 +117,3 @@ export const useTableFilters = <F extends Record<string, unknown> = Record<strin
     resetAll
   }
 }
-

@@ -19,7 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
       <div class="skeleton h-9 w-32 rounded-lg" />
     </div>
     <!-- Table header -->
-    <div class="flex gap-4 border-b border-surface-border pb-3">
+    <div class="border-surface-border flex gap-4 border-b pb-3">
       <div class="skeleton h-4 w-1/4" />
       <div class="skeleton h-4 w-1/6" />
       <div class="skeleton h-4 w-1/6" />
@@ -27,11 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
       <div class="skeleton h-4 w-1/6" />
     </div>
     <!-- Table rows -->
-    <div
-      v-for="i in props.lines"
-      :key="i"
-      class="flex items-center gap-4 py-3"
-    >
+    <div v-for="i in props.lines" :key="i" class="flex items-center gap-4 py-3">
       <div class="skeleton h-4 w-1/4" />
       <div class="skeleton h-4 w-1/6" />
       <div class="skeleton h-4 w-1/6" />
@@ -50,7 +46,10 @@ const props = withDefaults(defineProps<Props>(), {
   </div>
 
   <!-- Cards skeleton -->
-  <div v-else-if="props.variant === 'cards'" class="animate-fade-in grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <div
+    v-else-if="props.variant === 'cards'"
+    class="animate-fade-in grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+  >
     <div v-for="i in props.lines" :key="i" class="card space-y-3 p-4">
       <div class="skeleton h-32 w-full rounded-lg" />
       <div class="skeleton h-5 w-3/4" />

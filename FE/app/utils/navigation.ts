@@ -95,5 +95,5 @@ export const publicNavigationItems: NavigationMenuItem[] = [
   { label: 'Sản phẩm', icon: 'i-lucide-package', to: '/products' },
   { label: 'Đặt hàng', icon: 'i-lucide-shopping-cart', to: '/quick-order' },
   { label: 'Tin tức', icon: 'i-lucide-newspaper', to: '/blog' },
-  { label: 'Giới thiệu', icon: 'i-lucide-info', to: '/gioi-thieu' },
+  { label: 'Giới thiệu', icon: 'i-lucide-info', to: '/gioi-thieu' }
 ]

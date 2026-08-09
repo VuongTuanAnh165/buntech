@@ -125,17 +125,17 @@ onMounted(() => {
             { accessorKey: '7days', header: '7 ngày' },
             { accessorKey: '30days', header: '30 ngày' }
           ]"
-          :key="opt.key"
+          :key="opt.accessorKey"
           variant="ghost"
           color="neutral"
           :class="[
             'min-w-fit flex-1 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all',
-            dateRange === opt.key
+            dateRange === opt.accessorKey
               ? 'bg-primary-600 text-white shadow-sm'
               : 'text-slate-500 hover:bg-neutral-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
           ]"
-          @click="setRange(opt.key as DateRange)"
-          >{{ opt.label }}</UButton
+          @click="setRange(opt.accessorKey as DateRange)"
+          >{{ opt.header }}</UButton
         >
       </div>
     </div>
@@ -205,17 +205,17 @@ onMounted(() => {
             { accessorKey: 'delivered', header: 'Đã giao', count: stats.delivered },
             { accessorKey: 'cancelled', header: 'Đã hủy', count: stats.cancelled }
           ]"
-          :key="tab.key"
+          :key="tab.accessorKey"
           variant="ghost"
           color="neutral"
           :class="[
             'min-w-fit flex-1 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all',
-            statusFilter === tab.key
+            statusFilter === tab.accessorKey
               ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
               : 'text-slate-500 hover:bg-neutral-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
           ]"
-          @click="setStatusFilter(tab.key as StatusFilter)"
-          >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton
+          @click="setStatusFilter(tab.accessorKey as StatusFilter)"
+          >{{ tab.header }} <span class="opacity-60">({{ tab.count }})</span></UButton
         >
       </div>
     </div>
@@ -276,7 +276,7 @@ onMounted(() => {
             <div>
               <p class="font-mono text-xs text-slate-400 dark:text-zinc-500">#{{ order.id }}</p>
               <p class="font-semibold text-neutral-900 dark:text-white">
-                {{ order.customer_name || 'Khách vãng lai' }}
+                {{ order.user?.full_name || order.guest_info?.name || 'Khách vãng lai' }}
               </p>
             </div>
           </div>

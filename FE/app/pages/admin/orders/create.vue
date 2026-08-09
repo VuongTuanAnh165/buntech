@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Role, _OrderStatus, ProductStatus } from '~/utils/enums'
+import { Role, ProductStatus } from '~/utils/enums'
 import type { Profile, Product, Address } from '~/utils/types'
 import {
   mockProfiles,
@@ -154,6 +154,9 @@ function updateQuantity(index: number, delta: number) {
   }
   item.quantity = newQty
 }
+function setQuantity(index: number, quantity: number) {
+  orderItems.value[index].quantity = quantity
+}
 function submitOrder() {
   if (!orderItems.value.length)
     return toast.add({ title: 'Vui lòng chọn ít nhất một sản phẩm', color: 'error' })
@@ -279,180 +282,21 @@ onMounted(loadInitData)
             </div>
           </div>
         </div>
-        <!-- Product Picker -->
-        <div class="bg-surface ring-surface-border rounded-xl p-5 shadow-sm ring-1">
-          <div class="mb-4 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div class="bg-primary-50 flex h-8 w-8 items-center justify-center rounded-lg">
-                <UIcon name="i-lucide-package" class="text-primary-600 h-4 w-4" />
-              </div>
-              <div>
-                <h2 class="text-surface-foreground text-sm font-semibold">Chọn sản phẩm</h2>
-                <p class="text-xs text-slate-500">Bấm để thêm vào giỏ hàng</p>
-              </div>
-            </div>
-            <div class="relative w-48 text-sm">
-              <UInput
-                v-model="searchQuery"
-                icon="i-lucide-search"
-                placeholder="Tìm sản phẩm..."
-                class="w-full"
-              />
-            </div>
-          </div>
-          <div
-            v-if="filteredProducts.length"
-            class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"
-          >
-            <UButton
-              v-for="p in filteredProducts"
-              :key="p.id"
-              variant="ghost"
-              color="neutral"
-              type="button"
-              :class="[
-                'relative rounded-xl border p-3 text-left transition-all',
-                orderItems.some((i) => i.product_id === p.id)
-                  ? 'border-primary-500 ring-primary-500 bg-primary-50/50 ring-1'
-                  : 'border-surface-border bg-surface shadow-sm hover:border-slate-300'
-              ]"
-              @click="addProduct(p.id)"
-            >
-              <div
-                v-if="orderItems.some((i) => i.product_id === p.id)"
-                class="bg-primary-600 absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full text-white shadow-sm"
-              >
-                <UIcon name="i-lucide-check-circle-2" class="h-3.5 w-3.5" />
-              </div>
-              <div
-                class="mb-2 flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-slate-100 bg-slate-50 dark:border-zinc-700 dark:bg-zinc-800"
-              >
-                <NuxtImg
-                  v-if="p.image_url"
-                  :src="p.image_url"
-                  :alt="p.name"
-                  class="h-full w-full object-cover"
-                  loading="lazy"
-                />
-                <UIcon
-                  v-else
-                  name="i-lucide-package"
-                  class="h-6 w-6 text-slate-300 dark:text-zinc-600"
-                />
-              </div>
-              <p class="text-surface-foreground truncate text-xs font-medium">{{ p.name }}</p>
-              <div class="mt-1 flex items-center justify-between">
-                <span class="text-primary-600 text-xs font-semibold">{{ formatVND(p.price) }}</span>
-                <span class="text-[10px] text-slate-400">{{ p.stock }} {{ p.unit }}</span>
-              </div>
-            </UButton>
-          </div>
-          <div v-else class="py-8 text-center text-sm text-slate-500">Không tìm thấy sản phẩm</div>
-        </div>
+        <OrderProductPicker
+          v-model:search-query="searchQuery"
+          :products="filteredProducts"
+          :order-items="orderItems"
+          @add="addProduct"
+        />
         <!-- Cart -->
-        <div class="bg-surface ring-surface-border rounded-xl p-5 shadow-sm ring-1">
-          <div class="mb-4 flex items-center gap-2">
-            <div class="bg-info-50 flex h-8 w-8 items-center justify-center rounded-lg">
-              <UIcon name="i-lucide-shopping-cart" class="text-info-600 h-4 w-4" />
-            </div>
-            <div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Giỏ hàng</h2>
-              <p class="text-xs text-slate-500">{{ orderItems.length }} sản phẩm</p>
-            </div>
-          </div>
-          <template v-if="orderItems.length">
-            <TransitionGroup
-              name="list"
-              tag="div"
-              class="space-y-2 overflow-hidden px-1"
-              enter-active-class="transition duration-300 ease-out"
-              enter-from-class="opacity-0 translate-x-8"
-              enter-to-class="opacity-100 translate-x-0"
-              leave-active-class="transition duration-200 ease-in absolute w-full"
-              leave-from-class="opacity-100 translate-x-0"
-              leave-to-class="opacity-0 -translate-x-8"
-              move-class="transition duration-300 ease-out"
-            >
-              <div
-                v-for="(item, i) in orderItems"
-                :key="item.product_id"
-                class="bg-surface flex items-center gap-3 rounded-xl border border-transparent p-3 transition-colors hover:border-slate-200 hover:bg-slate-50 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
-              >
-                <div class="min-w-0 flex-1">
-                  <p class="text-surface-foreground truncate text-sm font-medium">
-                    {{ item.product_name }}
-                  </p>
-                  <p
-                    v-if="customPrices.has(item.product_id)"
-                    class="text-primary-600 text-[10px] font-medium"
-                  >
-                    Giá riêng
-                  </p>
-                  <p class="hidden text-xs text-slate-500 sm:block">{{ formatVND(item.price) }}</p>
-                </div>
-                <div
-                  class="border-surface-border bg-surface flex items-center gap-1 rounded-lg border"
-                >
-                  <UButton
-                    variant="ghost"
-                    color="neutral"
-                    size="xs"
-                    icon="i-lucide-minus"
-                    aria-label="Giảm"
-                    @click="updateQuantity(i, -1)"
-                  />
-                  <UInput
-                    :model-value="item.quantity"
-                    type="number"
-                    :min="1"
-                    size="xs"
-                    class="w-12 text-center"
-                    @update:model-value="
-                      (v: string | number) => {
-                        const num = Number(v)
-                        if (num > 0) item.quantity = num
-                      }
-                    "
-                  />
-                  <UButton
-                    variant="ghost"
-                    color="neutral"
-                    size="xs"
-                    icon="i-lucide-plus"
-                    aria-label="Tăng"
-                    @click="updateQuantity(i, 1)"
-                  />
-                </div>
-                <div class="w-24 text-right">
-                  <span class="text-surface-foreground text-sm font-semibold">{{
-                    formatVND(item.quantity * item.price)
-                  }}</span>
-                </div>
-                <UButton
-                  color="error"
-                  variant="ghost"
-                  icon="i-lucide-trash-2"
-                  size="sm"
-                  @click="removeItem(i)"
-                />
-              </div>
-            </TransitionGroup>
-            <div class="border-surface-border mt-4 flex items-center justify-between border-t pt-4">
-              <span class="text-surface-foreground text-sm font-semibold">Tạm tính</span>
-              <span class="text-surface-foreground text-lg font-bold">{{
-                formatVND(subtotal)
-              }}</span>
-            </div>
-          </template>
-          <div v-else class="py-12 text-center">
-            <div
-              class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50"
-            >
-              <UIcon name="i-lucide-shopping-cart" class="h-6 w-6 text-slate-300" />
-            </div>
-            <p class="text-surface-foreground text-sm font-medium">Giỏ hàng trống</p>
-          </div>
-        </div>
+        <OrderCart
+          :items="orderItems"
+          :custom-prices="customPrices"
+          :subtotal="subtotal"
+          @update-quantity="updateQuantity"
+          @remove="removeItem"
+          @set-quantity="setQuantity"
+        />
       </div>
       <!-- Right Column -->
       <div class="space-y-6">

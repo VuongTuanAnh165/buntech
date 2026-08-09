@@ -10,14 +10,12 @@ const note = ref('')
 const submitting = ref(false)
 // ─── Computed ─────────────────────────────────────────────
 const inventoryOptions = computed(() =>
-  mockInventoryItems.map(item => ({
+  mockInventoryItems.map((item) => ({
     label: `${item.name} (${formatNumber(item.quantity)} ${item.unit})`,
-    value: item.id,
+    value: item.id
   }))
 )
-const selectedItem = computed(() =>
-  mockInventoryItems.find(i => i.id === selectedItemId.value)
-)
+const selectedItem = computed(() => mockInventoryItems.find((i) => i.id === selectedItemId.value))
 // ─── Handlers ─────────────────────────────────────────────
 async function handleSubmit() {
   if (!selectedItemId.value || !quantity.value) {
@@ -25,11 +23,11 @@ async function handleSubmit() {
     return
   }
   submitting.value = true
-  await new Promise(resolve => setTimeout(resolve, 600))
+  await new Promise((resolve) => setTimeout(resolve, 600))
   toast.add({
     title: 'Nhập kho thành công',
     description: `Đã nhập ${formatNumber(quantity.value)} ${selectedItem.value?.unit} ${selectedItem.value?.name}`,
-    color: 'success',
+    color: 'success'
   })
   submitting.value = false
   selectedItemId.value = ''
@@ -45,23 +43,28 @@ async function handleSubmit() {
       :breadcrumbs="[
         { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
         { label: 'Kho', to: '/admin/inventory' },
-        { label: 'Nhập kho' },
+        { label: 'Nhập kho' }
       ]"
     >
       <template #actions>
         <UButton variant="outline" color="neutral" to="/admin/inventory">
-          <UIcon name="i-lucide-arrow-left" class="w-4 h-4 mr-1" /> Quay lại
+          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" /> Quay lại
         </UButton>
       </template>
     </BasePageHeader>
-    <div class="max-w-2xl animate-fade-in-up">
+    <div class="animate-fade-in-up max-w-2xl">
       <div class="card p-6 sm:p-8">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 rounded-lg bg-success-50 dark:bg-success-900/20 flex items-center justify-center ring-1 ring-success-100 dark:ring-success-900/30">
-            <UIcon name="i-lucide-arrow-down-to-line" class="w-5 h-5 text-success-600 dark:text-success-400" />
+        <div class="mb-6 flex items-center gap-3">
+          <div
+            class="bg-success-50 dark:bg-success-900/20 ring-success-100 dark:ring-success-900/30 flex h-10 w-10 items-center justify-center rounded-lg ring-1"
+          >
+            <UIcon
+              name="i-lucide-arrow-down-to-line"
+              class="text-success-600 dark:text-success-400 h-5 w-5"
+            />
           </div>
           <div>
-            <h2 class="text-lg font-semibold text-surface-foreground">Phiếu nhập kho</h2>
+            <h2 class="text-surface-foreground text-lg font-semibold">Phiếu nhập kho</h2>
             <p class="text-sm text-slate-500 dark:text-zinc-400">Ghi nhận nhập nguyên liệu mới</p>
           </div>
         </div>
@@ -77,17 +80,25 @@ async function handleSubmit() {
             />
           </UFormField>
           <Transition name="fade">
-            <div v-if="selectedItem" class="p-4 rounded-xl bg-success-50 dark:bg-success-900/10 border border-success-200 dark:border-success-800/30">
+            <div
+              v-if="selectedItem"
+              class="bg-success-50 dark:bg-success-900/10 border-success-200 dark:border-success-800/30 rounded-xl border p-4"
+            >
               <div class="flex items-center justify-between">
-                <p class="text-sm font-medium text-surface-foreground">Tồn kho hiện tại</p>
-                <p class="text-lg font-bold text-success-600 dark:text-success-400 tabular-nums">
+                <p class="text-surface-foreground text-sm font-medium">Tồn kho hiện tại</p>
+                <p class="text-success-600 dark:text-success-400 text-lg font-bold tabular-nums">
                   {{ formatNumber(selectedItem.quantity) }} {{ selectedItem.unit }}
                 </p>
               </div>
             </div>
           </Transition>
           <UFormField label="Số lượng nhập" required>
-            <UInput v-model="quantity" type="number" placeholder="Nhập số lượng..." icon="i-lucide-package-plus" />
+            <UInput
+              v-model="quantity"
+              type="number"
+              placeholder="Nhập số lượng..."
+              icon="i-lucide-package-plus"
+            />
           </UFormField>
           <UFormField label="Ghi chú">
             <UTextarea v-model="note" placeholder="VD: Nhập từ nhà cung cấp ABC..." :rows="3" />
@@ -101,7 +112,7 @@ async function handleSubmit() {
               class="flex-1 justify-center"
               @click="handleSubmit"
             >
-              <UIcon name="i-lucide-check" class="w-4 h-4 mr-1" /> Xác nhận nhập kho
+              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> Xác nhận nhập kho
             </UButton>
             <UButton variant="outline" color="neutral" size="lg" to="/admin/inventory">
               Hủy

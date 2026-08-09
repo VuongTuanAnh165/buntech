@@ -10,15 +10,17 @@ const note = ref('')
 const submitting = ref(false)
 // ─── Computed ─────────────────────────────────────────────
 const debtCustomers = computed(() =>
-  mockCustomers.filter(c => c.debt_limit > 0).map(c => ({
-    label: `${c.full_name} — ${c.phone}`,
-    value: c.id,
-    avatar: c.avatar_url,
-    debt: c.debt_limit,
-  }))
+  mockCustomers
+    .filter((c) => c.debt_limit > 0)
+    .map((c) => ({
+      label: `${c.full_name} — ${c.phone}`,
+      value: c.id,
+      avatar: c.avatar_url,
+      debt: c.debt_limit
+    }))
 )
 const selectedCustomer = computed(() =>
-  debtCustomers.value.find(c => c.value === selectedCustomerId.value)
+  debtCustomers.value.find((c) => c.value === selectedCustomerId.value)
 )
 // ─── Handlers ─────────────────────────────────────────────
 async function handleSubmit() {
@@ -27,8 +29,12 @@ async function handleSubmit() {
     return
   }
   submitting.value = true
-  await new Promise(resolve => setTimeout(resolve, 800))
-  toast.add({ title: 'Thu nợ thành công', description: `Đã ghi nhận ${formatVND(amount.value)} từ khách hàng`, color: 'success' })
+  await new Promise((resolve) => setTimeout(resolve, 800))
+  toast.add({
+    title: 'Thu nợ thành công',
+    description: `Đã ghi nhận ${formatVND(amount.value)} từ khách hàng`,
+    color: 'success'
+  })
   submitting.value = false
   selectedCustomerId.value = ''
   amount.value = undefined
@@ -43,24 +49,28 @@ async function handleSubmit() {
       :breadcrumbs="[
         { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
         { label: 'Tài chính', to: '/admin/debt' },
-        { label: 'Thu nợ' },
+        { label: 'Thu nợ' }
       ]"
     >
       <template #actions>
         <UButton variant="outline" color="neutral" to="/admin/debt">
-          <UIcon name="i-lucide-arrow-left" class="w-4 h-4 mr-1" /> Quay lại
+          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" /> Quay lại
         </UButton>
       </template>
     </BasePageHeader>
-    <div class="max-w-2xl animate-fade-in-up">
+    <div class="animate-fade-in-up max-w-2xl">
       <div class="card p-6 sm:p-8">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center ring-1 ring-primary-100 dark:ring-primary-900/30">
-            <UIcon name="i-lucide-wallet" class="w-5 h-5 text-primary-600 dark:text-primary-400" />
+        <div class="mb-6 flex items-center gap-3">
+          <div
+            class="bg-primary-50 dark:bg-primary-900/20 ring-primary-100 dark:ring-primary-900/30 flex h-10 w-10 items-center justify-center rounded-lg ring-1"
+          >
+            <UIcon name="i-lucide-wallet" class="text-primary-600 dark:text-primary-400 h-5 w-5" />
           </div>
           <div>
-            <h2 class="text-lg font-semibold text-surface-foreground">Ghi nhận thanh toán</h2>
-            <p class="text-sm text-slate-500 dark:text-zinc-400">Chọn khách hàng và nhập số tiền trả nợ</p>
+            <h2 class="text-surface-foreground text-lg font-semibold">Ghi nhận thanh toán</h2>
+            <p class="text-sm text-slate-500 dark:text-zinc-400">
+              Chọn khách hàng và nhập số tiền trả nợ
+            </p>
           </div>
         </div>
         <div class="space-y-5">
@@ -77,16 +87,23 @@ async function handleSubmit() {
           </UFormField>
           <!-- Customer debt info -->
           <Transition name="fade">
-            <div v-if="selectedCustomer" class="p-4 rounded-xl bg-error-50 dark:bg-error-900/10 border border-error-200 dark:border-error-800/30">
+            <div
+              v-if="selectedCustomer"
+              class="bg-error-50 dark:bg-error-900/10 border-error-200 dark:border-error-800/30 rounded-xl border p-4"
+            >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <UAvatar :src="selectedCustomer.avatar" :alt="selectedCustomer.label" size="sm" />
                   <div>
-                    <p class="text-sm font-medium text-surface-foreground">{{ selectedCustomer.label.split(' — ')[0] }}</p>
+                    <p class="text-surface-foreground text-sm font-medium">
+                      {{ selectedCustomer.label.split(' — ')[0] }}
+                    </p>
                     <p class="text-xs text-slate-500">Hạn mức nợ</p>
                   </div>
                 </div>
-                <p class="text-lg font-bold text-error-600 dark:text-error-400 tabular-nums">{{ formatVND(selectedCustomer.debt) }}</p>
+                <p class="text-error-600 dark:text-error-400 text-lg font-bold tabular-nums">
+                  {{ formatVND(selectedCustomer.debt) }}
+                </p>
               </div>
             </div>
           </Transition>
@@ -100,12 +117,18 @@ async function handleSubmit() {
               :ui="{ base: 'tabular-nums' }"
             />
             <template #hint>
-              <span v-if="amount" class="text-primary-600 dark:text-primary-400 font-medium">{{ formatVND(amount) }}</span>
+              <span v-if="amount" class="text-primary-600 dark:text-primary-400 font-medium">{{
+                formatVND(amount)
+              }}</span>
             </template>
           </UFormField>
           <!-- Note -->
           <UFormField label="Ghi chú">
-            <UTextarea v-model="note" placeholder="Ghi chú thanh toán (không bắt buộc)..." :rows="3" />
+            <UTextarea
+              v-model="note"
+              placeholder="Ghi chú thanh toán (không bắt buộc)..."
+              :rows="3"
+            />
           </UFormField>
           <!-- Actions -->
           <div class="flex items-center gap-3 pt-2">
@@ -117,11 +140,9 @@ async function handleSubmit() {
               class="flex-1 justify-center"
               @click="handleSubmit"
             >
-              <UIcon name="i-lucide-check" class="w-4 h-4 mr-1" /> Xác nhận thu nợ
+              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> Xác nhận thu nợ
             </UButton>
-            <UButton variant="outline" color="neutral" size="lg" to="/admin/debt">
-              Hủy
-            </UButton>
+            <UButton variant="outline" color="neutral" size="lg" to="/admin/debt"> Hủy </UButton>
           </div>
         </div>
       </div>

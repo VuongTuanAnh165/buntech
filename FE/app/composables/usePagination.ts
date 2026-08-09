@@ -48,8 +48,22 @@ export function usePagination(initialLimit = 10) {
   }
 
   return {
-    page, limit, total, search, sortBy, sortOrder,
-    totalPages, hasNext, hasPrev, from, to,
-    nextPage, prevPage, goToPage, changeLimit, reset, toggleSort,
+    page,
+    limit,
+    total,
+    search,
+    sortBy,
+    sortOrder,
+    totalPages,
+    hasNext,
+    hasPrev,
+    from,
+    to,
+    nextPage,
+    prevPage,
+    goToPage,
+    changeLimit,
+    reset,
+    toggleSort
   }
 }

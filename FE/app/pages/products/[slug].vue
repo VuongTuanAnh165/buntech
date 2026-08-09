@@ -222,7 +222,11 @@ useHead(() => ({
                   : 'border-surface-border hover:border-primary-300'
               ]"
               :aria-label="`Xem ảnh ${i + 1}`"
-              @click="activeImage = i"
+              @click="
+                () => {
+                  activeImage = i
+                }
+              "
             >
               <NuxtImg
                 v-if="img"
@@ -422,19 +426,23 @@ useHead(() => ({
               { accessorKey: 'description', header: 'Mô tả sản phẩm' },
               { accessorKey: 'reviews', header: `Đánh giá (${reviews.length})` }
             ]"
-            :key="tab.key"
+            :key="tab.accessorKey"
             variant="ghost"
             color="neutral"
             :class="[
               'min-h-[44px] border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors',
-              activeTab === tab.key
+              activeTab === tab.accessorKey
                 ? 'border-primary-600 text-primary-600 dark:text-primary-400'
                 : 'hover:text-surface-foreground border-transparent text-gray-500 dark:text-zinc-400'
             ]"
             role="tab"
-            :aria-selected="activeTab === tab.key"
-            @click="activeTab = tab.key as 'description' | 'reviews'"
-            >{{ tab.label }}</UButton
+            :aria-selected="activeTab === tab.accessorKey"
+            @click="
+              () => {
+                activeTab = tab.accessorKey as 'description' | 'reviews'
+              }
+            "
+            >{{ tab.header }}</UButton
           >
         </div>
 

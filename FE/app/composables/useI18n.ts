@@ -12,10 +12,10 @@ export const useI18n = () => {
     'customer.customerLogin': 'Đăng nhập',
     'app.tagline': 'Bún tươi thủ công - Truyền 3 đời'
   }
-  
+
   const t = (key: string) => {
     return translations[key] || key
   }
-  
+
   return { t }
 }

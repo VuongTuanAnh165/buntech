@@ -118,7 +118,10 @@ const stockState = computed(() => {
 
 const stockValue = computed(() => stock.value * price.value)
 
-const movementConfig: Record<string, unknown> = {
+const movementConfig: Record<
+  InventoryMovementType,
+  { icon: string; color: string; bg: string; sign: string; label: string }
+> = {
   [InventoryMovementType.IMPORT]: {
     icon: 'i-lucide-arrow-down-right',
     color: 'text-success-600 dark:text-success-400',
@@ -223,7 +226,9 @@ const topCustomers = [
 const ratingDistribution = computed(() => {
   const counts = [0, 0, 0, 0, 0]
   reviews.value.forEach((r) => {
-    counts[r.rating - 1]++
+    if (counts[r.rating - 1] !== undefined) {
+      counts[r.rating - 1]++
+    }
   })
   return [
     { star: 5, count: counts[4] || 0 },
@@ -291,7 +296,11 @@ onMounted(loadProduct)
       variant="ghost"
       color="neutral"
       class="mb-4 flex min-h-[44px] items-center gap-1 px-2 text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-      @click="navigateTo('/admin/products')"
+      @click="
+        () => {
+          navigateTo('/admin/products')
+        }
+      "
     >
       <span class="i-lucide-arrow-left h-4 w-4" aria-hidden="true" /> Quay lại
     </UButton>
@@ -368,7 +377,9 @@ onMounted(loadProduct)
                 <template #leading><span class="h-1.5 w-1.5 rounded-full bg-current" /></template>
                 {{ status === ProductStatus.ACTIVE ? 'Đang bán' : 'Ngưng bán' }}
               </UBadge>
-              <UBadge :color="stockState.color" variant="soft">{{ stockState.label }}</UBadge>
+              <UBadge :color="statusColors[status] as any" variant="soft" class="mt-2">{{
+                stockState.label
+              }}</UBadge>
             </div>
 
             <h1 class="text-surface-foreground mb-1 text-2xl font-bold tracking-tight">
@@ -592,7 +603,12 @@ onMounted(loadProduct)
             <div class="card stagger-item p-5 lg:col-span-2">
               <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-surface-foreground text-sm font-semibold">Tồn kho hiện tại</h2>
-                <UBadge :color="stockState.color" variant="subtle">
+                <UBadge
+                  :color="stockState.color as any"
+                  variant="subtle"
+                  size="sm"
+                  class="flex-shrink-0"
+                >
                   <template #leading><span class="h-1.5 w-1.5 rounded-full bg-current" /></template
                   >{{ stockState.label }}
                 </UBadge>
@@ -856,12 +872,12 @@ onMounted(loadProduct)
                 <div
                   :class="[
                     'flex h-9 w-9 items-center justify-center rounded-lg ring-1',
-                    colorMap[card.color].bg,
-                    colorMap[card.color].ring
+                    colorMap[card.color]?.bg,
+                    colorMap[card.color]?.ring
                   ]"
                 >
                   <span
-                    :class="['h-[18px] w-[18px]', card.icon, colorMap[card.color].text]"
+                    :class="['h-[18px] w-[18px]', card.icon, colorMap[card.color]?.text]"
                     aria-hidden="true"
                   />
                 </div>

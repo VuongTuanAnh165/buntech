@@ -63,7 +63,11 @@ const tableColumns = [
       class="animate-fade-in-up mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
     >
       <div class="flex items-center gap-4">
-        <UAvatar :alt="customerProfile?.full_name" :src="customerProfile?.avatar_url" size="lg" />
+        <UAvatar
+          :alt="customerProfile?.full_name"
+          :src="customerProfile?.avatar_url || undefined"
+          size="lg"
+        />
         <div>
           <div class="flex flex-wrap items-center gap-2">
             <h1 class="text-surface-foreground text-xl font-bold tracking-tight sm:text-2xl">
@@ -191,20 +195,22 @@ const tableColumns = [
           >
             <template #id-cell="{ row }">
               <span class="text-surface-foreground font-mono text-xs font-medium"
-                >#{{ String(row.id).slice(0, 8) }}</span
+                >#{{ String(row.original.id).slice(0, 8) }}</span
               >
             </template>
             <template #created_at-cell="{ row }">
-              <span class="text-sm text-slate-500">{{ formatDateTime(row.created_at) }}</span>
+              <span class="text-sm text-slate-500">{{
+                formatDateTime(row.original.created_at)
+              }}</span>
             </template>
             <template #status-cell="{ row }">
-              <UBadge :color="ORDER_STATUS_COLORS[row.status]" variant="subtle" size="sm">
-                {{ ORDER_STATUS_LABELS[row.status] }}
+              <UBadge :color="ORDER_STATUS_COLORS[row.original.status]" variant="subtle" size="sm">
+                {{ ORDER_STATUS_LABELS[row.original.status] }}
               </UBadge>
             </template>
             <template #total-cell="{ row }">
               <span class="text-surface-foreground font-semibold tabular-nums">{{
-                formatVND(Number(row.total))
+                formatVND(Number(row.original.total))
               }}</span>
             </template>
           </UTable>

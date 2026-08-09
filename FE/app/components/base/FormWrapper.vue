@@ -48,14 +48,8 @@ defineExpose({ formRef, setErrors, clearErrors })
     <slot name="actions">
       <div class="flex items-center justify-end gap-3 pt-2">
         <slot name="cancel" />
-        <UButton
-          type="submit"
-          :loading="props.loading"
-          size="lg"
-        >
-          <slot name="submit-text">
-            Lưu
-          </slot>
+        <UButton type="submit" :loading="props.loading" size="lg">
+          <slot name="submit-text"> Lưu </slot>
         </UButton>
       </div>
     </slot>

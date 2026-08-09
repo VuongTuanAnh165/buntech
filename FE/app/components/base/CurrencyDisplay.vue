@@ -23,7 +23,7 @@ const sizeClass = computed(() => {
     :class="[
       sizeClass,
       props.highlight
-        ? 'font-semibold text-primary-600 dark:text-primary-400'
+        ? 'text-primary-600 dark:text-primary-400 font-semibold'
         : 'text-surface-foreground'
     ]"
   >

@@ -212,7 +212,11 @@ const isDeleteModalOpen = computed({
                 color="neutral"
                 class="hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg p-2 text-slate-400 transition-colors dark:text-zinc-500"
                 aria-label="Xóa danh mục"
-                @click="deleteTarget = cat"
+                @click="
+                  () => {
+                    deleteTarget = cat
+                  }
+                "
               >
                 <span class="i-lucide-trash-2 h-4 w-4" aria-hidden="true" />
               </UButton>

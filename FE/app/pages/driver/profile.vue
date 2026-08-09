@@ -21,7 +21,7 @@ const driverOrders = computed(() => {
 const stats = computed(() => {
   const orders = driverOrders.value
   const delivered = orders.filter((o) => o.status === OrderStatus.DELIVERED)
-  const totalEarnings = delivered.reduce((sum, o) => sum + Math.round(o.total_amount * 0.03), 0)
+  const totalEarnings = delivered.reduce((sum, o) => sum + Math.round((o.total || 0) * 0.03), 0)
   const successRate = orders.length ? Math.round((delivered.length / orders.length) * 100) : 0
   return { totalDeliveries: delivered.length, successRate, totalEarnings, rating: 4.8 }
 })
@@ -33,7 +33,7 @@ const weeklyData = computed(() => {
   const counts = [5, 7, 4, 8, 6, 9, 3]
   return days.map((day, i) => {
     const isPast = i <= todayIdx
-    return { day, count: isPast ? counts[i] : 0, isToday: i === todayIdx }
+    return { day, count: isPast ? counts[i] || 0 : 0, isToday: i === todayIdx }
   })
 })
 const stableWeekly = ref<{ day: string; count: number; isToday: boolean }[]>([])
@@ -54,7 +54,7 @@ const recentActivity = computed(() =>
         : o.status === OrderStatus.CANCELLED
           ? `Đơn hủy #${o.id}`
           : `Đang giao #${o.id}`,
-    customer: o.customer_name || 'Khách vãng lai',
+    customer: o.user?.full_name || o.guest_info?.name || 'Khách vãng lai',
     address: o.shipping_address,
     amount: o.amount_collected || 0,
     time: o.created_at
@@ -374,7 +374,11 @@ onMounted(() => {
             variant="ghost"
             color="neutral"
             class="text-primary-600 dark:text-primary-400 text-xs font-medium hover:underline"
-            @click="navigateTo('/driver/history')"
+            @click="
+              () => {
+                navigateTo('/driver/history')
+              }
+            "
             >Xem tất cả</UButton
           >
         </div>

@@ -18,39 +18,36 @@ const handleCancel = () => {
         <div
           v-if="options.icon"
           class="mx-auto mb-4 flex size-12 items-center justify-center rounded-full"
-          :class="options.variant === 'danger'
-            ? 'bg-red-50 dark:bg-red-950/30'
-            : 'bg-primary-50 dark:bg-primary-950/30'"
+          :class="
+            options.variant === 'danger'
+              ? 'bg-red-50 dark:bg-red-950/30'
+              : 'bg-primary-50 dark:bg-primary-950/30'
+          "
         >
           <UIcon
             :name="options.icon"
             class="size-6"
-            :class="options.variant === 'danger'
-              ? 'text-error-600 dark:text-error-400'
-              : 'text-primary-600 dark:text-primary-400'"
+            :class="
+              options.variant === 'danger'
+                ? 'text-error-600 dark:text-error-400'
+                : 'text-primary-600 dark:text-primary-400'
+            "
           />
         </div>
 
         <!-- Content -->
         <div class="text-center">
-          <h3 class="text-lg font-semibold text-surface-foreground">
+          <h3 class="text-surface-foreground text-lg font-semibold">
             {{ options.title }}
           </h3>
-          <p
-            v-if="options.description"
-            class="mt-2 text-sm text-gray-500 dark:text-zinc-400"
-          >
+          <p v-if="options.description" class="mt-2 text-sm text-gray-500 dark:text-zinc-400">
             {{ options.description }}
           </p>
         </div>
 
         <!-- Actions -->
         <div class="mt-6 flex items-center justify-end gap-3">
-          <UButton
-            color="neutral"
-            variant="outline"
-            @click="handleCancel"
-          >
+          <UButton color="neutral" variant="outline" @click="handleCancel">
             {{ options.cancelText || 'Hủy' }}
           </UButton>
           <UButton

@@ -3,11 +3,11 @@ import { ref, onUnmounted, type Ref } from 'vue'
 export function useFocusTrap(containerRef: Ref<HTMLElement | null>) {
   const isActive = ref(false)
 
-  const getFocusableElements = (el: HTMLElement): HTMLElement[]  => {
+  const getFocusableElements = (el: HTMLElement): HTMLElement[] => {
     return Array.from(
       el.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
-      ),
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      )
     ).filter((e) => e.offsetParent !== null)
   }
 

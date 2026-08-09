@@ -128,17 +128,21 @@ onMounted(() => {
             { accessorKey: 'unread', header: 'Chưa đọc', count: unreadCount },
             { accessorKey: 'read', header: 'Đã đọc', count: notifications.length - unreadCount }
           ]"
-          :key="tab.key"
+          :key="tab.accessorKey"
           variant="ghost"
           color="neutral"
           :class="[
             'flex-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
-            filterTab === tab.key
+            filterTab === tab.accessorKey
               ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
               : 'text-slate-500 hover:bg-neutral-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
           ]"
-          @click="filterTab = tab.key as FilterTab"
-          >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton
+          @click="
+            () => {
+              filterTab = tab.accessorKey as FilterTab
+            }
+          "
+          >{{ tab.header }} <span class="opacity-60">({{ tab.count }})</span></UButton
         >
       </div>
     </div>

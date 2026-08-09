@@ -23,10 +23,10 @@ const _currentDriver = computed(
 const order = computed(() => mockOrders.find((o) => o.id === orderId.value) || null)
 useSeoMeta({ title: `Chi tiết đơn giao - BunTech Driver` })
 
-const orderItems = computed(() => order.value?.orderItems || [])
+const orderItems = computed(() => order.value?.order_items || [])
 const remaining = computed(() => {
   if (!order.value) return 0
-  return Math.max(0, order.value.total_amount - (order.value.amount_collected || 0))
+  return Math.max(0, (order.value.total || 0) - (order.value.amount_collected || 0))
 })
 
 const statusGradient = computed(() => {
@@ -48,7 +48,7 @@ const statusLabel: Record<string, string> = {
 }
 
 function callCustomer() {
-  const phone = order.value?.customer?.phone
+  const phone = order.value?.user?.phone || order.value?.guest_info?.phone
   if (phone) {
     toast.add({ title: `Đang gọi ${phone}`, color: 'success' })
   } else {
@@ -79,7 +79,7 @@ function confirmDelivery() {
 onMounted(() => {
   setTimeout(() => {
     if (order.value) {
-      amountInput.value = String(order.value.total_amount)
+      amountInput.value = String(order.value.total || 0)
     }
     loading.value = false
   }, 500)
@@ -93,7 +93,11 @@ onMounted(() => {
       variant="ghost"
       color="neutral"
       class="mb-4 flex min-h-[44px] items-center gap-1 rounded-md px-2 text-sm text-slate-500 transition-colors hover:text-neutral-900 dark:text-zinc-400 dark:hover:text-white"
-      @click="navigateTo('/driver/delivery')"
+      @click="
+        () => {
+          navigateTo('/driver/delivery')
+        }
+      "
     >
       <UIcon name="i-lucide-arrow-left" class="h-4 w-4" /> Quay lại
     </UButton>
@@ -180,13 +184,13 @@ onMounted(() => {
           Thông tin khách hàng
         </h2>
         <div class="mb-4 flex items-center gap-3">
-          <UAvatar :alt="order.customer_name || 'Khách'" size="md" />
+          <UAvatar :alt="order.user?.full_name || order.guest_info?.name || 'Khách'" size="md" />
           <div class="min-w-0 flex-1">
             <p class="font-semibold text-neutral-900 dark:text-white">
-              {{ order.customer_name || 'Khách vãng lai' }}
+              {{ order.user?.full_name || order.guest_info?.name || 'Khách vãng lai' }}
             </p>
             <p class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">
-              {{ order.customer?.phone || 'Chưa có SĐT' }}
+              {{ order.user?.phone || order.guest_info?.phone || 'Chưa có SĐT' }}
             </p>
           </div>
           <UButton
@@ -289,7 +293,7 @@ onMounted(() => {
           <div class="flex items-center justify-between text-sm">
             <span class="text-slate-500 dark:text-zinc-400">Tổng giá trị đơn</span>
             <span class="font-semibold text-neutral-900 tabular-nums dark:text-white">{{
-              formatVND(order.total_amount)
+              formatVND(order.total || 0)
             }}</span>
           </div>
           <div class="flex items-center justify-between text-sm">

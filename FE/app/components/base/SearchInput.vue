@@ -28,9 +28,12 @@ const clearSearch = () => {
   emit('update:modelValue', '')
 }
 
-watch(() => props.modelValue, (val) => {
-  localValue.value = val
-})
+watch(
+  () => props.modelValue,
+  (val) => {
+    localValue.value = val
+  }
+)
 
 onUnmounted(() => {
   if (debounceTimer) clearTimeout(debounceTimer)

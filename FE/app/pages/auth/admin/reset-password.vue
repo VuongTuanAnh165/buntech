@@ -20,8 +20,9 @@ const state = reactive({
 
 type Schema = z.output<typeof resetPasswordSchema>
 
-const { submit: handleResetPassword, saving: loading } = useFormSubmit<Schema>(
-  async (data) => {
+const { handleSubmit, isSubmitting: loading } = useFormSubmit()
+const handleResetPassword = handleSubmit(
+  async (data: Schema) => {
     await authService.resetPassword({
       phoneNumber: data.phoneNumber,
       token: data.token,
@@ -32,7 +33,7 @@ const { submit: handleResetPassword, saving: loading } = useFormSubmit<Schema>(
     onSuccess() {
       success.value = true
     },
-    onError(err) {
+    onError(err: Error) {
       toast.add({ title: 'Khôi phục mật khẩu thất bại', description: err.message, color: 'error' })
     }
   }
@@ -114,7 +115,7 @@ const strengthColor = computed(() => {
         class="space-y-5"
         :schema="resetPasswordSchema"
         :state="state"
-        @submit="handleResetPassword"
+        @submit="(e: any) => handleResetPassword(e.data)"
       >
         <UFormField label="Số điện thoại" name="phoneNumber">
           <UInput

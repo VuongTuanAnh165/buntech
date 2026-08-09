@@ -59,7 +59,7 @@ const stats = computed(() => {
   const shipping = all.filter((o) => o.status === OrderStatus.SHIPPING)
   const totalToCollect = all
     .filter((o) => o.status !== OrderStatus.DELIVERED)
-    .reduce((sum, o) => sum + (o.total_amount - (o.amount_collected || 0)), 0)
+    .reduce((sum, o) => sum + ((o.total || 0) - (o.amount_collected || 0)), 0)
   return {
     todayDeliveries: delivered.length,
     totalToCollect,
@@ -232,17 +232,21 @@ onMounted(() => {
               count: driverOrders.filter((o) => o.status === OrderStatus.DELIVERED).length
             }
           ]"
-          :key="tab.key"
+          :key="tab.accessorKey"
           variant="ghost"
           color="neutral"
           :class="[
             'min-w-fit flex-1 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all',
-            activeTab === tab.key
+            activeTab === tab.accessorKey
               ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
               : 'text-slate-500 hover:bg-neutral-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
           ]"
-          @click="activeTab = tab.key as 'all' | 'shipping' | 'pending' | 'delivered'"
-          >{{ tab.label }} <span class="opacity-60">({{ tab.count }})</span></UButton
+          @click="
+            () => {
+              activeTab = tab.accessorKey as 'all' | 'shipping' | 'pending' | 'delivered'
+            }
+          "
+          >{{ tab.header }} <span class="opacity-60">({{ tab.count }})</span></UButton
         >
       </div>
     </div>
@@ -312,7 +316,7 @@ onMounted(() => {
             <div>
               <p class="font-mono text-xs text-slate-400 dark:text-zinc-500">#{{ order.id }}</p>
               <p class="font-semibold text-neutral-900 dark:text-white">
-                {{ order.customer_name || 'Khách vãng lai' }}
+                {{ order.user?.full_name || order.guest_info?.name || 'Khách vãng lai' }}
               </p>
             </div>
           </div>
@@ -349,7 +353,7 @@ onMounted(() => {
                   class="h-3.5 w-3.5 text-slate-400 dark:text-zinc-500"
                 />
                 <span class="font-semibold text-neutral-900 tabular-nums dark:text-white">{{
-                  formatVND(order.total_amount)
+                  formatVND(order.total || 0)
                 }}</span>
               </div>
               <span class="text-slate-300 dark:text-zinc-600">·</span>

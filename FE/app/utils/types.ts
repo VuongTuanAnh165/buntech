@@ -1,4 +1,14 @@
-import type { Role, OrderStatus, TransactionType, ProductStatus, UserStatus, BlogStatus, InventoryMovementType, VehicleStatus, NotificationType } from './enums'
+import type {
+  Role,
+  OrderStatus,
+  TransactionType,
+  ProductStatus,
+  UserStatus,
+  BlogStatus,
+  InventoryMovementType,
+  VehicleStatus,
+  NotificationType
+} from './enums'
 
 export interface Profile {
   id: string

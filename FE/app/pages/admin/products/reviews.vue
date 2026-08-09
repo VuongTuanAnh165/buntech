@@ -137,22 +137,26 @@ function ratingStars(rating: number) {
     >
       <UButton
         v-for="f in filters"
-        :key="f.key"
+        :key="f.accessorKey"
         variant="ghost"
         color="neutral"
         :class="[
           'inline-flex min-h-[36px] items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all',
-          filterStatus === f.key
+          filterStatus === f.accessorKey
             ? 'bg-surface text-primary-600 dark:text-primary-400 shadow-sm'
             : 'hover:text-surface-foreground text-slate-500 dark:text-zinc-400'
         ]"
-        @click="filterStatus = f.key"
+        @click="
+          () => {
+            filterStatus = f.accessorKey as 'pending' | 'approved' | 'all'
+          }
+        "
       >
-        {{ f.label }}
+        {{ f.header }}
         <span
           :class="[
             'rounded-full px-1.5 py-0.5 text-[11px] tabular-nums',
-            filterStatus === f.key
+            filterStatus === f.accessorKey
               ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300'
               : 'bg-surface-border/40 text-slate-500 dark:text-zinc-400'
           ]"
@@ -291,7 +295,11 @@ function ratingStars(rating: number) {
                     variant="ghost"
                     color="neutral"
                     class="text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-900/20 flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
-                    @click="startReply(review)"
+                    @click="
+                      () => {
+                        startReply(review)
+                      }
+                    "
                   >
                     <span class="i-lucide-message-square-text h-3.5 w-3.5" aria-hidden="true" />
                     {{ review.reply ? 'Sửa phản hồi' : 'Phản hồi' }}

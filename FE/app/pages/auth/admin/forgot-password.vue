@@ -17,14 +17,15 @@ const state = reactive({
 
 type Schema = z.output<typeof forgotPasswordSchema>
 
-const { submit: handleForgotPassword, saving: loading } = useFormSubmit<Schema>(
-  async (data) => {
+const { handleSubmit, isSubmitting: loading } = useFormSubmit()
+const handleForgotPassword = handleSubmit(
+  async (data: Schema) => {
     // Calling auth service to send OTP
     const res = await authService.forgotPassword({ phoneNumber: data.phoneNumber })
     return res
   },
   {
-    onSuccess(res) {
+    onSuccess(res?: { otp?: string }) {
       sent.value = true
       // If dev mode returns OTP, you could log it or show it for testing
       if ((res as { otp?: string })?.otp) {
@@ -35,7 +36,7 @@ const { submit: handleForgotPassword, saving: loading } = useFormSubmit<Schema>(
         })
       }
     },
-    onError(err) {
+    onError(err: Error) {
       toast.add({ title: 'Có lỗi xảy ra', description: err.message, color: 'error' })
     }
   }
@@ -93,7 +94,7 @@ const { submit: handleForgotPassword, saving: loading } = useFormSubmit<Schema>(
         class="space-y-5"
         :schema="forgotPasswordSchema"
         :state="state"
-        @submit="handleForgotPassword"
+        @submit="(e: any) => handleForgotPassword(e.data)"
       >
         <UFormField label="Số điện thoại" name="phoneNumber">
           <UInput

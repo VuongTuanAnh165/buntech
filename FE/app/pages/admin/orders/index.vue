@@ -2,7 +2,6 @@
 import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import type { Order, Profile } from '~/utils/types'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
-import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '~/utils/orderStatus'
 const toast = useToast()
 useSeoMeta({ title: 'Đơn hàng - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
@@ -24,80 +23,40 @@ const limit = ref(10)
 const showFilters = ref(false)
 const selectedOrders = ref<Set<string>>(new Set())
 const showBatchModal = ref(false)
-const batchDriverId = ref('')
-const batchAssigning = ref(false)
 const exporting = ref(false)
 onMounted(() => {
   setTimeout(() => {
     loading.value = false
   }, 300)
 })
-const kpiStats = computed(() => {
-  const list = allOrders.value
-  const pending = list.filter((o) => o.status === OrderStatus.PENDING).length
-  const shipping = list.filter((o) => o.status === OrderStatus.SHIPPING).length
-  const delivered = list.filter((o) => o.status === OrderStatus.DELIVERED).length
-  return [
-    {
-      title: 'Tổng đơn hàng',
-      value: list.length,
-      icon: 'i-lucide-shopping-bag',
-      color: 'primary' as const,
-      trend: { value: 15, isPositive: true }
-    },
-    {
-      title: 'Chờ xử lý',
-      value: pending,
-      icon: 'i-lucide-clock',
-      color: 'warning' as const,
-      trend: { value: 3, isPositive: true }
-    },
-    {
-      title: 'Đang giao',
-      value: shipping,
-      icon: 'i-lucide-truck',
-      color: 'info' as const,
-      trend: { value: 7, isPositive: true }
-    },
-    {
-      title: 'Đã giao',
-      value: delivered,
-      icon: 'i-lucide-package-check',
-      color: 'success' as const,
-      trend: { value: 12, isPositive: true }
-    }
-  ]
-})
-const totalRevenue = computed(() =>
-  allOrders.value.filter((o) => o.status === OrderStatus.DELIVERED).reduce((s, o) => s + o.total, 0)
-)
+
 const statusPills = computed(() => {
   const list = allOrders.value
   return [
-    { accessorKey: 'ALL' as const, header: 'Tất cả', count: list.length },
+    { key: 'ALL' as const, label: 'Tất cả', count: list.length },
     {
-      accessorKey: OrderStatus.PENDING,
-      header: 'Chờ xử lý',
+      key: OrderStatus.PENDING,
+      label: 'Chờ xử lý',
       count: list.filter((o) => o.status === OrderStatus.PENDING).length
     },
     {
-      accessorKey: OrderStatus.PROCESSING,
-      header: 'Đang chuẩn bị',
+      key: OrderStatus.PROCESSING,
+      label: 'Đang chuẩn bị',
       count: list.filter((o) => o.status === OrderStatus.PROCESSING).length
     },
     {
-      accessorKey: OrderStatus.SHIPPING,
-      header: 'Đang giao',
+      key: OrderStatus.SHIPPING,
+      label: 'Đang giao',
       count: list.filter((o) => o.status === OrderStatus.SHIPPING).length
     },
     {
-      accessorKey: OrderStatus.DELIVERED,
-      header: 'Đã giao',
+      key: OrderStatus.DELIVERED,
+      label: 'Đã giao',
       count: list.filter((o) => o.status === OrderStatus.DELIVERED).length
     },
     {
-      accessorKey: OrderStatus.CANCELLED,
-      header: 'Đã hủy',
+      key: OrderStatus.CANCELLED,
+      label: 'Đã hủy',
       count: list.filter((o) => o.status === OrderStatus.CANCELLED).length
     }
   ]
@@ -158,29 +117,22 @@ function clearSelection() {
   selectedOrders.value.clear()
   selectedOrders.value = new Set()
 }
-function batchAssign() {
-  if (!batchDriverId.value || selectedOrders.value.size === 0) return
-  batchAssigning.value = true
-  setTimeout(() => {
-    const ids = Array.from(selectedOrders.value)
-    const driver = drivers.value.find((d) => d.id === batchDriverId.value) || null
-    allOrders.value = allOrders.value.map((o) =>
-      ids.includes(o.id)
-        ? {
-            ...o,
-            driver_id: batchDriverId.value,
-            driver,
-            status: OrderStatus.SHIPPING,
-            updated_at: new Date().toISOString()
-          }
-        : o
-    )
-    toast.add({ title: `Đã điều phối ${ids.length} đơn hàng`, color: 'success' })
-    showBatchModal.value = false
-    clearSelection()
-    batchDriverId.value = ''
-    batchAssigning.value = false
-  }, 500)
+function handleBatchAssign(driverId: string) {
+  const ids = Array.from(selectedOrders.value)
+  const driver = drivers.value.find((d) => d.id === driverId) || null
+  allOrders.value = allOrders.value.map((o) =>
+    ids.includes(o.id)
+      ? {
+          ...o,
+          driver_id: driverId,
+          driver,
+          status: OrderStatus.SHIPPING,
+          updated_at: new Date().toISOString()
+        }
+      : o
+  )
+  toast.add({ title: `Đã điều phối ${ids.length} đơn hàng`, color: 'success' })
+  clearSelection()
 }
 function exportCSV() {
   exporting.value = true
@@ -202,16 +154,6 @@ const activeFilterCount = computed(() => {
   if (search.value) c++
   return c
 })
-const columns = [
-  { accessorKey: 'select', header: '' },
-  { accessorKey: 'id', header: 'Mã đơn' },
-  { accessorKey: 'user', header: 'Khách hàng' },
-  { accessorKey: 'status', header: 'Trạng thái' },
-  { accessorKey: 'total', header: 'Tổng tiền' },
-  { accessorKey: 'amount_collected', header: 'Đã thu' },
-  { accessorKey: 'created_at', header: 'Ngày tạo' },
-  { accessorKey: 'actions', header: 'Thao tác' }
-]
 </script>
 <template>
   <div>
@@ -223,7 +165,7 @@ const columns = [
           color="neutral"
           icon="i-lucide-filter"
           aria-label="Lọc"
-          @click="showFilters = !showFilters"
+          @click="() => (showFilters = !showFilters)"
         >
           <span
             v-if="activeFilterCount > 0"
@@ -262,45 +204,7 @@ const columns = [
     </template>
 
     <template v-else>
-      <!-- KPI Row -->
-      <div class="mb-6">
-        <BaseStatsGrid :stats="kpiStats" :loading="loading" />
-      </div>
-      <!-- Revenue banner -->
-      <div
-        class="card stagger-item mb-4 flex items-center justify-between p-4"
-        style="animation-delay: 180ms"
-      >
-        <div class="flex items-center gap-3">
-          <div
-            class="bg-success-50 dark:bg-success-900/20 ring-success-100 dark:ring-success-900/30 flex h-10 w-10 items-center justify-center rounded-lg ring-1"
-          >
-            <div class="i-lucide-banknote text-success-600 dark:text-success-400 h-5 w-5" />
-          </div>
-          <div>
-            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">
-              Tổng doanh thu (đã giao)
-            </p>
-            <p class="text-success-600 dark:text-success-400 text-lg font-bold tabular-nums">
-              {{ formatVND(totalRevenue) }}
-            </p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="relative flex h-2.5 w-2.5">
-            <span
-              class="bg-success-400 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
-            />
-            <span class="bg-success-500 relative inline-flex h-2.5 w-2.5 rounded-full" />
-          </span>
-          <span
-            class="flex hidden items-center gap-1 text-xs text-slate-500 sm:flex dark:text-zinc-400"
-          >
-            <div class="i-lucide-radio h-3.5 w-3.5" />
-            Cập nhật theo thời gian thực
-          </span>
-        </div>
-      </div>
+      <OrderKpiCards :orders="allOrders" :loading="loading" />
       <!-- Status pills -->
       <div
         class="stagger-item mb-4 flex items-center gap-2 overflow-x-auto pb-1"
@@ -393,7 +297,10 @@ const columns = [
               @click="clearFilters"
               >Xóa lọc</UButton
             >
-            <UButton color="primary" class="flex-1 justify-center" @click="showFilters = false"
+            <UButton
+              color="primary"
+              class="flex-1 justify-center"
+              @click="() => (showFilters = false)"
               >Áp dụng</UButton
             >
           </div>
@@ -427,90 +334,11 @@ const columns = [
         class="animate-fade-in-up bg-surface ring-surface-border overflow-hidden rounded-xl ring-1"
         style="animation-delay: 280ms"
       >
-        <UTable :columns="columns" :data="pagedRows">
-          <template #select-cell="{ row }">
-            <UCheckbox
-              v-if="
-                row.original.status === OrderStatus.PROCESSING ||
-                row.original.status === OrderStatus.PENDING
-              "
-              :model-value="selectedOrders.has(row.original.id)"
-              @update:model-value="(v: boolean) => toggleSelectOrder(row.original.id, v)"
-              @click.stop
-            />
-          </template>
-          <template #id-cell="{ row }">
-            <span class="font-mono text-xs text-slate-500 dark:text-zinc-400">{{
-              row.original.id.slice(0, 8)
-            }}</span>
-          </template>
-          <template #user-cell="{ row }">
-            <div class="flex min-w-0 items-center gap-2">
-              <UAvatar
-                :alt="
-                  row.original.user?.full_name || row.original.guest_info?.name || 'Khách vãng lai'
-                "
-                :src="row.original.user?.avatar_url"
-                size="sm"
-              />
-              <div class="min-w-0">
-                <p class="text-surface-foreground max-w-[180px] truncate text-sm">
-                  {{
-                    row.original.user?.full_name ||
-                    row.original.guest_info?.name ||
-                    'Khách vãng lai'
-                  }}
-                </p>
-                <p
-                  v-if="row.original.driver"
-                  class="flex items-center gap-1 truncate text-xs text-slate-500 dark:text-zinc-400"
-                >
-                  <span class="i-lucide-truck h-3 w-3" /> {{ row.original.driver?.full_name }}
-                </p>
-              </div>
-            </div>
-          </template>
-          <template #status-cell="{ row }">
-            <UBadge :color="ORDER_STATUS_COLORS[row.original.status]" variant="subtle">
-              {{ ORDER_STATUS_LABELS[row.original.status] }}
-            </UBadge>
-          </template>
-          <template #total-cell="{ row }">
-            <span class="text-surface-foreground font-semibold tabular-nums">{{
-              formatVND(row.original.total)
-            }}</span>
-          </template>
-          <template #amount_collected-cell="{ row }">
-            <span
-              :class="[
-                'tabular-nums',
-                row.original.amount_collected > 0
-                  ? 'text-success-600 dark:text-success-400 font-medium'
-                  : 'text-slate-400 dark:text-zinc-500'
-              ]"
-            >
-              {{
-                row.original.amount_collected > 0 ? formatVND(row.original.amount_collected) : '—'
-              }}
-            </span>
-          </template>
-          <template #created_at-cell="{ row }">
-            <span class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">{{
-              formatDate(row.original.created_at)
-            }}</span>
-          </template>
-          <template #actions-cell="{ row }">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              size="sm"
-              :to="`/admin/orders/${row.original.id}`"
-            >
-              <div class="i-lucide-eye mr-1 h-4 w-4" />
-              Xem
-            </UButton>
-          </template>
-        </UTable>
+        <OrderListTable
+          :orders="pagedRows"
+          :selected-orders="selectedOrders"
+          @update:selected-orders="toggleSelectOrder"
+        />
         <div v-if="pagedRows.length === 0" class="text-surface-500 p-8 text-center">
           Không tìm thấy đơn hàng nào.
         </div>
@@ -529,50 +357,11 @@ const columns = [
       </div>
     </template>
     <!-- Batch Assign Modal -->
-    <UModal v-model:open="showBatchModal" title="Điều phối đơn hàng">
-      <template #body>
-        <div class="space-y-4">
-          <div
-            class="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 flex items-center gap-2 rounded-lg border p-3"
-          >
-            <div class="i-lucide-truck text-primary-600 dark:text-primary-400 h-5 w-5" />
-            <p class="text-primary-700 dark:text-primary-300 text-[13px]">
-              Đã chọn <strong class="font-bold">{{ selectedOrders.size }}</strong> đơn hàng để điều
-              phối
-            </p>
-          </div>
-          <UFormField label="Chọn tài xế" required>
-            <USelectMenu
-              v-model="batchDriverId"
-              :items="drivers.map((d) => ({ value: d.id, label: d.full_name }))"
-              value-key="value"
-              label-key="label"
-              placeholder="Chọn tài xế giao hàng"
-            />
-          </UFormField>
-        </div>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton
-            variant="ghost"
-            color="neutral"
-            @click="
-              () => {
-                showBatchModal = false
-              }
-            "
-            >Hủy</UButton
-          >
-          <UButton
-            :loading="batchAssigning"
-            :disabled="!batchDriverId || selectedOrders.size === 0"
-            @click="batchAssign"
-          >
-            Điều phối ngay
-          </UButton>
-        </div>
-      </template>
-    </UModal>
+    <OrderBatchAssignModal
+      v-model:open="showBatchModal"
+      :selected-count="selectedOrders.size"
+      :drivers="drivers"
+      @assign="handleBatchAssign"
+    />
   </div>
 </template>

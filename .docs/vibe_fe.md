@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 1: Nền tảng lõi, Quản lý Khách hàng & Cấu hình
-2. Màn hình Login, Quên mật khẩu, Đổi mật khẩu và Cập nhật Profile.
+3. Layout Admin (Sidebar, Header).
 
 ==================================================
 

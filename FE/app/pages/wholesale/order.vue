@@ -237,7 +237,11 @@ onMounted(() => {
                     ? 'bg-primary-600 border-primary-600 text-white'
                     : 'bg-surface text-surface-foreground border-surface-border hover:border-primary-300'
                 ]"
-                @click="selectedCategory = ''"
+                @click="
+                  () => {
+                    selectedCategory = ''
+                  }
+                "
               >
                 Tất cả
               </UButton>
@@ -253,7 +257,11 @@ onMounted(() => {
                     ? 'bg-primary-600 border-primary-600 text-white'
                     : 'bg-surface text-surface-foreground border-surface-border hover:border-primary-300'
                 ]"
-                @click="selectedCategory = cat.id"
+                @click="
+                  () => {
+                    selectedCategory = cat.id
+                  }
+                "
               >
                 {{ cat.name }}
               </UButton>
