@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 1: Nền tảng lõi, Quản lý Khách hàng & Cấu hình
-3. Layout Admin (Sidebar, Header).
+4. Lấy Master Data (Tỉnh thành, Enum) có ETag.
 
 ==================================================
 

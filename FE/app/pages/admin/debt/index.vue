@@ -195,6 +195,11 @@ onMounted(() => {
     loading.value = false
   }, 300)
 })
+
+function setFilter(filterKey: string) {
+  typeFilter.value = filterKey
+  page.value = 1
+}
 </script>
 <template>
   <div>
@@ -355,15 +360,12 @@ onMounted(() => {
       >
         <UButton
           v-for="pill in typePills"
-          :key="pill.key"
-          :variant="typeFilter === pill.key ? 'solid' : 'soft'"
-          :color="typeFilter === pill.key ? 'primary' : 'neutral'"
+          :key="pill.accessorKey"
+          :variant="typeFilter === pill.accessorKey ? 'solid' : 'soft'"
+          :color="typeFilter === pill.accessorKey ? 'primary' : 'neutral'"
           size="sm"
           class="whitespace-nowrap"
-          @click="
-            typeFilter = pill.key
-            page = 1
-          "
+          @click="setFilter(pill.accessorKey)"
         >
           <UIcon :name="pill.icon" class="mr-1 h-3.5 w-3.5" />
           {{ pill.label }}

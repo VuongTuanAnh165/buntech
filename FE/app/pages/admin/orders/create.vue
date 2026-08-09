@@ -176,6 +176,16 @@ function submitOrder() {
     toast.add({ title: 'Tạo đơn hàng thành công!', color: 'success' })
   }, 800)
 }
+
+function resetForm() {
+  success.value = false
+  orderItems.value = []
+  selectedCustomerId.value = ''
+  note.value = ''
+  amountCollectedInput.value = ''
+  deliveryFeeInput.value = ''
+}
+
 onMounted(loadInitData)
 </script>
 <template>
@@ -209,18 +219,7 @@ onMounted(loadInitData)
         <UButton :to="`/admin/orders/${createdOrderId}`" icon="i-lucide-package"
           >Xem đơn hàng</UButton
         >
-        <UButton
-          color="neutral"
-          variant="outline"
-          icon="i-lucide-plus"
-          @click="
-            success = false
-            orderItems = []
-            selectedCustomerId = ''
-            note = ''
-            amountCollectedInput = ''
-            deliveryFeeInput = ''
-          "
+        <UButton color="neutral" variant="outline" icon="i-lucide-plus" @click="resetForm"
           >Tạo đơn khác</UButton
         >
       </div>

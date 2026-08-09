@@ -1,57 +1,105 @@
-import { getDivisionsVersion, getDivisionsTree } from '~/services/masterDataService'
+import { getDivisionsTree, getConstants } from '~/services/masterDataService'
 
 /**
- * Composable quản lý dữ liệu Master Data (Tỉnh thành...).
- * Sử dụng useState để đảm bảo Global Reactivity (Share state giữa các component).
- * Chỉ đọc/ghi LocalStorage trên Client (tránh Hydration Mismatch & quá tải Server).
+ * Composable quản lý dữ liệu Master Data (Tỉnh thành, Constants).
+ * Sử dụng useState để đảm bảo Global Reactivity.
+ * Dùng ETag và If-None-Match để tránh tải lại file tĩnh lớn.
  */
 export const useMasterData = () => {
   const version = useState<string | null>('master_data_version', () => null)
   const divisions = useState<unknown[]>('administrative_divisions', () => [])
+  const constants = useState<Record<string, Record<string, string>> | null>(
+    'master_data_constants',
+    () => null
+  )
 
   const initSync = async () => {
-    // 1. Khôi phục từ LocalStorage (nếu có) để component render ngay lập tức
-    if (!version.value) {
-      version.value = localStorage.getItem('master_data_version')
-    }
-    if (!divisions.value.length) {
-      const cached = localStorage.getItem('administrative_divisions')
-      if (cached) {
-        try {
-          divisions.value = JSON.parse(cached)
-        } catch (e) {
-          console.error('[MasterData] Lỗi parse JSON từ LocalStorage', e)
-        }
-      }
-    }
-
-    // 2. Fetch version từ API để kiểm tra xem có cần cập nhật không
-    try {
-      const versionRes = await getDivisionsVersion()
-      if (versionRes?.success && versionRes?.data?.versionHash) {
-        const serverVersion = versionRes.data.versionHash
-
-        // 3. Nếu version khác nhau hoặc chưa có data -> Fetch data mới
-        if (version.value !== serverVersion || !divisions.value.length) {
-          const divisionsRes = await getDivisionsTree()
-          if (divisionsRes?.success) {
-            divisions.value = divisionsRes.data || []
-            version.value = serverVersion
-
-            // 4. Lưu vào LocalStorage để dùng cho lần sau
-            localStorage.setItem('administrative_divisions', JSON.stringify(divisionsRes.data))
-            localStorage.setItem('master_data_version', serverVersion)
+    // 1. Khôi phục từ LocalStorage (Client-side)
+    if (import.meta.client) {
+      if (!version.value) version.value = localStorage.getItem('master_data_version')
+      if (!divisions.value.length) {
+        const cached = localStorage.getItem('administrative_divisions')
+        if (cached) {
+          try {
+            divisions.value = JSON.parse(cached)
+          } catch {
+            // ignore
           }
         }
       }
+      if (!constants.value) {
+        const cachedConst = localStorage.getItem('master_data_constants')
+        if (cachedConst) {
+          try {
+            constants.value = JSON.parse(cachedConst)
+          } catch {
+            // ignore
+          }
+        }
+      }
+    }
+
+    // 2. Fetch Constants
+    try {
+      getConstants()
+        .then((res) => {
+          if (res?.success && res.data) {
+            constants.value = res.data
+            if (import.meta.client) {
+              localStorage.setItem('master_data_constants', JSON.stringify(res.data))
+            }
+          }
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error('[MasterData] Lỗi tải constants', e)
+        })
+    } catch {
+      // ignore
+    }
+
+    // 3. Fetch Divisions với ETag (If-None-Match)
+    try {
+      const currentHash = version.value || undefined
+      let newEtag: string | null = null
+
+      await getDivisionsTree(
+        currentHash,
+        (context: { response?: { headers?: { get: (n: string) => string | null } } }) => {
+          const etag =
+            context.response?.headers?.get('etag') || context.response?.headers?.get('ETag')
+          if (etag) newEtag = etag
+        }
+      )
+        .then((res) => {
+          if (res?.success && res.data) {
+            divisions.value = res.data
+            if (newEtag) version.value = newEtag
+
+            if (import.meta.client) {
+              localStorage.setItem('administrative_divisions', JSON.stringify(res.data))
+              if (newEtag) localStorage.setItem('master_data_version', newEtag)
+            }
+          }
+        })
+        .catch((e: { response?: { status?: number } }) => {
+          if (e?.response?.status === 304) {
+            // Data không đổi
+          } else {
+            // eslint-disable-next-line no-console
+            console.error('[MasterData] Lỗi tải divisions:', e)
+          }
+        })
     } catch (e) {
-      console.error('[MasterData] Lỗi đồng bộ dữ liệu:', e)
+      // eslint-disable-next-line no-console
+      console.error('[MasterData] Lỗi đồng bộ divisions:', e)
     }
   }
 
   return {
     version,
     divisions,
+    constants,
     initSync
   }
 }

@@ -7,7 +7,7 @@ import type { LoginResponse } from '~/types/auth'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
-interface CustomFetchOptions<R extends ResponseType = 'json'> extends FetchOptions<R> {
+export interface CustomFetchOptions<R extends ResponseType = 'json'> extends FetchOptions<R> {
   silent?: boolean
   ignoreErrorCodes?: string[]
   abortId?: string
@@ -401,8 +401,10 @@ export const fetchWithAuth = async <T = unknown, R extends ResponseType = 'json'
     }
 
     if (import.meta.server) {
+      // eslint-disable-next-line no-console
       console.error(JSON.stringify(logData))
     } else {
+      // eslint-disable-next-line no-console
       console.error('[API_FETCH_ERROR]', logData)
     }
 
@@ -422,7 +424,7 @@ export const ApiClient = {
   get<T = unknown, R extends ResponseType = 'json'>(
     url: string,
     query?: Record<string, unknown>,
-    opts?: FetchOptions<R>
+    opts?: CustomFetchOptions<R>
   ) {
     return fetchWithAuth<T, R>(url, { method: 'GET', query, ...opts } as CustomFetchOptions<R>)
   },
@@ -430,7 +432,7 @@ export const ApiClient = {
   post<T = unknown, R extends ResponseType = 'json'>(
     url: string,
     body?: unknown,
-    opts?: FetchOptions<R>
+    opts?: CustomFetchOptions<R>
   ) {
     return fetchWithAuth<T, R>(url, { method: 'POST', body, ...opts } as CustomFetchOptions<R>)
   },
@@ -438,7 +440,7 @@ export const ApiClient = {
   put<T = unknown, R extends ResponseType = 'json'>(
     url: string,
     body?: unknown,
-    opts?: FetchOptions<R>
+    opts?: CustomFetchOptions<R>
   ) {
     return fetchWithAuth<T, R>(url, { method: 'PUT', body, ...opts } as CustomFetchOptions<R>)
   },
@@ -446,7 +448,7 @@ export const ApiClient = {
   patch<T = unknown, R extends ResponseType = 'json'>(
     url: string,
     body?: unknown,
-    opts?: FetchOptions<R>
+    opts?: CustomFetchOptions<R>
   ) {
     return fetchWithAuth<T, R>(url, { method: 'PATCH', body, ...opts } as CustomFetchOptions<R>)
   },
@@ -454,7 +456,7 @@ export const ApiClient = {
   del<T = unknown, R extends ResponseType = 'json'>(
     url: string,
     query?: Record<string, unknown>,
-    opts?: FetchOptions<R>
+    opts?: CustomFetchOptions<R>
   ) {
     return fetchWithAuth<T, R>(url, { method: 'DELETE', query, ...opts } as CustomFetchOptions<R>)
   },
@@ -628,6 +630,7 @@ export const ApiClient = {
         return executeDownload(newToken)
       }
 
+      // eslint-disable-next-line no-console
       console.error('[API_DOWNLOAD_ERROR]', error)
       throw error
     })

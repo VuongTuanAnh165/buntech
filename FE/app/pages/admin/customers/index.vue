@@ -210,6 +210,11 @@ const deleteConfirmMessage = computed(() =>
     ? `Bạn có chắc muốn xóa khách hàng "${deleteTarget.value.full_name}"? Hành động này không thể hoàn tác.`
     : ''
 )
+function retry() {
+  loading.value = true
+  error.value = false
+  setTimeout(() => (loading.value = false), 300)
+}
 </script>
 <template>
   <div class="space-y-6">
@@ -228,15 +233,7 @@ const deleteConfirmMessage = computed(() =>
       description="Không thể tải danh sách khách hàng."
     >
       <template #action>
-        <UButton
-          color="primary"
-          @click="
-            loading = true
-            error = false
-            setTimeout(() => (loading = false), 300)
-          "
-          >Thử lại</UButton
-        >
+        <UButton color="primary" @click="retry">Thử lại</UButton>
       </template>
     </BaseEmptyState>
     <template v-else>
