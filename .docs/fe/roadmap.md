@@ -21,69 +21,95 @@
 
 *Giả định: 1 Sprint = 2 tuần. Đội ngũ FE gồm 1-2 người.*
 
-### SPRINT 1: Nền tảng lõi & Quản lý Khách hàng
-**Mục tiêu:** Setup xong dự án, đăng nhập thành công và quản lý được thông tin khách sỉ.
+### SPRINT 1: Nền tảng lõi, Quản lý Khách hàng & Cấu hình
+**Mục tiêu:** Setup xong dự án, đăng nhập thành công, quản lý được thông tin khách sỉ và cấu hình hệ thống cơ bản.
 
 | Hạng mục | Chi tiết |
 | --- | --- |
-| **Module** | Core, Auth, Master Data, Users |
-| **Chức năng** | 1. **Khởi tạo:** `npx nuxi init FE`, cài đặt **ESLint + Husky** khắt khe.<br>2. Màn hình Login, **Quên mật khẩu**, **Đổi mật khẩu**.<br>3. Layout Admin (Sidebar, Header).<br>4. Lấy Master Data (Tỉnh thành, Enum) có ETag.<br>5. Quản lý Khách hàng (List ảo hóa với `vue-virtual-scroller`, Create, Update). |
-| **API** | `/auth/login`, `/auth/me`, `/master-data/*`, `/constants`, `/admin/users/*` |
+| **Module** | Core, Auth, Master Data, Users, System Configs |
+| **Chức năng** | 1. **Khởi tạo:** `npx nuxi init FE`, cài đặt **ESLint + Husky** khắt khe.<br>2. Màn hình Login, **Quên mật khẩu**, **Đổi mật khẩu** và **Cập nhật Profile**.<br>3. Layout Admin (Sidebar, Header).<br>4. Lấy Master Data (Tỉnh thành, Enum) có ETag.<br>5. **Quản lý Cấu hình hệ thống** (Phí ship, thông tin liên hệ...).<br>6. Quản lý Khách hàng & **Sổ địa chỉ** (List ảo hóa với `vue-virtual-scroller`, Create, Update). |
+| **API** | `/auth/*`, `/master-data/*`, `/constants`, `/admin/users/*`, `/admin/users/:userId/addresses`, `/admin/system-configs/*` |
 | **Dependency** | None. (Độc lập khởi đầu) |
-| **Estimate** | 5 Man-days |
+| **Estimate** | 6 Man-days |
 | **Risk** | Kiến trúc thư mục setup sai từ đầu sẽ khó sửa về sau. Cấu hình interceptor Auth chưa chuẩn gây loop redirect. |
 | **Priority** | **CRITICAL** (Blocker) |
 
-### SPRINT 2: Cửa ngõ Khách hàng & Sản phẩm
-**Mục tiêu:** Public website cho SEO, khách vãng lai tự đặt hàng nhanh, Admin quản lý được danh mục sản phẩm.
+### SPRINT 2: Cửa ngõ Khách hàng, Sản phẩm & Nội dung
+**Mục tiêu:** Public website cho SEO, khách đặt hàng nhanh, Admin quản lý được Sản phẩm, Đánh giá và Blog.
 
 | Hạng mục | Chi tiết |
 | --- | --- |
-| **Module** | CMS, Products, Orders (Public) |
-| **Chức năng** | 1. Landing Page (Customer Site).<br>2. Giao diện Blog, Bài viết.<br>3. Quản lý Danh mục & Sản phẩm (Admin).<br>4. Giao diện Đặt hàng nhanh (Form có Honeypot). |
-| **API** | `/blog-categories`, `/posts`, `/categories`, `/products`, `POST /orders/quick` |
+| **Module** | CMS, Products, Product Reviews, Orders (Public) |
+| **Chức năng** | 1. Landing Page (Customer Site).<br>2. Giao diện Blog, Bài viết (Public) & **Quản lý Blog, Danh mục Blog (Admin)**.<br>3. Quản lý Danh mục & Sản phẩm (Admin).<br>4. **Quản lý Đánh giá sản phẩm** (Duyệt, Trả lời, Xóa).<br>5. Giao diện Đặt hàng nhanh (Form có Honeypot). |
+| **API** | `/blog-categories`, `/posts`, `/admin/blog-categories/*`, `/admin/posts/*`, `/categories`, `/products`, `/admin/categories/*`, `/admin/products/*`, `/admin/product-reviews/*`, `POST /orders/quick` |
 | **Dependency** | Sprint 1 (Layout & Component UI Kit) |
-| **Estimate** | 6 Man-days |
+| **Estimate** | 7 Man-days |
 | **Risk** | Honeypot ẩn bằng CSS không qua mặt được các bot hiện đại. Xử lý Upload ảnh (Preview/Resize) gây lag. |
 | **Priority** | High |
 
 ### SPRINT 3: Nghiệp vụ Bán sỉ & Xử lý Đơn hàng (Core Business)
-**Mục tiêu:** Áp dụng giá sỉ riêng và Admin tạo/duyệt đơn hàng thành công.
+**Mục tiêu:** Áp dụng giá sỉ riêng, tạo/duyệt đơn hàng và xuất báo cáo.
 
 | Hạng mục | Chi tiết |
 | --- | --- |
-| **Module** | Users (Custom Price), Orders (Admin) |
-| **Chức năng** | 1. Quản lý Bảng giá riêng cho User.<br>2. Danh sách & Chi tiết Đơn hàng (Admin).<br>3. Form tạo đơn Admin (Tự động map giá sỉ từ user, tự tính tổng tiền).<br>4. UX Flow: Copy đơn cũ tạo đơn mới. |
-| **API** | `/admin/users/:id/custom-prices`, `/admin/orders/*` |
+| **Module** | Users (Custom Price), Orders (Admin), Exports |
+| **Chức năng** | 1. Quản lý Bảng giá riêng cho User.<br>2. Danh sách, Chi tiết Đơn hàng (Admin).<br>3. Form tạo đơn Admin (Tự động map giá sỉ từ user, tự tính tổng tiền).<br>4. UX Flow: Copy đơn cũ tạo đơn mới.<br>5. **Xuất báo cáo dữ liệu** (Xuất Excel/CSV danh sách Đơn hàng & Đơn hàng hôm nay). |
+| **API** | `/admin/users/:id/custom-prices`, `/admin/orders/*`, `/admin/exports/*` |
 | **Dependency** | Users & Products (Phải có KH và SP mới tạo được đơn) |
 | **Estimate** | 7 Man-days |
 | **Risk** | Logic tính toán tổng tiền, thuế, giá sỉ đè giá gốc ở FE dễ bị lệch so với BE nếu validation form không chặt. |
 | **Priority** | **CRITICAL** |
 
 ### SPRINT 4: Mobile App & Vận hành Giao nhận
-**Mục tiêu:** Bàn giao đơn cho tài xế và tài xế chốt đơn thành công trên App Mobile.
+**Mục tiêu:** Bàn giao đơn cho tài xế, tài xế chốt đơn trên App và nhận thông báo Push.
 
 | Hạng mục | Chi tiết |
 | --- | --- |
-| **Module** | Orders (Batch Assign), Driver App, Realtime |
-| **Chức năng** | 1. Web Admin: Màn hình Batch Assign gán đơn cho tài xế.<br>2. Cài đặt Capacitor App và **SSE Realtime** (`EventSource`) để admin thấy tài xế chốt đơn tự động nhảy.<br>3. Lộ trình hôm nay (Driver).<br>4. Chức năng Chốt giao hàng: **Kéo trượt sang phải (Swipe to Confirm)**.<br>5. Lưu tạm **Offline Sync Queue** bằng `idb-keyval` khi rớt mạng 4G. |
-| **API** | `PATCH /admin/orders/batch-assign`, `/driver/*`, `PATCH /driver/orders/:id/deliver`, `GET /admin/events/sse` |
+| **Module** | Orders (Batch Assign), Driver App, Realtime, Notifications |
+| **Chức năng** | 1. Web Admin: Màn hình Batch Assign gán đơn cho tài xế.<br>2. Cài đặt Capacitor App và **SSE Realtime** (`EventSource`) để admin thấy tài xế chốt đơn tự động nhảy.<br>3. Lộ trình hôm nay (Driver) & **Lịch sử chuyến đi**.<br>4. Chức năng Chốt giao hàng: **Kéo trượt sang phải (Swipe to Confirm)**.<br>5. Lưu tạm **Offline Sync Queue** bằng `idb-keyval` khi rớt mạng 4G.<br>6. **Xin quyền Push Notification (FCM)** và hiển thị **Danh sách Thông báo** (Chuông báo). |
+| **API** | `PATCH /admin/orders/batch-assign`, `/api/v1/driver/*`, `PATCH /driver/orders/:id/deliver`, `GET /admin/events/sse`, `POST /api/v1/driver/device-tokens`, *(Chờ BE bổ sung: `/api/v1/driver/history`, `/api/v1/driver/notifications`)* |
 | **Dependency** | Orders (Phải có đơn hàng mới chia được tuyến) |
-| **Estimate** | 6 Man-days |
-| **Risk** | Rớt mạng khi tài xế bấm chốt đơn $\rightarrow$ Phải làm queue lưu tạm UUID để retry. Build iOS/Android bằng Capacitor gặp lỗi native. |
+| **Estimate** | 7 Man-days |
+| **Risk** | Rớt mạng khi tài xế bấm chốt đơn $\rightarrow$ Phải làm queue lưu tạm UUID để retry. Tích hợp Push Notification (FCM) dễ gặp lỗi permission trên iOS. **🚨 BLOCKER NGHIÊM TRỌNG:** Backend ĐANG THIẾU API lấy `Lịch sử chuyến đi` (`/api/v1/driver/history`) và `Danh sách Thông báo` (`/api/v1/driver/notifications`). Yêu cầu Backend tham khảo `api_requirements_phase3.md` để bổ sung gấp. |
 | **Priority** | **CRITICAL** |
 
 ### SPRINT 5: Kế toán, Kho vận & Thống kê
-**Mục tiêu:** Hạch toán tiền bạc, kiểm soát tồn kho và xem biểu đồ.
+**Mục tiêu:** Hạch toán tiền bạc, quản lý nguyên vật liệu, kiểm soát tồn kho và xem biểu đồ.
 
 | Hạng mục | Chi tiết |
 | --- | --- |
-| **Module** | Finance, Inventory, Dashboard |
-| **Chức năng** | 1. Sổ cái Kế toán & Thanh toán Nợ.<br>2. Nhập/Xuất kho & Báo cáo Hao hụt.<br>3. Dashboard Biểu đồ Doanh thu (Chart.js/ECharts).<br>4. Thống kê Top Buyers. |
-| **API** | `/admin/transactions/*`, `/admin/inventory/*`, `/admin/dashboard/*` |
+| **Module** | Finance, Inventory, Raw Materials, Dashboard |
+| **Chức năng** | 1. Sổ cái Kế toán & Thanh toán Nợ.<br>2. **Quản lý Danh mục Nguyên vật liệu** (Tạo, Sửa, Xóa nguyên liệu cơ bản).<br>3. Nhập/Xuất kho & Báo cáo Hao hụt.<br>4. Dashboard Biểu đồ Doanh thu (Chart.js/ECharts).<br>5. Thống kê Top Buyers. |
+| **API** | `/admin/transactions/*`, `/admin/raw-materials/*`, `/admin/inventory/*`, `/admin/dashboard/*` |
 | **Dependency** | Phải có luồng chốt đơn (Sprint 4) thì mới sinh ra Data Công nợ và Kho để hiển thị. |
-| **Estimate** | 5 Man-days |
+| **Estimate** | 6 Man-days |
 | **Risk** | Biểu đồ Time-series ở Dashboard bị sai lệch timezone (hiển thị sai ngày do UTC). |
+| **Priority** | Medium |
+
+### SPRINT 6: Cổng thông tin Khách sỉ (Wholesale Portal)
+**Mục tiêu:** Cung cấp Dashboard cho khách sỉ tự theo dõi công nợ, đơn hàng và tự đặt hàng.
+
+| Hạng mục | Chi tiết |
+| --- | --- |
+| **Module** | Customer Portal |
+| **Chức năng** | 1. Dashboard Khách sỉ (Thống kê công nợ, đơn hàng).<br>2. Lịch sử đặt hàng cá nhân.<br>3. Form tự đặt hàng sỉ (Tự load bảng giá riêng). |
+| **API** | *(Chờ BE bổ sung API dành riêng cho Customer: `GET/POST /api/v1/customer/orders`, `GET /api/v1/customer/debt`)* |
+| **Dependency** | Phải có luồng tạo tài khoản (Sprint 1) và cài giá sỉ (Sprint 3). |
+| **Estimate** | 6 Man-days |
+| **Risk** | **🚨 BLOCKER NGHIÊM TRỌNG:** Backend chưa có nhóm API dành riêng cho Khách hàng sỉ (`CUSTOMER` role). Cần BE code gấp các API lấy công nợ, lịch sử đơn hàng và đặt hàng mới. Đã có tài liệu đặc tả `api_requirements_phase3.md`. |
+| **Priority** | High |
+
+### SPRINT 7: Audit & Refinement (Kiểm toán hệ thống)
+**Mục tiêu:** Tinh chỉnh UI/UX, tối ưu hóa toàn bộ hệ thống trước khi Go-live.
+
+| Hạng mục | Chi tiết |
+| --- | --- |
+| **Module** | Core, UI/UX, Performance |
+| **Chức năng** | 1. **Dark Mode Audit**: Fix lỗi độ tương phản, border ở chế độ tối.<br>2. **Responsive Audit**: Test hiển thị trên iPhone SE, Tablet, Desktop.<br>3. **Accessibility Audit**: Kiểm tra Tab navigation, screen reader.<br>4. **Performance Audit**: Lazy load `<NuxtImg>`, chống reflow/repaint.<br>5. **Empty States & Error Pages**: Tối ưu UI khi danh sách trống hoặc lỗi 404/500. |
+| **API** | Không yêu cầu API mới. |
+| **Dependency** | Phải hoàn thành toàn bộ Sprint 1 -> 5. |
+| **Estimate** | 4 Man-days |
+| **Risk** | Fix Responsive có thể làm vỡ layout của Dark Mode nếu viết CSS bất cẩn. |
 | **Priority** | Medium |
 
 ---

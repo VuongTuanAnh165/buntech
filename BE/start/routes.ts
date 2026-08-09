@@ -345,11 +345,32 @@ router
       () => import('#controllers/driver_routes_controller'),
       'getTodayRoutes',
     ])
+    router.get('/history', [() => import('#controllers/driver_orders_controller'), 'history'])
     router.patch('/orders/:id/deliver', [
       () => import('#controllers/driver_orders_controller'),
       'deliver',
+    ])
+    router.get('/notifications', [
+      () => import('#controllers/driver_notifications_controller'),
+      'index',
+    ])
+    router.patch('/notifications/:id/read', [
+      () => import('#controllers/driver_notifications_controller'),
+      'markAsRead',
     ])
   })
   .prefix('/api/v1/driver')
   .use(middleware.auth())
   .use(middleware.driver())
+
+// Customer Routes (Khách Sỉ)
+router
+  .group(() => {
+    router.get('/debt', [() => import('#controllers/customer_debt_controller'), 'index'])
+    router.get('/orders', [() => import('#controllers/customer_orders_controller'), 'index'])
+    router.get('/orders/:id', [() => import('#controllers/customer_orders_controller'), 'show'])
+    router.post('/orders', [() => import('#controllers/customer_orders_controller'), 'store'])
+  })
+  .prefix('/api/v1/customer')
+  .use(middleware.auth())
+  .use(middleware.customer())

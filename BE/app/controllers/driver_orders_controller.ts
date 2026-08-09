@@ -4,9 +4,16 @@ import DriverOrderService from '#services/driver_order_service'
 import { deliverOrderValidator } from '#validators/driver_order_validator'
 import emitter from '@adonisjs/core/services/emitter'
 
+import { formatPagination } from '#utils/pagination'
+import AdminOrderService from '#services/admin_order_service'
+import { OrderStatus } from '#enums/order_status'
+
 @inject()
 export default class DriverOrdersController {
-  constructor(protected driverOrderService: DriverOrderService) {}
+  constructor(
+    protected driverOrderService: DriverOrderService,
+    protected adminOrderService: AdminOrderService
+  ) {}
 
   /**
    * @deliver
@@ -28,6 +35,31 @@ export default class DriverOrdersController {
       success: true,
       message: 'Chốt giao hàng thành công, công nợ đã được tự động cập nhật',
       data: order,
+    })
+  }
+
+  /**
+   * @history
+   * @summary Lịch sử chuyến đi
+   * @description Lấy danh sách các đơn hàng đã được giao thành công bởi tài xế
+   * @paramQuery page - Trang hiện tại
+   * @paramQuery limit - Số lượng trên mỗi trang
+   * @responseBody 200 - <PaginatedOrderListResponse>
+   */
+  async history({ request, response, auth }: HttpContext) {
+    const page = request.input('page', 1)
+    const limit = request.input('limit', 20)
+    const driverId = auth.user!.id
+
+    const orders = await this.adminOrderService.getOrders(page, limit, {
+      driverId,
+      status: OrderStatus.DELIVERED,
+    })
+
+    return response.ok({
+      success: true,
+      message: 'Lấy lịch sử giao hàng thành công',
+      data: formatPagination(orders),
     })
   }
 }

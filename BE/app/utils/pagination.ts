@@ -7,7 +7,7 @@ import { ModelPaginatorContract, LucidRow } from '@adonisjs/lucid/types/model'
  */
 export function formatPagination<T extends LucidRow>(paginator: ModelPaginatorContract<T>) {
   const meta = paginator.getMeta()
-  
+
   return {
     meta: {
       total: meta.total,

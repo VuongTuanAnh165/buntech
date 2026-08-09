@@ -52,3 +52,39 @@ Trả về mảng (danh sách) các đơn hàng và thông tin khách hàng, s�
   5. **Trừ tồn kho thành phẩm**: Tự động trừ số lượng sản phẩm Bún (thành phẩm) tương ứng trong đơn hàng khỏi kho thực tế để tránh sai lệch sổ sách.
   6. Lưu `idempotencyKey` để chống trùng.
   7. Commit Transaction.
+
+---
+
+## 4. Lịch sử giao hàng (History)
+
+- **URL**: `GET /api/v1/driver/history`
+- **Mục đích**: Lấy danh sách các đơn hàng mà tài xế đã giao thành công (hoặc thất bại) trong quá khứ.
+- **Query Params**:
+  - `page` (Number, default 1)
+  - `limit` (Number, default 10)
+  - `status` (String, optional): Lọc theo trạng thái giao hàng (VD: `DELIVERED`, `CANCELLED`).
+  - `dateFrom`, `dateTo` (String, optional): Lọc theo khoảng thời gian.
+- **Response (200 OK)**:
+Trả về danh sách đơn hàng có phân trang.
+
+---
+
+## 5. Thông báo (Notifications)
+
+- **URL**: `GET /api/v1/driver/notifications`
+- **Mục đích**: Lấy danh sách thông báo cá nhân của tài xế (VD: "Admin vừa phân công cho bạn 10 đơn hàng").
+- **Query Params**:
+  - `page` (Number, default 1)
+  - `limit` (Number, default 20)
+  - `unreadOnly` (Boolean, optional): Truyền `true` để chỉ lấy thông báo chưa đọc.
+- **Response (200 OK)**:
+Trả về danh sách các thông báo (Tiêu đề, Nội dung, Thời gian, Trạng thái đã đọc/chưa đọc) có phân trang.
+
+---
+
+## 6. Đánh dấu đã đọc Thông báo (Mark as read)
+
+- **URL**: `PATCH /api/v1/driver/notifications/:id/read`
+- **Mục đích**: Chuyển trạng thái của thông báo thành đã đọc (`is_read` = `true`).
+- **Path Params**: `id` - ID Thông báo
+- **Response (200 OK)**: Trả về trạng thái thành công.
