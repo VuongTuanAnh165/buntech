@@ -58,6 +58,11 @@ export const adminNavigationItems: NavigationMenuItem[][] = [
       label: 'Thống kê',
       icon: 'i-lucide-chart-bar',
       to: '/admin/statistics'
+    },
+    {
+      label: 'Cấu hình hệ thống',
+      icon: 'i-lucide-settings',
+      to: '/admin/system'
     }
   ]
 ]

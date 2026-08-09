@@ -167,7 +167,9 @@ export interface SystemConfig {
   id: string
   key: string
   value: string
+  description?: string
   updated_at: string
+  created_at?: string
 }
 
 export interface Paginated<T> {
