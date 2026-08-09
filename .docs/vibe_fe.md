@@ -46,7 +46,8 @@ Không được bỏ sót.
 
 Chức năng cần triển khai
 
-<TÊN CHỨC NĂNG>
+SPRINT 1: Nền tảng lõi, Quản lý Khách hàng & Cấu hình
+1. Khởi tạo: npx nuxi init FE, cài đặt ESLint + Husky khắt khe.
 
 ==================================================
 
@@ -65,6 +66,10 @@ Phải tuân thủ toàn bộ rule trong FE/.agents.
 Khi code
 
 Bắt buộc thực hiện đúng thứ tự.
+
+Luôn viết code dưới dạng các component nhỏ, không vượt quá 400 dòng/file. Nếu dài hơn, bắt buộc phải tách component.
+
+Sử dụng công cụ `grep_search` hoặc `view_file` để kiểm tra xem đã có component UI/Composable nào tồn tại có thể tái sử dụng chưa trước khi tạo mới.
 
 Phase 1
 

@@ -67,10 +67,10 @@
 | --- | --- |
 | **Module** | Orders (Batch Assign), Driver App, Realtime, Notifications |
 | **Chức năng** | 1. Web Admin: Màn hình Batch Assign gán đơn cho tài xế.<br>2. Cài đặt Capacitor App và **SSE Realtime** (`EventSource`) để admin thấy tài xế chốt đơn tự động nhảy.<br>3. Lộ trình hôm nay (Driver) & **Lịch sử chuyến đi**.<br>4. Chức năng Chốt giao hàng: **Kéo trượt sang phải (Swipe to Confirm)**.<br>5. Lưu tạm **Offline Sync Queue** bằng `idb-keyval` khi rớt mạng 4G.<br>6. **Xin quyền Push Notification (FCM)** và hiển thị **Danh sách Thông báo** (Chuông báo). |
-| **API** | `PATCH /admin/orders/batch-assign`, `/api/v1/driver/*`, `PATCH /driver/orders/:id/deliver`, `GET /admin/events/sse`, `POST /api/v1/driver/device-tokens`, *(Chờ BE bổ sung: `/api/v1/driver/history`, `/api/v1/driver/notifications`)* |
+| **API** | `PATCH /admin/orders/batch-assign`, `/api/v1/driver/*`, `PATCH /api/v1/driver/orders/:id/deliver`, `GET /api/v1/driver/history`, `GET /api/v1/driver/notifications`, `GET /admin/events/sse`, `POST /api/v1/driver/device-tokens` |
 | **Dependency** | Orders (Phải có đơn hàng mới chia được tuyến) |
 | **Estimate** | 7 Man-days |
-| **Risk** | Rớt mạng khi tài xế bấm chốt đơn $\rightarrow$ Phải làm queue lưu tạm UUID để retry. Tích hợp Push Notification (FCM) dễ gặp lỗi permission trên iOS. **🚨 BLOCKER NGHIÊM TRỌNG:** Backend ĐANG THIẾU API lấy `Lịch sử chuyến đi` (`/api/v1/driver/history`) và `Danh sách Thông báo` (`/api/v1/driver/notifications`). Yêu cầu Backend tham khảo `api_requirements_phase3.md` để bổ sung gấp. |
+| **Risk** | Rớt mạng khi tài xế bấm chốt đơn $\rightarrow$ Phải làm queue lưu tạm UUID để retry. Tích hợp Push Notification (FCM) dễ gặp lỗi permission trên iOS. |
 | **Priority** | **CRITICAL** |
 
 ### SPRINT 5: Kế toán, Kho vận & Thống kê
@@ -93,10 +93,10 @@
 | --- | --- |
 | **Module** | Customer Portal |
 | **Chức năng** | 1. Dashboard Khách sỉ (Thống kê công nợ, đơn hàng).<br>2. Lịch sử đặt hàng cá nhân.<br>3. Form tự đặt hàng sỉ (Tự load bảng giá riêng). |
-| **API** | *(Chờ BE bổ sung API dành riêng cho Customer: `GET/POST /api/v1/customer/orders`, `GET /api/v1/customer/debt`)* |
+| **API** | `GET /api/v1/customer/orders`, `POST /api/v1/customer/orders`, `GET /api/v1/customer/debt` |
 | **Dependency** | Phải có luồng tạo tài khoản (Sprint 1) và cài giá sỉ (Sprint 3). |
 | **Estimate** | 6 Man-days |
-| **Risk** | **🚨 BLOCKER NGHIÊM TRỌNG:** Backend chưa có nhóm API dành riêng cho Khách hàng sỉ (`CUSTOMER` role). Cần BE code gấp các API lấy công nợ, lịch sử đơn hàng và đặt hàng mới. Đã có tài liệu đặc tả `api_requirements_phase3.md`. |
+| **Risk** | Phân quyền truy cập cần test kỹ để tránh Khách sỉ này nhìn thấy đơn hàng và công nợ của Khách sỉ khác. |
 | **Priority** | High |
 
 ### SPRINT 7: Audit & Refinement (Kiểm toán hệ thống)
