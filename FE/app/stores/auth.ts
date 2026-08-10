@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
-import { authService } from '~~/core/services/auth.service'
+import { authService } from '~/services/authService'
 import type { LoginPayload } from '~/types/auth'
 import type { CurrentUser } from '~/types/common'
-import { Role } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 
 export const useAuthStore = defineStore('auth', () => {
   // --- State ---
@@ -13,9 +13,14 @@ export const useAuthStore = defineStore('auth', () => {
   // --- Getters ---
   const isAuthenticated = computed(() => !!user.value)
   const role = computed(() => user.value?.role ?? null)
-  const isAdmin = computed(() => user.value?.role === Role.ADMIN)
-  const isDriver = computed(() => user.value?.role === Role.DRIVER)
-  const isCustomer = computed(() => user.value?.role === Role.CUSTOMER)
+  const { constants } = useMasterData()
+  const roleConstants = computed(() => constants.value?.[ConstantKey.Role] || {})
+
+  const isAdmin = computed(() => user.value?.role === (roleConstants.value.ADMIN || 'admin'))
+  const isDriver = computed(() => user.value?.role === (roleConstants.value.DRIVER || 'driver'))
+  const isCustomer = computed(
+    () => user.value?.role === (roleConstants.value.CUSTOMER || 'customer')
+  )
 
   const userInitials = computed(() => {
     if (!user.value?.fullName) return ''

@@ -1,4 +1,3 @@
-import { Role, OrderStatus, ProductStatus, TransactionType, InventoryMovementType } from './enums'
 import type {
   Profile,
   Category,
@@ -23,7 +22,6 @@ import type {
   DeliveryRoute
 } from './types'
 
-export * from './enums'
 export * from './types'
 
 const now = new Date()
@@ -181,10 +179,10 @@ function genName(isMale: boolean): string {
 const adminProfiles: Profile[] = [
   {
     id: uid('usr', 1),
-    role: Role.ADMIN,
+    role: 'ADMIN',
     phone: '0901234567',
     full_name: 'Nguyễn Quang Admin',
-    status: UserStatus.ACTIVE,
+    status: 'ACTIVE',
     debt_limit: 0,
     avatar_url: avatarFor('Nguyễn Quang Admin'),
     created_at: iso(120),
@@ -192,10 +190,10 @@ const adminProfiles: Profile[] = [
   },
   {
     id: uid('usr', 2),
-    role: Role.ADMIN,
+    role: 'ADMIN',
     phone: '0901234568',
     full_name: 'Trần Thị Quản Lý',
-    status: UserStatus.ACTIVE,
+    status: 'ACTIVE',
     debt_limit: 0,
     avatar_url: avatarFor('Trần Thị Quản Lý'),
     created_at: iso(100),
@@ -210,10 +208,10 @@ const driverProfiles: Profile[] = Array.from({ length: 50 }, (_, i) => {
   const isActive = i < 45
   return {
     id: uid('usr', i + 3),
-    role: Role.DRIVER,
+    role: 'DRIVER',
     phone,
     full_name: name,
-    status: isActive ? UserStatus.ACTIVE : UserStatus.INACTIVE,
+    status: isActive ? 'ACTIVE' : 'INACTIVE',
     debt_limit: 0,
     avatar_url: avatarFor(name),
     created_at: iso(90 - i),
@@ -229,10 +227,10 @@ const customerProfiles: Profile[] = Array.from({ length: 68 }, (_, i) => {
   const debtLimit = randInt(5, 50) * 1000000
   return {
     id: uid('usr', i + 53),
-    role: Role.CUSTOMER,
+    role: 'CUSTOMER',
     phone,
     full_name: name,
-    status: isActive ? UserStatus.ACTIVE : UserStatus.INACTIVE,
+    status: isActive ? 'ACTIVE' : 'INACTIVE',
     debt_limit: debtLimit,
     avatar_url: avatarFor(name),
     created_at: iso(80 - Math.floor(i / 2)),
@@ -376,7 +374,7 @@ function generateProducts(): Product[] {
       stock: randInt(20, 300),
       unit: base.unit,
       image_url: `https://picsum.photos/seed/buntech-prod-${counter}/600/600`,
-      status: ProductStatus.ACTIVE,
+      status: 'ACTIVE',
       deleted_at: null,
       created_at: iso(60 - counter),
       updated_at: iso(randInt(0, 30))
@@ -406,7 +404,7 @@ function generateProducts(): Product[] {
           stock,
           unit: pkg.unit,
           image_url: `https://picsum.photos/seed/buntech-prod-${counter}/600/600`,
-          status: stock === 0 || counter % 47 === 0 ? ProductStatus.INACTIVE : ProductStatus.ACTIVE,
+          status: stock === 0 || counter % 47 === 0 ? 'INACTIVE' : 'ACTIVE',
           deleted_at: null,
           created_at: iso(Math.max(0, 60 - counter)),
           updated_at: iso(randInt(0, 30))
@@ -504,28 +502,28 @@ export const mockCustomPrices: CustomPrice[] = Array.from({ length: 60 }, (_, i)
 
 // ─── Orders (500+) ────────────────────────────────────────────────
 const allCustomerIds = customerProfiles.map((p) => p.id)
-const allDriverIds = driverProfiles.filter((p) => p.status === UserStatus.ACTIVE).map((p) => p.id)
+const allDriverIds = driverProfiles.filter((p) => p.status === 'ACTIVE').map((p) => p.id)
 const orderStatusWeights = [
-  OrderStatus.PENDING,
-  OrderStatus.PENDING,
-  OrderStatus.PENDING,
-  OrderStatus.PROCESSING,
-  OrderStatus.PROCESSING,
-  OrderStatus.PROCESSING,
-  OrderStatus.SHIPPING,
-  OrderStatus.SHIPPING,
-  OrderStatus.SHIPPING,
-  OrderStatus.SHIPPING,
-  OrderStatus.DELIVERED,
-  OrderStatus.DELIVERED,
-  OrderStatus.DELIVERED,
-  OrderStatus.DELIVERED,
-  OrderStatus.DELIVERED,
-  OrderStatus.DELIVERED,
-  OrderStatus.DELIVERED,
-  OrderStatus.DELIVERED,
-  OrderStatus.DELIVERED,
-  OrderStatus.CANCELLED
+  'PENDING',
+  'PENDING',
+  'PENDING',
+  'PROCESSING',
+  'PROCESSING',
+  'PROCESSING',
+  'SHIPPING',
+  'SHIPPING',
+  'SHIPPING',
+  'SHIPPING',
+  'DELIVERED',
+  'DELIVERED',
+  'DELIVERED',
+  'DELIVERED',
+  'DELIVERED',
+  'DELIVERED',
+  'DELIVERED',
+  'DELIVERED',
+  'DELIVERED',
+  'CANCELLED'
 ]
 const orderNotes = [
   'Giao buổi sáng',
@@ -548,8 +546,7 @@ function generateOrders(): Order[] {
   for (let i = 0; i < 500; i++) {
     const cust = allCustomerIds[i % allCustomerIds.length]!
     const status = orderStatusWeights[i % orderStatusWeights.length]!
-    const hasDriver =
-      status !== OrderStatus.PENDING && status !== OrderStatus.CANCELLED && i % 5 !== 0
+    const hasDriver = status !== 'PENDING' && status !== 'CANCELLED' && i % 5 !== 0
     const driver = hasDriver ? allDriverIds[i % allDriverIds.length]! : null
     const driverProfile = driver ? mockProfiles.find((p) => p.id === driver) || null : null
     const custProfile = mockProfiles.find((p) => p.id === cust) || null
@@ -587,11 +584,7 @@ function generateOrders(): Order[] {
       status,
       total,
       amount_collected:
-        status === OrderStatus.DELIVERED
-          ? total
-          : status === OrderStatus.SHIPPING
-            ? Math.floor(total * 0.5)
-            : 0,
+        status === 'DELIVERED' ? total : status === 'SHIPPING' ? Math.floor(total * 0.5) : 0,
       guest_info: isGuest ? { name: 'Khách vãng lai', phone: '0987654321', address: addr } : null,
       shipping_address: addr,
       note: pick(orderNotes),
@@ -611,39 +604,33 @@ export const mockOrderItems: OrderItem[] = mockOrders.flatMap((o) => o.order_ite
 // ─── Transactions (100+) ──────────────────────────────────────────
 function generateTransactions(): Transaction[] {
   const txns: Transaction[] = []
-  const types = [
-    TransactionType.DEBT_INCREASE,
-    TransactionType.DEBT_INCREASE,
-    TransactionType.DEBT_PAYMENT,
-    TransactionType.PAYMENT,
-    TransactionType.REFUND
-  ]
+  const types = ['DEBT_INCREASE', 'DEBT_INCREASE', 'DEBT_PAYMENT', 'PAYMENT', 'REFUND']
   for (let i = 0; i < 120; i++) {
     const cust = allCustomerIds[i % allCustomerIds.length]!
     const custProfile = mockProfiles.find((p) => p.id === cust) || null
     const type = types[i % types.length]!
     const order = mockOrders.find((o) => o.user_id === cust)
     const amount =
-      type === TransactionType.DEBT_INCREASE
+      type === 'DEBT_INCREASE'
         ? order?.total || randInt(200000, 2000000)
-        : type === TransactionType.DEBT_PAYMENT
+        : type === 'DEBT_PAYMENT'
           ? randInt(100000, 1000000)
-          : type === TransactionType.PAYMENT
+          : type === 'PAYMENT'
             ? randInt(50000, 500000)
             : randInt(50000, 200000)
     txns.push({
       id: uid('txn', i + 1),
       user_id: cust,
       user: custProfile,
-      order_id: type === TransactionType.DEBT_INCREASE ? order?.id || null : null,
+      order_id: type === 'DEBT_INCREASE' ? order?.id || null : null,
       type,
       amount,
       note:
-        type === TransactionType.DEBT_INCREASE
+        type === 'DEBT_INCREASE'
           ? `Đơn hàng ${order?.id?.slice(0, 8) || ''}`
-          : type === TransactionType.DEBT_PAYMENT
+          : type === 'DEBT_PAYMENT'
             ? 'Thanh toán tiền nợ'
-            : type === TransactionType.PAYMENT
+            : type === 'PAYMENT'
               ? 'Thu tiền giao hàng'
               : 'Hoàn tiền đơn hủy',
       created_at: iso(i % 90)
@@ -741,12 +728,7 @@ export const mockInventoryItems: InventoryItem[] = inventoryData.map((item, i) =
 }))
 
 // ─── Inventory Movements (50+) ────────────────────────────────────
-const movementTypes = [
-  InventoryMovementType.IMPORT,
-  InventoryMovementType.IMPORT,
-  InventoryMovementType.EXPORT,
-  InventoryMovementType.LOSS
-]
+const movementTypes = ['IMPORT', 'IMPORT', 'EXPORT', 'LOSS']
 const movementNotes = [
   'Nhập mới từ nhà cung cấp',
   'Nhập thêm nguyên liệu',
@@ -1040,7 +1022,7 @@ const baseBlogPosts: BlogPost[] = blogData.map((b, i) => {
     featured_image: b[4],
     author_name: author?.full_name || 'BunTech',
     published_at: i < 18 ? iso(b[5]) : null,
-    status: i < 18 ? BlogStatus.PUBLISHED : BlogStatus.DRAFT,
+    status: i < 18 ? 'PUBLISHED' : 'DRAFT',
     deleted_at: null,
     created_at: iso(b[5] + 1),
     updated_at: iso(b[5])
@@ -1068,7 +1050,7 @@ const additionalBlogPosts: BlogPost[] = blogTitleTemplates.map((b, i) => {
     featured_image: blogImagePool[i % blogImagePool.length]!,
     author_name: mockProfiles[i % 2]?.full_name || 'BunTech',
     published_at: isPublished ? iso(daysAgo) : null,
-    status: isPublished ? BlogStatus.PUBLISHED : BlogStatus.DRAFT,
+    status: isPublished ? 'PUBLISHED' : 'DRAFT',
     deleted_at: null,
     created_at: iso(daysAgo + 1),
     updated_at: iso(daysAgo)
@@ -1171,8 +1153,7 @@ const platePrefixes = ['51A', '59V', '50F', '51K', '59B', '50S', '51L', '59C', '
 export const mockVehicles: Vehicle[] = Array.from({ length: 80 }, (_, i) => {
   const driver =
     i < 45 ? driverProfiles[i]?.id || null : i < 50 ? driverProfiles[i]?.id || null : null
-  const status =
-    i < 56 ? VehicleStatus.ACTIVE : i < 68 ? VehicleStatus.MAINTENANCE : VehicleStatus.INACTIVE
+  const status = i < 56 ? 'ACTIVE' : i < 68 ? 'MAINTENANCE' : 'INACTIVE'
   return {
     id: uid('veh', i + 1),
     driver_id: driver,
@@ -1187,13 +1168,13 @@ export const mockVehicles: Vehicle[] = Array.from({ length: 80 }, (_, i) => {
 })
 
 // ─── Notifications (100+) ─────────────────────────────────────────
-const notifTitles: Array<[NotificationType, string]> = [
-  [NotificationType.ORDER_ASSIGNED, 'Đơn hàng mới được giao'],
-  [NotificationType.ORDER_DELIVERED, 'Đã giao hàng thành công'],
-  [NotificationType.ORDER_CANCELLED, 'Đơn hàng đã bị hủy'],
-  [NotificationType.LOW_STOCK, 'Cảnh báo tồn kho thấp'],
-  [NotificationType.NEW_REVIEW, 'Có đánh giá mới'],
-  [NotificationType.SYSTEM, 'Cập nhật hệ thống']
+const notifTitles: Array<[string, string]> = [
+  ['ORDER_ASSIGNED', 'Đơn hàng mới được giao'],
+  ['ORDER_DELIVERED', 'Đã giao hàng thành công'],
+  ['ORDER_CANCELLED', 'Đơn hàng đã bị hủy'],
+  ['LOW_STOCK', 'Cảnh báo tồn kho thấp'],
+  ['NEW_REVIEW', 'Có đánh giá mới'],
+  ['SYSTEM', 'Cập nhật hệ thống']
 ]
 const notifMessages = [
   'Bạn có 1 đơn hàng giao hàng mới cần xử lý.',
@@ -1220,7 +1201,7 @@ export const mockNotifications: Notification[] = Array.from({ length: 120 }, (_,
     title,
     message: notifMessages[i % notifMessages.length]!,
     is_read: i % 3 === 0,
-    link: type === NotificationType.ORDER_ASSIGNED ? `/driver/${uid('ord', i + 1)}` : null,
+    link: type === 'ORDER_ASSIGNED' ? `/driver/${uid('ord', i + 1)}` : null,
     created_at: iso(Math.max(0, Math.floor(i / 8)))
   }
 })
@@ -1264,9 +1245,9 @@ export const mockMessages: Message[] = Array.from({ length: 120 }, (_, i) => {
 export const mockDeliveryRoutes: DeliveryRoute[] = Array.from({ length: 50 }, (_, i) => {
   const driver = driverProfiles[i % driverProfiles.length]!
   const routeOrders = mockOrders
-    .filter((o) => o.driver_id === driver?.id && o.status !== OrderStatus.PENDING)
+    .filter((o) => o.driver_id === driver?.id && o.status !== 'PENDING')
     .slice(0, 5 + (i % 4))
-  const completed = routeOrders.filter((o) => o.status === OrderStatus.DELIVERED).length
+  const completed = routeOrders.filter((o) => o.status === 'DELIVERED').length
   const status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' =
     i < 20 ? 'COMPLETED' : i < 35 ? 'IN_PROGRESS' : 'PENDING'
   return {

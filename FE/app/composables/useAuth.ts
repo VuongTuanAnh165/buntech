@@ -1,4 +1,4 @@
-import { AuthService } from '~/services/authService'
+import { authService } from '~/services/authService'
 import type { LoginPayload } from '~/types/auth'
 
 /**
@@ -11,7 +11,7 @@ export const useAuth = () => {
   const login = async (payload: LoginPayload) => {
     isLoading.value = true
     try {
-      const res = await AuthService.login(payload)
+      const res = await authService.login(payload)
       if (res.data) {
         const isProd = process.env.NODE_ENV === 'production'
         const cookieOptions = {
@@ -31,9 +31,8 @@ export const useAuth = () => {
         // Điều hướng thẳng vào /admin để tránh Double Redirect qua / (index.vue)
         navigateTo(redirectPath || '/admin')
       }
-    } catch (error) {
+    } catch {
       // Toast lỗi đã được ApiClient tự động hiển thị, ở đây không cần alert hay toast thủ công nữa
-      console.error('Login Failed', error)
     } finally {
       isLoading.value = false
     }

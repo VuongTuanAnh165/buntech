@@ -15,7 +15,7 @@ const debtCustomers = computed(() =>
     .map((c) => ({
       label: `${c.full_name} — ${c.phone}`,
       value: c.id,
-      avatar: c.avatar_url,
+      avatar: { src: c.avatar_url || undefined },
       debt: c.debt_limit
     }))
 )

@@ -1,22 +1,31 @@
 <script setup lang="ts">
-import { OrderStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Order } from '~/utils/types'
+
+const { constants } = useMasterData()
 const props = defineProps<{
   order: Order
 }>()
 const statusColor = computed(() => {
-  if (props.order.status === OrderStatus.PENDING) return 'warning'
-  if (props.order.status === OrderStatus.IN_PROGRESS || props.order.status === OrderStatus.SHIPPING)
+  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING) return 'warning'
+  if (
+    props.order.status === constants.value?.[ConstantKey.OrderStatus]?.IN_PROGRESS ||
+    props.order.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+  )
     return 'primary'
-  if (props.order.status === OrderStatus.DELIVERED) return 'success'
+  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED) return 'success'
   return 'error'
 })
 const statusLabel = computed(() => {
-  if (props.order.status === OrderStatus.PENDING) return 'Chờ giao'
-  if (props.order.status === OrderStatus.IN_PROGRESS || props.order.status === OrderStatus.SHIPPING)
+  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING) return 'Chờ giao'
+  if (
+    props.order.status === constants.value?.[ConstantKey.OrderStatus]?.IN_PROGRESS ||
+    props.order.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+  )
     return 'Đang giao'
-  if (props.order.status === OrderStatus.DELIVERED) return 'Hoàn thành'
-  if (props.order.status === OrderStatus.CANCELLED) return 'Đã hủy'
+  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
+    return 'Hoàn thành'
+  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED) return 'Đã hủy'
   return props.order.status
 })
 </script>
@@ -46,7 +55,8 @@ const statusLabel = computed(() => {
           <span class="flex items-center gap-1">
             <span
               v-if="
-                order.status === OrderStatus.IN_PROGRESS || order.status === OrderStatus.SHIPPING
+                order.status === constants?.[ConstantKey.OrderStatus]?.IN_PROGRESS ||
+                order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
               "
               class="bg-primary-500 h-1.5 w-1.5 animate-pulse rounded-full"
             />

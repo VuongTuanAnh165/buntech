@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Hồ sơ tài xế - BunTech Driver' })
 const _router = useRouter()
@@ -8,8 +9,11 @@ const toast = useToast()
 const loading = ref(true)
 const driver = computed(
   () =>
-    mockProfiles.find((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) ||
-    mockProfiles[2]
+    mockProfiles.find(
+      (p) =>
+        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
+        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+    ) || mockProfiles[2]
 )
 const driverOrders = computed(() => {
   const id = driver.value?.id
@@ -20,7 +24,9 @@ const driverOrders = computed(() => {
 })
 const stats = computed(() => {
   const orders = driverOrders.value
-  const delivered = orders.filter((o) => o.status === OrderStatus.DELIVERED)
+  const delivered = orders.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+  )
   const totalEarnings = delivered.reduce((sum, o) => sum + Math.round((o.total || 0) * 0.03), 0)
   const successRate = orders.length ? Math.round((delivered.length / orders.length) * 100) : 0
   return { totalDeliveries: delivered.length, successRate, totalEarnings, rating: 4.8 }
@@ -43,15 +49,15 @@ const recentActivity = computed(() =>
   driverOrders.value.slice(0, 6).map((o) => ({
     id: o.id,
     type:
-      o.status === OrderStatus.DELIVERED
+      o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
         ? 'delivered'
-        : o.status === OrderStatus.CANCELLED
+        : o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
           ? 'cancelled'
           : 'shipping',
     label:
-      o.status === OrderStatus.DELIVERED
+      o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
         ? `Giao thành công #${o.id}`
-        : o.status === OrderStatus.CANCELLED
+        : o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
           ? `Đơn hủy #${o.id}`
           : `Đang giao #${o.id}`,
     customer: o.user?.full_name || o.guest_info?.name || 'Khách vãng lai',
@@ -264,7 +270,11 @@ onMounted(() => {
         class="card card-hover mb-4 cursor-pointer p-5"
         role="button"
         tabindex="0"
-        @click="navigateTo('/driver/vehicle')"
+        @click="
+          () => {
+            navigateTo('/driver/vehicle')
+          }
+        "
         @keydown.enter="navigateTo('/driver/vehicle')"
       >
         <div class="mb-4 flex items-center justify-between">

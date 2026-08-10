@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { TransactionType } from '~/utils/enums'
-import { mockTransactions, _mockCustomers, _mockOrders } from '~/utils/mockData'
-import type { _Transaction } from '~/utils/types'
+import { ConstantKey } from '~/enums/constantKeys'
+import { mockTransactions } from '~/utils/mockData'
+
+const { constants } = useMasterData()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Tài chính - BunTech Admin' })
 const toast = useToast()
@@ -14,17 +15,17 @@ const perPage = ref(10)
 // ─── Computed KPIs ────────────────────────────────────────
 const totalRevenue = computed(() =>
   mockTransactions
-    .filter((t) => t.type === TransactionType.PAYMENT)
+    .filter((t) => t.type === constants.value?.[ConstantKey.TransactionType]?.PAYMENT)
     .reduce((s, t) => s + t.amount, 0)
 )
 const totalDebt = computed(() =>
   mockTransactions
-    .filter((t) => t.type === TransactionType.DEBT_INCREASE)
+    .filter((t) => t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE)
     .reduce((s, t) => s + t.amount, 0)
 )
 const totalCollected = computed(() =>
   mockTransactions
-    .filter((t) => t.type === TransactionType.DEBT_PAYMENT)
+    .filter((t) => t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT)
     .reduce((s, t) => s + t.amount, 0)
 )
 const debtRemaining = computed(() => totalDebt.value - totalCollected.value)
@@ -62,7 +63,7 @@ const kpiStats = computed(() => [
 const topDebtors = computed(() => {
   const debtMap = new Map<string, { name: string; avatar: string; total: number }>()
   for (const t of mockTransactions) {
-    if (t.type === TransactionType.DEBT_INCREASE && t.user) {
+    if (t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE && t.user) {
       const existing = debtMap.get(t.user.id)
       if (existing) {
         existing.total += t.amount
@@ -102,10 +103,18 @@ const cashflowData = computed(() => {
 const typePills = computed(() => {
   const counts = {
     ALL: mockTransactions.length,
-    PAYMENT: mockTransactions.filter((t) => t.type === TransactionType.PAYMENT).length,
-    REFUND: mockTransactions.filter((t) => t.type === TransactionType.REFUND).length,
-    DEBT_INCREASE: mockTransactions.filter((t) => t.type === TransactionType.DEBT_INCREASE).length,
-    DEBT_PAYMENT: mockTransactions.filter((t) => t.type === TransactionType.DEBT_PAYMENT).length
+    PAYMENT: mockTransactions.filter(
+      (t) => t.type === constants.value?.[ConstantKey.TransactionType]?.PAYMENT
+    ).length,
+    REFUND: mockTransactions.filter(
+      (t) => t.type === constants.value?.[ConstantKey.TransactionType]?.REFUND
+    ).length,
+    DEBT_INCREASE: mockTransactions.filter(
+      (t) => t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE
+    ).length,
+    DEBT_PAYMENT: mockTransactions.filter(
+      (t) => t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT
+    ).length
   }
   return [
     { accessorKey: 'ALL', header: 'Tất cả', icon: 'i-lucide-list', count: counts.ALL },
@@ -253,14 +262,14 @@ function setFilter(filterKey: string) {
                 <div
                   class="bg-success-500/80 flex-1 rounded-t-md transition-all duration-500"
                   :style="{
-                    height: `${(day.income / 6000000) * 100}%`,
+                    height: `${((day.income || 0) / 6000000) * 100}%`,
                     animationDelay: `${i * 60}ms`
                   }"
                 />
                 <div
                   class="bg-error-500/60 flex-1 rounded-t-md transition-all duration-500"
                   :style="{
-                    height: `${(day.expense / 6000000) * 100}%`,
+                    height: `${((day.expense || 0) / 6000000) * 100}%`,
                     animationDelay: `${i * 60 + 30}ms`
                   }"
                 />
@@ -413,11 +422,11 @@ function setFilter(filterKey: string) {
             >
               <UIcon
                 :name="
-                  row.original.type === TransactionType.DEBT_INCREASE
+                  row.original.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
                     ? 'i-lucide-arrow-down-left'
-                    : row.original.type === TransactionType.DEBT_PAYMENT
+                    : row.original.type === constants?.[ConstantKey.TransactionType]?.DEBT_PAYMENT
                       ? 'i-lucide-arrow-up-right'
-                      : row.original.type === TransactionType.PAYMENT
+                      : row.original.type === constants?.[ConstantKey.TransactionType]?.PAYMENT
                         ? 'i-lucide-banknote'
                         : 'i-lucide-undo-2'
                 "
@@ -430,15 +439,15 @@ function setFilter(filterKey: string) {
             <span
               :class="[
                 'font-semibold tabular-nums',
-                row.original.type === TransactionType.DEBT_INCREASE ||
-                row.original.type === TransactionType.REFUND
+                row.original.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE ||
+                row.original.type === constants?.[ConstantKey.TransactionType]?.REFUND
                   ? 'text-error-600 dark:text-error-400'
                   : 'text-success-600 dark:text-success-400'
               ]"
             >
               {{
-                row.original.type === TransactionType.DEBT_INCREASE ||
-                row.original.type === TransactionType.REFUND
+                row.original.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE ||
+                row.original.type === constants?.[ConstantKey.TransactionType]?.REFUND
                   ? '-'
                   : '+'
               }}{{ formatVND(row.original.amount) }}

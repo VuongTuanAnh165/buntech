@@ -203,33 +203,78 @@ await callOnce('fetch-config', async () => {
 
 ## 7. Xử lý Form & Bắt lỗi tự động (Nuxt UI + Zod)
 
-Hệ thống đã được thiết kế sẵn cơ chế **Tự động Map lỗi 422 từ Backend** thẳng lên giao diện:
+Hệ thống yêu cầu xử lý form đồng nhất theo tiêu chuẩn **Vue 3 Native Form kết hợp Zod Schema**.
+**CẢNH BÁO QUAN TRỌNG:** Tạm thời **CẤM SỬ DỤNG** component `<UForm>` của thư viện Nuxt UI v4 do tồn tại bug nghiêm trọng gây submit GET reload trang khi validation thất bại. Cũng **KHÔNG** sử dụng `BaseFormWrapper.vue`.
 
-- BẮT BUỘC sử dụng component bọc ngoài `<FormWrapper>` kết hợp với `<UForm>` của **Nuxt UI** và **Zod Schema**.
-- BẮT BUỘC dùng composable `useFormSubmit` để thực hiện hàm submit. Truyền `formRef` vào option để composable tự động parse lỗi Validation HTTP 422 từ API và bôi đỏ các field nhập liệu.
+Quy tắc chuẩn khi viết Form:
 
-> ✅ **CODE CHUẨN (Form tự động bắt lỗi API 422)**
+- Sử dụng thẻ HTML chuẩn: `<form @submit.prevent="handleFormSubmit">`.
+- Tự định nghĩa `formErrors` (reactive object) và truyền vào prop `:error` của từng `<UFormField>`.
+- Sử dụng hàm `schema.safeParse(state)` của Zod để tự kiểm tra lỗi (validate) trước khi gọi hàm submit chính.
+- BẮT BUỘC dùng composable `useFormSubmit` để wrap hàm submit chính (quản lý `isSubmitting` loading state, và map lỗi HTTP 422 tự động bằng `formRef`).
+
+> ✅ **CODE CHUẨN (Native Form + Tự động bắt lỗi Zod & API 422)**
 
 ```vue
 <script setup lang="ts">
-const formRef = ref()
-const state = reactive({ email: '', password: '' })
+import { z } from 'zod'
 
-// useFormSubmit tự động quản lý isSubmitting và map lỗi 422
-const onSubmit = useFormSubmit(async (data) => await authService.login(data.email, data.password), {
-  formRef, // Truyền formRef vào đây là lỗi tự động được xử lý!
-  successMessage: 'Thành công'
+const schema = z.object({ email: z.string().email(), password: z.string() })
+const state = reactive({ email: '', password: '' })
+const formErrors = reactive<Record<string, string>>({})
+
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    Object.keys(formErrors).forEach((key) => delete formErrors[key])
+    errors.forEach((e) => {
+      formErrors[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    Object.keys(formErrors).forEach((key) => delete formErrors[key])
+  }
 })
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  const result = schema.safeParse(state)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
+}
+
+const { handleSubmit, isSubmitting: loading } = useFormSubmit()
+
+const handleLogin = handleSubmit(
+  async (data) => await authService.login(data.email, data.password),
+  { formRef, successMessage: 'Thành công' }
+)
+
+const handleFormSubmit = () => {
+  if (validateForm()) {
+    handleLogin(state)
+  }
+}
 </script>
 
 <template>
-  <FormWrapper ref="formRef" :schema="schema" :state="state" @submit="onSubmit">
-    <UFormGroup label="Email" name="email">
+  <form @submit.prevent="handleFormSubmit" class="space-y-4">
+    <UFormField label="Email" name="email" :error="formErrors.email">
       <UInput v-model="state.email" />
-    </UFormGroup>
-    <!-- loading state được form wrapper lo -->
-    <UButton type="submit" loading>Submit</UButton>
-  </FormWrapper>
+    </UFormField>
+
+    <UFormField label="Password" name="password" :error="formErrors.password">
+      <UInput v-model="state.password" type="password" />
+    </UFormField>
+
+    <UButton type="submit" :loading="loading">Đăng nhập</UButton>
+  </form>
 </template>
 ```
 

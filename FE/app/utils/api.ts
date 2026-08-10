@@ -337,7 +337,10 @@ export const fetchWithAuth = async <T = unknown, R extends ResponseType = 'json'
           description,
           color: 'warning'
         })
-      } else if (res.status !== HttpStatus.UNAUTHORIZED) {
+      } else if (
+        res.status !== HttpStatus.UNAUTHORIZED ||
+        context.request.toString().includes('/auth/login')
+      ) {
         const errorCode = res._data?.errorCode as string | undefined
         const ignoreCodes = (context.options as CustomFetchOptions<R>).ignoreErrorCodes || []
         const isSilent =
@@ -375,19 +378,22 @@ export const fetchWithAuth = async <T = unknown, R extends ResponseType = 'json'
       { response?: { status?: number }; message?: string } | null | undefined
 
     if (fetchError?.response?.status === HttpStatus.UNAUTHORIZED) {
-      let failedToken: string | undefined
-      if (mergedOptions.headers instanceof Headers) {
-        failedToken = mergedOptions.headers.get('Authorization')?.replace('Bearer ', '')
-      } else if (mergedOptions.headers && typeof mergedOptions.headers === 'object') {
-        const authHeader = (mergedOptions.headers as Record<string, string>).Authorization
-        if (authHeader) failedToken = authHeader.replace('Bearer ', '')
+      const isAuthRoute = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/refresh')
+
+      if (!isAuthRoute) {
+        let failedToken: string | undefined
+        if (mergedOptions.headers instanceof Headers) {
+          failedToken = mergedOptions.headers.get('Authorization')?.replace('Bearer ', '')
+        } else if (mergedOptions.headers && typeof mergedOptions.headers === 'object') {
+          const authHeader = (mergedOptions.headers as Record<string, string>).Authorization
+          if (authHeader) failedToken = authHeader.replace('Bearer ', '')
+        }
+        const newToken = await refreshAccessToken(failedToken)
+        mergedOptions.headers = new Headers(mergedOptions.headers || {})
+        mergedOptions.headers.set('Authorization', `Bearer ${newToken}`)
+
+        return await $fetch<T>(requestUrl, mergedOptions as Parameters<typeof $fetch>[1])
       }
-
-      const newToken = await refreshAccessToken(failedToken)
-      mergedOptions.headers = new Headers(mergedOptions.headers || {})
-      mergedOptions.headers.set('Authorization', `Bearer ${newToken}`)
-
-      return await $fetch<T>(requestUrl, mergedOptions as Parameters<typeof $fetch>[1])
     }
 
     const logData = {

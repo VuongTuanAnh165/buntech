@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 
 definePageMeta({ layout: 'driver' })
 
@@ -16,8 +17,11 @@ const submitting = ref(false)
 
 const _currentDriver = computed(
   () =>
-    mockProfiles.find((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) ||
-    mockProfiles[2]
+    mockProfiles.find(
+      (p) =>
+        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
+        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+    ) || mockProfiles[2]
 )
 
 const order = computed(() => mockOrders.find((o) => o.id === orderId.value) || null)
@@ -31,11 +35,15 @@ const remaining = computed(() => {
 
 const statusGradient = computed(() => {
   if (!order.value) return 'from-slate-700 to-slate-800'
-  const s = order.value.status as OrderStatus
-  if (s === OrderStatus.SHIPPING) return 'from-primary-600 to-indigo-700'
-  if (s === OrderStatus.DELIVERED) return 'from-success-600 to-emerald-700'
-  if (s === OrderStatus.CANCELLED) return 'from-error-600 to-rose-700'
-  if (s === OrderStatus.PROCESSING) return 'from-warning-500 to-amber-600'
+  const s = order.value.status
+  if (s === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING)
+    return 'from-primary-600 to-indigo-700'
+  if (s === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
+    return 'from-success-600 to-emerald-700'
+  if (s === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED)
+    return 'from-error-600 to-rose-700'
+  if (s === constants.value?.[ConstantKey.OrderStatus]?.PROCESSING)
+    return 'from-warning-500 to-amber-600'
   return 'from-slate-700 to-slate-800'
 })
 

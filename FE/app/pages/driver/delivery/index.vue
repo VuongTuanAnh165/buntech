@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Tuyến giao hàng - BunTech Driver' })
@@ -13,8 +14,11 @@ const activeTab = ref<'all' | 'shipping' | 'pending' | 'delivered'>('all')
 // Current driver
 const currentDriver = computed(
   () =>
-    mockProfiles.find((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) ||
-    mockProfiles[2]
+    mockProfiles.find(
+      (p) =>
+        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
+        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+    ) || mockProfiles[2]
 )
 // All active orders assigned to this driver
 const driverOrders = computed(() => {
@@ -24,11 +28,11 @@ const driverOrders = computed(() => {
     .filter((o) => o.driver_id === driverId)
     .filter((o) =>
       [
-        OrderStatus.SHIPPING,
-        OrderStatus.PROCESSING,
-        OrderStatus.PENDING,
-        OrderStatus.DELIVERED
-      ].includes(o.status as OrderStatus)
+        constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
+        constants.value?.[ConstantKey.OrderStatus]?.PROCESSING,
+        constants.value?.[ConstantKey.OrderStatus]?.PENDING,
+        constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+      ].includes(o.status)
     )
     .sort((a, b) => {
       const order: Record<string, number> = { SHIPPING: 0, PROCESSING: 1, PENDING: 2, DELIVERED: 3 }
@@ -41,24 +45,36 @@ const driverOrders = computed(() => {
 const filteredOrders = computed(() => {
   if (activeTab.value === 'all') return driverOrders.value
   if (activeTab.value === 'shipping')
-    return driverOrders.value.filter((o) => o.status === OrderStatus.SHIPPING)
+    return driverOrders.value.filter(
+      (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+    )
   if (activeTab.value === 'pending')
     return driverOrders.value.filter(
-      (o) => o.status === OrderStatus.PROCESSING || o.status === OrderStatus.PENDING
+      (o) =>
+        o.status === constants.value?.[ConstantKey.OrderStatus]?.PROCESSING ||
+        o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING
     )
   if (activeTab.value === 'delivered')
-    return driverOrders.value.filter((o) => o.status === OrderStatus.DELIVERED)
+    return driverOrders.value.filter(
+      (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    )
   return driverOrders.value
 })
 const stats = computed(() => {
   const all = driverOrders.value
-  const delivered = all.filter((o) => o.status === OrderStatus.DELIVERED)
-  const pending = all.filter(
-    (o) => o.status === OrderStatus.PROCESSING || o.status === OrderStatus.PENDING
+  const delivered = all.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
   )
-  const shipping = all.filter((o) => o.status === OrderStatus.SHIPPING)
+  const pending = all.filter(
+    (o) =>
+      o.status === constants.value?.[ConstantKey.OrderStatus]?.PROCESSING ||
+      o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING
+  )
+  const shipping = all.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+  )
   const totalToCollect = all
-    .filter((o) => o.status !== OrderStatus.DELIVERED)
+    .filter((o) => o.status !== constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
     .reduce((sum, o) => sum + ((o.total || 0) - (o.amount_collected || 0)), 0)
   return {
     todayDeliveries: delivered.length,
@@ -217,19 +233,25 @@ onMounted(() => {
             {
               accessorKey: 'shipping',
               header: 'Đang giao',
-              count: driverOrders.filter((o) => o.status === OrderStatus.SHIPPING).length
+              count: driverOrders.filter(
+                (o) => o.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
+              ).length
             },
             {
               accessorKey: 'pending',
               header: 'Chưa giao',
               count: driverOrders.filter(
-                (o) => o.status === OrderStatus.PROCESSING || o.status === OrderStatus.PENDING
+                (o) =>
+                  o.status === constants?.[ConstantKey.OrderStatus]?.PROCESSING ||
+                  o.status === constants?.[ConstantKey.OrderStatus]?.PENDING
               ).length
             },
             {
               accessorKey: 'delivered',
               header: 'Đã giao',
-              count: driverOrders.filter((o) => o.status === OrderStatus.DELIVERED).length
+              count: driverOrders.filter(
+                (o) => o.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
+              ).length
             }
           ]"
           :key="tab.accessorKey"
@@ -273,18 +295,22 @@ onMounted(() => {
         :style="{ animationDelay: `${i * 60}ms` }"
         role="button"
         tabindex="0"
-        @click="navigateTo(`/driver/delivery/${order.id}`)"
+        @click="
+          () => {
+            navigateTo(`/driver/delivery/${order.id}`)
+          }
+        "
         @keydown.enter="navigateTo(`/driver/delivery/${order.id}`)"
       >
         <!-- Left accent bar -->
         <div
           :class="[
             'absolute top-0 bottom-0 left-0 w-1',
-            order.status === OrderStatus.SHIPPING
+            order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
               ? 'bg-primary-500'
-              : order.status === OrderStatus.DELIVERED
+              : order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                 ? 'bg-success-500'
-                : order.status === OrderStatus.CANCELLED
+                : order.status === constants?.[ConstantKey.OrderStatus]?.CANCELLED
                   ? 'bg-error-500'
                   : 'bg-warning-500'
           ]"
@@ -294,9 +320,9 @@ onMounted(() => {
             <div
               :class="[
                 'flex h-10 w-10 items-center justify-center rounded-xl',
-                order.status === OrderStatus.SHIPPING
+                order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
                   ? 'bg-primary-50 dark:bg-primary-900/20'
-                  : order.status === OrderStatus.DELIVERED
+                  : order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                     ? 'bg-success-50 dark:bg-success-900/20'
                     : 'bg-warning-50 dark:bg-warning-900/20'
               ]"
@@ -305,9 +331,9 @@ onMounted(() => {
                 name="i-lucide-package"
                 :class="[
                   'h-5 w-5',
-                  order.status === OrderStatus.SHIPPING
+                  order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
                     ? 'text-primary-600 dark:text-primary-400'
-                    : order.status === OrderStatus.DELIVERED
+                    : order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                       ? 'text-success-600 dark:text-success-400'
                       : 'text-warning-600 dark:text-warning-400'
                 ]"
@@ -322,11 +348,11 @@ onMounted(() => {
           </div>
           <UBadge
             :color="
-              order.status === OrderStatus.SHIPPING
+              order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
                 ? 'primary'
-                : order.status === OrderStatus.DELIVERED
+                : order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                   ? 'success'
-                  : order.status === OrderStatus.CANCELLED
+                  : order.status === constants?.[ConstantKey.OrderStatus]?.CANCELLED
                     ? 'error'
                     : 'warning'
             "

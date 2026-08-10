@@ -4,10 +4,14 @@
   Reason: Extracted from admin/orders/index.vue to meet line count limit
 -->
 <script setup lang="ts">
-import { OrderStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Order } from '~/utils/types'
-import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '~/utils/orderStatus'
+import { getOrderStatusColor, getOrderStatusLabel } from '~/utils/orderStatus'
+
 import { formatDate, formatVND } from '~/utils/formatters'
+const { constants } = useMasterData()
+
+const { constants } = useMasterData()
 
 defineProps<{
   orders: Order[]
@@ -39,8 +43,8 @@ function toggleSelectOrder(id: string, checked: boolean) {
     <template #select-cell="{ row }">
       <UCheckbox
         v-if="
-          row.original.status === OrderStatus.PROCESSING ||
-          row.original.status === OrderStatus.PENDING
+          row.original.status === constants?.[ConstantKey.OrderStatus]?.PROCESSING ||
+          row.original.status === constants?.[ConstantKey.OrderStatus]?.PENDING
         "
         :model-value="selectedOrders.has(row.original.id)"
         @update:model-value="(v: boolean) => toggleSelectOrder(row.original.id, v)"
@@ -73,8 +77,8 @@ function toggleSelectOrder(id: string, checked: boolean) {
       </div>
     </template>
     <template #status-cell="{ row }">
-      <UBadge :color="ORDER_STATUS_COLORS[row.original.status]" variant="subtle">
-        {{ ORDER_STATUS_LABELS[row.original.status] }}
+      <UBadge :color="getOrderStatusColor(constants)[row.original.status] as any" variant="subtle">
+        {{ getOrderStatusLabel(constants)[row.original.status] }}
       </UBadge>
     </template>
     <template #total-cell="{ row }">

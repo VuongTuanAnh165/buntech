@@ -21,7 +21,11 @@ defineProps<{
       <template #id-cell="{ row }">
         <span
           class="text-primary-600 dark:text-primary-400 cursor-pointer font-mono text-xs hover:underline"
-          @click="navigateTo(`/admin/orders/${row.id}`)"
+          @click="
+            () => {
+              navigateTo(`/admin/orders/${row.id}`)
+            }
+          "
           >#{{ String(row.id).slice(-6) }}</span
         >
       </template>

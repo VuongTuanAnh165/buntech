@@ -1,21 +1,9 @@
-import type {
-  Role,
-  OrderStatus,
-  TransactionType,
-  ProductStatus,
-  UserStatus,
-  BlogStatus,
-  InventoryMovementType,
-  VehicleStatus,
-  NotificationType
-} from './enums'
-
 export interface Profile {
   id: string
-  role: Role
+  role: string
   phone: string | null
   full_name: string
-  status: UserStatus
+  status: string
   debt_limit: number
   avatar_url: string | null
   created_at: string
@@ -40,7 +28,7 @@ export interface Product {
   stock: number
   unit: string
   image_url: string | null
-  status: ProductStatus
+  status: string
   deleted_at: string | null
   created_at: string
   updated_at: string
@@ -85,7 +73,7 @@ export interface Order {
   driver_id: string | null
   driver?: Profile | null
   user?: Profile | null
-  status: OrderStatus
+  status: string
   total: number
   amount_collected: number
   guest_info: { name: string; phone: string; address: string } | null
@@ -112,7 +100,7 @@ export interface Transaction {
   user_id: string | null
   user?: Profile | null
   order_id: string | null
-  type: TransactionType
+  type: string
   amount: number
   note: string
   created_at: string
@@ -132,7 +120,7 @@ export interface InventoryMovement {
   id: string
   inventory_id: string
   inventory_item?: InventoryItem | null
-  type: InventoryMovementType
+  type: string
   quantity: number
   note: string
   created_at: string
@@ -157,7 +145,7 @@ export interface BlogPost {
   featured_image: string | null
   author_name: string | null
   published_at: string | null
-  status: BlogStatus
+  status: string
   deleted_at: string | null
   created_at: string
   updated_at: string
@@ -204,7 +192,7 @@ export interface Vehicle {
   plate_number: string
   model: string
   capacity: number
-  status: VehicleStatus
+  status: string
   last_maintenance: string
   created_at: string
   updated_at: string
@@ -213,7 +201,7 @@ export interface Vehicle {
 export interface Notification {
   id: string
   user_id: string | null
-  type: NotificationType
+  type: string
   title: string
   message: string
   is_read: boolean

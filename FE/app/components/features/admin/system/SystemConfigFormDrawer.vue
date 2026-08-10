@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { z } from 'zod'
+import { requiredString } from '~/utils/validation'
 import type { SystemConfig } from '~/utils/types'
-import type { FormSubmitEvent } from '#ui/types'
+import { reactive, ref, computed, watch } from 'vue'
 
 const props = defineProps<{
   open: boolean
@@ -24,9 +25,9 @@ const isEdit = computed(() => !!props.config)
 const schema = z.object({
   key: z
     .string()
-    .min(1, 'Key không được để trống')
-    .regex(/^[a-z0-9_]+$/, 'Key chỉ được chứa chữ cái viết thường, số và dấu gạch dưới'),
-  value: z.string().min(1, 'Giá trị không được để trống'),
+    .min(1, 'Mã cấu hình (Key) không được để trống')
+    .regex(/^[a-z0-9_]+$/, 'Chỉ được chứa chữ thường, số và dấu gạch dưới'),
+  value: requiredString('Giá trị (Value)'),
   description: z.string().optional()
 })
 
@@ -37,6 +38,8 @@ const state = reactive<Schema>({
   value: '',
   description: ''
 })
+
+const formErrors = reactive<Record<string, string>>({})
 
 watch(
   () => props.open,
@@ -51,41 +54,93 @@ watch(
         state.value = ''
         state.description = ''
       }
+      Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
     }
   }
 )
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  emit('save', event.data)
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+    errors.forEach((e) => {
+      formErrors[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+  }
+})
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  const result = schema.safeParse(state)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
+}
+
+const { handleSubmit } = useFormSubmit()
+
+const onSubmit = handleSubmit(
+  async (data: Schema) => {
+    emit('save', data)
+  },
+  {
+    formRef,
+    onSuccess: () => {},
+    onError: () => {}
+  }
+)
+
+const handleFormSubmit = () => {
+  if (validateForm()) {
+    onSubmit(state)
+  }
 }
 </script>
 
 <template>
   <USlideover v-model:open="isOpen" :title="isEdit ? 'Chỉnh sửa cấu hình' : 'Thêm cấu hình mới'">
     <template #body>
-      <UForm id="config-form" :schema="schema" :state="state" class="space-y-6" @submit="onSubmit">
-        <UFormField label="Mã cấu hình (Key)" name="key" required>
+      <form id="config-form" class="space-y-6" @submit.prevent="handleFormSubmit">
+        <UFormField label="Mã cấu hình (Key)" name="key" required :error="formErrors.key">
           <template #description>
             Chỉ chứa chữ cái thường, số và dấu gạch dưới. Ví dụ: <code>freeship_threshold</code>
           </template>
           <UInput v-model="state.key" placeholder="Nhập mã cấu hình..." :disabled="isEdit" />
         </UFormField>
 
-        <UFormField label="Giá trị (Value)" name="value" required>
+        <UFormField label="Giá trị (Value)" name="value" required :error="formErrors.value">
           <UTextarea v-model="state.value" :rows="4" placeholder="Nhập giá trị..." />
         </UFormField>
 
-        <UFormField label="Mô tả" name="description">
+        <UFormField label="Mô tả" name="description" :error="formErrors.description">
           <UInput
             v-model="state.description"
             placeholder="Giải thích ý nghĩa của cấu hình này..."
           />
         </UFormField>
-      </UForm>
+      </form>
     </template>
     <template #footer>
       <div class="flex w-full justify-end gap-3">
-        <UButton color="neutral" variant="ghost" @click="isOpen = false"> Hủy bỏ </UButton>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          @click="
+            () => {
+              isOpen = false
+            }
+          "
+        >
+          Hủy bỏ
+        </UButton>
         <UButton type="submit" form="config-form" color="primary" :loading="loading">
           Lưu lại
         </UButton>

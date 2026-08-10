@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-vue-next'
-import { resetPasswordSchema } from '~~/core/validators/auth.validator'
-import { authService } from '~~/core/services/auth.service'
+import { resetPasswordSchema } from '~/utils/validation'
+import { authService } from '~/services/authService'
 import type { z } from 'zod'
 
 const { t } = useI18n()
-const toast = useToast()
 
-useSeoMeta({ title: `${t('auth.resetPassword')} - BunTech` })
+useSeoMeta({ title: 'Đặt lại mật khẩu - BunTech Admin' })
 definePageMeta({ layout: 'auth' })
 
 const success = ref(false)
@@ -20,6 +19,34 @@ const state = reactive({
 
 type Schema = z.output<typeof resetPasswordSchema>
 
+const formErrors = reactive<Record<string, string>>({})
+
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+    errors.forEach((e) => {
+      formErrors[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+  }
+})
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  const result = resetPasswordSchema.safeParse(state)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
+}
+
 const { handleSubmit, isSubmitting: loading } = useFormSubmit()
 const handleResetPassword = handleSubmit(
   async (data: Schema) => {
@@ -30,14 +57,21 @@ const handleResetPassword = handleSubmit(
     })
   },
   {
+    formRef,
     onSuccess() {
       success.value = true
     },
-    onError(err: Error) {
-      toast.add({ title: 'Khôi phục mật khẩu thất bại', description: err.message, color: 'error' })
+    onError(err: unknown) {
+      void err // ApiClient xử lý toast lỗi
     }
   }
 )
+
+const handleFormSubmit = () => {
+  if (validateForm()) {
+    handleResetPassword(state)
+  }
+}
 
 const strength = computed(() => {
   const val = state.newPassword
@@ -109,15 +143,8 @@ const strengthColor = computed(() => {
       </div>
 
       <!-- Form -->
-      <UForm
-        v-else
-        key="form"
-        class="space-y-5"
-        :schema="resetPasswordSchema"
-        :state="state"
-        @submit="(e: any) => handleResetPassword(e.data)"
-      >
-        <UFormField label="Số điện thoại" name="phoneNumber">
+      <form v-else key="form" class="space-y-5" @submit.prevent="handleFormSubmit">
+        <UFormField label="Số điện thoại" name="phoneNumber" :error="formErrors.phoneNumber">
           <UInput
             v-model="state.phoneNumber"
             type="tel"
@@ -127,11 +154,15 @@ const strengthColor = computed(() => {
           />
         </UFormField>
 
-        <UFormField label="Mã OTP" name="token">
+        <UFormField label="Mã OTP" name="token" :error="formErrors.token">
           <UInput v-model="state.token" placeholder="Mã xác thực 6 số" class="w-full" />
         </UFormField>
 
-        <UFormField :label="t('auth.newPassword')" name="newPassword">
+        <UFormField
+          :label="t('auth.newPassword')"
+          name="newPassword"
+          :error="formErrors.newPassword"
+        >
           <UInput
             v-model="state.newPassword"
             type="password"
@@ -155,7 +186,11 @@ const strengthColor = computed(() => {
           <p class="mt-1.5 text-xs text-slate-400 dark:text-zinc-500">{{ strengthLabel }}</p>
         </div>
 
-        <UFormField :label="t('auth.confirmPassword')" name="confirmPassword">
+        <UFormField
+          :label="t('auth.confirmPassword')"
+          name="confirmPassword"
+          :error="formErrors.confirmPassword"
+        >
           <UInput
             v-model="state.confirmPassword"
             type="password"
@@ -174,7 +209,7 @@ const strengthColor = computed(() => {
         <UButton type="submit" :loading="loading" class="!mt-8 w-full" size="lg">
           {{ t('auth.resetPasswordButton') }}
         </UButton>
-      </UForm>
+      </form>
     </Transition>
   </div>
 </template>

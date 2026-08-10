@@ -1,27 +1,73 @@
 import { ApiClient } from '~/utils/api'
-import type { ApiResponse } from '~/types/api'
+import type { MasterDataConstants, Division } from '~/types/masterData'
 
-export const getDivisionsVersion = () => {
-  return ApiClient.get<ApiResponse<{ versionHash: string | null }>>(
-    '/master-data/divisions/version'
-  )
-}
+export const masterDataService = {
+  async getConstants(currentVersion?: string, onNewEtag?: (etag: string) => void) {
+    try {
+      const headers: Record<string, string> = {}
+      if (currentVersion) {
+        headers['If-None-Match'] = currentVersion
+      }
 
-export const getDivisionsTree = (
-  versionHash?: string,
-  onResponse?: (context: { response?: { headers?: { get: (n: string) => string | null } } }) => void
-) => {
-  const headers: Record<string, string> = {}
-  if (versionHash) {
-    headers['If-None-Match'] = versionHash
+      const res = await ApiClient.get<{ data: MasterDataConstants }>('/constants', undefined, {
+        headers,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onResponse: (context: any) => {
+          const etag =
+            context.response?.headers?.get('etag') || context.response?.headers?.get('ETag')
+          if (etag) {
+            onNewEtag?.(etag)
+          }
+        }
+      })
+
+      if (res?.data) {
+        return res.data
+      }
+      return null
+    } catch (e: unknown) {
+      if (typeof e === 'object' && e !== null && 'response' in e) {
+        const responseError = e as { response?: { status?: number } }
+        if (responseError.response?.status === 304) {
+          throw e
+        }
+      }
+      return null
+    }
+  },
+
+  async getDivisions(currentVersion?: string, onNewEtag?: (etag: string) => void) {
+    try {
+      const headers: Record<string, string> = {}
+      if (currentVersion) {
+        headers['If-None-Match'] = currentVersion
+      }
+
+      const res = await ApiClient.get<{ data: Division[] }>('/master-data/divisions', undefined, {
+        headers,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onResponse: (context: any) => {
+          const etag =
+            context.response?.headers?.get('etag') || context.response?.headers?.get('ETag')
+          if (etag) {
+            onNewEtag?.(etag)
+          }
+        },
+        silent: true // Prevents toast error popup on 304 if configured in ApiClient
+      })
+
+      if (res?.data) {
+        return res.data
+      }
+      return null
+    } catch (e: unknown) {
+      if (typeof e === 'object' && e !== null && 'response' in e) {
+        const responseError = e as { response?: { status?: number } }
+        if (responseError.response?.status === 304) {
+          throw e
+        }
+      }
+      throw e
+    }
   }
-  return ApiClient.get<ApiResponse<unknown[]>>('/master-data/divisions', undefined, {
-    headers,
-    onResponse,
-    silent: true
-  })
-}
-
-export const getConstants = () => {
-  return ApiClient.get<ApiResponse<Record<string, Record<string, string>>>>('/constants')
 }

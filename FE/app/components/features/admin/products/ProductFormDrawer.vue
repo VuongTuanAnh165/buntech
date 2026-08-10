@@ -5,8 +5,10 @@
   Reason: Extracted to keep admin/products/index.vue under 400 lines
 -->
 <script setup lang="ts">
-import { ProductStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Product, Category } from '~/utils/types'
+
+const { constants } = useMasterData()
 
 const props = defineProps<{
   product: Product | null
@@ -27,7 +29,7 @@ const form = ref({
   stock: 0,
   unit: 'kg',
   category_id: '',
-  status: ProductStatus.ACTIVE,
+  status: constants.value?.[ConstantKey.ProductStatus]?.ACTIVE,
   image_url: ''
 })
 const imagePreview = ref<string | null>(null)
@@ -59,7 +61,7 @@ watch(
         stock: 0,
         unit: 'kg',
         category_id: props.categories[0]?.id || '',
-        status: ProductStatus.ACTIVE,
+        status: constants.value?.[ConstantKey.ProductStatus]?.ACTIVE,
         image_url: ''
       }
       imagePreview.value = null
@@ -136,8 +138,8 @@ function handleSave() {
           <USelectMenu
             v-model="form.status"
             :items="[
-              { value: ProductStatus.ACTIVE, label: 'Đang bán' },
-              { value: ProductStatus.INACTIVE, label: 'Ngừng bán' }
+              { value: constants?.[ConstantKey.ProductStatus]?.ACTIVE, label: 'Đang bán' },
+              { value: constants?.[ConstantKey.ProductStatus]?.INACTIVE, label: 'Ngừng bán' }
             ]"
             value-key="value"
             label-key="label"
@@ -147,7 +149,17 @@ function handleSave() {
     </template>
     <template #footer>
       <div class="flex w-full justify-end gap-3">
-        <UButton color="neutral" variant="ghost" @click="isOpen = false"> Hủy </UButton>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          @click="
+            () => {
+              isOpen = false
+            }
+          "
+        >
+          Hủy
+        </UButton>
         <UButton :loading="saving" color="primary" @click="handleSave">
           {{ product ? 'Cập nhật' : 'Thêm mới' }}
         </UButton>

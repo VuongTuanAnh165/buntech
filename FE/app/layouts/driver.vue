@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { _driverNavigationItems } from '~/utils/navigation'
 
 const route = useRoute()
 const _router = useRouter()

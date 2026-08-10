@@ -3,7 +3,6 @@ import type { SystemConfig } from '~/utils/types'
 import { useSystemConfigs } from '~/composables/admin/useSystemConfigs'
 import SystemConfigFormDrawer from '~/components/features/admin/system/SystemConfigFormDrawer.vue'
 
-const toast = useToast()
 const { confirm } = useConfirmDialog()
 const { fetchConfigs, createConfig, updateConfig, deleteConfig } = useSystemConfigs()
 
@@ -11,7 +10,6 @@ useSeoMeta({ title: 'Cấu hình hệ thống - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
 
 // ─── State ────────────────────────────────────────────────────────
-const loading = ref(true)
 const configs = ref<SystemConfig[]>([])
 const search = ref('')
 const page = ref(1)
@@ -28,10 +26,6 @@ watch(search, (val) => {
   }, 300)
 })
 
-watch([page, limit, debouncedSearch], () => {
-  loadData()
-})
-
 const columns = [
   { accessorKey: 'key', header: 'Key' },
   { accessorKey: 'value', header: 'Value' },
@@ -41,30 +35,35 @@ const columns = [
 ]
 
 // ─── Data fetching ────────────────────────────────────────────────
-async function loadData() {
-  loading.value = true
-  try {
-    const res = await fetchConfigs({
+const {
+  data: resData,
+  status,
+  refresh
+} = await useAsyncData(
+  'admin-system-configs',
+  () =>
+    fetchConfigs({
       page: page.value,
       limit: limit.value,
       search: debouncedSearch.value || undefined
-    })
-
-    if (res?.data) {
-      configs.value = (res.data as unknown as { data: SystemConfig[] }).data || []
-      total.value = (res.data as unknown as { meta?: { total: number } }).meta?.total || 0
-    }
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('Error loading configs:', err)
-  } finally {
-    loading.value = false
+    }),
+  {
+    watch: [page, limit, debouncedSearch]
   }
-}
+)
 
-onMounted(() => {
-  loadData()
+const loading = computed(() => status.value === 'pending')
+
+watchEffect(() => {
+  if (resData.value?.data) {
+    configs.value = (resData.value.data as unknown as { data: SystemConfig[] }).data || []
+    total.value = (resData.value.data as unknown as { meta?: { total: number } }).meta?.total || 0
+  }
 })
+
+async function loadData() {
+  await refresh()
+}
 
 onUnmounted(() => {
   if (searchTimeoutId.value) clearTimeout(searchTimeoutId.value)
@@ -94,10 +93,8 @@ async function handleSave(data: { key: string; value: string; description?: stri
         value: data.value,
         description: data.description
       })
-      toast.add({ title: 'Cập nhật cấu hình thành công', color: 'success' })
     } else {
       await createConfig(data)
-      toast.add({ title: 'Thêm cấu hình thành công', color: 'success' })
     }
     showDrawer.value = false
     loadData()
@@ -121,7 +118,6 @@ async function handleDelete(row: unknown) {
   if (isConfirmed) {
     try {
       await deleteConfig(config.key)
-      toast.add({ title: 'Đã xóa cấu hình', color: 'success' })
       if (configs.value.length === 1 && page.value > 1) {
         page.value--
       } else {

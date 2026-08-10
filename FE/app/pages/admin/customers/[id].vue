@@ -1,10 +1,5 @@
 <script setup lang="ts">
 import {
-  Role,
-  _UserStatus,
-  TransactionType,
-  ProductStatus,
-  _OrderStatus,
   mockProfiles,
   mockOrders,
   mockTransactions,
@@ -12,7 +7,9 @@ import {
   mockCustomPrices,
   mockProducts
 } from '~/utils/mockData'
-import type { Profile, Order, Transaction, Address, CustomPrice, Product } from '~/utils/mockData'
+import type { Profile, Order, Transaction, Address, CustomPrice, Product } from '~/utils/types'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 
 const route = useRoute()
 const toast = useToast()
@@ -53,8 +50,8 @@ const customerName = computed(() => customer.value?.full_name || '—')
 const currentDebt = computed(() => {
   let debt = 0
   for (const tx of transactions.value) {
-    if (tx.type === TransactionType.DEBT_INCREASE) debt += tx.amount
-    if (tx.type === TransactionType.DEBT_PAYMENT) debt -= tx.amount
+    if (tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE) debt += tx.amount
+    if (tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT) debt -= tx.amount
   }
   return debt
 })
@@ -73,12 +70,16 @@ const avgOrderValue = computed(() =>
 
 const debtTransactions = computed(() =>
   transactions.value.filter(
-    (tx) => tx.type === TransactionType.DEBT_INCREASE || tx.type === TransactionType.DEBT_PAYMENT
+    (tx) =>
+      tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE ||
+      tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT
   )
 )
 
 const _paymentTransactions = computed(() =>
-  transactions.value.filter((tx) => tx.type === TransactionType.PAYMENT)
+  transactions.value.filter(
+    (tx) => tx.type === constants.value?.[ConstantKey.TransactionType]?.PAYMENT
+  )
 )
 
 const tabs = computed(() => [
@@ -268,7 +269,9 @@ function deletePrice(id: string) {
 }
 
 const availableProducts = computed(() =>
-  mockProducts.filter((p) => !p.deleted_at && p.status === ProductStatus.ACTIVE)
+  mockProducts.filter(
+    (p) => !p.deleted_at && p.status === constants.value?.[ConstantKey.ProductStatus]?.ACTIVE
+  )
 )
 
 useSeoMeta({ title: () => `${customerName.value} - BunTech Admin` })
@@ -291,7 +294,11 @@ onMounted(loadCustomer)
       color="neutral"
       icon="i-lucide-arrow-left"
       class="mb-4"
-      @click="navigateTo('/admin/customers')"
+      @click="
+        () => {
+          navigateTo('/admin/customers')
+        }
+      "
     >
       Quay lại
     </UButton>
@@ -339,7 +346,7 @@ onMounted(loadCustomer)
           aria-hidden="true"
         />
         <div class="relative flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-          <UAvatar :alt="customer.full_name" :src="customer.avatar_url" size="3xl" />
+          <UAvatar :alt="customer.full_name" :src="customer.avatar_url || undefined" size="3xl" />
           <div class="min-w-0 flex-1">
             <h1 class="text-surface-foreground text-xl font-bold tracking-tight sm:text-2xl">
               {{ customer.full_name }}
@@ -357,18 +364,18 @@ onMounted(loadCustomer)
             <div class="mt-2.5 flex flex-wrap items-center gap-2">
               <UBadge
                 :color="
-                  customer.role === Role.DRIVER
+                  customer.role === constants?.[ConstantKey.Role]?.DRIVER
                     ? 'warning'
-                    : customer.role === Role.ADMIN
+                    : customer.role === constants?.[ConstantKey.Role]?.ADMIN
                       ? 'error'
                       : 'success'
                 "
                 variant="soft"
               >
                 {{
-                  customer.role === Role.ADMIN
-                    ? 'Quản trị'
-                    : customer.role === Role.DRIVER
+                  customer.role === constants?.[ConstantKey.Role]?.ADMIN
+                    ? 'Quản trị viên'
+                    : customer.role === constants?.[ConstantKey.Role]?.DRIVER
                       ? 'Tài xế'
                       : 'Khách hàng'
                 }}
@@ -594,7 +601,16 @@ onMounted(loadCustomer)
       </template>
       <template #footer>
         <div class="flex w-full justify-end gap-3">
-          <UButton variant="ghost" color="neutral" @click="showAddressModal = false">Huỷ</UButton>
+          <UButton
+            variant="ghost"
+            color="neutral"
+            @click="
+              () => {
+                showAddressModal = false
+              }
+            "
+            >Huỷ</UButton
+          >
           <UButton color="primary" @click="saveAddress">{{
             editingAddressId ? 'Cập nhật' : 'Thêm mới'
           }}</UButton>
@@ -631,7 +647,16 @@ onMounted(loadCustomer)
       </template>
       <template #footer>
         <div class="flex w-full justify-end gap-3">
-          <UButton variant="ghost" color="neutral" @click="showPriceModal = false">Huỷ</UButton>
+          <UButton
+            variant="ghost"
+            color="neutral"
+            @click="
+              () => {
+                showPriceModal = false
+              }
+            "
+            >Huỷ</UButton
+          >
           <UButton color="primary" @click="savePrice">Lưu giá</UButton>
         </div>
       </template>

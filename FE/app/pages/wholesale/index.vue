@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { mockProfiles, mockOrders } from '~/utils/mockData'
-import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '~/utils/orderStatus'
+import { getOrderStatusColor, getOrderStatusLabel } from '~/utils/orderStatus'
+const { constants } = useMasterData()
 useSeoMeta({ title: 'Khách hàng - BunTech' })
 definePageMeta({ layout: 'default' })
 const loading = ref(true)
@@ -204,8 +205,12 @@ const tableColumns = [
               }}</span>
             </template>
             <template #status-cell="{ row }">
-              <UBadge :color="ORDER_STATUS_COLORS[row.original.status]" variant="subtle" size="sm">
-                {{ ORDER_STATUS_LABELS[row.original.status] }}
+              <UBadge
+                :color="getOrderStatusColor(constants)[row.original.status] as any"
+                variant="subtle"
+                size="sm"
+              >
+                {{ getOrderStatusLabel(constants)[row.original.status] }}
               </UBadge>
             </template>
             <template #total-cell="{ row }">

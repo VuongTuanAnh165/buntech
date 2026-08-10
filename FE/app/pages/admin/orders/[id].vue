@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { mockOrders, mockProfiles, mockOrderItems } from '~/utils/mockData'
-import { OrderStatus, Role, UserStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Order, OrderItem, Profile } from '~/utils/types'
 import {
-  ORDER_STATUS_COLORS,
-  ORDER_STATUS_ICONS,
-  ORDER_STATUS_LABELS,
-  ORDER_STATUS_FLOW
+  getOrderStatusColor,
+  getOrderStatusIcon,
+  getOrderStatusLabel,
+  getOrderStatusList
 } from '~/utils/orderStatus'
+
+const { constants } = useMasterData()
 
 const toast = useToast()
 const route = useRoute()
@@ -26,13 +28,15 @@ const changingStatus = ref(false)
 const showAssignDriver = ref(false)
 const selectedDriverId = ref('')
 
-const statusFlow = ORDER_STATUS_FLOW
+const statusFlow = computed(() => getOrderStatusList(constants))
 const currentStatusIndex = computed(() => {
   if (!order.value) return -1
-  if (order.value.status === OrderStatus.CANCELLED) return -2
-  return statusFlow.indexOf(order.value.status as OrderStatus)
+  if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED) return -2
+  return statusFlow.value.indexOf(order.value.status)
 })
-const isCancelled = computed(() => order.value?.status === OrderStatus.CANCELLED)
+const isCancelled = computed(
+  () => order.value?.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
+)
 
 const total = computed(() => Number(order.value?.total ?? 0))
 const amountCollected = computed(() => Number(order.value?.amount_collected ?? 0))
@@ -58,10 +62,16 @@ const driverName = computed(() => driver.value?.full_name)
 const orderNotes = computed(() => order.value?.note || 'Không có ghi chú cho đơn hàng này.')
 
 const availableDrivers = computed(() =>
-  mockProfiles.filter((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE)
+  mockProfiles.filter(
+    (p) =>
+      p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
+      p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+  )
 )
 const statusOptions = computed(() =>
-  Object.values(OrderStatus).filter((s) => s !== order.value?.status)
+  Object.values(constants.value?.[ConstantKey.OrderStatus] || {}).filter(
+    (s) => s !== order.value?.status
+  )
 )
 
 // History
@@ -70,31 +80,47 @@ function buildHistory() {
   if (!order.value) return
   const created = order.value.created_at
   const base: { status: string; at: string; note: string }[] = [
-    { status: OrderStatus.PENDING, at: created, note: 'Đơn hàng được tạo' }
+    {
+      status: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
+      at: created,
+      note: 'Đơn hàng được tạo'
+    }
   ]
-  if (order.value.status !== OrderStatus.PENDING && order.value.status !== OrderStatus.CANCELLED) {
+  if (
+    order.value.status !== constants.value?.[ConstantKey.OrderStatus]?.PENDING &&
+    order.value.status !== constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
+  ) {
     base.push({
-      status: OrderStatus.PROCESSING,
+      status: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
       at: addHours(created, 2),
       note: 'Bắt đầu chuẩn bị hàng'
     })
   }
-  if ([OrderStatus.SHIPPING, OrderStatus.DELIVERED].includes(order.value.status as OrderStatus)) {
+  if (
+    [
+      constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
+      constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    ].includes(order.value.status)
+  ) {
     base.push({
-      status: OrderStatus.SHIPPING,
+      status: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
       at: addHours(created, 4),
       note: 'Đã giao cho tài xế'
     })
   }
-  if (order.value.status === OrderStatus.DELIVERED) {
+  if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED) {
     base.push({
-      status: OrderStatus.DELIVERED,
+      status: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
       at: addHours(created, 8),
       note: 'Khách đã nhận hàng'
     })
   }
-  if (order.value.status === OrderStatus.CANCELLED) {
-    base.push({ status: OrderStatus.CANCELLED, at: addHours(created, 1), note: 'Đơn hàng bị hủy' })
+  if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED) {
+    base.push({
+      status: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string,
+      at: addHours(created, 1),
+      note: 'Đơn hàng bị hủy'
+    })
   }
   orderHistory.value = base
 }
@@ -144,10 +170,10 @@ function changeStatus(newStatus: string) {
   if (!order.value) return
   showStatusMenu.value = false
   changingStatus.value = true
-  order.value.status = newStatus as OrderStatus
+  order.value.status = newStatus
   setTimeout(() => {
     toast.add({
-      title: `Đã cập nhật trạng thái: ${ORDER_STATUS_LABELS[newStatus]}`,
+      title: `Đã cập nhật trạng thái: ${getOrderStatusLabel(constants)[newStatus as string]}`,
       color: 'success'
     })
     buildHistory()
@@ -207,7 +233,11 @@ const breadcrumbItems = [
       variant="ghost"
       color="neutral"
       class="mb-4 flex min-h-[44px] items-center gap-1 px-2 text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-      @click="navigateTo('/admin/orders')"
+      @click="
+        () => {
+          navigateTo('/admin/orders')
+        }
+      "
     >
       <UIcon name="i-lucide-arrow-left" class="h-4 w-4" /> Quay lại
     </UButton>
@@ -247,8 +277,8 @@ const breadcrumbItems = [
               <span class="font-mono text-sm text-slate-500 dark:text-zinc-400"
                 >#{{ String(orderId).slice(0, 8) }}</span
               >
-              <UBadge :color="ORDER_STATUS_COLORS[order.status]" variant="subtle">
-                {{ ORDER_STATUS_LABELS[order.status] }}
+              <UBadge :color="getOrderStatusColor(constants)[order.status] as any" variant="subtle">
+                {{ getOrderStatusLabel(constants)[order.status] }}
               </UBadge>
             </div>
             <h1 class="text-surface-foreground mb-1 text-2xl font-bold tracking-tight">
@@ -286,7 +316,11 @@ const breadcrumbItems = [
                 <UButton
                   size="sm"
                   :loading="changingStatus"
-                  @click="showStatusMenu = !showStatusMenu"
+                  @click="
+                    () => {
+                      showStatusMenu = !showStatusMenu
+                    }
+                  "
                 >
                   <UIcon name="i-lucide-refresh-cw" class="h-4 w-4" /> Đổi trạng thái
                   <UIcon
@@ -308,8 +342,8 @@ const breadcrumbItems = [
                       class="text-surface-foreground hover:bg-surface-hover flex min-h-[40px] w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors"
                       @click="changeStatus(s as string)"
                     >
-                      <UIcon :name="ORDER_STATUS_ICONS[s]" class="h-4 w-4" />
-                      {{ ORDER_STATUS_LABELS[s] }}
+                      <UIcon :name="getOrderStatusIcon(constants)[s]" class="h-4 w-4" />
+                      {{ getOrderStatusLabel(constants)[s] }}
                     </UButton>
                   </div>
                 </Transition>
@@ -461,7 +495,10 @@ const breadcrumbItems = [
                       : 'bg-surface-hover text-slate-400 dark:text-zinc-500'
                   ]"
                 >
-                  <UIcon :name="ORDER_STATUS_ICONS[statusFlow[i]]" class="h-5 w-5" />
+                  <UIcon
+                    :name="getOrderStatusIcon(constants)[statusFlow[i] as string]"
+                    class="h-5 w-5"
+                  />
                 </div>
                 <div class="text-center">
                   <p
@@ -525,20 +562,20 @@ const breadcrumbItems = [
                 <div
                   :class="[
                     'ring-surface flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ring-4',
-                    h.status === OrderStatus.CANCELLED
+                    h.status === constants?.[ConstantKey.OrderStatus]?.CANCELLED
                       ? 'bg-error-50 dark:bg-error-900/20'
-                      : h.status === OrderStatus.DELIVERED
+                      : h.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                         ? 'bg-success-50 dark:bg-success-900/20'
                         : 'bg-primary-50 dark:bg-primary-900/20'
                   ]"
                 >
                   <UIcon
-                    :name="ORDER_STATUS_ICONS[h.status]"
+                    :name="getOrderStatusIcon(constants)[h.status]"
                     :class="[
                       'h-4 w-4',
-                      h.status === OrderStatus.CANCELLED
+                      h.status === constants?.[ConstantKey.OrderStatus]?.CANCELLED
                         ? 'text-error-600 dark:text-error-400'
-                        : h.status === OrderStatus.DELIVERED
+                        : h.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                           ? 'text-success-600 dark:text-success-400'
                           : 'text-primary-600 dark:text-primary-400'
                     ]"
@@ -547,7 +584,7 @@ const breadcrumbItems = [
                 <div class="min-w-0 flex-1 pt-0.5">
                   <div class="flex items-center justify-between gap-2">
                     <p class="text-surface-foreground text-sm font-medium">
-                      {{ ORDER_STATUS_LABELS[h.status] }}
+                      {{ getOrderStatusLabel(constants)[h.status] }}
                     </p>
                     <span class="text-xs text-slate-400 dark:text-zinc-500">{{
                       formatDateTime(h.at)
@@ -576,7 +613,7 @@ const breadcrumbItems = [
               <h2 class="text-surface-foreground text-sm font-semibold">Khách hàng</h2>
             </div>
             <div class="mb-4 flex items-center gap-3">
-              <UAvatar :alt="customerName" size="lg" :src="customer?.avatar_url" />
+              <UAvatar :alt="customerName" size="lg" :src="customer?.avatar_url || undefined" />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-semibold">
                   {{ customerName }}
@@ -670,7 +707,11 @@ const breadcrumbItems = [
                 variant="ghost"
                 color="neutral"
                 class="text-primary-600 dark:text-primary-400 flex items-center gap-1 text-xs hover:underline"
-                @click="showAssignDriver = true"
+                @click="
+                  () => {
+                    showAssignDriver = true
+                  }
+                "
               >
                 <UIcon name="i-lucide-user-check" class="h-3.5 w-3.5" /> Gán tài xế
               </UButton>
@@ -680,7 +721,7 @@ const breadcrumbItems = [
               v-if="driverName"
               class="border-surface-border mb-4 flex items-center gap-3 border-b pb-4"
             >
-              <UAvatar :alt="driverName" size="md" :src="driver?.avatar_url" />
+              <UAvatar :alt="driverName" size="md" :src="driver?.avatar_url || undefined" />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-medium">{{ driverName }}</p>
                 <p class="text-xs text-slate-500 dark:text-zinc-400">Tài xế giao hàng</p>
@@ -760,9 +801,13 @@ const breadcrumbItems = [
                   ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                   : 'border-surface-border hover:bg-surface-hover'
               ]"
-              @click="selectedDriverId = drv.id"
+              @click="
+                () => {
+                  selectedDriverId = drv.id
+                }
+              "
             >
-              <UAvatar :alt="drv.full_name" size="sm" :src="drv.avatar_url" />
+              <UAvatar :alt="drv.full_name" size="sm" :src="drv.avatar_url || undefined" />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-medium">
                   {{ drv.full_name }}
@@ -779,7 +824,16 @@ const breadcrumbItems = [
             </UButton>
           </div>
           <div class="flex justify-end gap-2 pt-2">
-            <UButton variant="ghost" color="neutral" @click="showAssignDriver = false">Huỷ</UButton>
+            <UButton
+              variant="ghost"
+              color="neutral"
+              @click="
+                () => {
+                  showAssignDriver = false
+                }
+              "
+              >Huỷ</UButton
+            >
             <UButton :disabled="!selectedDriverId" @click="assignDriver">Gán tài xế</UButton>
           </div>
         </div>

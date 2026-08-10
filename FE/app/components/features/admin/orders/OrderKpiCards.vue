@@ -4,8 +4,10 @@
   Reason: Extracted to keep admin/orders/index.vue under 400 lines
 -->
 <script setup lang="ts">
-import { OrderStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Order } from '~/utils/types'
+
+const { constants } = useMasterData()
 
 const props = defineProps<{
   orders: Order[]
@@ -14,9 +16,15 @@ const props = defineProps<{
 
 const kpiStats = computed(() => {
   const list = props.orders
-  const pending = list.filter((o) => o.status === OrderStatus.PENDING).length
-  const shipping = list.filter((o) => o.status === OrderStatus.SHIPPING).length
-  const delivered = list.filter((o) => o.status === OrderStatus.DELIVERED).length
+  const pending = list.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING
+  ).length
+  const shipping = list.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+  ).length
+  const delivered = list.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+  ).length
   return [
     {
       title: 'Tổng đơn hàng',
@@ -50,7 +58,9 @@ const kpiStats = computed(() => {
 })
 
 const totalRevenue = computed(() =>
-  props.orders.filter((o) => o.status === OrderStatus.DELIVERED).reduce((s, o) => s + o.total, 0)
+  props.orders
+    .filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
+    .reduce((s, o) => s + o.total, 0)
 )
 </script>
 

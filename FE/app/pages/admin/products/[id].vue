@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ProductStatus, InventoryMovementType } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Product, ProductReview, InventoryMovement } from '~/utils/types'
 import { mockProducts, mockProductReviews as mockReviews } from '~/utils/mockData'
+const { constants } = useMasterData()
 
 const toast = useToast()
 const route = useRoute()
@@ -47,7 +48,7 @@ function loadProduct() {
       {
         id: '1',
         inventory_id: 'inv-1',
-        type: InventoryMovementType.IMPORT,
+        type: constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT as string,
         quantity: 50,
         note: 'Nhập kho từ xưởng',
         created_at: '2023-10-15T10:00:00Z'
@@ -55,7 +56,7 @@ function loadProduct() {
       {
         id: '2',
         inventory_id: 'inv-1',
-        type: InventoryMovementType.EXPORT,
+        type: constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT as string,
         quantity: 20,
         note: 'Xuất kho cho đơn hàng',
         created_at: '2023-10-14T14:30:00Z'
@@ -63,7 +64,7 @@ function loadProduct() {
       {
         id: '3',
         inventory_id: 'inv-1',
-        type: InventoryMovementType.IMPORT,
+        type: constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT as string,
         quantity: 100,
         note: 'Nhập kho từ xưởng',
         created_at: '2023-10-12T09:15:00Z'
@@ -71,7 +72,7 @@ function loadProduct() {
       {
         id: '4',
         inventory_id: 'inv-1',
-        type: InventoryMovementType.EXPORT,
+        type: constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT as string,
         quantity: 15,
         note: 'Xuất kho cho đơn hàng',
         created_at: '2023-10-10T16:45:00Z'
@@ -79,7 +80,7 @@ function loadProduct() {
       {
         id: '5',
         inventory_id: 'inv-1',
-        type: InventoryMovementType.LOSS,
+        type: constants.value?.[ConstantKey.InventoryMovementType]?.LOSS as string,
         quantity: 2,
         note: 'Hàng hỏng trong quá trình vận chuyển',
         created_at: '2023-10-08T11:20:00Z'
@@ -98,7 +99,9 @@ function loadProduct() {
 const productImageUrl = computed(() => product.value?.image_url || '')
 const productName = computed(() => product.value?.name || '')
 const categoryName = computed(() => product.value?.category?.name || '—')
-const status = computed(() => product.value?.status || ProductStatus.INACTIVE)
+const status = computed(
+  () => product.value?.status || constants.value?.[ConstantKey.ProductStatus]?.INACTIVE
+)
 const stock = computed(() => Number(product.value?.stock ?? 0))
 const price = computed(() => Number(product.value?.price ?? 0))
 const unit = computed(() => product.value?.unit || 'kg')
@@ -119,30 +122,29 @@ const stockState = computed(() => {
 const stockValue = computed(() => stock.value * price.value)
 
 const movementConfig: Record<
-  InventoryMovementType,
+  string,
   { icon: string; color: string; bg: string; sign: string; label: string }
-> = {
-  [InventoryMovementType.IMPORT]: {
-    icon: 'i-lucide-arrow-down-right',
-    color: 'text-success-600 dark:text-success-400',
-    bg: 'bg-success-50 dark:bg-success-900/20',
-    sign: '+',
-    label: 'Nhập kho'
-  },
-  [InventoryMovementType.EXPORT]: {
-    icon: 'i-lucide-arrow-up-right',
-    color: 'text-info-600 dark:text-info-400',
-    bg: 'bg-info-50 dark:bg-info-900/20',
-    sign: '-',
-    label: 'Xuất kho'
-  },
-  [InventoryMovementType.LOSS]: {
-    icon: 'i-lucide-alert-triangle',
-    color: 'text-error-600 dark:text-error-400',
-    bg: 'bg-error-50 dark:bg-error-900/20',
-    sign: '-',
-    label: 'Hao hụt'
-  }
+> = {}
+movementConfig[constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT || 'IMPORT'] = {
+  icon: 'i-lucide-arrow-down-right',
+  color: 'text-success-600 dark:text-success-400',
+  bg: 'bg-success-50 dark:bg-success-900/20',
+  sign: '+',
+  label: 'Nhập kho'
+}
+movementConfig[constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT || 'EXPORT'] = {
+  icon: 'i-lucide-arrow-up-right',
+  color: 'text-info-600 dark:text-info-400',
+  bg: 'bg-info-50 dark:bg-info-900/20',
+  sign: '-',
+  label: 'Xuất kho'
+}
+movementConfig[constants.value?.[ConstantKey.InventoryMovementType]?.LOSS || 'LOSS'] = {
+  icon: 'i-lucide-alert-triangle',
+  color: 'text-error-600 dark:text-error-400',
+  bg: 'bg-error-50 dark:bg-error-900/20',
+  sign: '-',
+  label: 'Hao hụt'
 }
 
 // Analytics (mock)
@@ -261,7 +263,10 @@ const specs = computed(() => [
   {
     icon: 'i-lucide-package',
     label: 'Trạng thái',
-    value: status.value === ProductStatus.ACTIVE ? 'Đang bán' : 'Ngưng bán'
+    value:
+      status.value === constants.value?.[ConstantKey.ProductStatus]?.ACTIVE
+        ? 'Đang bán'
+        : 'Ngưng bán'
   },
   {
     icon: 'i-lucide-calendar',
@@ -371,11 +376,17 @@ onMounted(loadProduct)
                 >{{ categoryName }}</UBadge
               >
               <UBadge
-                :color="status === ProductStatus.ACTIVE ? 'success' : 'neutral'"
+                :color="
+                  status === constants?.[ConstantKey.ProductStatus]?.ACTIVE ? 'success' : 'neutral'
+                "
                 variant="subtle"
               >
                 <template #leading><span class="h-1.5 w-1.5 rounded-full bg-current" /></template>
-                {{ status === ProductStatus.ACTIVE ? 'Đang bán' : 'Ngưng bán' }}
+                {{
+                  status === constants?.[ConstantKey.ProductStatus]?.ACTIVE
+                    ? 'Đang bán'
+                    : 'Ngưng bán'
+                }}
               </UBadge>
               <UBadge :color="statusColors[status] as any" variant="soft" class="mt-2">{{
                 stockState.label
@@ -424,7 +435,11 @@ onMounted(loadProduct)
                 color="neutral"
                 class="bg-surface border-surface-border hover:bg-surface-hover flex items-center justify-center rounded border px-2 py-1 text-slate-600 shadow-sm transition-colors dark:text-zinc-300"
                 title="Sửa"
-                @click="() => navigateTo(`/admin/products/${product?.id}/edit`)"
+                @click="
+                  () => {
+                    navigateTo(`/admin/products/${product?.id}/edit`)
+                  }
+                "
               >
                 <UIcon name="i-lucide-pencil" class="h-3.5 w-3.5" />
               </UButton>
@@ -450,8 +465,10 @@ onMounted(loadProduct)
         class="animate-fade-in-up mb-6"
         style="animation-delay: 60ms"
         @change="
-          (idx: number) =>
-            (activeTab = (['overview', 'inventory', 'reviews', 'analytics'] as const)[idx])
+          (idx: number) => {
+            activeTab =
+              (['overview', 'inventory', 'reviews', 'analytics'] as const)[idx] || 'overview'
+          }
         "
       />
 
@@ -731,14 +748,14 @@ onMounted(loadProduct)
                 <div
                   :class="[
                     'ring-surface flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ring-4',
-                    movementConfig[movement.type].bg
+                    movementConfig[movement.type]?.bg
                   ]"
                 >
                   <span
                     :class="[
                       'h-4 w-4',
-                      movementConfig[movement.type].icon,
-                      movementConfig[movement.type].color
+                      movementConfig[movement.type]?.icon,
+                      movementConfig[movement.type]?.color
                     ]"
                     aria-hidden="true"
                   />
@@ -746,10 +763,13 @@ onMounted(loadProduct)
                 <div class="min-w-0 flex-1 pt-0.5">
                   <div class="flex flex-wrap items-center justify-between gap-2">
                     <p class="text-surface-foreground text-sm font-medium">
-                      {{ movementConfig[movement.type].label }}
+                      {{ movementConfig[movement.type]?.label }}
                     </p>
                     <p class="text-surface-foreground font-medium">
-                      {{ movement.type === InventoryMovementType.IMPORT ? '+' : '-'
+                      {{
+                        movement.type === constants?.[ConstantKey.InventoryMovementType]?.IMPORT
+                          ? '+'
+                          : '-'
                       }}{{ movement.quantity }} {{ product?.unit || 'đv' }}
                     </p>
                     <p class="text-xs text-slate-500 dark:text-zinc-400">

@@ -58,7 +58,17 @@ function handleAssign() {
     </template>
     <template #footer>
       <div class="flex justify-end gap-2">
-        <UButton variant="ghost" color="neutral" @click="isOpen = false"> Hủy </UButton>
+        <UButton
+          variant="ghost"
+          color="neutral"
+          @click="
+            () => {
+              isOpen = false
+            }
+          "
+        >
+          Hủy
+        </UButton>
         <UButton
           :loading="batchAssigning"
           :disabled="!batchDriverId || selectedCount === 0"

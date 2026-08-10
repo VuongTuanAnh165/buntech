@@ -1,4 +1,5 @@
-import { getDivisionsTree, getConstants } from '~/services/masterDataService'
+import { masterDataService } from '~/services/masterDataService'
+import type { MasterDataConstants, Division } from '~/types/masterData'
 
 /**
  * Composable quản lý dữ liệu Master Data (Tỉnh thành, Constants).
@@ -7,16 +8,16 @@ import { getDivisionsTree, getConstants } from '~/services/masterDataService'
  */
 export const useMasterData = () => {
   const version = useState<string | null>('master_data_version', () => null)
-  const divisions = useState<unknown[]>('administrative_divisions', () => [])
-  const constants = useState<Record<string, Record<string, string>> | null>(
-    'master_data_constants',
-    () => null
-  )
+  const constantsVersion = useState<string | null>('master_data_constants_version', () => null)
+  const divisions = useState<Division[]>('administrative_divisions', () => [])
+  const constants = useState<MasterDataConstants | null>('master_data_constants', () => null)
 
   const initSync = async () => {
     // 1. Khôi phục từ LocalStorage (Client-side)
     if (import.meta.client) {
       if (!version.value) version.value = localStorage.getItem('master_data_version')
+      if (!constantsVersion.value)
+        constantsVersion.value = localStorage.getItem('master_data_constants_version')
       if (!divisions.value.length) {
         const cached = localStorage.getItem('administrative_divisions')
         if (cached) {
@@ -39,60 +40,58 @@ export const useMasterData = () => {
       }
     }
 
-    // 2. Fetch Constants
+    // 2. Fetch Constants với ETag (If-None-Match)
     try {
-      getConstants()
-        .then((res) => {
-          if (res?.success && res.data) {
-            constants.value = res.data
-            if (import.meta.client) {
-              localStorage.setItem('master_data_constants', JSON.stringify(res.data))
-            }
-          }
-        })
-        .catch((e) => {
-          // eslint-disable-next-line no-console
-          console.error('[MasterData] Lỗi tải constants', e)
-        })
-    } catch {
-      // ignore
+      const currentConstHash = constantsVersion.value || undefined
+
+      const data = await masterDataService.getConstants(currentConstHash, (newEtag) => {
+        constantsVersion.value = newEtag
+        if (import.meta.client) {
+          localStorage.setItem('master_data_constants_version', newEtag)
+        }
+      })
+
+      if (data) {
+        constants.value = data
+        if (import.meta.client) {
+          localStorage.setItem('master_data_constants', JSON.stringify(data))
+        }
+      }
+    } catch (e: unknown) {
+      if (typeof e === 'object' && e !== null && 'response' in e) {
+        const responseError = e as { response?: { status?: number } }
+        if (responseError.response?.status === 304) {
+          // Data không đổi
+        }
+      }
     }
 
     // 3. Fetch Divisions với ETag (If-None-Match)
     try {
       const currentHash = version.value || undefined
-      let newEtag: string | null = null
 
-      await getDivisionsTree(
-        currentHash,
-        (context: { response?: { headers?: { get: (n: string) => string | null } } }) => {
-          const etag =
-            context.response?.headers?.get('etag') || context.response?.headers?.get('ETag')
-          if (etag) newEtag = etag
+      const divData = await masterDataService.getDivisions(currentHash, (newEtag) => {
+        version.value = newEtag
+        if (import.meta.client) {
+          localStorage.setItem('master_data_version', newEtag)
         }
-      )
-        .then((res) => {
-          if (res?.success && res.data) {
-            divisions.value = res.data
-            if (newEtag) version.value = newEtag
+      })
 
-            if (import.meta.client) {
-              localStorage.setItem('administrative_divisions', JSON.stringify(res.data))
-              if (newEtag) localStorage.setItem('master_data_version', newEtag)
-            }
-          }
-        })
-        .catch((e: { response?: { status?: number } }) => {
-          if (e?.response?.status === 304) {
-            // Data không đổi
-          } else {
-            // eslint-disable-next-line no-console
-            console.error('[MasterData] Lỗi tải divisions:', e)
-          }
-        })
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('[MasterData] Lỗi đồng bộ divisions:', e)
+      if (divData) {
+        divisions.value = divData
+        if (import.meta.client) {
+          localStorage.setItem('administrative_divisions', JSON.stringify(divData))
+        }
+      }
+    } catch (e: unknown) {
+      if (typeof e === 'object' && e !== null && 'response' in e) {
+        const responseError = e as { response?: { status?: number } }
+        if (responseError.response?.status === 304) {
+          // Data không đổi
+        }
+      } else {
+        // console.error handled in service
+      }
     }
   }
 

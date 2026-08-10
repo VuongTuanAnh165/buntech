@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { BlogStatus } from '~/utils/enums'
-import { mockBlogPosts, _mockBlogCategories } from '~/utils/mockData'
+import { mockBlogPosts } from '~/utils/mockData'
+const { constants } = useMasterData()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Quản lý Blog - BunTech Admin' })
 const toast = useToast()
@@ -13,9 +13,11 @@ const perPage = ref(10)
 // ─── Computed KPIs ────────────────────────────────────────
 const totalPosts = computed(() => mockBlogPosts.length)
 const publishedPosts = computed(
-  () => mockBlogPosts.filter((p) => p.status === BlogStatus.PUBLISHED).length
+  () => mockBlogPosts.filter((p) => p.status === constants.value?.['BlogStatus']?.PUBLISHED).length
 )
-const draftPosts = computed(() => mockBlogPosts.filter((p) => p.status === BlogStatus.DRAFT).length)
+const draftPosts = computed(
+  () => mockBlogPosts.filter((p) => p.status === constants.value?.['BlogStatus']?.DRAFT).length
+)
 const totalViews = computed(() =>
   mockBlogPosts.reduce((s, p, i) => s + (p.views || i * 150 + 100), 0)
 )
@@ -158,7 +160,7 @@ onMounted(() => {
                   ><UIcon name="i-lucide-eye" class="h-3.5 w-3.5" />
                   {{
                     new Intl.NumberFormat('vi-VN').format(
-                      post.views || Math.floor(Math.random() * 1000) + 100
+                      (post as any).views || Math.floor(Math.random() * 1000) + 100
                     )
                   }}</span
                 >
@@ -182,8 +184,8 @@ onMounted(() => {
               v-model="statusFilter"
               :items="[
                 { label: 'Tất cả trạng thái', value: 'ALL' },
-                { label: 'Đã xuất bản', value: BlogStatus.PUBLISHED },
-                { label: 'Bản nháp', value: BlogStatus.DRAFT }
+                { label: 'Đã xuất bản', value: constants?.['BlogStatus']?.PUBLISHED },
+                { label: 'Bản nháp', value: constants?.['BlogStatus']?.DRAFT }
               ]"
               value-key="value"
             />
@@ -224,7 +226,11 @@ onMounted(() => {
             </template>
             <template #status-cell="{ row }">
               <UBadge
-                :color="row.original.status === BlogStatus.PUBLISHED ? 'success' : 'warning'"
+                :color="
+                  row.original.status === constants?.['BlogStatus']?.PUBLISHED
+                    ? 'success'
+                    : 'warning'
+                "
                 variant="subtle"
                 size="sm"
               >
@@ -232,12 +238,16 @@ onMounted(() => {
                   <span
                     class="h-1.5 w-1.5 rounded-full"
                     :class="
-                      row.original.status === BlogStatus.PUBLISHED
+                      row.original.status === constants?.['BlogStatus']?.PUBLISHED
                         ? 'bg-success-500'
                         : 'bg-warning-500'
                     "
                   />
-                  {{ row.original.status === BlogStatus.PUBLISHED ? 'Đã xuất bản' : 'Bản nháp' }}
+                  {{
+                    row.original.status === constants?.['BlogStatus']?.PUBLISHED
+                      ? 'Đã xuất bản'
+                      : 'Bản nháp'
+                  }}
                 </span>
               </UBadge>
             </template>
@@ -245,7 +255,7 @@ onMounted(() => {
               <span class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-zinc-400">
                 <UIcon name="i-lucide-clock" class="h-3.5 w-3.5" />
                 {{
-                  row.original.status === BlogStatus.PUBLISHED
+                  row.original.status === constants?.['BlogStatus']?.PUBLISHED
                     ? formatDate(row.original.published_at || row.original.created_at)
                     : 'Chưa XB'
                 }}

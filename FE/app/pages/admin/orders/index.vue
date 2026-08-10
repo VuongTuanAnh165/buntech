@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import { OrderStatus, Role, UserStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Order, Profile } from '~/utils/types'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
+const { constants } = useMasterData()
 const toast = useToast()
 useSeoMeta({ title: 'Đơn hàng - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
 // State
 const allOrders = ref<Order[]>([...mockOrders])
 const drivers = ref<Profile[]>(
-  mockProfiles.filter((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE)
+  mockProfiles.filter(
+    (p) =>
+      p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
+      p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+  )
 )
 const loading = ref(true)
 // Filters
 const search = ref('')
-const statusFilter = ref<'ALL' | OrderStatus>('ALL')
+const statusFilter = ref<'ALL' | string>('ALL')
 const startDate = ref('')
 const endDate = ref('')
 const sortBy = ref<'id' | 'status' | 'total' | 'created_at'>('created_at')
@@ -35,29 +40,34 @@ const statusPills = computed(() => {
   return [
     { key: 'ALL' as const, label: 'Tất cả', count: list.length },
     {
-      key: OrderStatus.PENDING,
+      key: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
       label: 'Chờ xử lý',
-      count: list.filter((o) => o.status === OrderStatus.PENDING).length
+      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING)
+        .length
     },
     {
-      key: OrderStatus.PROCESSING,
+      key: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
       label: 'Đang chuẩn bị',
-      count: list.filter((o) => o.status === OrderStatus.PROCESSING).length
+      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.PROCESSING)
+        .length
     },
     {
-      key: OrderStatus.SHIPPING,
+      key: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
       label: 'Đang giao',
-      count: list.filter((o) => o.status === OrderStatus.SHIPPING).length
+      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING)
+        .length
     },
     {
-      key: OrderStatus.DELIVERED,
+      key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
       label: 'Đã giao',
-      count: list.filter((o) => o.status === OrderStatus.DELIVERED).length
+      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
+        .length
     },
     {
-      key: OrderStatus.CANCELLED,
+      key: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string,
       label: 'Đã hủy',
-      count: list.filter((o) => o.status === OrderStatus.CANCELLED).length
+      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED)
+        .length
     }
   ]
 })
@@ -96,7 +106,7 @@ const filteredRows = computed(() => {
 const total = computed(() => filteredRows.value.length)
 const pagedRows = computed(() => {
   const start = (page.value - 1) * limit.value
-  return filteredRows.value.slice(start, start + limit.value)
+  return filteredRows.value.slice(start, start + limit.value) as unknown
 })
 watch([search, statusFilter, startDate, endDate], () => {
   page.value = 1
@@ -120,17 +130,24 @@ function clearSelection() {
 function handleBatchAssign(driverId: string) {
   const ids = Array.from(selectedOrders.value)
   const driver = drivers.value.find((d) => d.id === driverId) || null
-  allOrders.value = allOrders.value.map((o) =>
-    ids.includes(o.id)
-      ? {
-          ...o,
-          driver_id: driverId,
-          driver,
-          status: OrderStatus.SHIPPING,
-          updated_at: new Date().toISOString()
-        }
-      : o
-  )
+  allOrders.value = allOrders.value
+    .map((o) => {
+      return o as unknown
+    })
+    .map((o) => {
+      return o as unknown
+    })
+    .map((o) =>
+      ids.includes(o.id)
+        ? {
+            ...o,
+            driver_id: driverId,
+            driver,
+            status: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
+            updated_at: new Date().toISOString()
+          }
+        : o
+    )
   toast.add({ title: `Đã điều phối ${ids.length} đơn hàng`, color: 'success' })
   clearSelection()
 }
@@ -165,7 +182,11 @@ const activeFilterCount = computed(() => {
           color="neutral"
           icon="i-lucide-filter"
           aria-label="Lọc"
-          @click="() => (showFilters = !showFilters)"
+          @click="
+            () => {
+              showFilters = !showFilters
+            }
+          "
         >
           <span
             v-if="activeFilterCount > 0"
@@ -188,7 +209,11 @@ const activeFilterCount = computed(() => {
           color="primary"
           :disabled="selectedOrders.size === 0"
           class="hidden md:inline-flex"
-          @click="showBatchModal = true"
+          @click="
+            () => {
+              showBatchModal = true
+            }
+          "
         >
           <div class="i-lucide-truck mr-1 h-4 w-4" />
           Điều phối ({{ selectedOrders.size }})
@@ -217,7 +242,11 @@ const activeFilterCount = computed(() => {
           :color="statusFilter === pill.key ? 'primary' : 'neutral'"
           size="sm"
           class="whitespace-nowrap"
-          @click="statusFilter = pill.key"
+          @click="
+            () => {
+              statusFilter = pill.key
+            }
+          "
         >
           {{ pill.label }}
           <UBadge
@@ -274,7 +303,11 @@ const activeFilterCount = computed(() => {
                   :variant="statusFilter === pill.key ? 'solid' : 'soft'"
                   :color="statusFilter === pill.key ? 'primary' : 'neutral'"
                   size="sm"
-                  @click="statusFilter = pill.key"
+                  @click="
+                    () => {
+                      statusFilter = pill.key
+                    }
+                  "
                 >
                   {{ pill.label }} ({{ pill.count }})
                 </UButton>
@@ -300,7 +333,11 @@ const activeFilterCount = computed(() => {
             <UButton
               color="primary"
               class="flex-1 justify-center"
-              @click="() => (showFilters = false)"
+              @click="
+                () => {
+                  showFilters = false
+                }
+              "
               >Áp dụng</UButton
             >
           </div>
@@ -322,7 +359,14 @@ const activeFilterCount = computed(() => {
             <UButton variant="ghost" color="neutral" size="sm" @click="clearSelection"
               >Bỏ chọn</UButton
             >
-            <UButton size="sm" @click="showBatchModal = true">
+            <UButton
+              size="sm"
+              @click="
+                () => {
+                  showBatchModal = true
+                }
+              "
+            >
               <div class="i-lucide-truck mr-1 h-3.5 w-3.5" />
               Điều phối
             </UButton>

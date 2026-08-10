@@ -2,6 +2,8 @@
  * Plugin khởi tạo User Session khi app load.
  * Gọi API /auth/me 1 lần duy nhất trên Server (SSR).
  */
+import { useAuthStore } from '~/stores/auth'
+
 export default defineNuxtPlugin(async () => {
   const authStore = useAuthStore()
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { mockInventoryItems, mockInventoryMovements } from '~/utils/mockData'
-import { InventoryMovementType } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Kho nguyên liệu - BunTech Admin' })
 const toast = useToast()
@@ -83,19 +84,23 @@ const recentMovements = computed(() =>
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 10)
 )
-function movementIcon(type: InventoryMovementType) {
-  if (type === InventoryMovementType.IMPORT) return 'i-lucide-arrow-down-to-line'
-  if (type === InventoryMovementType.EXPORT) return 'i-lucide-arrow-up-from-line'
+function movementIcon(type: string) {
+  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT)
+    return 'i-lucide-arrow-down-to-line'
+  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT)
+    return 'i-lucide-arrow-up-from-line'
   return 'i-lucide-alert-circle'
 }
-function movementColor(type: InventoryMovementType) {
-  if (type === InventoryMovementType.IMPORT) return 'text-success-500'
-  if (type === InventoryMovementType.EXPORT) return 'text-primary-500'
+function movementColor(type: string) {
+  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT)
+    return 'text-success-500'
+  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT)
+    return 'text-primary-500'
   return 'text-error-500'
 }
-function movementLabel(type: InventoryMovementType) {
-  if (type === InventoryMovementType.IMPORT) return 'Nhập kho'
-  if (type === InventoryMovementType.EXPORT) return 'Xuất kho'
+function movementLabel(type: string) {
+  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT) return 'Nhập kho'
+  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT) return 'Xuất kho'
   return 'Hao hụt'
 }
 // ─── Table columns ────────────────────────────────────────
@@ -164,7 +169,13 @@ onMounted(() => {
             <div class="flex-1">
               <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm nguyên liệu..." />
             </div>
-            <UButton @click="showAddModal = true">
+            <UButton
+              @click="
+                () => {
+                  showAddModal = true
+                }
+              "
+            >
               <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm nguyên liệu
             </UButton>
           </div>
@@ -288,9 +299,9 @@ onMounted(() => {
                 <div class="mt-0.5 flex items-center gap-1.5">
                   <UBadge
                     :color="
-                      mov.type === InventoryMovementType.IMPORT
+                      mov.type === constants?.[ConstantKey.InventoryMovementType]?.IMPORT
                         ? 'success'
-                        : mov.type === InventoryMovementType.EXPORT
+                        : mov.type === constants?.[ConstantKey.InventoryMovementType]?.EXPORT
                           ? 'info'
                           : 'error'
                     "
@@ -308,12 +319,12 @@ onMounted(() => {
               <span
                 class="flex-shrink-0 text-sm font-semibold tabular-nums"
                 :class="
-                  mov.type === InventoryMovementType.IMPORT
+                  mov.type === constants?.[ConstantKey.InventoryMovementType]?.IMPORT
                     ? 'text-success-600 dark:text-success-400'
                     : 'text-error-600 dark:text-error-400'
                 "
               >
-                {{ mov.type === InventoryMovementType.IMPORT ? '+' : '-'
+                {{ mov.type === constants?.[ConstantKey.InventoryMovementType]?.IMPORT ? '+' : '-'
                 }}{{ formatNumber(mov.quantity) }}
               </span>
             </div>
@@ -337,7 +348,16 @@ onMounted(() => {
         </template>
         <template #footer>
           <div class="flex justify-end gap-3">
-            <UButton variant="outline" color="neutral" @click="showAddModal = false">Hủy</UButton>
+            <UButton
+              variant="outline"
+              color="neutral"
+              @click="
+                () => {
+                  showAddModal = false
+                }
+              "
+              >Hủy</UButton
+            >
             <UButton @click="handleAdd">
               <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm
             </UButton>

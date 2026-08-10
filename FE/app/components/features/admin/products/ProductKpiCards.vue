@@ -5,8 +5,10 @@
   Reason: Extracted to keep admin/products/index.vue under 400 lines
 -->
 <script setup lang="ts">
-import { ProductStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Product } from '~/utils/types'
+
+const { constants } = useMasterData()
 
 const props = defineProps<{
   products: Product[]
@@ -15,8 +17,12 @@ const props = defineProps<{
 
 const kpiCards = computed(() => {
   const list = props.products
-  const active = list.filter((p) => p.status === ProductStatus.ACTIVE).length
-  const inactive = list.filter((p) => p.status === ProductStatus.INACTIVE).length
+  const active = list.filter(
+    (p) => p.status === constants.value?.[ConstantKey.ProductStatus]?.ACTIVE
+  ).length
+  const inactive = list.filter(
+    (p) => p.status === constants.value?.[ConstantKey.ProductStatus]?.INACTIVE
+  ).length
   const lowStock = list.filter((p) => p.stock > 0 && p.stock < 10).length
   return [
     {

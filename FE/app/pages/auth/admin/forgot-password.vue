@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { MailCheck, ArrowLeft, Phone } from 'lucide-vue-next'
-import { forgotPasswordSchema } from '~~/core/validators/auth.validator'
-import { authService } from '~~/core/services/auth.service'
+import { forgotPasswordSchema } from '~/utils/validation'
+import { authService } from '~/services/authService'
 import type { z } from 'zod'
 
 const { t } = useI18n()
-const toast = useToast()
 
-useSeoMeta({ title: `${t('auth.forgotPassword')} - BunTech` })
+useSeoMeta({ title: 'Quên mật khẩu - BunTech Admin' })
 definePageMeta({ layout: 'auth' })
 
 const sent = ref(false)
@@ -17,6 +16,34 @@ const state = reactive({
 
 type Schema = z.output<typeof forgotPasswordSchema>
 
+const formErrors = reactive<Record<string, string>>({})
+
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+    errors.forEach((e) => {
+      formErrors[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+  }
+})
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  const result = forgotPasswordSchema.safeParse(state)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
+}
+
 const { handleSubmit, isSubmitting: loading } = useFormSubmit()
 const handleForgotPassword = handleSubmit(
   async (data: Schema) => {
@@ -25,22 +52,21 @@ const handleForgotPassword = handleSubmit(
     return res
   },
   {
-    onSuccess(res?: { otp?: string }) {
+    formRef,
+    onSuccess() {
       sent.value = true
-      // If dev mode returns OTP, you could log it or show it for testing
-      if ((res as { otp?: string })?.otp) {
-        toast.add({
-          title: 'Mã OTP (Test)',
-          description: String((res as { otp?: string }).otp),
-          color: 'info'
-        })
-      }
     },
-    onError(err: Error) {
-      toast.add({ title: 'Có lỗi xảy ra', description: err.message, color: 'error' })
+    onError(err: unknown) {
+      void err // ApiClient xử lý toast lỗi
     }
   }
 )
+
+const handleFormSubmit = () => {
+  if (validateForm()) {
+    handleForgotPassword(state)
+  }
+}
 </script>
 
 <template>
@@ -88,15 +114,8 @@ const handleForgotPassword = handleSubmit(
       </div>
 
       <!-- Form -->
-      <UForm
-        v-else
-        key="form"
-        class="space-y-5"
-        :schema="forgotPasswordSchema"
-        :state="state"
-        @submit="(e: any) => handleForgotPassword(e.data)"
-      >
-        <UFormField label="Số điện thoại" name="phoneNumber">
+      <form v-else key="form" class="space-y-5" @submit.prevent="handleFormSubmit">
+        <UFormField label="Số điện thoại" name="phoneNumber" :error="formErrors.phoneNumber">
           <UInput
             v-model="state.phoneNumber"
             type="tel"
@@ -109,7 +128,7 @@ const handleForgotPassword = handleSubmit(
         <UButton type="submit" :loading="loading" class="!mt-8 w-full" size="lg">
           Lấy mã xác thực (OTP)
         </UButton>
-      </UForm>
+      </form>
     </Transition>
 
     <p class="mt-8 text-center text-xs text-gray-400 dark:text-zinc-500">

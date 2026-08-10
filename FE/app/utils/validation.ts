@@ -50,3 +50,41 @@ export const nonNegativeNumber = (fieldName: string) =>
  * Schema string tùy chọn — cho phép rỗng hoặc undefined.
  */
 export const optionalString = z.string().optional().or(z.literal(''))
+
+export const loginSchema = z.object({
+  phoneNumber: phoneSchema,
+  password: requiredString('Mật khẩu'),
+  rememberMe: z.boolean().optional()
+})
+
+export const forgotPasswordSchema = z.object({
+  phoneNumber: phoneSchema
+})
+
+export const resetPasswordSchema = z
+  .object({
+    phoneNumber: phoneSchema,
+    token: requiredString('Mã OTP'),
+    newPassword: passwordSchema,
+    confirmPassword: requiredString('Xác nhận mật khẩu')
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Mật khẩu không khớp',
+    path: ['confirmPassword']
+  })
+
+export const changePasswordSchema = z
+  .object({
+    oldPassword: requiredString('Mật khẩu hiện tại'),
+    newPassword: passwordSchema,
+    confirmPassword: requiredString('Xác nhận mật khẩu')
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Mật khẩu không khớp',
+    path: ['confirmPassword']
+  })
+
+export const updateProfileSchema = z.object({
+  fullName: requiredString('Họ và tên'),
+  avatarUrl: z.string().url('URL ảnh không hợp lệ').optional()
+})

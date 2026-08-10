@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { TransactionType } from '~/utils/mockData'
-import type { Transaction } from '~/utils/mockData'
+import type { Transaction } from '~/utils/types'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 const props = defineProps<{
   transactions: Transaction[]
   debtLimit: number
@@ -9,8 +10,8 @@ const props = defineProps<{
 const currentDebt = computed(() => {
   let debt = 0
   for (const tx of props.transactions) {
-    if (tx.type === TransactionType.DEBT_INCREASE) debt += tx.amount
-    if (tx.type === TransactionType.DEBT_PAYMENT) debt -= tx.amount
+    if (tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE) debt += tx.amount
+    if (tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT) debt -= tx.amount
   }
   return debt
 })
@@ -20,11 +21,15 @@ const debtUtilization = computed(() =>
 )
 const debtTransactions = computed(() =>
   props.transactions.filter(
-    (tx) => tx.type === TransactionType.DEBT_INCREASE || tx.type === TransactionType.DEBT_PAYMENT
+    (tx) =>
+      tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE ||
+      tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT
   )
 )
 const paymentTransactions = computed(() =>
-  props.transactions.filter((tx) => tx.type === TransactionType.PAYMENT)
+  props.transactions.filter(
+    (tx) => tx.type === constants.value?.[ConstantKey.TransactionType]?.PAYMENT
+  )
 )
 </script>
 <template>
@@ -128,20 +133,21 @@ const paymentTransactions = computed(() =>
             <div
               :class="[
                 'flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg',
-                tx.type === TransactionType.DEBT_INCREASE
+                tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
                   ? 'bg-error-50 dark:bg-error-900/20'
-                  : tx.type === TransactionType.DEBT_PAYMENT || tx.type === TransactionType.PAYMENT
+                  : tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_PAYMENT ||
+                      tx.type === constants?.[ConstantKey.TransactionType]?.PAYMENT
                     ? 'bg-success-50 dark:bg-success-900/20'
                     : 'bg-primary-50 dark:bg-primary-900/20'
               ]"
             >
               <span
                 :class="[
-                  tx.type === TransactionType.DEBT_INCREASE
+                  tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
                     ? 'i-lucide-trending-up'
                     : 'i-lucide-trending-down',
                   'h-4 w-4',
-                  tx.type === TransactionType.DEBT_INCREASE
+                  tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
                     ? 'text-error-600 dark:text-error-400'
                     : 'text-success-600 dark:text-success-400'
                 ]"
@@ -151,11 +157,11 @@ const paymentTransactions = computed(() =>
             <div class="min-w-0 flex-1">
               <p class="text-surface-foreground text-sm font-medium">
                 {{
-                  tx.type === TransactionType.DEBT_INCREASE
+                  tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
                     ? 'Tăng công nợ'
-                    : tx.type === TransactionType.DEBT_PAYMENT
+                    : tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_PAYMENT
                       ? 'Giảm công nợ'
-                      : tx.type === TransactionType.PAYMENT
+                      : tx.type === constants?.[ConstantKey.TransactionType]?.PAYMENT
                         ? 'Thanh toán'
                         : 'Hoàn tiền'
                 }}
@@ -168,12 +174,13 @@ const paymentTransactions = computed(() =>
             <span
               :class="[
                 'flex-shrink-0 text-sm font-semibold tabular-nums',
-                tx.type === TransactionType.DEBT_INCREASE
+                tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
                   ? 'text-error-600 dark:text-error-400'
                   : 'text-success-600 dark:text-success-400'
               ]"
             >
-              {{ tx.type === TransactionType.DEBT_INCREASE ? '+' : '-' }}{{ formatVND(tx.amount) }}
+              {{ tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE ? '+' : '-'
+              }}{{ formatVND(tx.amount) }}
             </span>
           </div>
         </div>

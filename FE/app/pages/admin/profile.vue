@@ -1,32 +1,45 @@
 <script setup lang="ts">
-import { Role } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { CurrentUser } from '~/types/common'
-import { updateProfileSchema } from '~~/core/validators/auth.validator'
-import { authService } from '~~/core/services/auth.service'
+import { updateProfileSchema } from '~/utils/validation'
+import { authService } from '~/services/authService'
+import { useAuthStore } from '~/stores/auth'
 import type { z } from 'zod'
 
 const authStore = useAuthStore()
-const toast = useToast()
-const ROLE_LABELS: Record<string, string> = {
-  [Role.ADMIN]: 'Quản trị viên',
-  [Role.DRIVER]: 'Tài xế',
-  [Role.CUSTOMER]: 'Khách hàng'
-}
+const { constants } = useMasterData()
+
+const ROLE_LABELS = computed<Record<string, string>>(() => {
+  const roleConstants = constants.value?.[ConstantKey.Role] || {}
+  return {
+    [roleConstants.ADMIN || 'admin']: 'Quản trị viên',
+    [roleConstants.DRIVER || 'driver']: 'Tài xế',
+    [roleConstants.CUSTOMER || 'customer']: 'Khách hàng'
+  }
+})
+
 useSeoMeta({ title: 'Hồ sơ cá nhân - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
-const ROLE_COLORS = {
-  [Role.ADMIN]: 'primary',
-  [Role.DRIVER]: 'warning',
-  [Role.CUSTOMER]: 'success'
-}
+
+const ROLE_COLORS = computed<Record<string, string>>(() => {
+  const roleConstants = constants.value?.[ConstantKey.Role] || {}
+  return {
+    [roleConstants.ADMIN || 'admin']: 'primary',
+    [roleConstants.DRIVER || 'driver']: 'warning',
+    [roleConstants.CUSTOMER || 'customer']: 'success'
+  }
+})
+
 const user = computed(() => {
   return authStore.user as CurrentUser | null
 })
+
 // Derived email from login convention
 const email = computed(() => {
   if (!user.value) return '—'
-  if (user.value.role === Role.ADMIN) return 'admin@buntech.vn'
-  if (user.value.role === Role.DRIVER) return 'driver@buntech.vn'
+  const roleConstants = constants.value?.[ConstantKey.Role] || {}
+  if (user.value.role === (roleConstants.ADMIN || 'admin')) return 'admin@buntech.vn'
+  if (user.value.role === (roleConstants.DRIVER || 'driver')) return 'driver@buntech.vn'
   return `${user.value.fullName.toLowerCase().replace(/\s+/g, '.')}@buntech.vn`
 })
 
@@ -149,10 +162,39 @@ const editForm = reactive({
   phone: ''
 })
 
+const formErrors = reactive<Record<string, string>>({})
+
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+    errors.forEach((e) => {
+      formErrors[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+  }
+})
+
 function openEdit() {
   editForm.fullName = user.value?.fullName || ''
   editForm.phone = user.value?.phoneNumber || ''
+  Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
   showEditModal.value = true
+}
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  const result = updateProfileSchema.safeParse(editForm)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
 }
 
 const { handleSubmit, isSubmitting: saving } = useFormSubmit()
@@ -168,15 +210,18 @@ const saveProfile = handleSubmit(
     }
   },
   {
+    formRef,
     onSuccess() {
       showEditModal.value = false
-      toast.add({ title: 'Đã cập nhật hồ sơ', color: 'success' })
-    },
-    onError(err: Error) {
-      toast.add({ title: 'Cập nhật thất bại', description: err.message, color: 'error' })
     }
   }
 )
+
+const handleFormSubmit = () => {
+  if (validateForm()) {
+    saveProfile(editForm)
+  }
+}
 // Personal info rows
 const personalInfo = computed(() => [
   { label: 'Họ và tên', value: user.value?.fullName || '—', icon: 'i-lucide-user-cog' },
@@ -184,7 +229,7 @@ const personalInfo = computed(() => [
   { label: 'Email', value: email.value, icon: 'i-lucide-mail' },
   {
     label: 'Vai trò',
-    value: user.value ? ROLE_LABELS[user.value.role] || user.value.role : '—',
+    value: user.value ? ROLE_LABELS.value[user.value.role] || user.value.role : '—',
     icon: 'i-lucide-badge-check'
   },
   {
@@ -241,7 +286,7 @@ const personalInfo = computed(() => [
             </h2>
             <UBadge
               :color="
-                (ROLE_COLORS[user?.role || Role.ADMIN] as
+                (ROLE_COLORS[user?.role || 'admin'] as
                   'error' | 'primary' | 'warning' | 'success') || 'primary'
               "
               variant="solid"
@@ -327,41 +372,31 @@ const personalInfo = computed(() => [
       </div>
       <AdminActivityTimeline :activities="activities" />
     </div>
-    <!-- Edit Modal -->
     <UModal v-model:open="showEditModal" title="Chỉnh sửa hồ sơ" :ui="{ content: 'sm:max-w-md' }">
       <template #body>
-        <UForm
-          class="space-y-4"
-          :schema="updateProfileSchema"
-          :state="editForm"
-          @submit="(e: any) => saveProfile(e.data)"
-        >
-          <UFormField label="Họ và tên" name="fullName" required>
+        <form id="profile-form" class="space-y-4" @submit.prevent="handleFormSubmit">
+          <UFormField label="Họ và tên" name="fullName" required :error="formErrors.fullName">
             <UInput v-model="editForm.fullName" class="w-full" />
           </UFormField>
-          <UFormField
-            label="Số điện thoại (Chỉ xem)"
-            name="phone"
-            help="SĐT được dùng để đăng nhập"
-          >
+          <UFormField label="Số điện thoại (Chỉ xem)" help="SĐT được dùng để đăng nhập">
             <UInput v-model="editForm.phone" type="tel" class="w-full" disabled />
           </UFormField>
-        </UForm>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton
-            variant="ghost"
-            color="neutral"
-            @click="
-              () => {
-                showEditModal = false
-              }
-            "
-            >Huỷ</UButton
-          >
-          <UButton :loading="saving" @click="() => saveProfile(editForm as any)">Lưu</UButton>
-        </div>
+
+          <div class="flex items-center justify-end gap-3 pt-2">
+            <UButton
+              variant="ghost"
+              color="neutral"
+              @click="
+                () => {
+                  showEditModal = false
+                }
+              "
+            >
+              Huỷ
+            </UButton>
+            <UButton type="submit" color="primary" :loading="saving" size="lg"> Lưu </UButton>
+          </div>
+        </form>
       </template>
     </UModal>
   </div>

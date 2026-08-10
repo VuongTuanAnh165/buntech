@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ProductStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Product, Category } from '~/utils/types'
 import { mockProducts, mockCategories } from '~/utils/mockData'
+const { constants } = useMasterData()
 const toast = useToast()
 const _router = useRouter()
 useSeoMeta({ title: `Sản phẩm - BunTech Admin` })
@@ -13,7 +14,7 @@ const loading = ref(true)
 const error = ref(false)
 // ─── Filters / pagination state ───────────────────────────────
 const search = ref('')
-const statusFilter = ref<'ALL' | ProductStatus>('ALL')
+const statusFilter = ref<'ALL' | string>('ALL')
 const categoryFilter = ref<string>('ALL')
 const sortBy = ref<'name' | 'price' | 'stock' | 'status' | 'created_at'>('created_at')
 const sortDirection = ref<'asc' | 'desc'>('desc')
@@ -248,8 +249,8 @@ const columns = ref<Record<string, unknown>[]>([
           v-model="statusFilter"
           :items="[
             { value: 'ALL', label: 'Tất cả trạng thái' },
-            { value: ProductStatus.ACTIVE, label: 'Đang bán' },
-            { value: ProductStatus.INACTIVE, label: 'Ngừng bán' }
+            { value: constants?.[ConstantKey.ProductStatus]?.ACTIVE, label: 'Đang bán' },
+            { value: constants?.[ConstantKey.ProductStatus]?.INACTIVE, label: 'Ngừng bán' }
           ]"
           value-key="value"
           label-key="label"
@@ -341,11 +342,19 @@ const columns = ref<Record<string, unknown>[]>([
           </template>
           <template #status-cell="{ row }">
             <UBadge
-              :color="row.original.status === ProductStatus.ACTIVE ? 'success' : 'neutral'"
+              :color="
+                row.original.status === constants?.[ConstantKey.ProductStatus]?.ACTIVE
+                  ? 'success'
+                  : 'neutral'
+              "
               variant="subtle"
             >
               <template #leading><span class="h-1.5 w-1.5 rounded-full bg-current" /></template>
-              {{ row.original.status === ProductStatus.ACTIVE ? 'Đang bán' : 'Ngừng bán' }}
+              {{
+                row.original.status === constants?.[ConstantKey.ProductStatus]?.ACTIVE
+                  ? 'Đang bán'
+                  : 'Ngừng bán'
+              }}
             </UBadge>
           </template>
           <template #actions-cell="{ row }">

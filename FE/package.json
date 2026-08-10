@@ -23,6 +23,7 @@
     "dayjs": "^1.11.21",
     "dompurify": "^3.4.13",
     "echarts": "^6.1.0",
+    "idb-keyval": "^6.3.0",
     "lucide-vue-next": "^1.0.0",
     "nuxt": "^4.4.8",
     "nuxt-security": "^2.6.0",

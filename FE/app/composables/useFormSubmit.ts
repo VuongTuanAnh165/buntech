@@ -66,6 +66,7 @@ export const useFormSubmit = () => {
         if (options?.onError) {
           options.onError(err)
         }
+        // eslint-disable-next-line no-console
         console.error('[useFormSubmit Error]', err)
       } finally {
         isSubmitting.value = false

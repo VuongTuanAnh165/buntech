@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { NotificationType, Role, UserStatus } from '~/utils/enums'
 import { mockNotifications, mockProfiles } from '~/utils/mockData'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Thông báo - BunTech Driver' })
 const toast = useToast()
@@ -9,40 +10,49 @@ const loading = ref(true)
 const filterTab = ref<FilterTab>('all')
 const currentDriver = computed(
   () =>
-    mockProfiles.find((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) ||
-    mockProfiles[2]
+    mockProfiles.find(
+      (p) =>
+        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
+        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+    ) || mockProfiles[2]
 )
 const notifications = ref(
   mockNotifications
     .filter((n) => n.user_id === currentDriver.value?.id || !n.user_id)
     .map((n) => ({ ...n, read: n.is_read }))
 )
-const NOTIFICATION_ICONS: Record<string, { icon: string; bg: string; text: string }> = {
-  [NotificationType.ORDER_ASSIGNED]: {
-    icon: 'i-lucide-package',
-    bg: 'bg-primary-50 dark:bg-primary-900/20',
-    text: 'text-primary-600 dark:text-primary-400'
-  },
-  [NotificationType.ORDER_DELIVERED]: {
-    icon: 'i-lucide-check-circle-2',
-    bg: 'bg-success-50 dark:bg-success-900/20',
-    text: 'text-success-600 dark:text-success-400'
-  },
-  [NotificationType.ORDER_CANCELLED]: {
-    icon: 'i-lucide-x-circle',
-    bg: 'bg-error-50 dark:bg-error-900/20',
-    text: 'text-error-600 dark:text-error-400'
-  },
-  [NotificationType.LOW_STOCK]: {
-    icon: 'i-lucide-alert-triangle',
-    bg: 'bg-warning-50 dark:bg-warning-900/20',
-    text: 'text-warning-600 dark:text-warning-400'
-  },
-  [NotificationType.SYSTEM]: {
-    icon: 'i-lucide-bell',
-    bg: 'bg-info-50 dark:bg-info-900/20',
-    text: 'text-info-600 dark:text-info-400'
-  }
+const NOTIFICATION_ICONS: Record<string, { icon: string; bg: string; text: string }> = {}
+
+NOTIFICATION_ICONS[
+  constants.value?.[ConstantKey.NotificationType]?.ORDER_ASSIGNED || 'ORDER_ASSIGNED'
+] = {
+  icon: 'i-lucide-package',
+  bg: 'bg-primary-50 dark:bg-primary-900/20',
+  text: 'text-primary-600 dark:text-primary-400'
+}
+NOTIFICATION_ICONS[
+  constants.value?.[ConstantKey.NotificationType]?.ORDER_DELIVERED || 'ORDER_DELIVERED'
+] = {
+  icon: 'i-lucide-check-circle-2',
+  bg: 'bg-success-50 dark:bg-success-900/20',
+  text: 'text-success-600 dark:text-success-400'
+}
+NOTIFICATION_ICONS[
+  constants.value?.[ConstantKey.NotificationType]?.ORDER_CANCELLED || 'ORDER_CANCELLED'
+] = {
+  icon: 'i-lucide-x-circle',
+  bg: 'bg-error-50 dark:bg-error-900/20',
+  text: 'text-error-600 dark:text-error-400'
+}
+NOTIFICATION_ICONS[constants.value?.[ConstantKey.NotificationType]?.LOW_STOCK || 'LOW_STOCK'] = {
+  icon: 'i-lucide-alert-triangle',
+  bg: 'bg-warning-50 dark:bg-warning-900/20',
+  text: 'text-warning-600 dark:text-warning-400'
+}
+NOTIFICATION_ICONS[constants.value?.[ConstantKey.NotificationType]?.SYSTEM || 'SYSTEM'] = {
+  icon: 'i-lucide-bell',
+  bg: 'bg-info-50 dark:bg-info-900/20',
+  text: 'text-info-600 dark:text-info-400'
 }
 const filteredNotifications = computed(() => {
   if (filterTab.value === 'unread') return notifications.value.filter((n) => !n.read)

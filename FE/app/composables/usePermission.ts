@@ -1,5 +1,4 @@
 import { useAuthStore } from '~/stores/auth'
-import type { Role } from '~/enums/role'
 
 /**
  * Composable xử lý kiểm tra quyền (Authorization) phía Client.
@@ -12,17 +11,17 @@ export const usePermission = () => {
    * Kiểm tra xem User có ít nhất 1 role trong danh sách yêu cầu không.
    * @param roles Một Role hoặc mảng các Role
    */
-  const hasRole = (roles: Role | Role[]) => {
+  const hasRole = (roles: string | string[]) => {
     if (!authStore.user) return false
 
     const roleList = Array.isArray(roles) ? roles : [roles]
-    return roleList.includes(authStore.user.role as Role)
+    return roleList.includes(authStore.user.role as string)
   }
 
   /**
    * Throw lỗi 403 nếu User không có quyền. Dùng trong Middleware hoặc Logic.
    */
-  const requireRole = (roles: Role | Role[]) => {
+  const requireRole = (roles: string | string[]) => {
     if (!hasRole(roles)) {
       throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
     }

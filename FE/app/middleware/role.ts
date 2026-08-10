@@ -5,7 +5,7 @@
  * Sử dụng:
  * definePageMeta({
  *   middleware: ['auth', 'role'],
- *   requiredRole: Role.ADMIN
+ *   requiredRole: 'ADMIN'
  * })
  */
 export default defineNuxtRouteMiddleware((to) => {

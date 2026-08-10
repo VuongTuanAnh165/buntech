@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { OrderStatus } from '~/utils/enums'
 import {
   mockOrders,
   mockTopBuyers,
@@ -7,7 +6,7 @@ import {
   mockDashboardKPI,
   mockRevenueData
 } from '~/utils/mockData'
-import { ORDER_STATUS_COLORS, ORDER_STATUS_ICONS, ORDER_STATUS_LABELS } from '~/utils/orderStatus'
+import { getOrderStatusColor, getOrderStatusIcon, getOrderStatusLabel } from '~/utils/orderStatus'
 useSeoMeta({ title: 'Dashboard - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
 const loading = ref(true)
@@ -18,9 +17,10 @@ const kpi = reactive({
   customersTotal: 0,
   productsTotal: 0
 })
+const { constants } = useMasterData()
 const revenueData = ref<{ day: string; revenue: number }[]>([])
 const topBuyers = ref(mockTopBuyers)
-const recentOrders = ref<Record<string, unknown>[]>([])
+const recentOrders = ref<unknown[]>([])
 const topProducts = ref<{ name: string; value: number }[]>([])
 const orderStatusData = ref<{ name: string; value: number }[]>([])
 const kpiStats = computed(() => [
@@ -78,7 +78,7 @@ async function loadData() {
     kpi.customersTotal = mockDashboardKPI.newCustomers
     kpi.productsTotal = mockProducts.length
     revenueData.value = mockRevenueData.map((r, _i) => ({
-      day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()],
+      day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()] || '',
       revenue: r.revenue
     }))
     recentOrders.value = mockOrders.slice(0, 6)
@@ -98,7 +98,7 @@ async function loadData() {
       statusCounts[order.status] = (statusCounts[order.status] || 0) + 1
     }
     orderStatusData.value = Object.entries(statusCounts).map(([status, count]) => ({
-      name: ORDER_STATUS_LABELS[status as OrderStatus] || status,
+      name: getOrderStatusLabel(constants)[status as string] || status,
       value: count
     }))
   } catch {
@@ -112,7 +112,7 @@ const displayRevenue = computed(() =>
   revenueData.value.length
     ? revenueData.value
     : mockRevenueData.map((r, _i) => ({
-        day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()],
+        day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()] || '',
         revenue: r.revenue
       }))
 )
@@ -244,7 +244,7 @@ const displayRecentOrders = computed(() =>
                 class="hover:bg-surface-hover/60 flex items-center gap-2.5 py-3 transition-colors duration-150"
               >
                 <div class="relative">
-                  <UAvatar :alt="buyer.full_name" :src="buyer.avatar_url" size="sm" />
+                  <UAvatar :alt="buyer.full_name" :src="buyer.avatar_url || undefined" size="sm" />
                   <span
                     :class="[
                       'ring-surface absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ring-2',
@@ -267,7 +267,11 @@ const displayRecentOrders = computed(() =>
                 </div>
               </div>
             </div>
-            <BaseEmptyState v-if="topBuyers.length === 0" description="Chưa có dữ liệu" />
+            <BaseEmptyState
+              v-if="topBuyers.length === 0"
+              title="Trống"
+              description="Chưa có dữ liệu"
+            />
           </template>
         </UCard>
       </div>
@@ -311,21 +315,21 @@ const displayRecentOrders = computed(() =>
               <div
                 :class="[
                   'flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg',
-                  ORDER_STATUS_COLORS[order.status] === 'success'
+                  getOrderStatusColor(constants)[order.status] === 'success'
                     ? 'bg-success-50 dark:bg-success-900/20'
-                    : ORDER_STATUS_COLORS[order.status] === 'warning'
+                    : getOrderStatusColor(constants)[order.status] === 'warning'
                       ? 'bg-warning-50 dark:bg-warning-900/20'
-                      : ORDER_STATUS_COLORS[order.status] === 'danger'
-                        ? 'bg-danger-50 dark:bg-danger-900/20'
-                        : ORDER_STATUS_COLORS[order.status] === 'accent'
-                          ? 'bg-accent-50 dark:bg-accent-900/20'
-                          : ORDER_STATUS_COLORS[order.status] === 'info'
+                      : getOrderStatusColor(constants)[order.status] === 'danger'
+                        ? 'bg-error-50 dark:bg-error-900/20'
+                        : getOrderStatusColor(constants)[order.status] === 'accent'
+                          ? 'bg-primary-50 dark:bg-primary-900/20'
+                          : getOrderStatusColor(constants)[order.status] === 'info'
                             ? 'bg-info-50 dark:bg-info-900/20'
                             : 'bg-slate-50 dark:bg-slate-900/20'
                 ]"
               >
                 <UIcon
-                  :name="ORDER_STATUS_ICONS[order.status] || 'i-lucide-alert-circle'"
+                  :name="getOrderStatusIcon(constants)[order.status] || 'i-lucide-alert-circle'"
                   class="h-3.5 w-3.5 text-current"
                 />
               </div>
@@ -337,16 +341,22 @@ const displayRecentOrders = computed(() =>
                   <UIcon name="i-lucide-clock" class="h-3 w-3" /> {{ formatDate(order.created_at) }}
                 </p>
               </div>
-              <UBadge :color="ORDER_STATUS_COLORS[order.status]" variant="subtle">{{
-                ORDER_STATUS_LABELS[order.status]
-              }}</UBadge>
+              <UBadge
+                :color="getOrderStatusColor(constants)[order.status] as any"
+                variant="subtle"
+                >{{ getOrderStatusLabel(constants)[order.status] }}</UBadge
+              >
               <span
                 class="text-surface-foreground ml-2 hidden min-w-[80px] text-right text-sm font-semibold tabular-nums sm:inline"
                 >{{ formatVND(Number(order.total)) }}</span
               >
             </NuxtLink>
           </div>
-          <BaseEmptyState v-if="displayRecentOrders.length === 0" description="Chưa có dữ liệu" />
+          <BaseEmptyState
+            v-if="displayRecentOrders.length === 0"
+            title="Trống"
+            description="Chưa có dữ liệu"
+          />
         </template>
       </UCard>
     </template>

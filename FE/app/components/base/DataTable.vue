@@ -1,14 +1,16 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends Record<string, unknown>">
 interface Column {
-  key: string
-  label: string
+  key?: string
+  label?: string
+  accessorKey?: string
+  header?: string
   sortable?: boolean
   class?: string
 }
 
 interface Props {
   columns: Column[]
-  rows: Record<string, unknown>[]
+  rows: T[]
   loading?: boolean
   loadingLines?: number
   emptyTitle?: string
@@ -25,11 +27,17 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const mappedColumns = computed(() => {
-  return props.columns.map((col) => ({
-    accessorKey: col.key,
-    header: col.label,
-    ...col
-  }))
+  return props.columns.map((col) => {
+    const finalKey = col.key || col.accessorKey || ''
+    const finalLabel = col.label || col.header || ''
+    return {
+      accessorKey: finalKey,
+      header: finalLabel,
+      key: finalKey,
+      label: finalLabel,
+      ...col
+    }
+  })
 })
 </script>
 
@@ -42,9 +50,9 @@ const mappedColumns = computed(() => {
     <template v-else-if="props.rows.length">
       <UTable :columns="mappedColumns" :data="props.rows">
         <!-- Forward all column slots -->
-        <template v-for="col in props.columns" :key="col.key" #[`${col.key}-cell`]="{ row }">
-          <slot :name="`${col.key}-cell`" :row="row.original ? row.original : row">
-            {{ row.original ? row.original[col.key] : row[col.key] }}
+        <template v-for="col in mappedColumns" :key="col.key" #[`${col.key}-cell`]="{ row }">
+          <slot :name="`${col.key}-cell`" :row="(row.original ? row.original : row) as T">
+            {{ row.original ? (row.original as any)[col.key] : (row as any)[col.key] }}
           </slot>
         </template>
       </UTable>

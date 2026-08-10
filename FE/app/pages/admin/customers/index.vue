@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { Role, UserStatus, mockProfiles } from '~/utils/mockData'
-import type { Profile } from '~/utils/mockData'
+import { mockProfiles } from '~/utils/mockData'
+import type { Profile } from '~/utils/types'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 
 useSeoMeta({ title: 'Khách hàng - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
 const toast = useToast()
 // State
-const allProfiles = ref<Profile[]>(mockProfiles.filter((p) => p.role !== Role.ADMIN))
+const allProfiles = ref<Profile[]>(
+  mockProfiles.filter((p) => p.role !== constants.value?.[ConstantKey.Role]?.ADMIN)
+)
 const loading = ref(true)
 const error = ref(false)
 // Filters
@@ -15,16 +19,16 @@ const roleFilter = ref<string>('ALL')
 const statusFilter = ref<string>('ALL')
 const page = ref(1)
 const limit = ref(10)
-const roleOptions = [
+const roleOptions = computed(() => [
   { label: 'Tất cả vai trò', value: 'ALL' },
-  { label: 'Khách hàng', value: Role.CUSTOMER },
-  { label: 'Tài xế', value: Role.DRIVER }
-]
-const statusOptions = [
+  { label: 'Khách hàng', value: constants.value?.[ConstantKey.Role]?.CUSTOMER },
+  { label: 'Tài xế', value: constants.value?.[ConstantKey.Role]?.DRIVER }
+])
+const statusOptions = computed(() => [
   { label: 'Tất cả trạng thái', value: 'ALL' },
-  { label: 'Đang hoạt động', value: UserStatus.ACTIVE },
-  { label: 'Tạm khóa', value: UserStatus.INACTIVE }
-]
+  { label: 'Đang hoạt động', value: constants.value?.[ConstantKey.UserStatus]?.ACTIVE },
+  { label: 'Tạm khóa', value: constants.value?.[ConstantKey.UserStatus]?.INACTIVE }
+])
 // Debounce for search
 const debouncedSearch = ref('')
 const searchTimeoutId = ref<ReturnType<typeof setTimeout>>()
@@ -37,29 +41,33 @@ watch(search, (val) => {
 // KPI
 const kpiCards = computed(() => {
   const list = allProfiles.value
-  const active = list.filter((p) => p.status === UserStatus.ACTIVE).length
-  const inactive = list.filter((p) => p.status === UserStatus.INACTIVE).length
+  const active = list.filter(
+    (p) => p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+  ).length
+  const inactive = list.filter(
+    (p) => p.status === constants.value?.[ConstantKey.UserStatus]?.INACTIVE
+  ).length
   const _totalDebt = list.reduce((s, p) => s + (p.debt_limit || 0), 0)
   return [
     {
       title: 'Tổng khách hàng',
       value: list.length,
       icon: 'i-lucide-users',
-      color: 'primary',
+      color: 'primary' as const,
       trend: { value: 12, isPositive: true }
     },
     {
       title: 'Đang hoạt động',
       value: active,
       icon: 'i-lucide-user-check',
-      color: 'success',
+      color: 'success' as const,
       trend: { value: 5, isPositive: true }
     },
     {
       title: 'Tạm khóa',
       value: inactive,
       icon: 'i-lucide-user-x',
-      color: 'error',
+      color: 'error' as const,
       trend: { value: 2, isPositive: false }
     }
   ]
@@ -101,9 +109,9 @@ const form = ref({
   phone: '',
   email: '',
   password: '',
-  role: Role.CUSTOMER,
+  role: constants.value?.[ConstantKey.Role]?.CUSTOMER as string,
   debt_limit: 0,
-  status: UserStatus.ACTIVE
+  status: constants.value?.[ConstantKey.UserStatus]?.ACTIVE as string
 })
 const formErrors = ref<Record<string, string>>({})
 const saving = ref(false)
@@ -121,9 +129,9 @@ function openAdd() {
     phone: '',
     email: '',
     password: '',
-    role: Role.CUSTOMER,
+    role: constants.value?.[ConstantKey.Role]?.CUSTOMER as string,
     debt_limit: 0,
-    status: UserStatus.ACTIVE
+    status: constants.value?.[ConstantKey.UserStatus]?.ACTIVE as string
   }
   formErrors.value = {}
   showDrawer.value = true
@@ -171,9 +179,9 @@ function saveCustomer() {
           debt_limit: form.value.debt_limit,
           status: form.value.status,
           updated_at: new Date().toISOString()
-        }
+        } as unknown
       }
-      toast.add({ title: 'Cập nhật khách hàng thành công', color: 'success' })
+      toast.add({ title: 'Cập nhật khách hàng thành công', color: 'success' as const })
     } else {
       const newId = `usr-new-${Date.now()}`
       const newProfile: Profile = {
@@ -188,7 +196,7 @@ function saveCustomer() {
         updated_at: new Date().toISOString()
       }
       allProfiles.value.unshift(newProfile)
-      toast.add({ title: 'Thêm khách hàng thành công', color: 'success' })
+      toast.add({ title: 'Thêm khách hàng thành công', color: 'success' as const })
     }
     saving.value = false
     showDrawer.value = false
@@ -199,7 +207,7 @@ function confirmDelete() {
   deleting.value = true
   setTimeout(() => {
     allProfiles.value = allProfiles.value.filter((p) => p.id !== deleteTarget.value?.id)
-    toast.add({ title: 'Xóa khách hàng thành công', color: 'success' })
+    toast.add({ title: 'Xóa khách hàng thành công', color: 'success' as const })
     deleteTarget.value = null
     deleting.value = false
     if (pagedRows.value.length === 0 && page.value > 1) page.value--
@@ -285,7 +293,7 @@ function retry() {
                     {{ row.full_name }}
                   </p>
                   <p class="truncate font-mono text-xs text-slate-500 dark:text-zinc-400">
-                    {{ row.id.slice(0, 12) }}
+                    {{ String(row.id).slice(0, 12) }}
                   </p>
                 </div>
               </div>
@@ -301,8 +309,11 @@ function retry() {
               <span v-else class="text-slate-400 dark:text-zinc-500">—</span>
             </template>
             <template #role-cell="{ row }">
-              <UBadge :color="row.role === Role.DRIVER ? 'warning' : 'primary'" variant="soft">
-                {{ row.role === Role.DRIVER ? 'Tài xế' : 'Khách hàng' }}
+              <UBadge
+                :color="row.role === constants?.[ConstantKey.Role]?.DRIVER ? 'warning' : 'primary'"
+                variant="soft"
+              >
+                {{ row.role === constants?.[ConstantKey.Role]?.DRIVER ? 'Tài xế' : 'Khách hàng' }}
               </UBadge>
             </template>
             <template #status-cell="{ row }">
@@ -333,7 +344,11 @@ function retry() {
                   color="neutral"
                   variant="ghost"
                   aria-label="Xem chi tiết"
-                  @click.stop="navigateTo(`/admin/customers/${row.id}`)"
+                  @click.stop="
+                    () => {
+                      navigateTo(`/admin/customers/${row.id}`)
+                    }
+                  "
                 />
                 <UButton
                   icon="i-lucide-pencil"
@@ -347,7 +362,11 @@ function retry() {
                   color="error"
                   variant="ghost"
                   aria-label="Xóa"
-                  @click.stop="deleteTarget = row"
+                  @click.stop="
+                    () => {
+                      deleteTarget = row
+                    }
+                  "
                 />
               </div>
             </template>
@@ -435,7 +454,16 @@ function retry() {
       </template>
       <template #footer>
         <div class="flex w-full justify-end gap-3">
-          <UButton variant="ghost" color="neutral" @click="showDrawer = false">Hủy</UButton>
+          <UButton
+            variant="ghost"
+            color="neutral"
+            @click="
+              () => {
+                showDrawer = false
+              }
+            "
+            >Hủy</UButton
+          >
           <UButton :loading="saving" color="primary" @click="saveCustomer">{{
             editingId ? 'Cập nhật' : 'Thêm mới'
           }}</UButton>

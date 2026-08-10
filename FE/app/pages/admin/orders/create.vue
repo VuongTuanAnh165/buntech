@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Role, ProductStatus } from '~/utils/enums'
+import { ConstantKey } from '~/enums/constantKeys'
 import type { Profile, Product, Address } from '~/utils/types'
 import {
   mockProfiles,
@@ -8,6 +8,8 @@ import {
   mockAddresses,
   mockTransactions
 } from '~/utils/mockData'
+
+const { constants } = useMasterData()
 const toast = useToast()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Tạo đơn hàng - BunTech Admin' })
@@ -26,7 +28,7 @@ const orderItems = ref<
     price: number
     stock: number
     unit: string
-    image_url: string
+    image_url: string | null
   }[]
 >([])
 const note = ref('')
@@ -90,10 +92,16 @@ function loadInitData() {
   loading.value = true
   setTimeout(() => {
     customers.value = mockProfiles
-      .filter((p) => p.role === Role.CUSTOMER && p.status === 'ACTIVE')
+      .filter(
+        (p) =>
+          p.role === constants.value?.[ConstantKey.Role]?.CUSTOMER &&
+          p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+      )
       .sort((a, b) => a.full_name.localeCompare(b.full_name))
     products.value = mockProducts
-      .filter((p) => !p.deleted_at && p.status === ProductStatus.ACTIVE)
+      .filter(
+        (p) => !p.deleted_at && p.status === constants.value?.[ConstantKey.ProductStatus]?.ACTIVE
+      )
       .sort((a, b) => a.name.localeCompare(b.name))
     loading.value = false
   }, 400)
@@ -147,6 +155,7 @@ function removeItem(index: number) {
 }
 function updateQuantity(index: number, delta: number) {
   const item = orderItems.value[index]
+  if (!item) return
   const newQty = item.quantity + delta
   if (newQty <= 0) {
     removeItem(index)
@@ -155,18 +164,24 @@ function updateQuantity(index: number, delta: number) {
   item.quantity = newQty
 }
 function setQuantity(index: number, quantity: number) {
-  orderItems.value[index].quantity = quantity
+  if (orderItems.value[index]) orderItems.value[index].quantity = quantity
 }
 function submitOrder() {
-  if (!orderItems.value.length)
-    return toast.add({ title: 'Vui lòng chọn ít nhất một sản phẩm', color: 'error' })
-  if (!selectedCustomerId.value)
-    return toast.add({ title: 'Vui lòng chọn khách hàng', color: 'error' })
-  if (exceedsDebtLimit.value)
-    return toast.add({
+  if (!orderItems.value.length) {
+    toast.add({ title: 'Vui lòng chọn ít nhất một sản phẩm', color: 'error' })
+    return
+  }
+  if (!selectedCustomerId.value) {
+    toast.add({ title: 'Vui lòng chọn khách hàng', color: 'error' })
+    return
+  }
+  if (exceedsDebtLimit.value) {
+    toast.add({
       title: `Cảnh báo: Đơn hàng vượt hạn mức công nợ của ${selectedCustomer.value?.full_name || ''}`,
       color: 'error'
     })
+    return
+  }
 
   saving.value = true
   setTimeout(() => {

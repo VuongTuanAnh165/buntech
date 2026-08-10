@@ -1,5 +1,3 @@
-import type { Role } from '~/utils/enums'
-
 /**
  * Entity gốc — Mọi entity trong hệ thống đều kế thừa từ đây.
  */
@@ -49,6 +47,6 @@ export interface CurrentUser {
   id: string | number
   fullName: string
   phoneNumber: string
-  role: Role
+  role: string
   profile: CurrentUserProfile | null
 }

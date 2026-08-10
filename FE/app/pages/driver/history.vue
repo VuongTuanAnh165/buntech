@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { OrderStatus, Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Lịch sử giao hàng - BunTech Driver' })
 const _router = useRouter()
@@ -14,8 +15,11 @@ const statusFilter = ref<StatusFilter>('all')
 const visibleCount = ref(8)
 const currentDriver = computed(
   () =>
-    mockProfiles.find((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) ||
-    mockProfiles[2]
+    mockProfiles.find(
+      (p) =>
+        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
+        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+    ) || mockProfiles[2]
 )
 const dateRangeDays = computed(() => {
   if (dateRange.value === 'today') return 1
@@ -28,20 +32,32 @@ const allHistory = computed(() => {
   const cutoff = Date.now() - dateRangeDays.value * 86400000
   return mockOrders
     .filter((o) => o.driver_id === driverId)
-    .filter((o) => o.status === OrderStatus.DELIVERED || o.status === OrderStatus.CANCELLED)
+    .filter(
+      (o) =>
+        o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED ||
+        o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
+    )
     .filter((o) => new Date(o.created_at).getTime() >= cutoff)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 })
 const filteredHistory = computed(() => {
   if (statusFilter.value === 'all') return allHistory.value
   if (statusFilter.value === 'delivered')
-    return allHistory.value.filter((o) => o.status === OrderStatus.DELIVERED)
-  return allHistory.value.filter((o) => o.status === OrderStatus.CANCELLED)
+    return allHistory.value.filter(
+      (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    )
+  return allHistory.value.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
+  )
 })
 const stats = computed(() => {
   const list = allHistory.value
-  const delivered = list.filter((o) => o.status === OrderStatus.DELIVERED)
-  const cancelled = list.filter((o) => o.status === OrderStatus.CANCELLED)
+  const delivered = list.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+  )
+  const cancelled = list.filter(
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
+  )
   const totalCollected = delivered.reduce((sum, o) => sum + (o.amount_collected || 0), 0)
   const successRate = list.length ? Math.round((delivered.length / list.length) * 100) : 0
   const totalDistance = delivered.reduce((sum, o) => {
@@ -242,12 +258,18 @@ onMounted(() => {
         :style="{ animationDelay: `${i * 50}ms` }"
         role="button"
         tabindex="0"
-        @click="navigateTo(`/driver/delivery/${order.id}`)"
+        @click="
+          () => {
+            navigateTo(`/driver/delivery/${order.id}`)
+          }
+        "
       >
         <div
           :class="[
             'absolute top-0 bottom-0 left-0 w-1',
-            order.status === OrderStatus.DELIVERED ? 'bg-success-500' : 'bg-error-500'
+            order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
+              ? 'bg-success-500'
+              : 'bg-error-500'
           ]"
         />
         <div class="mb-3 flex items-start justify-between pl-1">
@@ -255,19 +277,19 @@ onMounted(() => {
             <div
               :class="[
                 'flex h-10 w-10 items-center justify-center rounded-xl',
-                order.status === OrderStatus.DELIVERED
+                order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                   ? 'bg-success-50 dark:bg-success-900/20'
                   : 'bg-error-50 dark:bg-error-900/20'
               ]"
             >
               <UIcon
                 :name="
-                  order.status === OrderStatus.DELIVERED
+                  order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                     ? 'i-lucide-check-circle-2'
                     : 'i-lucide-x-circle'
                 "
                 :class="
-                  order.status === OrderStatus.DELIVERED
+                  order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                     ? 'text-success-600 dark:text-success-400 h-5 w-5'
                     : 'text-error-600 dark:text-error-400 h-5 w-5'
                 "
@@ -281,10 +303,16 @@ onMounted(() => {
             </div>
           </div>
           <UBadge
-            :color="order.status === OrderStatus.DELIVERED ? 'success' : 'error'"
+            :color="
+              order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED ? 'success' : 'error'
+            "
             variant="subtle"
             size="xs"
-            >{{ order.status === OrderStatus.DELIVERED ? 'Đã giao' : 'Đã hủy' }}</UBadge
+            >{{
+              order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
+                ? 'Đã giao'
+                : 'Đã hủy'
+            }}</UBadge
           >
         </div>
         <div class="space-y-2 pl-1 text-sm">

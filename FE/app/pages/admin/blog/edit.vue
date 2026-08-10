@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { mockBlogCategories, mockBlogPosts } from '~/utils/mockData'
-import { BlogStatus } from '~/utils/enums'
 
+const { constants } = useMasterData()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Viết bài - BunTech Admin' })
 
@@ -16,9 +16,8 @@ const title = ref('')
 const categoryId = ref('')
 const excerpt = ref('')
 const content = ref('')
-const status = ref<BlogStatus>(BlogStatus.DRAFT)
+const status = ref<string | undefined>(constants.value?.['BlogStatus']?.DRAFT)
 const imageUrl = ref('')
-
 const categoryOptions = mockBlogCategories.map((c) => ({ label: c.name, value: c.id }))
 
 // ─── Lifecycle ────────────────────────────────────────────
@@ -76,7 +75,7 @@ function handleImageSelect() {
         <UButton variant="outline" color="neutral" to="/admin/blog"> Hủy </UButton>
         <UButton :loading="submitting" @click="handleSave">
           <UIcon name="i-lucide-save" class="mr-1 h-4 w-4" />
-          {{ status === BlogStatus.PUBLISHED ? 'Xuất bản' : 'Lưu nháp' }}
+          {{ status === constants?.['BlogStatus']?.PUBLISHED ? 'Xuất bản' : 'Lưu nháp' }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -139,8 +138,8 @@ function handleImageSelect() {
               <USelectMenu
                 v-model="status"
                 :items="[
-                  { label: 'Bản nháp', value: BlogStatus.DRAFT },
-                  { label: 'Xuất bản', value: BlogStatus.PUBLISHED }
+                  { label: 'Bản nháp', value: constants?.['BlogStatus']?.DRAFT },
+                  { label: 'Xuất bản', value: constants?.['BlogStatus']?.PUBLISHED }
                 ]"
                 value-key="value"
               />
@@ -178,7 +177,7 @@ function handleImageSelect() {
             <div
               class="absolute inset-0 flex items-center justify-center gap-2 bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
             >
-              <UButton color="white" variant="solid" size="sm" @click="handleImageSelect">
+              <UButton color="neutral" variant="solid" size="sm" @click="handleImageSelect">
                 Đổi ảnh
               </UButton>
               <UButton
@@ -186,7 +185,11 @@ function handleImageSelect() {
                 variant="solid"
                 size="sm"
                 icon="i-lucide-trash-2"
-                @click="imageUrl = ''"
+                @click="
+                  () => {
+                    imageUrl = ''
+                  }
+                "
               />
             </div>
           </div>

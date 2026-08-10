@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { _computed } from 'vue'
-
-const _props = defineProps<{
+defineProps<{
   activities: {
     id: string
     type: string

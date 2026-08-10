@@ -160,7 +160,16 @@ onMounted(() => {
         </template>
         <template #footer>
           <div class="flex justify-end gap-3">
-            <UButton variant="outline" color="neutral" @click="showModal = false">Hủy</UButton>
+            <UButton
+              variant="outline"
+              color="neutral"
+              @click="
+                () => {
+                  showModal = false
+                }
+              "
+              >Hủy</UButton
+            >
             <UButton @click="handleSave">
               <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> Lưu
             </UButton>

@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { Role, UserStatus } from '~/utils/enums'
 import { mockOrders, mockProfiles } from '~/utils/mockData'
+import { ConstantKey } from '~/enums/constantKeys'
+const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Phương tiện - BunTech Driver' })
 const toast = useToast()
 const loading = ref(true)
 const currentDriver = computed(
   () =>
-    mockProfiles.find((p) => p.role === Role.DRIVER && p.status === UserStatus.ACTIVE) ||
-    mockProfiles[2]
+    mockProfiles.find(
+      (p) =>
+        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
+        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
+    ) || mockProfiles[2]
 )
 // Vehicle stats from orders
 const vehicleStats = computed(() => {

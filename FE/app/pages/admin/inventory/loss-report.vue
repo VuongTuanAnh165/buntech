@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { InventoryMovementType } from '~/utils/enums'
-import { mockInventoryMovements, _mockInventoryItems } from '~/utils/mockData'
+import { ConstantKey } from '~/enums/constantKeys'
+import { mockInventoryMovements } from '~/utils/mockData'
+const { constants } = useMasterData()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Báo cáo hao hụt - BunTech Admin' })
 const _toast = useToast()
@@ -20,7 +21,11 @@ const rangeDays = computed(() => Number(selectedRange.value))
 const sinceDate = computed(() => new Date(Date.now() - rangeDays.value * 86400000).toISOString())
 const lossMovements = computed(() =>
   mockInventoryMovements
-    .filter((m) => m.type === InventoryMovementType.LOSS && m.created_at >= sinceDate.value)
+    .filter(
+      (m) =>
+        m.type === constants.value?.[ConstantKey.InventoryMovementType]?.LOSS &&
+        m.created_at >= sinceDate.value
+    )
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 )
 const totalLossEvents = computed(() => lossMovements.value.length)
@@ -28,7 +33,9 @@ const totalQuantityLost = computed(() => lossMovements.value.reduce((s, m) => s 
 // For loss rate calculation
 const importedMovements = computed(() =>
   mockInventoryMovements.filter(
-    (m) => m.type === InventoryMovementType.IMPORT && m.created_at >= sinceDate.value
+    (m) =>
+      m.type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT &&
+      m.created_at >= sinceDate.value
   )
 )
 const totalImported = computed(() => importedMovements.value.reduce((s, m) => s + m.quantity, 0))
@@ -66,7 +73,9 @@ const lossTrend = computed(() => {
     const d = new Date(now.getTime() - (6 - i) * 86400000)
     const dateStr = d.toISOString().slice(0, 10)
     const dayLoss = mockInventoryMovements.filter(
-      (m) => m.type === InventoryMovementType.LOSS && m.created_at.slice(0, 10) === dateStr
+      (m) =>
+        m.type === constants.value?.[ConstantKey.InventoryMovementType]?.LOSS &&
+        m.created_at.slice(0, 10) === dateStr
     )
     return {
       label: days[d.getDay()],

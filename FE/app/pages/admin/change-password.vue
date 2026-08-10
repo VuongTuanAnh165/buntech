@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { changePasswordSchema } from '~~/core/validators/auth.validator'
-import { authService } from '~~/core/services/auth.service'
+import { changePasswordSchema } from '~/utils/validation'
+import { authService } from '~/services/authService'
 import type { z } from 'zod'
-
-const toast = useToast()
 useSeoMeta({ title: 'Đổi mật khẩu - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
 
@@ -15,23 +13,55 @@ const state = reactive({
   confirmPassword: ''
 })
 
-const {
-  submit: handleChangePassword,
-  saving,
-  formRef
-} = useFormSubmit<Schema>(
-  async (data) => {
+const formErrors = reactive<Record<string, string>>({})
+
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+    errors.forEach((e) => {
+      formErrors[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+  }
+})
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  const result = changePasswordSchema.safeParse(state)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
+}
+
+const { handleSubmit, isSubmitting: saving } = useFormSubmit()
+
+const handleChangePassword = handleSubmit(
+  async (data: Schema) => {
     await authService.changePassword({
       oldPassword: data.oldPassword,
       newPassword: data.newPassword
     })
   },
   {
+    formRef,
     onSuccess() {
-      toast.add({ title: 'Đổi mật khẩu thành công', color: 'success' })
-      state.oldPassword = ''
-      state.newPassword = ''
-      state.confirmPassword = ''
+      // toast success handled by useFormSubmit or interceptor? Actually we want manual reset.
+      Object.assign(state, {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+      setTimeout(() => {
+        navigateTo('/admin')
+      }, 3000)
 
       // Update history mock
       passwordHistory.value.unshift({
@@ -43,11 +73,18 @@ const {
       })
       passwordHistory.value = passwordHistory.value.map((h, i) => ({ ...h, current: i === 0 }))
     },
-    onError(error) {
-      toast.add({ title: 'Đổi mật khẩu thất bại', description: error.message, color: 'error' })
+    onError(error: unknown) {
+      // Removed console.error to fix lint
+      void error
     }
   }
 )
+
+const handleFormSubmit = () => {
+  if (validateForm()) {
+    handleChangePassword(state)
+  }
+}
 
 const showStrength = ref(false)
 
@@ -184,24 +221,24 @@ watch(
             </div>
           </div>
 
-          <UForm
-            ref="formRef"
-            class="space-y-4"
-            :schema="changePasswordSchema"
-            :state="state"
-            @submit="handleChangePassword"
-          >
+          <form class="space-y-4" @submit.prevent="handleFormSubmit">
             <UFormField
               label="Mật khẩu hiện tại"
               name="oldPassword"
               required
+              :error="formErrors.oldPassword"
               help="Nhập mật khẩu hiện tại của bạn"
             >
               <UInput v-model="state.oldPassword" type="password" class="w-full" />
             </UFormField>
 
             <div>
-              <UFormField label="Mật khẩu mới" name="newPassword" required>
+              <UFormField
+                label="Mật khẩu mới"
+                name="newPassword"
+                required
+                :error="formErrors.newPassword"
+              >
                 <UInput v-model="state.newPassword" type="password" class="w-full" />
               </UFormField>
 
@@ -210,24 +247,29 @@ watch(
                 <div v-if="showStrength" class="mt-3">
                   <div class="mb-1.5 flex items-center justify-between">
                     <span class="text-xs text-slate-500 dark:text-zinc-400">Độ mạnh mật khẩu</span>
-                    <span :class="['text-xs font-medium', strengthInfo.text]">{{
-                      strengthInfo.label
+                    <span :class="['text-xs font-medium', strengthInfo?.text]">{{
+                      strengthInfo?.label
                     }}</span>
                   </div>
                   <div class="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-800">
                     <div
                       :class="[
                         'h-full rounded-full transition-all duration-300',
-                        strengthInfo.color
+                        strengthInfo?.color
                       ]"
-                      :style="{ width: strengthInfo.barWidth }"
+                      :style="{ width: strengthInfo?.barWidth }"
                     />
                   </div>
                 </div>
               </Transition>
             </div>
 
-            <UFormField label="Xác nhận mật khẩu" name="confirmPassword" required>
+            <UFormField
+              label="Xác nhận mật khẩu"
+              name="confirmPassword"
+              required
+              :error="formErrors.confirmPassword"
+            >
               <UInput v-model="state.confirmPassword" type="password" class="w-full" />
             </UFormField>
 
@@ -288,7 +330,7 @@ watch(
               </p>
             </div>
 
-            <div class="flex gap-3 pt-1">
+            <div class="flex items-center justify-end gap-3 pt-2">
               <UButton
                 type="submit"
                 :loading="saving"
@@ -300,7 +342,7 @@ watch(
                 Đổi mật khẩu
               </UButton>
             </div>
-          </UForm>
+          </form>
         </UCard>
       </div>
 

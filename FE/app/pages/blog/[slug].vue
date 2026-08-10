@@ -181,10 +181,12 @@ useHead(() => ({
       </div>
 
       <!-- Content -->
+      <!-- eslint-disable vue/no-v-html -->
       <article
         class="prose prose-sm sm:prose-base [&_h2]:text-surface-foreground [&_a]:text-primary-600 dark:[&_a]:text-primary-400 [&_blockquote]:border-primary-300 dark:[&_blockquote]:border-primary-700 max-w-none leading-relaxed text-gray-700 dark:text-zinc-200 [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:pl-4 [&_blockquote]:italic [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-bold [&_img]:rounded-xl [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-5"
         v-html="sanitizedContent"
       />
+      <!-- eslint-enable vue/no-v-html -->
 
       <!-- Author bio card -->
       <div
