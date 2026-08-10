@@ -73,20 +73,16 @@ export const useAuthStore = defineStore('auth', () => {
         useCookie('auth_token', cookieOptions).value = res.data.accessToken
         useCookie('refresh_token', cookieOptions).value = res.data.refreshToken
 
-        // Fetch actual user data instead of mocking
+        // Populate basic user info immediately for role checks
+        if (res.data.user) {
+          user.value = res.data.user
+          initialized.value = true
+        }
+
+        // Fetch actual user data (including profile) instead of mocking
         await fetchUser()
 
-        const route = useRoute()
-        const redirectPath = route.query.redirect as string | undefined
-
-        // redirect based on role
-        if (!redirectPath) {
-          if (isAdmin.value) navigateTo('/admin/dashboard/overview')
-          else if (isDriver.value) navigateTo('/driver')
-          else navigateTo('/')
-        } else {
-          navigateTo(redirectPath)
-        }
+        // Caller is responsible for navigation
       }
     } catch (error) {
       // eslint-disable-next-line no-console

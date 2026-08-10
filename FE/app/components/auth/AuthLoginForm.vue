@@ -18,37 +18,7 @@ const toast = useToast()
 
 type Schema = z.output<typeof loginSchema>
 const state = reactive<Schema>({ phoneNumber: '', password: '' })
-const formErrors = reactive<Record<string, string>>({})
-
-const formRef = ref({
-  setErrors: (errors: { path: string; message: string }[]) => {
-    Object.keys(formErrors).forEach((key) => {
-      Reflect.deleteProperty(formErrors, key)
-    })
-    errors.forEach((e) => {
-      formErrors[e.path] = e.message
-    })
-  },
-  clearErrors: () => {
-    Object.keys(formErrors).forEach((key) => {
-      Reflect.deleteProperty(formErrors, key)
-    })
-  }
-})
-
-const validateForm = () => {
-  formRef.value.clearErrors()
-  const result = loginSchema.safeParse(state)
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => ({
-      path: issue.path[0]?.toString() || '',
-      message: issue.message
-    }))
-    formRef.value.setErrors(errors)
-    return false
-  }
-  return true
-}
+const formRef = ref()
 
 const { handleSubmit, isSubmitting: loading } = useFormSubmit()
 
@@ -62,17 +32,23 @@ const handleLogin = handleSubmit(
       return
     }
 
-    if (props.role === 'admin') navigateTo('/admin')
-    else if (props.role === 'driver') navigateTo('/driver')
-    else navigateTo('/portal')
+    const route = useRoute()
+    const redirectPath = route.query.redirect as string | undefined
+
+    if (redirectPath) {
+      await navigateTo(redirectPath)
+    } else {
+      if (props.role === 'admin') await navigateTo('/admin')
+      else if (props.role === 'driver') await navigateTo('/driver')
+      else await navigateTo('/portal')
+    }
   },
   { formRef }
 )
 
-const handleFormSubmit = () => {
-  if (validateForm()) {
-    handleLogin(state)
-  }
+const handleFormSubmit = async (event: { data: Schema }) => {
+  // event.data is validated by UForm
+  handleLogin(event.data)
 }
 </script>
 
@@ -108,8 +84,14 @@ const handleFormSubmit = () => {
     </div>
 
     <!-- Form -->
-    <form class="relative z-10 space-y-5" @submit.prevent="handleFormSubmit">
-      <UFormField label="Số điện thoại" name="phoneNumber" :error="formErrors.phoneNumber">
+    <UForm
+      ref="formRef"
+      :schema="loginSchema"
+      :state="state"
+      class="relative z-10 space-y-5"
+      @submit="handleFormSubmit"
+    >
+      <UFormField label="Số điện thoại" name="phoneNumber">
         <UInput
           v-model="state.phoneNumber"
           type="tel"
@@ -120,7 +102,7 @@ const handleFormSubmit = () => {
         />
       </UFormField>
 
-      <UFormField label="Mật khẩu" name="password" :error="formErrors.password">
+      <UFormField label="Mật khẩu" name="password">
         <UInput
           v-model="state.password"
           type="password"
@@ -158,7 +140,7 @@ const handleFormSubmit = () => {
           />
         </UButton>
       </div>
-    </form>
+    </UForm>
 
     <!-- Divider -->
     <div class="relative my-8">

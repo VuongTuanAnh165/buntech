@@ -9,7 +9,7 @@ export default class extends BaseSeeder {
       {
         fullName: 'Admin Buntech',
         phoneNumber: '0901234567',
-        password: 'password123',
+        password: 'Abcd@1234',
         role: Role.ADMIN,
         profile: {
           storeName: 'Buntech Headquarter',
@@ -22,7 +22,7 @@ export default class extends BaseSeeder {
       {
         fullName: 'Tài xế Nguyễn Văn A',
         phoneNumber: '0911111111',
-        password: 'password123',
+        password: 'Abcd@1234',
         role: Role.DRIVER,
         profile: {
           storeName: null,
@@ -35,7 +35,7 @@ export default class extends BaseSeeder {
       {
         fullName: 'Đại lý Minh Phát',
         phoneNumber: '0922222222',
-        password: 'password123',
+        password: 'Abcd@1234',
         role: Role.CUSTOMER,
         profile: {
           storeName: 'Cửa hàng Minh Phát',
@@ -49,14 +49,14 @@ export default class extends BaseSeeder {
       {
         fullName: 'Khách hàng Lẻ 1',
         phoneNumber: '0987654321',
-        password: 'password123',
+        password: 'Abcd@1234',
         role: Role.CUSTOMER,
         profile: {
           storeName: null,
           avatarUrl: null,
           debtLimit: '0',
           currentDebt: '0',
-          zaloUserId: 'zalo_test_123',
+          zaloUserId: `zalo_test_${Date.now()}`,
           customerType: CustomerType.RETAIL,
         },
       },

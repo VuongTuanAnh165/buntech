@@ -1,3 +1,5 @@
+import type { CurrentUser } from './common'
+
 export interface LoginPayload {
   phoneNumber: string
   password: string
@@ -7,6 +9,7 @@ export interface LoginPayload {
 export interface LoginResponse {
   accessToken: string
   refreshToken: string
+  user: CurrentUser
 }
 
 export interface RefreshTokenPayload {
