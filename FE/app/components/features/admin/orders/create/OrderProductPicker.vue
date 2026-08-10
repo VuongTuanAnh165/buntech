@@ -4,7 +4,6 @@
   Reason: Extracted to keep admin/orders/create.vue under 400 lines
 -->
 <script setup lang="ts">
-import { formatVND } from '~/utils/formatters'
 import type { Product } from '~/utils/types'
 
 defineProps<{

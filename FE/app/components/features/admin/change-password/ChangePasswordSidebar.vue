@@ -59,7 +59,7 @@ const accountSecurity = computed(() => [
   {
     label: 'Xác thực 2 bước',
     value: twoFAEnabled.value ? 'Đã bật' : 'Chưa bật',
-    color: twoFAEnabled.value ? 'success' : ('warning' as const),
+    color: twoFAEnabled.value ? ('success' as const) : ('warning' as const),
     icon: 'i-lucide-smartphone'
   },
   {
@@ -76,7 +76,10 @@ const accountSecurity = computed(() => [
   }
 ])
 
-const securityColorMap: Record<string, { bg: string; text: string; ring: string }> = {
+const securityColorMap: Record<
+  'success' | 'warning' | 'info' | 'primary',
+  { bg: string; text: string; ring: string }
+> = {
   success: {
     bg: 'bg-success-50 dark:bg-success-900/20',
     text: 'text-success-600 dark:text-success-400',

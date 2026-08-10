@@ -32,8 +32,8 @@ const statusLabel = computed(() => {
 <template>
   <UCard
     class="w-full cursor-pointer overflow-hidden border-0 shadow-sm ring-1 ring-neutral-200 transition-transform duration-200 active:scale-[0.98] dark:ring-neutral-800"
-    :ui="{ body: { padding: 'p-0' } }"
-    @click="$navigateTo(`/driver/delivery/${order.id}`)"
+    :ui="{ body: 'p-0' }"
+    @click="navigateTo(`/driver/delivery/${order.id}`)"
   >
     <!-- Top section -->
     <div class="border-b border-neutral-100 p-4 dark:border-neutral-800/50">
@@ -42,11 +42,11 @@ const statusLabel = computed(() => {
           <div
             class="bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 ring-primary-100 dark:ring-primary-900 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold ring-1"
           >
-            {{ order.customer_name?.charAt(0).toUpperCase() || 'K' }}
+            {{ (order.user?.full_name || order.guest_info?.name || 'K').charAt(0).toUpperCase() }}
           </div>
           <div>
             <h3 class="line-clamp-1 font-semibold text-neutral-900 dark:text-white">
-              {{ order.customer_name || 'Khách hàng' }}
+              {{ order.user?.full_name || order.guest_info?.name || 'Khách hàng' }}
             </h3>
             <p class="font-mono text-xs text-neutral-500">{{ order.id }}</p>
           </div>
@@ -76,7 +76,7 @@ const statusLabel = computed(() => {
           >Cần thu</span
         >
         <span class="text-primary-600 dark:text-primary-400 font-bold tabular-nums">
-          {{ formatVND(order.total_amount) }}
+          {{ formatVND(Number(order.total)) }}
         </span>
       </div>
 

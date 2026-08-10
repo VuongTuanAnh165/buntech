@@ -377,7 +377,7 @@ function setFilter(filterKey: string) {
           @click="setFilter(pill.accessorKey)"
         >
           <UIcon :name="pill.icon" class="mr-1 h-3.5 w-3.5" />
-          {{ pill.label }}
+          {{ pill.header }}
           <UBadge color="neutral" variant="subtle" size="sm" class="ml-1">{{ pill.count }}</UBadge>
         </UButton>
       </div>
@@ -401,7 +401,7 @@ function setFilter(filterKey: string) {
             <div class="flex items-center gap-2">
               <UAvatar
                 :alt="row.original.user?.full_name || 'Khách'"
-                :src="row.original.user?.avatar_url"
+                :src="row.original.user?.avatar_url ?? undefined"
                 size="sm"
               />
               <div>

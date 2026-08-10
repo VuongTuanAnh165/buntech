@@ -86,6 +86,7 @@ const option = computed(() => {
         ...base.tooltip,
         formatter: (params: { name: string; value: number }[]) => {
           const p = params[0]
+          if (!p) return ''
           return `<div style="font-size:11px;color:${isDark.value ? '#a1a1aa' : '#9ca3af'};margin-bottom:4px">${p.name}</div><div style="font-weight:600;font-size:14px">${formatVND(p.value)}</div>`
         }
       },
@@ -138,6 +139,7 @@ const option = computed(() => {
       ...base.tooltip,
       formatter: (params: { name: string; value: number }[]) => {
         const p = params[0]
+        if (!p) return ''
         return `<div style="font-size:11px;color:${isDark.value ? '#a1a1aa' : '#9ca3af'};margin-bottom:4px">${p.name}</div><div style="font-weight:600;font-size:14px">${formatVND(p.value)}</div>`
       }
     },

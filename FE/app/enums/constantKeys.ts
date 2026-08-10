@@ -12,5 +12,6 @@ export enum ConstantKey {
   UserStatus = 'UserStatus',
   NotificationType = 'NotificationType',
   ProductStatus = 'ProductStatus',
-  InventoryMovementType = 'InventoryMovementType'
+  InventoryMovementType = 'InventoryMovementType',
+  BlogStatus = 'BlogStatus'
 }

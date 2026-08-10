@@ -120,7 +120,7 @@ function handleImageSelect() {
                   v-model="content"
                   placeholder="Bắt đầu viết nội dung ở đây..."
                   :rows="15"
-                  :ui="{ base: 'border-0 focus:ring-0 rounded-none resize-y', wrapper: 'static' }"
+                  :ui="{ base: 'border-0 focus:ring-0 rounded-none resize-y' }"
                 />
               </div>
             </UFormField>

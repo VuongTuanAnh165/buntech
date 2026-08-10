@@ -229,7 +229,7 @@ const ratingDistribution = computed(() => {
   const counts = [0, 0, 0, 0, 0]
   reviews.value.forEach((r) => {
     if (counts[r.rating - 1] !== undefined) {
-      counts[r.rating - 1]++
+      counts[r.rating - 1]!++
     }
   })
   return [
@@ -388,7 +388,7 @@ onMounted(loadProduct)
                     : 'Ngưng bán'
                 }}
               </UBadge>
-              <UBadge :color="statusColors[status] as any" variant="soft" class="mt-2">{{
+              <UBadge :color="stockState.color as any" variant="soft" class="mt-2">{{
                 stockState.label
               }}</UBadge>
             </div>

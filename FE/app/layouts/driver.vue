@@ -88,7 +88,11 @@ const navItems = [
           variant="ghost"
           color="neutral"
           class="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white"
-          @click="showMenu = !showMenu"
+          @click="
+            () => {
+              showMenu = !showMenu
+            }
+          "
         >
           <UIcon :name="showMenu ? 'i-lucide-x' : 'i-lucide-menu'" class="h-5 w-5" />
         </UButton>

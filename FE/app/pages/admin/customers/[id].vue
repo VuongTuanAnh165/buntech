@@ -212,7 +212,7 @@ function saveAddress() {
   if (editingAddressId.value) {
     const idx = addresses.value.findIndex((a) => a.id === editingAddressId.value)
     if (idx >= 0) {
-      addresses.value[idx] = { ...addresses.value[idx], ...addressForm.value }
+      addresses.value[idx] = { ...addresses.value[idx], ...addressForm.value } as Address
       toast.add({ title: 'Đã cập nhật địa chỉ', color: 'success' })
     }
   } else {
@@ -247,7 +247,8 @@ function savePrice() {
   )
   const product = mockProducts.find((p) => p.id === priceForm.value.product_id)
   if (existing >= 0) {
-    customPrices.value[existing].price = priceForm.value.price
+    const cp = customPrices.value[existing]
+    if (cp) cp.price = priceForm.value.price
     toast.add({ title: 'Đã cập nhật giá riêng', color: 'success' })
   } else {
     customPrices.value.unshift({
@@ -631,8 +632,10 @@ onMounted(loadCustomer)
               placeholder="Chọn sản phẩm..."
               class="w-full"
             >
-              <template #option="{ option }">
-                {{ option.name }} — {{ formatVND(option.price) }}/{{ option.unit }}
+              <template #item="{ item }">
+                {{ (item as any).name }} — {{ formatVND((item as any).price) }}/{{
+                  (item as any).unit
+                }}
               </template>
             </USelectMenu>
           </UFormField>

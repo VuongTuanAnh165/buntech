@@ -28,10 +28,10 @@ const _props = defineProps<{
       >
         <div class="mb-1 flex items-start justify-between">
           <h4 class="line-clamp-1 text-sm font-medium text-neutral-900 dark:text-white">
-            {{ order.customer_name }}
+            {{ order.user?.full_name || order.guest_info?.name || 'Khách hàng' }}
           </h4>
           <span class="text-[10px] whitespace-nowrap text-neutral-500">{{
-            formatTime(order.created_at)
+            formatDate(order.created_at)
           }}</span>
         </div>
         <p class="line-clamp-2 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">

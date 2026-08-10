@@ -106,7 +106,7 @@ const filteredRows = computed(() => {
 const total = computed(() => filteredRows.value.length)
 const pagedRows = computed(() => {
   const start = (page.value - 1) * limit.value
-  return filteredRows.value.slice(start, start + limit.value) as unknown
+  return filteredRows.value.slice(start, start + limit.value)
 })
 watch([search, statusFilter, startDate, endDate], () => {
   page.value = 1
@@ -130,24 +130,17 @@ function clearSelection() {
 function handleBatchAssign(driverId: string) {
   const ids = Array.from(selectedOrders.value)
   const driver = drivers.value.find((d) => d.id === driverId) || null
-  allOrders.value = allOrders.value
-    .map((o) => {
-      return o as unknown
-    })
-    .map((o) => {
-      return o as unknown
-    })
-    .map((o) =>
-      ids.includes(o.id)
-        ? {
-            ...o,
-            driver_id: driverId,
-            driver,
-            status: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
-            updated_at: new Date().toISOString()
-          }
-        : o
-    )
+  allOrders.value = allOrders.value.map((o) =>
+    ids.includes(o.id)
+      ? ({
+          ...o,
+          driver_id: driverId,
+          driver,
+          status: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
+          updated_at: new Date().toISOString()
+        } as Order)
+      : o
+  )
   toast.add({ title: `Đã điều phối ${ids.length} đơn hàng`, color: 'success' })
   clearSelection()
 }
@@ -393,7 +386,7 @@ const activeFilterCount = computed(() => {
               {{ total }}
             </span>
             <USelectMenu v-model="limit" :options="[10, 20, 50]" class="w-32">
-              <template #label>{{ limit }} / trang</template>
+              <template #default>{{ limit }} / trang</template>
             </USelectMenu>
           </div>
           <UPagination v-model="page" :total="total" :page-count="limit" :max="5" />

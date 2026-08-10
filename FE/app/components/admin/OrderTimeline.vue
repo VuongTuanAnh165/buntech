@@ -9,22 +9,22 @@ const props = defineProps<Props>()
 // Define the linear steps
 const timelineSteps = computed(() => [
   {
-    value: constants.value?.[ConstantKey.OrderStatus]?.PENDING,
+    value: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
     label: 'Chờ xử lý',
     icon: 'i-lucide-clock'
   },
   {
-    value: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING,
+    value: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
     label: 'Đang xử lý',
     icon: 'i-lucide-package'
   },
   {
-    value: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
+    value: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
     label: 'Đang giao',
     icon: 'i-lucide-truck'
   },
   {
-    value: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED,
+    value: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
     label: 'Đã giao',
     icon: 'i-lucide-check-circle'
   }
@@ -43,7 +43,7 @@ const getStepStatus = (stepValue: string, index: number) => {
 }
 // Generate mock dates for completed steps
 const getStepDate = (index: number) => {
-  const status = getStepStatus(timelineSteps.value[index].value as string, index)
+  const status = getStepStatus(timelineSteps.value[index]?.value as string, index)
   if (status === 'pending') return ''
 
   const baseDate = new Date(props.createdAt)

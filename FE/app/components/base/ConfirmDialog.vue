@@ -1,13 +1,5 @@
 <script setup lang="ts">
-const { options, isOpen, resolve } = useConfirmDialog()
-
-const handleConfirm = () => {
-  resolve(true)
-}
-
-const handleCancel = () => {
-  resolve(false)
-}
+const { options, isOpen, handleConfirm, handleCancel } = useConfirmDialog()
 </script>
 
 <template>
@@ -19,7 +11,7 @@ const handleCancel = () => {
           v-if="options.icon"
           class="mx-auto mb-4 flex size-12 items-center justify-center rounded-full"
           :class="
-            options.variant === 'danger'
+            options.color === 'error'
               ? 'bg-red-50 dark:bg-red-950/30'
               : 'bg-primary-50 dark:bg-primary-950/30'
           "
@@ -28,7 +20,7 @@ const handleCancel = () => {
             :name="options.icon"
             class="size-6"
             :class="
-              options.variant === 'danger'
+              options.color === 'error'
                 ? 'text-error-600 dark:text-error-400'
                 : 'text-primary-600 dark:text-primary-400'
             "
@@ -48,13 +40,10 @@ const handleCancel = () => {
         <!-- Actions -->
         <div class="mt-6 flex items-center justify-end gap-3">
           <UButton color="neutral" variant="outline" @click="handleCancel">
-            {{ options.cancelText || 'Hủy' }}
+            {{ options.cancelLabel || 'Hủy' }}
           </UButton>
-          <UButton
-            :color="options.variant === 'danger' ? 'error' : 'primary'"
-            @click="handleConfirm"
-          >
-            {{ options.confirmText || 'Xác nhận' }}
+          <UButton :color="options.color === 'error' ? 'error' : 'primary'" @click="handleConfirm">
+            {{ options.confirmLabel || 'Xác nhận' }}
           </UButton>
         </div>
       </div>

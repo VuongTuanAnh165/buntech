@@ -179,7 +179,7 @@ function saveCustomer() {
           debt_limit: form.value.debt_limit,
           status: form.value.status,
           updated_at: new Date().toISOString()
-        } as unknown
+        } as unknown as Profile
       }
       toast.add({ title: 'Cập nhật khách hàng thành công', color: 'success' as const })
     } else {
@@ -260,7 +260,9 @@ function retry() {
             label-key="label"
             class="sm:w-48"
           >
-            <template #label>{{ roleOptions.find((o) => o.value === roleFilter)?.label }}</template>
+            <template #default>{{
+              roleOptions.find((o) => o.value === roleFilter)?.label
+            }}</template>
           </USelectMenu>
           <USelectMenu
             v-model="statusFilter"
@@ -269,7 +271,7 @@ function retry() {
             label-key="label"
             class="sm:w-48"
           >
-            <template #label>{{
+            <template #default>{{
               statusOptions.find((o) => o.value === statusFilter)?.label
             }}</template>
           </USelectMenu>
@@ -382,7 +384,7 @@ function retry() {
                     / {{ total }}
                   </span>
                   <USelectMenu v-model="limit" :options="[10, 20, 50]" class="w-32">
-                    <template #label>{{ limit }} / trang</template>
+                    <template #default>{{ limit }} / trang</template>
                   </USelectMenu>
                 </div>
                 <UPagination v-model="page" :total="total" :page-count="limit" :max="5" />

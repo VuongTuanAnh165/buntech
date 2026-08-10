@@ -146,6 +146,7 @@ export interface BlogPost {
   author_name: string | null
   published_at: string | null
   status: string
+  views?: number
   deleted_at: string | null
   created_at: string
   updated_at: string

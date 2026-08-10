@@ -160,7 +160,7 @@ onMounted(() => {
                   ><UIcon name="i-lucide-eye" class="h-3.5 w-3.5" />
                   {{
                     new Intl.NumberFormat('vi-VN').format(
-                      (post as any).views || Math.floor(Math.random() * 1000) + 100
+                      post.views || Math.floor(Math.random() * 1000) + 100
                     )
                   }}</span
                 >

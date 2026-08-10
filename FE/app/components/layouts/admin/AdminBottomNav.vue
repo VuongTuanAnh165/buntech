@@ -25,11 +25,11 @@ function isActive(to: string) {
     <div class="scrollbar-hide flex items-stretch gap-1 overflow-x-auto px-2 py-2">
       <NuxtLink
         v-for="item in allNavItems"
-        :key="item.to"
+        :key="item.to as string"
         :to="item.to"
         :class="[
           'flex min-h-[52px] min-w-[60px] flex-shrink-0 flex-col items-center justify-center gap-1 rounded-lg px-3 py-2 transition-all duration-200 active:scale-90',
-          isActive(item.to)
+          isActive(item.to as string)
             ? 'text-primary-600 dark:text-primary-400'
             : 'text-slate-400 dark:text-zinc-500'
         ]"

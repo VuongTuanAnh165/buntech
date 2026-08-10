@@ -86,7 +86,7 @@ const handleLogout = async () => {
             class="flex h-10 items-center gap-3 rounded-xl px-2 transition-all duration-300 hover:bg-slate-100/50 dark:hover:bg-zinc-800/50"
           >
             <UAvatar
-              :src="authStore.user?.avatarUrl || ''"
+              :src="authStore.user?.profile?.avatarUrl || ''"
               :alt="authStore.user?.fullName || 'Admin'"
               size="sm"
               class="shadow-sm ring-2 ring-white dark:ring-zinc-900"

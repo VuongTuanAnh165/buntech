@@ -5,8 +5,6 @@
   Reason: Extracted to keep admin/profile.vue under 400 lines limit.
 -->
 <script setup lang="ts">
-import { formatDateTime } from '~/utils/formatters'
-
 const accountAgeLabel = 'Từ lâu'
 
 // Stats

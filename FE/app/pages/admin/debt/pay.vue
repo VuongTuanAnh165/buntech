@@ -15,7 +15,8 @@ const debtCustomers = computed(() =>
     .map((c) => ({
       label: `${c.full_name} — ${c.phone}`,
       value: c.id,
-      avatar: { src: c.avatar_url || undefined },
+      avatar: c.avatar_url ? { src: c.avatar_url } : undefined,
+      avatarUrl: c.avatar_url || undefined,
       debt: c.debt_limit
     }))
 )
@@ -93,7 +94,11 @@ async function handleSubmit() {
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <UAvatar :src="selectedCustomer.avatar" :alt="selectedCustomer.label" size="sm" />
+                  <UAvatar
+                    :src="selectedCustomer.avatarUrl"
+                    :alt="selectedCustomer.label"
+                    size="sm"
+                  />
                   <div>
                     <p class="text-surface-foreground text-sm font-medium">
                       {{ selectedCustomer.label.split(' — ')[0] }}

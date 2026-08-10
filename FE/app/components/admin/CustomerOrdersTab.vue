@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Order } from '~/utils/mockData'
+import type { Order } from '~/utils/types'
 defineProps<{
   orders: Order[]
 }>()
@@ -14,7 +14,7 @@ defineProps<{
         { accessorKey: 'amount_collected', header: 'Đã thu', class: 'text-right' },
         { accessorKey: 'created_at', header: 'Ngày đặt' }
       ]"
-      :rows="orders"
+      :rows="orders as unknown as Record<string, unknown>[]"
       empty-title="Chưa có đơn hàng"
       empty-description="Khách hàng này chưa đặt đơn hàng nào"
     >
@@ -30,7 +30,7 @@ defineProps<{
         >
       </template>
       <template #status-cell="{ row }">
-        <BaseStatusBadge type="order" :status="row.status" />
+        <BaseStatusBadge type="order" :status="row.status as string" />
       </template>
       <template #total-cell="{ row }">
         <span class="text-surface-foreground font-medium tabular-nums">{{
@@ -50,7 +50,9 @@ defineProps<{
         </span>
       </template>
       <template #created_at-cell="{ row }">
-        <span class="text-slate-500 dark:text-zinc-400">{{ formatDate(row.created_at) }}</span>
+        <span class="text-slate-500 dark:text-zinc-400">{{
+          formatDate(row.created_at as string)
+        }}</span>
       </template>
     </BaseDataTable>
   </div>

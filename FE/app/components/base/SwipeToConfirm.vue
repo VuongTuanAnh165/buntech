@@ -30,7 +30,7 @@ let startX = 0
 function handleStart(e: MouseEvent | TouchEvent) {
   if (props.disabled || isConfirmed.value) return
   isDragging.value = true
-  startX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX
+  startX = e instanceof MouseEvent ? e.clientX : e.touches[0]?.clientX || 0
   if (trackRef.value) {
     trackWidth.value = trackRef.value.offsetWidth
   }
@@ -44,7 +44,7 @@ function handleStart(e: MouseEvent | TouchEvent) {
 function handleMove(e: MouseEvent | TouchEvent) {
   if (!isDragging.value) return
   // e.preventDefault() // prevent scrolling while dragging
-  const currentX = e instanceof MouseEvent ? e.clientX : e.touches[0].clientX
+  const currentX = e instanceof MouseEvent ? e.clientX : e.touches[0]?.clientX || 0
   const deltaX = currentX - startX
   dragOffset.value = Math.max(0, Math.min(deltaX, maxOffset.value))
 }

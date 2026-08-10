@@ -7,6 +7,7 @@ import {
   mockRevenueData
 } from '~/utils/mockData'
 import { getOrderStatusColor, getOrderStatusIcon, getOrderStatusLabel } from '~/utils/orderStatus'
+import type { Order } from '~/utils/types'
 useSeoMeta({ title: 'Dashboard - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
 const loading = ref(true)
@@ -20,7 +21,7 @@ const kpi = reactive({
 const { constants } = useMasterData()
 const revenueData = ref<{ day: string; revenue: number }[]>([])
 const topBuyers = ref(mockTopBuyers)
-const recentOrders = ref<unknown[]>([])
+const recentOrders = ref<Order[]>([])
 const topProducts = ref<{ name: string; value: number }[]>([])
 const orderStatusData = ref<{ name: string; value: number }[]>([])
 const kpiStats = computed(() => [

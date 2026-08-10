@@ -8,9 +8,6 @@ import { ConstantKey } from '~/enums/constantKeys'
 import type { Order } from '~/utils/types'
 import { getOrderStatusColor, getOrderStatusLabel } from '~/utils/orderStatus'
 
-import { formatDate, formatVND } from '~/utils/formatters'
-const { constants } = useMasterData()
-
 const { constants } = useMasterData()
 
 defineProps<{
@@ -47,7 +44,9 @@ function toggleSelectOrder(id: string, checked: boolean) {
           row.original.status === constants?.[ConstantKey.OrderStatus]?.PENDING
         "
         :model-value="selectedOrders.has(row.original.id)"
-        @update:model-value="(v: boolean) => toggleSelectOrder(row.original.id, v)"
+        @update:model-value="
+          (v: boolean | 'indeterminate') => toggleSelectOrder(row.original.id, !!v)
+        "
         @click.stop
       />
     </template>
@@ -60,7 +59,7 @@ function toggleSelectOrder(id: string, checked: boolean) {
       <div class="flex min-w-0 items-center gap-2">
         <UAvatar
           :alt="row.original.user?.full_name || row.original.guest_info?.name || 'Khách vãng lai'"
-          :src="row.original.user?.avatar_url"
+          :src="row.original.user?.avatar_url ?? undefined"
           size="sm"
         />
         <div class="min-w-0">

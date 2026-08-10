@@ -126,11 +126,15 @@ onUnmounted(() => {
                   aria-haspopup="menu"
                   :aria-expanded="userMenuOpen"
                   aria-controls="user-menu"
-                  @click="userMenuOpen = !userMenuOpen"
+                  @click="
+                    () => {
+                      userMenuOpen = !userMenuOpen
+                    }
+                  "
                 >
                   <AppAvatar
-                    :name="authStore.user?.full_name"
-                    :src="authStore.user?.avatar_url"
+                    :name="authStore.user?.fullName"
+                    :src="authStore.user?.profile?.avatarUrl"
                     size="sm"
                   />
                 </UButton>
@@ -143,7 +147,7 @@ onUnmounted(() => {
                   >
                     <div class="border-surface-border border-b px-4 py-2.5">
                       <p class="text-surface-foreground text-sm font-semibold">
-                        {{ authStore.user?.full_name }}
+                        {{ authStore.user?.fullName }}
                       </p>
                     </div>
                     <NuxtLink

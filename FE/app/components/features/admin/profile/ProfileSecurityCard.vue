@@ -5,8 +5,6 @@
   Reason: Extracted from admin/profile.vue to adhere to the < 400 lines rule and component-driven architecture.
 -->
 <script setup lang="ts">
-import { formatDate } from '~/utils/formatters'
-
 // Security / sessions mock data
 const sessions = ref([
   {
