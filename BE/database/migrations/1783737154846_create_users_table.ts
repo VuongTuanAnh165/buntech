@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.string('phone_number', 20).notNullable().unique()
       table.string('full_name', 191).notNullable()
       table.string('password', 191).notNullable()
-      table.enum('role', ['admin', 'driver', 'wholesale', 'retail', 'guest']).defaultTo('retail')
+      table.enum('role', ['admin', 'driver', 'customer', 'guest']).defaultTo('customer')
 
       table.timestamp('created_at')
       table.timestamp('updated_at')
