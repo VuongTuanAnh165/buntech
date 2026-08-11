@@ -287,12 +287,14 @@ export const fetchWithAuth = async <T = unknown, R extends ResponseType = 'json'
 
   mergedOptions.onResponse = async (context) => {
     const res = context.response as { status: number; _data?: Record<string, unknown> }
+    const method = (context.options.method || 'GET').toUpperCase()
+
     if (
       import.meta.client &&
       res.status >= HttpStatus.OK &&
       res.status < HttpStatus.MULTIPLE_CHOICES
     ) {
-      if (hasResponseMessage(res._data)) {
+      if (method !== 'GET' && hasResponseMessage(res._data)) {
         tryUseNuxtApp()?.callHook('app:toast', {
           title: 'Thành công',
           description: res._data.message,

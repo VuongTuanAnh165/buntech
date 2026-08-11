@@ -30,7 +30,7 @@ const columns = [
   { accessorKey: 'key', header: 'Key' },
   { accessorKey: 'value', header: 'Value' },
   { accessorKey: 'description', header: 'Mô tả' },
-  { accessorKey: 'updated_at', header: 'Ngày cập nhật' },
+  { accessorKey: 'createdAt', header: 'Ngày tạo' },
   { accessorKey: 'actions', header: 'Thao tác', align: 'right' as const, width: '120px' }
 ]
 
@@ -95,9 +95,11 @@ async function handleSave(data: { key: string; value: string; description?: stri
       })
     } else {
       await createConfig(data)
+      page.value = 1
+      search.value = ''
     }
     showDrawer.value = false
-    loadData()
+    await loadData()
   } catch {
     // Interceptor sẽ lo thông báo lỗi
   } finally {
@@ -152,7 +154,7 @@ async function handleDelete(row: unknown) {
     </div>
 
     <UTable
-      :rows="configs"
+      :data="configs"
       :columns="columns"
       :loading="loading"
       class="bg-surface ring-surface-border min-h-[400px] rounded-b-xl ring-1"
@@ -167,27 +169,31 @@ async function handleDelete(row: unknown) {
         </BaseEmptyState>
       </template>
 
+      <template #actions-header>
+        <div class="w-full text-right">Thao tác</div>
+      </template>
+
       <template #key-cell="{ row }">
         <span class="text-primary-600 dark:text-primary-400 font-mono text-sm font-medium">
-          {{ (row as any).key }}
+          {{ row.original.key }}
         </span>
       </template>
 
       <template #value-cell="{ row }">
         <span class="text-slate-700 dark:text-slate-300">
-          {{ (row as any).value }}
+          {{ row.original.value }}
         </span>
       </template>
 
       <template #description-cell="{ row }">
         <span class="text-sm text-slate-500">
-          {{ (row as any).description || '-' }}
+          {{ row.original.description || '-' }}
         </span>
       </template>
 
-      <template #updated_at-cell="{ row }">
+      <template #createdAt-cell="{ row }">
         <span class="text-sm text-slate-500">
-          {{ formatDate((row as any).updated_at) }}
+          {{ formatDate(row.original.createdAt) }}
         </span>
       </template>
 
@@ -199,7 +205,7 @@ async function handleDelete(row: unknown) {
               variant="ghost"
               icon="i-lucide-edit"
               size="sm"
-              @click="openEdit(row)"
+              @click="openEdit(row.original)"
             />
           </UTooltip>
           <UTooltip text="Xóa">
@@ -208,7 +214,7 @@ async function handleDelete(row: unknown) {
               variant="ghost"
               icon="i-lucide-trash-2"
               size="sm"
-              @click="handleDelete(row)"
+              @click="handleDelete(row.original)"
             />
           </UTooltip>
         </div>
