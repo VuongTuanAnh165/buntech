@@ -44,12 +44,13 @@ onUnmounted(() => {
   <UInput
     :model-value="localValue"
     :placeholder="props.placeholder"
-    icon="i-lucide-search"
+    trailing-icon="i-lucide-search"
     class="w-full sm:max-w-xs"
     @update:model-value="handleInput"
   >
-    <template v-if="localValue" #trailing>
+    <template #trailing>
       <UButton
+        v-if="localValue"
         icon="i-lucide-x"
         color="neutral"
         variant="link"
