@@ -88,6 +88,34 @@ export default defineAppConfig({
       slots: {
         root: 'ring-0 shadow-sm'
       }
+    },
+    navigationMenu: {
+      slots: {
+        list: 'isolate min-w-0 space-y-2.5', // Khoảng cách các menu thưa hơn
+        link: 'group relative w-full flex items-center gap-3.5 font-medium text-[15px] px-4 py-3.5 rounded-lg transition-all duration-200 focus:outline-none',
+        linkLeadingIcon: 'shrink-0 size-5 transition-colors',
+        childList: 'isolate space-y-1.5 mt-2 pl-4 ml-4',
+        childLink:
+          'group relative size-full flex items-center gap-3 text-start text-[14px] px-4 py-2.5 rounded-lg transition-all duration-200 focus:outline-none',
+        childLinkIcon: 'size-4 shrink-0 transition-colors',
+        separator: 'my-5 h-px bg-white/[0.08] mx-2'
+      },
+      variants: {
+        active: {
+          true: {
+            link: '!bg-[#ea580c] !text-white before:hidden',
+            linkLeadingIcon: '!text-white',
+            childLink: '!bg-[#ea580c]/10 !text-[#ea580c] font-semibold before:hidden',
+            childLinkIcon: '!text-[#ea580c]'
+          },
+          false: {
+            link: '!text-slate-300 hover:!text-white hover:!bg-white/[0.08] before:hidden',
+            linkLeadingIcon: '!text-slate-400 group-hover:!text-white',
+            childLink: '!text-slate-400 hover:!text-white hover:!bg-white/[0.08] before:hidden',
+            childLinkIcon: '!text-slate-500 group-hover:!text-white'
+          }
+        }
+      }
     }
   }
 })
