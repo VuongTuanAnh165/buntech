@@ -13,8 +13,6 @@
  * })
  */
 interface SubmitOptions {
-  /** Tin nhắn toast khi thành công (nếu API không trả message). */
-  successMessage?: string
   /** Callback sau khi submit thành công. */
   onSuccess?: () => void | Promise<void>
   /** Callback khi có lỗi. */

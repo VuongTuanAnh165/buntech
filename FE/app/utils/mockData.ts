@@ -475,15 +475,15 @@ export const mockAddresses: Address[] = Array.from({ length: 60 }, (_, i) => {
   const cust = customerProfiles[custIdx]!
   return {
     id: uid('addr', i + 1),
-    user_id: cust.id,
-    full_name: cust.full_name,
+    userId: cust.id,
+    fullName: cust.full_name,
     phone: cust.phone,
-    street: `${randInt(1, 300)} ${pick(hcmStreets)}`,
+    addressLine: `${randInt(1, 300)} ${pick(hcmStreets)}`,
     ward: pick(hcmWards),
     district: pick(hcmDistricts),
-    city: 'TP. HCM',
-    is_default: i % 4 === 0,
-    created_at: iso(50 - i)
+    province: 'TP. HCM',
+    isDefault: i % 4 === 0,
+    createdAt: iso(50 - i)
   }
 })
 

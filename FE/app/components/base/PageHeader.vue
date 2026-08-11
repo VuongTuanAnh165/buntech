@@ -7,11 +7,13 @@ interface BreadcrumbItem {
 
 interface Props {
   title: string
+  subtitle?: string
   description?: string
   breadcrumbs?: BreadcrumbItem[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  subtitle: undefined,
   description: undefined,
   breadcrumbs: () => []
 })
@@ -27,11 +29,15 @@ const props = withDefaults(defineProps<Props>(), {
         <h1 class="text-surface-foreground text-xl font-bold tracking-tight sm:text-2xl">
           {{ props.title }}
         </h1>
-        <p v-if="props.description" class="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-          {{ props.description }}
+        <p
+          v-if="props.subtitle || props.description"
+          class="mt-1 text-sm text-gray-500 dark:text-zinc-400"
+        >
+          {{ props.subtitle || props.description }}
         </p>
       </div>
       <div class="flex shrink-0 items-center gap-2">
+        <slot name="action" />
         <slot name="actions" />
       </div>
     </div>

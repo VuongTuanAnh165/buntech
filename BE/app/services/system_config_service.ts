@@ -9,12 +9,21 @@ export default class SystemConfigService {
   /**
    * Get paginated list of system configs
    */
-  async getConfigs(page: number = 1, limit: number = Pagination.DEFAULT_LIMIT) {
+  async getConfigs(page: number = 1, limit: number = Pagination.DEFAULT_LIMIT, search?: string) {
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
-    return SystemConfig.query()
+    const query = SystemConfig.query()
       .select('key', 'value', 'description', 'created_at')
       .orderBy('created_at', 'desc')
-      .paginate(page, safeLimit)
+
+    if (search) {
+      query.where((q) => {
+        q.whereILike('key', `%${search}%`)
+         .orWhereILike('value', `%${search}%`)
+         .orWhereILike('description', `%${search}%`)
+      })
+    }
+
+    return query.paginate(page, safeLimit)
   }
 
   /**

@@ -1,3 +1,23 @@
+export interface UserProfileDTO {
+  userId: string | number
+  avatarUrl: string | null
+  storeName: string | null
+  debtLimit: string | number
+  currentDebt: string | number
+  zaloUserId: string | null
+  customerType: string | null
+}
+
+export interface UserDTO {
+  id: string | number
+  fullName: string
+  phoneNumber: string
+  role: string
+  createdAt: string
+  profile?: UserProfileDTO
+}
+
+// Giữ lại Profile cũ cho các modules khác đang dùng tạm, sẽ dần loại bỏ
 export interface Profile {
   id: string
   role: string
@@ -55,16 +75,18 @@ export interface CustomPrice {
 }
 
 export interface Address {
-  id: string
-  user_id: string
-  full_name: string
-  phone: string | null
-  street: string
+  id: string | number
+  userId: string | number
+  fullName?: string
+  phone?: string | null
+  street?: string
+  addressLine?: string
   ward: string
-  district: string
-  city: string
-  is_default: boolean
-  created_at: string
+  district?: string
+  province?: string
+  city?: string
+  isDefault: boolean
+  createdAt: string
 }
 
 export interface Order {

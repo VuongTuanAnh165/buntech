@@ -26,8 +26,9 @@ export default class UsersController {
     const page = request.input('page', 1)
     const limit = request.input('limit', 20)
     const role = request.input('role')
+    const search = request.input('search')
 
-    const users = await this.userService.getUsers(page, limit, role)
+    const users = await this.userService.getUsers(page, limit, role, search)
 
     return response.ok({
       success: true,

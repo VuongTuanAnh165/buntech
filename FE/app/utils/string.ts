@@ -193,3 +193,32 @@ export const getInitials = (name: string | null | undefined): string => {
   const last = words[words.length - 1]?.[0] ?? ''
   return (first + last).toUpperCase()
 }
+
+/**
+ * Chuyển một chuỗi từ snake_case sang camelCase
+ */
+export function snakeToCamel(str: string): string {
+  return str.replace(/([-_][a-z])/gi, ($1) => {
+    return $1.toUpperCase().replace('-', '').replace('_', '')
+  })
+}
+
+/**
+ * Hàm đệ quy duyệt qua mọi key của object/array
+ * để chuyển đổi toàn bộ key từ snake_case sang camelCase.
+ */
+export function camelizeKeys(obj: unknown): unknown {
+  if (Array.isArray(obj)) {
+    return obj.map((v) => camelizeKeys(v))
+  } else if (obj !== null && typeof obj === 'object' && obj.constructor === Object) {
+    return Object.keys(obj).reduce(
+      (result, key) => {
+        const camelKey = snakeToCamel(key)
+        result[camelKey] = camelizeKeys((obj as Record<string, unknown>)[key])
+        return result
+      },
+      {} as Record<string, unknown>
+    )
+  }
+  return obj
+}

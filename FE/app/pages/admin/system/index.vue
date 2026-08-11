@@ -191,9 +191,9 @@ async function handleDelete(row: unknown) {
         </span>
       </template>
 
-      <template #createdAt-cell="{ row }">
-        <span class="text-sm text-slate-500">
-          {{ formatDate(row.original.createdAt) }}
+      <template #created_at-cell="{ row }">
+        <span class="text-slate-500 dark:text-zinc-400">
+          {{ formatDate(row.original.created_at || new Date()) }}
         </span>
       </template>
 

@@ -22,7 +22,8 @@ export default class SystemConfigsController {
   async index({ request, response }: HttpContext) {
     const page = request.input('page', 1)
     const limit = request.input('limit', 100)
-    const configs = await this.systemConfigService.getConfigs(page, limit)
+    const search = request.input('search')
+    const configs = await this.systemConfigService.getConfigs(page, limit, search)
 
     return response.ok({
       success: true,

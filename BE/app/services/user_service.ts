@@ -12,7 +12,7 @@ export default class UserService {
   /**
    * Get list of users with pagination and optional role filter
    */
-  async getUsers(page: number = 1, limit: number = Pagination.DEFAULT_LIMIT, role?: string) {
+  async getUsers(page: number = 1, limit: number = Pagination.DEFAULT_LIMIT, role?: string, search?: string) {
     const query = User.query()
       .select('id', 'full_name', 'phone_number', 'role', 'created_at')
       .preload('profile', (q) => {
@@ -22,6 +22,13 @@ export default class UserService {
 
     if (role) {
       query.where('role', role)
+    }
+
+    if (search) {
+      query.where((q) => {
+        q.whereILike('full_name', `%${search}%`)
+         .orWhereILike('phone_number', `%${search}%`)
+      })
     }
 
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)

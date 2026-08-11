@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 1: Nền tảng lõi, Quản lý Khách hàng & Cấu hình
-5. Quản lý Cấu hình hệ thống (Phí ship, thông tin liên hệ...).
+6. Quản lý Khách hàng & Sổ địa chỉ (Danh sách phân trang với UTable chuẩn, Create, Update).
 
 ==================================================
 

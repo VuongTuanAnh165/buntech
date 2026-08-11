@@ -4,6 +4,7 @@ import { defu } from 'defu'
 import { HttpStatus } from '~/enums/http'
 import type { ApiResponse } from '~/types/api'
 import type { LoginResponse } from '~/types/auth'
+import { camelizeKeys } from '~/utils/string'
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -286,6 +287,11 @@ export const fetchWithAuth = async <T = unknown, R extends ResponseType = 'json'
   }
 
   mergedOptions.onResponse = async (context) => {
+    // Camelize all response data keys automatically
+    if (context.response._data) {
+      context.response._data = camelizeKeys(context.response._data)
+    }
+
     const res = context.response as { status: number; _data?: Record<string, unknown> }
     const method = (context.options.method || 'GET').toUpperCase()
 

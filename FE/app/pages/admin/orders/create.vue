@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import { ConstantKey } from '~/enums/constantKeys'
-import type { Profile, Product, Address } from '~/utils/types'
-import {
-  mockProfiles,
-  mockProducts,
-  mockCustomPrices,
-  mockAddresses,
-  mockTransactions
-} from '~/utils/mockData'
+import type { UserDTO, Product, Address } from '~/utils/types'
+import { mockProducts, mockCustomPrices, mockTransactions } from '~/utils/mockData'
+import { useUsers } from '~/composables/admin/useUsers'
 
 const { constants } = useMasterData()
 const toast = useToast()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Tạo đơn hàng - BunTech Admin' })
+const { fetchUsers, fetchAddresses } = useUsers()
 const loading = ref(true)
-const customers = ref<Profile[]>([])
+const customers = ref<UserDTO[]>([])
 const products = ref<Product[]>([])
 const selectedCustomerId = ref('')
 const customPrices = ref<Map<string, number>>(new Map())
@@ -63,7 +59,7 @@ const customerDebt = computed(() => {
   }
   return debt
 })
-const debtLimit = computed(() => Number(selectedCustomer.value?.debt_limit ?? 0))
+const debtLimit = computed(() => Number(selectedCustomer.value?.profile?.debtLimit ?? 0))
 const exceedsDebtLimit = computed(
   () => debtLimit.value > 0 && customerDebt.value + debtAmount.value > debtLimit.value
 )
@@ -77,47 +73,50 @@ const filteredProducts = computed(() => {
     .slice(0, 24)
 })
 const customerOptions = computed(() =>
-  customers.value.map((c) => ({ value: c.id, label: `${c.full_name} — ${c.phone || 'SĐT'}` }))
+  customers.value.map((c) => ({ value: c.id, label: `${c.fullName} — ${c.phoneNumber || 'SĐT'}` }))
 )
 const addressOptions = computed(() =>
   customerAddresses.value.map((a) => ({
     value: a.id,
-    label: `${a.street}, ${a.ward}, ${a.district}, ${a.city}${a.is_default ? ' (Mặc định)' : ''}`
+    label: `${a.addressLine || a.street}, ${a.ward}, ${a.district}, ${a.province || a.city}${a.isDefault ? ' (Mặc định)' : ''}`
   }))
 )
 const _selectedAddress = computed(() =>
   customerAddresses.value.find((a) => a.id === selectedAddressId.value)
 )
-function loadInitData() {
+async function loadInitData() {
   loading.value = true
-  setTimeout(() => {
-    customers.value = mockProfiles
-      .filter(
-        (p) =>
-          p.role === constants.value?.[ConstantKey.Role]?.CUSTOMER &&
-          p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
-      )
-      .sort((a, b) => a.full_name.localeCompare(b.full_name))
+  try {
+    const res = await fetchUsers({ role: 'CUSTOMER', limit: 100 })
+    customers.value = res.data?.data || []
+
     products.value = mockProducts
       .filter(
         (p) => !p.deleted_at && p.status === constants.value?.[ConstantKey.ProductStatus]?.ACTIVE
       )
       .sort((a, b) => a.name.localeCompare(b.name))
+  } finally {
     loading.value = false
-  }, 400)
+  }
 }
-function onCustomerChange() {
+async function onCustomerChange() {
   customPrices.value.clear()
   customerAddresses.value = []
   selectedAddressId.value = ''
   if (!selectedCustomerId.value) return
   const cps = mockCustomPrices.filter((cp) => cp.user_id === selectedCustomerId.value)
   for (const cp of cps) customPrices.value.set(cp.product_id, Number(cp.price))
-  customerAddresses.value = mockAddresses
-    .filter((a) => a.user_id === selectedCustomerId.value)
-    .sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0))
-  const defaultAddr = customerAddresses.value.find((a) => a.is_default)
-  if (defaultAddr) selectedAddressId.value = defaultAddr.id
+
+  try {
+    const res = await fetchAddresses(selectedCustomerId.value)
+    customerAddresses.value = res.data || []
+    customerAddresses.value.sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0))
+    const defaultAddr = customerAddresses.value.find((a) => a.isDefault)
+    if (defaultAddr) selectedAddressId.value = String(defaultAddr.id)
+  } catch {
+    //
+  }
+
   orderItems.value = orderItems.value.map((item) => ({
     ...item,
     price: customPrices.value.has(item.product_id)
@@ -177,7 +176,7 @@ function submitOrder() {
   }
   if (exceedsDebtLimit.value) {
     toast.add({
-      title: `Cảnh báo: Đơn hàng vượt hạn mức công nợ của ${selectedCustomer.value?.full_name || ''}`,
+      title: `Cảnh báo: Đơn hàng vượt hạn mức công nợ của ${selectedCustomer.value?.fullName || ''}`,
       color: 'error'
     })
     return
@@ -375,7 +374,7 @@ onMounted(loadInitData)
           >
             <UIcon name="i-lucide-alert-triangle" class="text-error-600 mt-0.5 h-5 w-5 shrink-0" />
             <p class="text-error-700 text-xs">
-              Đơn hàng vượt hạn mức công nợ của {{ selectedCustomer?.full_name }} (còn
+              Đơn hàng vượt hạn mức công nợ của {{ selectedCustomer?.fullName }} (còn
               {{ formatVND(debtLimit - customerDebt) }})
             </p>
           </div>
