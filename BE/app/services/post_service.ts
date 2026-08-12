@@ -4,6 +4,7 @@ import type { Infer } from '@vinejs/vine/types'
 import { Pagination } from '#enums/pagination'
 import { type createPostValidator, type updatePostValidator } from '#validators/post'
 import FileUploadService from '#services/file_upload_service'
+import MediaService from '#services/media_service'
 import { inject } from '@adonisjs/core'
 import logger from '@adonisjs/core/services/logger'
 
@@ -13,11 +14,16 @@ export type UpdatePostDTO = Infer<typeof updatePostValidator>
 interface GetPostListOptions {
   isPublic?: boolean
   categoryId?: number
+  search?: string
+  status?: string
 }
 
 @inject()
 export default class PostService {
-  constructor(protected fileUploadService: FileUploadService) {}
+  constructor(
+    protected fileUploadService: FileUploadService,
+    protected mediaService: MediaService
+  ) {}
 
   async getList(page: number = 1, limit: number = 10, options?: GetPostListOptions) {
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
@@ -33,8 +39,12 @@ export default class PostService {
         'isPublished',
         'publishedAt'
       )
-      .preload('category', (q) => q.select('id', 'name', 'slug'))
-      .preload('author', (q) => q.select('id', 'fullName'))
+      .preload('category', (catQuery) => {
+        catQuery.select('id', 'name', 'slug')
+      })
+      .preload('author', (userQuery) => {
+        userQuery.select('id', 'fullName')
+      })
       .orderBy('createdAt', 'desc')
 
     if (options?.categoryId) {
@@ -43,6 +53,18 @@ export default class PostService {
 
     if (options?.isPublic) {
       query.where('isPublished', true).andWhere('publishedAt', '<=', DateTime.now().toSQL())
+    }
+
+    if (options?.search) {
+      query.where('title', 'LIKE', `%${options.search}%`)
+    }
+
+    if (options?.status) {
+      if (options.status === 'PUBLISHED') {
+        query.where('isPublished', true)
+      } else if (options.status === 'DRAFT') {
+        query.where('isPublished', false)
+      }
     }
 
     return await query.paginate(page, safeLimit)
@@ -88,6 +110,11 @@ export default class PostService {
       newKey = uploadResult.key
     }
 
+    // Xử lý ảnh trong nội dung bài viết (Chuyển tmp -> images)
+    if (postData.content) {
+      postData.content = await this.mediaService.processHtmlImages(null, postData.content)
+    }
+
     try {
       return await Post.create({ ...postData, thumbnailUrl, authorId })
     } catch (error) {
@@ -117,6 +144,11 @@ export default class PostService {
       const uploadResult = await this.fileUploadService.upload(thumbnail, 'posts/thumbnails')
       thumbnailUrl = uploadResult.url
       newKey = uploadResult.key
+    }
+
+    // Xử lý ảnh trong nội dung bài viết (Chuyển tmp -> images và xoá ảnh rác)
+    if (postData.content !== undefined) {
+      postData.content = await this.mediaService.processHtmlImages(post.content, postData.content)
     }
 
     try {

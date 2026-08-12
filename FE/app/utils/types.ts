@@ -149,29 +149,35 @@ export interface InventoryMovement {
 }
 
 export interface BlogCategory {
-  id: string
+  id: number
   name: string
   slug: string
-  created_at: string
+  description: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 export interface BlogPost {
-  id: string
-  category_id: string | null
+  id: number
+  authorId: number
+  blogCategoryId: number
   category?: BlogCategory | null
   title: string
   slug: string
-  excerpt: string
-  content: string
-  image_url: string | null
-  featured_image: string | null
-  author_name: string | null
-  published_at: string | null
-  status: string
-  views?: number
-  deleted_at: string | null
-  created_at: string
-  updated_at: string
+  excerpt: string | null
+  content: string | null
+  thumbnailUrl: string | null
+  metaTitle: string | null
+  metaDescription: string | null
+  isPublished: boolean
+  publishedAt: string | null
+  views: number
+  author?: {
+    id: number
+    fullName: string
+  }
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SystemConfig {
@@ -181,13 +187,6 @@ export interface SystemConfig {
   description?: string
   updated_at: string
   created_at?: string
-}
-
-export interface Paginated<T> {
-  data: T[]
-  total: number
-  page: number
-  limit: number
 }
 
 export interface DashboardKPI {

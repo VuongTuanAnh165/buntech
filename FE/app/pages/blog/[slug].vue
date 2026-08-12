@@ -1,41 +1,45 @@
 <script setup lang="ts">
-import {
-  ArrowLeft,
-  Calendar,
-  User,
-  Clock,
-  Package,
-  Tag,
-  Facebook,
-  Twitter,
-  Link2
-} from 'lucide-vue-next'
+import { ArrowLeft, Clock, Facebook, Twitter } from 'lucide-vue-next'
 import DOMPurify from 'dompurify'
+import { blogService } from '~/services/blogService'
+import { extractIdFromSlug } from '~/utils/idEncoder'
+import { normalizePaginationResponse } from '~/utils/api'
+import type { BlogPost } from '~/utils/types'
+
 const toast = useToast()
 const route = useRoute()
 definePageMeta({ layout: 'default' })
 
 const slug = route.params.slug as string
-const loading = ref(true)
-const error = ref(false)
+const postId = extractIdFromSlug(slug)
 
-const post = computed(() => mockBlogPosts.find((p) => p.slug === slug && p.status === 'PUBLISHED'))
-
-const relatedPosts = computed(() => {
-  if (!post.value) return []
-  return mockBlogPosts
-    .filter(
-      (p) =>
-        p.category_id === post.value!.category_id &&
-        p.id !== post.value!.id &&
-        p.status === 'PUBLISHED'
-    )
-    .slice(0, 3)
+const {
+  data: post,
+  pending: loading,
+  error: fetchError
+} = useAsyncData(`public-post-${postId}`, () => {
+  if (!postId) return Promise.reject(new Error('Invalid ID'))
+  return blogService.getPublicPost(postId).then((res) => res.data)
 })
 
-const blogCategory = computed(() =>
-  mockBlogCategories.find((c) => c.id === post.value?.category_id)
+const error = computed(() => !postId || !!fetchError.value || (!loading.value && !post.value))
+
+// Related posts
+const { data: relatedRes } = useAsyncData(
+  `related-posts-${postId}`,
+  () => {
+    if (!post.value?.blogCategoryId) return Promise.resolve(null)
+    return blogService.getPublicPosts({ limit: 4, categoryId: post.value.blogCategoryId })
+  },
+  { watch: [post] }
 )
+
+const relatedPosts = computed<BlogPost[]>(() => {
+  const allRelated = normalizePaginationResponse<BlogPost>(relatedRes.value).data || []
+  return allRelated.filter((p: BlogPost) => p.id !== postId).slice(0, 3)
+})
+
+const blogCategoryName = computed(() => post.value?.category?.name || 'Tin tức')
 
 const readingTime = computed(() => {
   if (!post.value?.content) return 1
@@ -45,35 +49,39 @@ const readingTime = computed(() => {
 
 const sanitizedContent = computed(() => {
   if (!post.value?.content) return ''
-  return DOMPurify.sanitize(String(post.value.content))
+  return import.meta.client
+    ? DOMPurify.sanitize(String(post.value.content))
+    : String(post.value.content)
 })
 
 const sharePost = () => {
   if (import.meta.client) {
     navigator.clipboard.writeText(window.location.href)
-    toast.add({ title: 'Thành công', description: '', color: 'success' })
+    toast.add({ title: 'Đã sao chép liên kết', color: 'success' })
   }
 }
 
 const shareFacebook = () => {
-  toast.add({ title: 'Thông báo', description: '', color: 'info' })
+  if (import.meta.client) {
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
+      '_blank'
+    )
+  }
 }
 
 const shareTwitter = () => {
-  toast.add({ title: 'Thông báo', description: '', color: 'info' })
+  if (import.meta.client) {
+    window.open(
+      `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.value?.title || '')}`,
+      '_blank'
+    )
+  }
 }
 
-onMounted(() => {
-  setTimeout(() => {
-    if (!post.value) {
-      error.value = true
-    }
-    loading.value = false
-  }, 400)
-})
-
 useHead(() => ({
-  title: post.value ? `${post.value.title} - BunTech` : 'Tin tức - BunTech'
+  title: post.value ? `${post.value.metaTitle || post.value.title} - BunTech` : 'Tin tức - BunTech',
+  meta: [{ name: 'description', content: post.value?.metaDescription || post.value?.excerpt || '' }]
 }))
 </script>
 
@@ -102,16 +110,16 @@ useHead(() => ({
     <template v-else-if="post">
       <!-- Meta -->
       <div class="mb-3 flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-zinc-400">
-        <span class="inline-flex items-center gap-1"
-          ><Calendar class="h-3.5 w-3.5" aria-hidden="true" />
-          {{ formatDate(post.published_at) }}</span
-        >
-        <span class="inline-flex items-center gap-1"
-          ><User class="h-3.5 w-3.5" aria-hidden="true" /> {{ post.author_name }}</span
-        >
-        <span class="inline-flex items-center gap-1"
-          ><Clock class="h-3.5 w-3.5" aria-hidden="true" /> {{ readingTime }} phút đọc</span
-        >
+        <span class="inline-flex items-center gap-1">
+          <Calendar class="h-3.5 w-3.5" aria-hidden="true" />
+          {{ formatDate(post.publishedAt || post.createdAt) }}
+        </span>
+        <span class="inline-flex items-center gap-1">
+          <User class="h-3.5 w-3.5" aria-hidden="true" /> Tác giả ({{ post.authorId }})
+        </span>
+        <span class="inline-flex items-center gap-1">
+          <Clock class="h-3.5 w-3.5" aria-hidden="true" /> {{ readingTime }} phút đọc
+        </span>
       </div>
 
       <h1
@@ -122,11 +130,11 @@ useHead(() => ({
 
       <!-- Featured image -->
       <div
-        v-if="post.image_url"
+        v-if="post.thumbnailUrl"
         class="bg-surface-muted mb-8 aspect-[16/9] overflow-hidden rounded-2xl"
       >
         <NuxtImg
-          :src="post.image_url"
+          :src="getImageUrl(post.thumbnailUrl)"
           :alt="post.title"
           class="h-full w-full object-cover"
           loading="eager"
@@ -140,7 +148,7 @@ useHead(() => ({
             class="badge bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300"
           >
             <Tag class="h-3 w-3" aria-hidden="true" />
-            {{ blogCategory?.name || 'Tin tức' }}
+            {{ blogCategoryName }}
           </span>
         </div>
         <div class="flex items-center gap-1">
@@ -192,10 +200,10 @@ useHead(() => ({
       <div
         class="bg-surface border-surface-border mt-12 flex items-start gap-4 rounded-xl border p-6"
       >
-        <UAvatar :alt="post.author_name || ''" size="lg" />
+        <UAvatar alt="T" size="lg" />
         <div class="flex-1">
           <div class="mb-1 flex items-center gap-2">
-            <p class="text-surface-foreground font-semibold">{{ post.author_name }}</p>
+            <p class="text-surface-foreground font-semibold">Tác giả (ID: {{ post.authorId }})</p>
             <UBadge color="primary" size="sm">Tác giả</UBadge>
           </div>
           <p class="text-sm leading-relaxed text-gray-500 dark:text-zinc-400">
@@ -209,36 +217,7 @@ useHead(() => ({
       <div v-if="relatedPosts.length" class="mt-12">
         <h2 class="text-surface-foreground mb-6 text-xl font-bold">Bài viết liên quan</h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <NuxtLink
-            v-for="(rp, i) in relatedPosts"
-            :key="rp.id"
-            :to="`/blog/${rp.slug}`"
-            class="card card-hover card-gradient group stagger-item overflow-hidden"
-            :style="{ animationDelay: `${i * 60}ms` }"
-          >
-            <div class="bg-surface-muted aspect-[16/9] overflow-hidden">
-              <NuxtImg
-                v-if="rp.image_url"
-                :src="rp.image_url"
-                :alt="rp.title"
-                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
-              />
-              <div v-else class="flex h-full w-full items-center justify-center">
-                <Package class="h-10 w-10 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
-              </div>
-            </div>
-            <div class="p-4">
-              <p class="mb-1 text-xs text-gray-400 dark:text-zinc-500">
-                {{ formatDate(rp.published_at) }}
-              </p>
-              <h3
-                class="text-surface-foreground group-hover:text-primary-600 dark:group-hover:text-primary-400 line-clamp-2 text-sm font-medium transition-colors"
-              >
-                {{ rp.title }}
-              </h3>
-            </div>
-          </NuxtLink>
+          <DomainBlogPostCard v-for="(rp, i) in relatedPosts" :key="rp.id" :post="rp" :index="i" />
         </div>
       </div>
     </template>

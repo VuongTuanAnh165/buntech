@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 2: Cửa ngõ Khách hàng, Sản phẩm & Nội dung
-1. Landing Page (Customer Site).
+2. Giao diện Blog, Bài viết (Public) & Quản lý Blog, Danh mục Blog (Admin). (Quản lý đấy nhé, phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn)
 
 ==================================================
 

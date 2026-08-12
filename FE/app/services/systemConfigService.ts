@@ -1,9 +1,10 @@
 import { ApiClient } from '~/utils/api'
-import type { SystemConfig, Paginated } from '~/utils/types'
+import type { SystemConfig } from '~/utils/types'
+import type { PaginatedResponse } from '~/types/api'
 
 export const systemConfigService = {
   fetchConfigs(params: Record<string, string | number | undefined>) {
-    return ApiClient.get<Paginated<SystemConfig>>('/admin/system-configs', params)
+    return ApiClient.get<PaginatedResponse<SystemConfig>>('/admin/system-configs', params)
   },
   getConfig(key: string) {
     return ApiClient.get<{ data: SystemConfig }>(`/admin/system-configs/${key}`)

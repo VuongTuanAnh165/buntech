@@ -18,8 +18,8 @@ export default class SystemConfigService {
     if (search) {
       query.where((q) => {
         q.whereILike('key', `%${search}%`)
-         .orWhereILike('value', `%${search}%`)
-         .orWhereILike('description', `%${search}%`)
+          .orWhereILike('value', `%${search}%`)
+          .orWhereILike('description', `%${search}%`)
       })
     }
 

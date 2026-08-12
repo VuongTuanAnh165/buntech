@@ -1,4 +1,4 @@
-import { ModelPaginatorContract, LucidRow } from '@adonisjs/lucid/types/model'
+import { type ModelPaginatorContract, type LucidRow } from '@adonisjs/lucid/types/model'
 
 /**
  * Chuẩn hóa format dữ liệu phân trang trả về từ Lucid ORM.

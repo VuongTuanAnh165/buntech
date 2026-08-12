@@ -756,11 +756,46 @@ export const mockInventoryMovements: InventoryMovement[] = Array.from({ length: 
 
 // ─── Blog Categories (5) ─────────────────────────────────────────
 export const mockBlogCategories: BlogCategory[] = [
-  { id: uid('bcat', 1), name: 'Tin tức', slug: 'tin-tuc', created_at: iso(90) },
-  { id: uid('bcat', 2), name: 'Kiến thức', slug: 'kien-thuc', created_at: iso(90) },
-  { id: uid('bcat', 3), name: 'Công thức nấu ăn', slug: 'cong-thuc-nau-an', created_at: iso(90) },
-  { id: uid('bcat', 4), name: 'Sức khỏe', slug: 'suc-khoe', created_at: iso(85) },
-  { id: uid('bcat', 5), name: 'Khuyến mãi', slug: 'khuyen-mai', created_at: iso(80) }
+  {
+    id: 1,
+    name: 'Tin tức',
+    slug: 'tin-tuc',
+    description: '',
+    createdAt: iso(90),
+    updatedAt: iso(90)
+  },
+  {
+    id: 2,
+    name: 'Kiến thức',
+    slug: 'kien-thuc',
+    description: '',
+    createdAt: iso(90),
+    updatedAt: iso(90)
+  },
+  {
+    id: 3,
+    name: 'Công thức nấu ăn',
+    slug: 'cong-thuc-nau-an',
+    description: '',
+    createdAt: iso(90),
+    updatedAt: iso(90)
+  },
+  {
+    id: 4,
+    name: 'Sức khỏe',
+    slug: 'suc-khoe',
+    description: '',
+    createdAt: iso(85),
+    updatedAt: iso(85)
+  },
+  {
+    id: 5,
+    name: 'Khuyến mãi',
+    slug: 'khuyen-mai',
+    description: '',
+    createdAt: iso(80),
+    updatedAt: iso(80)
+  }
 ]
 
 // ─── Blog Posts (50+) ─────────────────────────────────────────────
@@ -1004,7 +1039,8 @@ const blogImagePool = [
   'https://images.pexels.com/photos/6711678/pexels-photo-6711678.jpeg?auto=compress&cs=tinysrgb&w=800'
 ]
 
-const baseBlogPosts: BlogPost[] = blogData.map((b, i) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const baseBlogPosts: any[] = blogData.map((b, i) => {
   const cat = mockBlogCategories.find((c) => c.name === b[3])!
   const author = mockProfiles[Math.floor(i % 2)]
   return {
@@ -1029,7 +1065,8 @@ const baseBlogPosts: BlogPost[] = blogData.map((b, i) => {
   }
 })
 
-const additionalBlogPosts: BlogPost[] = blogTitleTemplates.map((b, i) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const additionalBlogPosts: any[] = blogTitleTemplates.map((b, i) => {
   const cat = mockBlogCategories.find((c) => c.name === b[1])!
   const idx = i + blogData.length
   const title = b[0]

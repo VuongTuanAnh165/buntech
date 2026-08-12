@@ -100,3 +100,17 @@ export const formatVNDInput = (value: number): string => {
   if (!value) return ''
   return new Intl.NumberFormat('vi-VN').format(value)
 }
+
+/**
+ * Format image URL (handles relative URLs)
+ */
+export const getImageUrl = (url: string | null | undefined): string => {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) {
+    return url
+  }
+  // Remove /api or /api/v1 from apiBaseUrl to get the root URL
+  const config = useRuntimeConfig()
+  const baseUrl = config.public.apiBaseUrl.replace(/\/api(\/v\d+)?$/, '')
+  return url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`
+}

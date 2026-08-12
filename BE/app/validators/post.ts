@@ -19,7 +19,7 @@ export const createPostValidator = vine.compile(
     metaTitle: vine.string().maxLength(60).optional(),
     metaDescription: vine.string().maxLength(160).optional(),
     isPublished: vine.boolean().optional(),
-    publishedAt: vine.date().optional(),
+    publishedAt: vine.date({ formats: ['iso8601'] }).optional(),
   })
 )
 
@@ -53,6 +53,6 @@ export const updatePostValidator = vine.withMetaData<{ postId: number }>().compi
     metaTitle: vine.string().maxLength(60).optional(),
     metaDescription: vine.string().maxLength(160).optional(),
     isPublished: vine.boolean().optional(),
-    publishedAt: vine.date().optional(),
+    publishedAt: vine.date({ formats: ['iso8601'] }).optional(),
   })
 )

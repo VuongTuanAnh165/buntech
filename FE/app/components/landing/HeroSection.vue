@@ -30,8 +30,8 @@ const heroImage =
           class="animate-fade-in-up mb-8 max-w-xl text-lg leading-relaxed text-slate-200 sm:text-xl"
           style="animation-delay: 100ms"
         >
-          Bún làm từ 100% gạo tự nhiên, sản xuất mỗi sáng theo bí truyền gia đình. Giao hàng tận nơi
-          trong 2 giờ, đặt hàng dễ dàng qua app.
+          Bún tươi 100% gạo nguyên chất, không chất bảo quản.<br />sản xuất mỗi sáng theo bí truyền
+          gia đình. Giao hàng tận nơi trong 2 giờ, đặt hàng dễ dàng qua app.
         </p>
         <div
           class="animate-fade-in-up flex flex-col gap-3 sm:flex-row"

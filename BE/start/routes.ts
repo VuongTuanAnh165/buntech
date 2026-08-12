@@ -34,7 +34,10 @@ router
       .post('/auth/refresh', [() => import('#controllers/auth_controller'), 'refresh'])
       .use(authThrottle)
     router
-      .post('/auth/forgot-password', [() => import('#controllers/auth_controller'), 'forgotPassword'])
+      .post('/auth/forgot-password', [
+        () => import('#controllers/auth_controller'),
+        'forgotPassword',
+      ])
       .use(authThrottle)
     router
       .post('/auth/reset-password', [() => import('#controllers/auth_controller'), 'resetPassword'])
@@ -46,7 +49,10 @@ router
       .put('/auth/me', [() => import('#controllers/auth_controller'), 'updateProfile'])
       .use(middleware.auth())
     router
-      .put('/auth/change-password', [() => import('#controllers/auth_controller'), 'changePassword'])
+      .put('/auth/change-password', [
+        () => import('#controllers/auth_controller'),
+        'changePassword',
+      ])
       .use(middleware.auth())
 
     // Master Data

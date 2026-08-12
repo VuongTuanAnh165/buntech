@@ -327,7 +327,9 @@ export const fetchWithAuth = async <T = unknown, R extends ResponseType = 'json'
           message: Array.isArray(messages) ? messages[0] : messages
         }))
       }
-    } else if (import.meta.client) {
+    }
+
+    if (import.meta.client) {
       if (res.status === HttpStatus.TOO_MANY_REQUESTS) {
         let description = hasResponseMessage(res._data)
           ? res._data.message

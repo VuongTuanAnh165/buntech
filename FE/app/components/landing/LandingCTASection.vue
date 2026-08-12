@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { mockBlogPosts } from '~/utils/mockData'
 
-const blogPosts = computed(() => mockBlogPosts.filter((p) => p.status === 'PUBLISHED').slice(0, 3))
+const blogPosts = computed(() => mockBlogPosts.filter((p) => p.isPublished).slice(0, 3))
 </script>
 
 <template>
@@ -38,18 +38,11 @@ const blogPosts = computed(() => mockBlogPosts.filter((p) => p.status === 'PUBLI
           >
             <div class="bg-surface-muted aspect-[16/9] overflow-hidden">
               <NuxtImg
-                v-if="post.image_url"
-                :src="post.image_url"
+                :src="getImageUrl(post.thumbnailUrl) || 'https://picsum.photos/400/300?random=1'"
                 :alt="post.title"
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />
-              <div v-else class="flex h-full w-full items-center justify-center">
-                <span
-                  class="i-lucide-package h-12 w-12 text-gray-300 dark:text-zinc-600"
-                  aria-hidden="true"
-                />
-              </div>
             </div>
             <div class="p-5">
               <h3

@@ -74,9 +74,13 @@ export default class PostsController {
     const pageNum = page || Pagination.DEFAULT_PAGE
     const limitNum = limit || Pagination.DEFAULT_LIMIT
     const categoryId = request.input('categoryId')
+    const search = request.input('search')
+    const status = request.input('status')
 
     const posts = await this.postService.getList(pageNum, limitNum, {
       categoryId: categoryId ? Number(categoryId) : undefined,
+      search: search || undefined,
+      status: status && status !== 'ALL' ? status : undefined,
     })
 
     return response.json({

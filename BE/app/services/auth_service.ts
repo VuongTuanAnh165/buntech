@@ -148,10 +148,10 @@ export default class AuthService {
 
     // In a real app, send OTP via SMS here
     // For now, we will return the OTP in the response just for development purpose
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: 'Mã xác thực đã được gửi',
-      otp: process.env.NODE_ENV !== 'production' ? otp : undefined 
+      otp: process.env.NODE_ENV !== 'production' ? otp : undefined,
     }
   }
 

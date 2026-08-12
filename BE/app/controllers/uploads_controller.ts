@@ -17,8 +17,8 @@ export default class UploadsController {
   async store({ request, response }: HttpContext) {
     const { image } = await request.validateUsing(uploadValidator)
 
-    // Rename file to prevent path traversal and ensure uniqueness
-    const key = `images/${crypto.randomUUID()}.${image.extname}`
+    // Save file to tmp folder initially to prevent orphan images
+    const key = `tmp/${crypto.randomUUID()}.${image.extname}`
 
     // Use drive to store the file
     await image.moveToDisk(key, 'fs')

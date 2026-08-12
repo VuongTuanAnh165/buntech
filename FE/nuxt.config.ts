@@ -49,7 +49,7 @@ export default defineNuxtConfig({
         ],
         'style-src': ["'self'", 'https:', "'unsafe-inline'"],
         'base-uri': ["'self'"],
-        'img-src': ["'self'", 'data:', 'https:', 'http:'],
+        'img-src': ["'self'", 'data:', 'https:', 'http:', 'blob:'],
         'font-src': ["'self'", 'https:', 'data:'],
         'object-src': ["'none'"],
         'script-src-attr': ["'none'"],

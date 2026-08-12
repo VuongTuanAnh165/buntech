@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.string('phone_number', 20).notNullable().index()
       table.string('token', 64).notNullable()
       table.timestamp('expires_at', { useTz: true }).notNullable()
-      
+
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })
