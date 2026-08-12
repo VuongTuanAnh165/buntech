@@ -5,7 +5,6 @@ import { normalizePaginationResponse } from '~/utils/api'
 
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Quản lý Sản phẩm - BunTech Admin' })
-const toast = useToast()
 
 // ─── State ────────────────────────────────────────────────
 const search = ref('')
@@ -85,7 +84,6 @@ async function handleDelete(id: number) {
   if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return
   try {
     await productService.deleteProduct(id)
-    toast.add({ title: 'Xóa sản phẩm thành công', color: 'success' })
     await refresh()
   } catch {
     // Error is handled by global interceptor

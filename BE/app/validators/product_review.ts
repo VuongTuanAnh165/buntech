@@ -27,3 +27,11 @@ export const replyProductReviewValidator = vine.compile(
     replyContent: vine.string().maxLength(2000),
   })
 )
+
+export const reviewFilterValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+    status: vine.enum(['all', 'pending', 'approved']).optional(),
+  })
+)

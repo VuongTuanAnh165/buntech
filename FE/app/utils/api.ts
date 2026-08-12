@@ -115,6 +115,9 @@ export function normalizePaginationResponse<T>(res: unknown): {
     meta.firstPage = rawMeta.firstPage ?? rawMeta.first_page ?? 1
   }
 
+  meta.from = meta.total > 0 ? (meta.currentPage - 1) * meta.perPage + 1 : 0
+  meta.to = meta.total > 0 ? Math.min(meta.currentPage * meta.perPage, meta.total) : 0
+
   return { data: items, meta }
 }
 

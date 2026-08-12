@@ -43,10 +43,10 @@ export default class ProductReviewService {
   /**
    * Admin: Get all reviews
    */
-  async adminList(page: number = 1, limit: number = 10) {
+  async adminList(page: number = 1, limit: number = 10, status?: string) {
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
 
-    return await ProductReview.query()
+    const query = ProductReview.query()
       .select(
         'id',
         'rating',
@@ -64,7 +64,39 @@ export default class ProductReviewService {
       .preload('replier', (q) => q.select('id', 'fullName'))
       .preload('images', (q) => q.select('review_id', 'file_url'))
       .orderBy('createdAt', 'desc')
-      .paginate(page, safeLimit)
+
+    if (status === 'pending') {
+      query.where('isApproved', false)
+    } else if (status === 'approved') {
+      query.where('isApproved', true)
+    }
+
+    return await query.paginate(page, safeLimit)
+  }
+
+  /**
+   * Admin: Get reviews statistics
+   */
+  async getStats() {
+    const result = await db.rawQuery(
+      `
+      SELECT 
+        COUNT(id) as total,
+        SUM(CASE WHEN is_approved = true THEN 1 ELSE 0 END) as approved,
+        SUM(CASE WHEN is_approved = false THEN 1 ELSE 0 END) as pending,
+        AVG(rating) as average_rating
+      FROM product_reviews
+      WHERE deleted_at IS NULL
+      `
+    )
+
+    const row = result.rows ? result.rows[0] : result[0][0]
+    return {
+      total: row.total ? Number(row.total) : 0,
+      approved: row.approved ? Number(row.approved) : 0,
+      pending: row.pending ? Number(row.pending) : 0,
+      averageRating: row.average_rating ? Number.parseFloat(row.average_rating) : 0.0,
+    }
   }
 
   /**

@@ -55,15 +55,20 @@ export interface Product {
 }
 
 export interface ProductReview {
-  id: string
-  product_id: string
-  user_id: string | null
-  author_name: string
+  id: number
+  productId: number
+  userId: number | null
   rating: number
-  content: string
-  is_approved: boolean
-  reply: string | null
-  created_at: string
+  content: string | null
+  isApproved: boolean
+  hasPurchased: boolean
+  replyContent: string | null
+  repliedBy: number | null
+  createdAt: string
+  user?: { id: number; fullName: string }
+  product?: { id: number; name: string; thumbnailUrl?: string | null }
+  replier?: { id: number; fullName: string }
+  images?: { fileUrl: string }[]
 }
 
 export interface CustomPrice {

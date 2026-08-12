@@ -29,7 +29,7 @@ const activeImage = ref(0)
 const product = computed(() => mockProducts.find((p) => p.slug === slug && p.status === 'ACTIVE'))
 
 const reviews = computed(() =>
-  mockProductReviews.filter((r) => r.product_id === product.value?.id && r.is_approved)
+  mockProductReviews.filter((r) => r.productId === product.value?.id && r.isApproved)
 )
 
 const relatedProducts = computed(() => {
@@ -510,9 +510,11 @@ useHead(() => ({
             >
               <div class="mb-2 flex items-start justify-between">
                 <div class="flex items-center gap-3">
-                  <AppAvatar :name="review.author_name" size="sm" />
+                  <AppAvatar :name="review.user?.fullName || 'Khách'" size="sm" />
                   <div>
-                    <p class="text-surface-foreground font-medium">{{ review.author_name }}</p>
+                    <p class="text-surface-foreground font-medium">
+                      {{ review.user?.fullName || 'Khách' }}
+                    </p>
                     <div class="mt-0.5 flex items-center gap-1">
                       <Star
                         v-for="j in 5"
@@ -533,13 +535,13 @@ useHead(() => ({
                 {{ review.content }}
               </p>
               <div
-                v-if="review.reply"
+                v-if="review.replyContent"
                 class="bg-surface-muted border-primary-300 dark:border-primary-700 mt-3 rounded-lg border-l-2 p-3"
               >
                 <p class="text-primary-600 dark:text-primary-400 mb-1 text-xs font-medium">
                   Phản hồi từ BunTech:
                 </p>
-                <p class="text-sm text-gray-700 dark:text-zinc-200">{{ review.reply }}</p>
+                <p class="text-sm text-gray-700 dark:text-zinc-200">{{ review.replyContent }}</p>
               </div>
             </div>
           </template>

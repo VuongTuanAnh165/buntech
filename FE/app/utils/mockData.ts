@@ -2,7 +2,6 @@ import type {
   Profile,
   Category,
   Product,
-  ProductReview,
   CustomPrice,
   Address,
   Order,
@@ -675,19 +674,22 @@ const reviewContent = [
   'Miến dong nấu canh rất ngon, sợi giòn.'
 ]
 
-export const mockProductReviews: ProductReview[] = Array.from({ length: 60 }, (_, i) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mockProductReviews: any[] = Array.from({ length: 60 }, (_, i) => {
   const prod = mockProducts[i % mockProducts.length]!
   const cust = customerProfiles[i % customerProfiles.length]!
   return {
-    id: uid('rev', i + 1),
-    product_id: prod.id,
-    user_id: cust.id,
-    author_name: cust.full_name,
+    id: i + 1,
+    productId: prod.id,
+    userId: cust.id,
     rating: [5, 4, 5, 3, 5, 4, 5, 4, 5, 4, 5, 5, 5, 4, 5, 5, 4, 5, 5, 5, 3, 5, 4, 5, 4][i % 25]!,
     content: reviewContent[i % reviewContent.length]!,
-    is_approved: i % 4 !== 0,
-    reply: i % 3 === 0 ? 'Cảm ơn anh/chị! Chúng tôi luôn cố gắng giữ chất lượng.' : null,
-    created_at: iso(Math.max(0, 30 - Math.floor(i / 2)))
+    isApproved: i % 4 !== 0,
+    hasPurchased: true,
+    replyContent: i % 3 === 0 ? 'Cảm ơn anh/chị! Chúng tôi luôn cố gắng giữ chất lượng.' : null,
+    repliedBy: i % 3 === 0 ? 1 : null,
+    createdAt: iso(Math.max(0, 30 - Math.floor(i / 2))),
+    user: { id: cust.id, fullName: cust.full_name }
   }
 })
 

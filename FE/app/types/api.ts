@@ -22,6 +22,8 @@ export interface PaginationMeta {
   lastPageUrl?: string
   nextPageUrl?: string | null
   previousPageUrl?: string | null
+  from?: number
+  to?: number
 }
 
 /**

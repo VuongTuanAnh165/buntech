@@ -5,6 +5,7 @@ import {
   createProductReviewValidator,
   approveProductReviewValidator,
   replyProductReviewValidator,
+  reviewFilterValidator,
 } from '#validators/product_review'
 import { HttpStatus } from '#enums/http_status'
 import { Pagination } from '#enums/pagination'
@@ -68,22 +69,38 @@ export default class ProductReviewsController {
    * @description Admin API: Get all product reviews
    * @paramQuery page - Trang hiện tại
    * @paramQuery limit - Số lượng trên mỗi trang
+   * @paramQuery status - Trạng thái lọc (all, pending, approved)
    * @responseBody 200 - <PaginatedProductReviewAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
-    const { page, limit } = await request.validateUsing(paginationValidator, {
+    const { page, limit, status } = await request.validateUsing(reviewFilterValidator, {
       data: request.qs(),
     })
 
     const pageNum = page || Pagination.DEFAULT_PAGE
     const limitNum = limit || Pagination.DEFAULT_LIMIT
 
-    const reviews = await this.productReviewService.adminList(pageNum, limitNum)
+    const reviews = await this.productReviewService.adminList(pageNum, limitNum, status)
 
     return response.json({
       success: true,
       message: 'Lấy danh sách đánh giá thành công',
       data: formatPagination(reviews),
+    })
+  }
+
+  /**
+   * @stats
+   * @summary Lấy thống kê đánh giá (Admin)
+   * @description Admin API: Get product reviews statistics
+   * @responseBody 200 - {"success": true, "message": "Thành công", "data": {"total": 0, "pending": 0, "approved": 0, "averageRating": 0}}
+   */
+  async stats({ response }: HttpContext) {
+    const stats = await this.productReviewService.getStats()
+    return response.json({
+      success: true,
+      message: 'Lấy thống kê thành công',
+      data: stats,
     })
   }
 

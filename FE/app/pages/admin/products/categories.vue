@@ -99,7 +99,6 @@ async function handleDelete(id: number) {
   if (!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return
   try {
     await productService.deleteCategory(id)
-    toast.add({ title: 'Xóa thành công', color: 'success' })
     await refresh()
   } catch {
     // API error is handled by interceptor
@@ -163,10 +162,8 @@ async function handleSave() {
 
     if (isEditing.value && editingId.value) {
       await productService.updateCategory(editingId.value, formData)
-      toast.add({ title: 'Cập nhật thành công', color: 'success' })
     } else {
       await productService.createCategory(formData)
-      toast.add({ title: 'Thêm mới thành công', color: 'success' })
     }
     showModal.value = false
     await refresh()

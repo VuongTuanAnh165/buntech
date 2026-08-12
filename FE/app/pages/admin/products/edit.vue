@@ -184,10 +184,8 @@ async function handleSave() {
 
     if (isEditing.value) {
       await productService.updateProduct(productId.value, formData)
-      toast.add({ title: 'Cập nhật thành công', color: 'success' })
     } else {
       await productService.createProduct(formData)
-      toast.add({ title: 'Thêm mới thành công', color: 'success' })
     }
 
     navigateTo('/admin/products')

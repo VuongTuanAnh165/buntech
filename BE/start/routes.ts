@@ -172,6 +172,10 @@ router
     ])
 
     // Product Reviews CRUD
+    router.get('/admin/product-reviews/stats', [
+      () => import('#controllers/product_reviews_controller'),
+      'stats',
+    ])
     router.get('/admin/product-reviews', [
       () => import('#controllers/product_reviews_controller'),
       'index',
