@@ -72,9 +72,13 @@ export default class ProductService {
   /**
    * Admin: Phân trang danh sách sản phẩm
    */
-  async paginate(page: number = 1, limit: number = 10) {
+  async paginate(
+    page: number = 1,
+    limit: number = 10,
+    filters?: { search?: string; status?: string; categoryId?: number }
+  ) {
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
-    return await Product.query()
+    const query = Product.query()
       .select(
         'id',
         'name',
@@ -88,7 +92,22 @@ export default class ProductService {
       )
       .preload('category', (q) => q.select('id', 'name', 'slug'))
       .orderBy('id', 'desc')
-      .paginate(page, safeLimit)
+
+    if (filters?.search) {
+      query.where((q) => {
+        q.whereILike('name', `%${filters.search}%`).orWhereILike('slug', `%${filters.search}%`)
+      })
+    }
+
+    if (filters?.categoryId) {
+      query.where('categoryId', filters.categoryId)
+    }
+
+    if (filters?.status && filters.status !== 'ALL') {
+      query.where('isActive', filters.status === 'PUBLISHED')
+    }
+
+    return await query.paginate(page, safeLimit)
   }
 
   /**

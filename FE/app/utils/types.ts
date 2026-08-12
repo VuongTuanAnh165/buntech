@@ -252,3 +252,43 @@ export interface DeliveryRoute {
   estimated_time: number
   created_at: string
 }
+
+export interface ProductCategory {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  thumbnailUrl: string | null
+  metaTitle: string | null
+  metaDescription: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ProductImage {
+  id: number
+  productId: number
+  fileUrl: string
+  displayOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminProduct {
+  id: number
+  categoryId: number | null
+  category?: ProductCategory | null
+  name: string
+  slug: string
+  basePrice: number
+  unit: string
+  shortDescription: string | null
+  content: string | null
+  thumbnailUrl: string | null
+  metaTitle: string | null
+  metaDescription: string | null
+  isActive: boolean
+  images?: ProductImage[]
+  createdAt: string
+  updatedAt: string
+}

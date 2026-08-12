@@ -1,312 +1,352 @@
 <script setup lang="ts">
-import type { Category } from '~/utils/types'
-import { mockCategories, mockProducts } from '~/utils/mockData'
-const toast = useToast()
-useSeoMeta({ title: `Danh mục sản phẩm - BunTech Admin` })
+import { z } from 'zod'
+import { productService } from '~/services/productService'
+import type { ProductCategory } from '~/utils/types'
+import { slugify } from '~/utils/string'
+import { normalizePaginationResponse } from '~/utils/api'
+
 definePageMeta({ layout: 'admin' })
-// ─── State ──────────────────────────────────────────────
-const loading = ref(true)
-const categories = ref<Category[]>([...mockCategories])
-const products = ref([...mockProducts])
-const showModal = ref(false)
-const editingId = ref<string | null>(null)
-const form = ref({ name: '', slug: '' })
-const saving = ref(false)
-const deleteTarget = ref<Category | null>(null)
-const deleting = ref(false)
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 300)
+useSeoMeta({ title: 'Danh mục Sản phẩm - BunTech Admin' })
+const toast = useToast()
+
+// ─── State ────────────────────────────────────────────────
+const page = ref(1)
+const perPage = ref(10)
+
+const {
+  data: rawRes,
+  pending,
+  refresh
+} = useAsyncData(
+  'admin-product-categories',
+  () => productService.getAdminCategories({ page: page.value, limit: perPage.value }),
+  { watch: [page, perPage] }
+)
+
+const normalized = computed(() => normalizePaginationResponse<ProductCategory>(rawRes.value))
+const categories = computed(() => normalized.value.data)
+const meta = computed(() => normalized.value.meta)
+
+const search = ref('')
+const filteredCategories = computed(() => {
+  if (!search.value.trim()) return categories.value
+  const q = search.value.toLowerCase()
+  return categories.value.filter((c) => c.name.toLowerCase().includes(q))
 })
-// ─── Product count per category ──────────────────────────
-function productCount(catId: string): number {
-  return products.value.filter((p) => p.category_id === catId).length
+
+const columns = [
+  { accessorKey: 'thumbnail', header: 'Ảnh' },
+  { accessorKey: 'name', header: 'Tên danh mục' },
+  { accessorKey: 'slug', header: 'Đường dẫn (Slug)' },
+  { accessorKey: 'description', header: 'Mô tả' },
+  { accessorKey: 'actions', header: 'Hành động' }
+]
+
+// ─── Form State ───────────────────────────────────────────
+const showModal = ref(false)
+const isEditing = ref(false)
+const editingId = ref<number | null>(null)
+const isSubmitting = ref(false)
+
+const formState = reactive({
+  name: '',
+  description: ''
+})
+
+const formErrors = reactive<Record<string, string>>({})
+
+const schema = z.object({
+  name: z.string().min(1, 'Tên danh mục không được để trống').max(100, 'Tên không quá 100 ký tự'),
+  description: z.string().optional()
+})
+
+// Thumbnail
+const selectedFile = ref<File | null>(null)
+const previewUrl = ref<string>('')
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
+// ─── Handlers ─────────────────────────────────────────────
+function triggerFileSelect() {
+  fileInputRef.value?.click()
 }
-function activeProductCount(catId: string): number {
-  return products.value.filter(
-    (p) => p.category_id === catId && p.status === 'ACTIVE' && !p.deleted_at
-  ).length
-}
-// ─── CRUD ───────────────────────────────────────────────
-function openAdd() {
-  editingId.value = null
-  form.value = { name: '', slug: '' }
-  showModal.value = true
-}
-function openEdit(cat: Category) {
-  editingId.value = cat.id
-  form.value = { name: cat.name, slug: cat.slug }
-  showModal.value = true
-}
-function save() {
-  if (!form.value.name.trim()) {
-    toast.add({ title: 'Vui lòng nhập tên danh mục', color: 'error' })
+
+function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  if (file.size > 2 * 1024 * 1024) {
+    toast.add({ title: 'Ảnh không được vượt quá 2MB', color: 'warning' })
     return
   }
-  saving.value = true
-  const slug = form.value.slug.trim() || slugify(form.value.name)
-  setTimeout(() => {
-    if (editingId.value) {
-      const idx = categories.value.findIndex((c) => c.id === editingId.value)
-      if (idx !== -1) {
-        categories.value[idx] = {
-          ...categories.value[idx],
-          name: form.value.name.trim(),
-          slug
-        } as Category
-      }
-      toast.add({ title: 'Đã cập nhật danh mục', color: 'success' })
+  const validExts = ['image/jpeg', 'image/png', 'image/webp']
+  if (!validExts.includes(file.type)) {
+    toast.add({ title: 'Chỉ hỗ trợ ảnh JPG, PNG, WebP', color: 'warning' })
+    return
+  }
+
+  selectedFile.value = file
+  previewUrl.value = URL.createObjectURL(file)
+}
+
+function clearImage() {
+  selectedFile.value = null
+  previewUrl.value = ''
+  if (fileInputRef.value) fileInputRef.value.value = ''
+}
+
+async function handleDelete(id: number) {
+  if (!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return
+  try {
+    await productService.deleteCategory(id)
+    toast.add({ title: 'Xóa thành công', color: 'success' })
+    await refresh()
+  } catch {
+    // API error is handled by interceptor
+  }
+}
+
+function openAdd() {
+  isEditing.value = false
+  editingId.value = null
+  formState.name = ''
+  formState.description = ''
+  clearImage()
+
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+  Object.keys(formErrors).forEach((k) => delete formErrors[k])
+  showModal.value = true
+}
+
+function openEdit(cat: ProductCategory) {
+  isEditing.value = true
+  editingId.value = cat.id
+  formState.name = cat.name
+  formState.description = cat.description || ''
+
+  clearImage()
+  if (cat.thumbnailUrl) {
+    previewUrl.value = getImageUrl(cat.thumbnailUrl)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+  Object.keys(formErrors).forEach((k) => delete formErrors[k])
+  showModal.value = true
+}
+
+async function handleSave() {
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+  Object.keys(formErrors).forEach((k) => delete formErrors[k])
+  const result = schema.safeParse(formState)
+  if (!result.success) {
+    result.error.issues.forEach((e: import('zod').ZodIssue) => {
+      if (e.path[0]) formErrors[e.path[0].toString()] = e.message
+    })
+    return
+  }
+
+  isSubmitting.value = true
+  try {
+    const formData = new FormData()
+    formData.append('name', result.data.name)
+    formData.append('slug', slugify(result.data.name))
+    if (result.data.description) formData.append('description', result.data.description)
+    formData.append('metaTitle', result.data.name.substring(0, 60))
+    formData.append(
+      'metaDescription',
+      (result.data.description || result.data.name).substring(0, 160)
+    )
+
+    if (selectedFile.value) {
+      formData.append('thumbnail', selectedFile.value)
+    }
+
+    if (isEditing.value && editingId.value) {
+      await productService.updateCategory(editingId.value, formData)
+      toast.add({ title: 'Cập nhật thành công', color: 'success' })
     } else {
-      categories.value.push({
-        id: `cat-${Date.now()}`,
-        name: form.value.name.trim(),
-        slug,
-        created_at: new Date().toISOString()
-      })
-      toast.add({ title: 'Đã thêm danh mục mới', color: 'success' })
+      await productService.createCategory(formData)
+      toast.add({ title: 'Thêm mới thành công', color: 'success' })
     }
     showModal.value = false
-    saving.value = false
-  }, 400)
-}
-function confirmDelete() {
-  if (!deleteTarget.value) return
-  deleting.value = true
-  setTimeout(() => {
-    categories.value = categories.value.filter((c) => c.id !== deleteTarget.value!.id)
-    toast.add({ title: 'Đã xóa danh mục', color: 'success' })
-    deleteTarget.value = null
-    deleting.value = false
-  }, 400)
-}
-const deleteConfirmMessage = computed(() =>
-  deleteTarget.value
-    ? `Bạn có chắc muốn xóa danh mục "${deleteTarget.value.name}"? Các sản phẩm thuộc danh mục này sẽ không bị xóa.`
-    : ''
-)
-const isDeleteModalOpen = computed({
-  get: () => !!deleteTarget.value,
-  set: (val) => {
-    if (!val) deleteTarget.value = null
+    await refresh()
+  } catch {
+    // handled globally
+  } finally {
+    isSubmitting.value = false
   }
-})
+}
 </script>
+
 <template>
-  <div>
-    <BasePageHeader title="Danh mục sản phẩm" description="Phân loại sản phẩm bún, phở, miến...">
+  <div class="mx-auto max-w-6xl">
+    <BasePageHeader
+      title="Danh mục Sản phẩm"
+      description="Quản lý phân loại sản phẩm, hỗ trợ SEO và tìm kiếm dễ dàng."
+      :breadcrumbs="[
+        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
+        { label: 'Sản phẩm', to: '/admin/products' },
+        { label: 'Danh mục' }
+      ]"
+    >
       <template #actions>
-        <UButton icon="i-lucide-plus" color="primary" @click="openAdd"> Thêm danh mục </UButton>
+        <UButton variant="outline" color="neutral" to="/admin/products">
+          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" /> Sản phẩm
+        </UButton>
+        <UButton @click="openAdd">
+          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm danh mục
+        </UButton>
       </template>
     </BasePageHeader>
-    <!-- Stats Summary -->
-    <div class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-      <div class="card stagger-item p-4" style="animation-delay: 0ms">
-        <div class="flex items-center gap-3">
-          <div
-            class="bg-primary-50 dark:bg-primary-900/20 flex h-9 w-9 items-center justify-center rounded-lg"
-          >
-            <span
-              class="i-lucide-folder-open text-primary-600 dark:text-primary-400 h-[18px] w-[18px]"
-              aria-hidden="true"
-            />
-          </div>
-          <div>
-            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">Tổng danh mục</p>
-            <p class="text-surface-foreground text-xl font-bold tabular-nums">
-              {{ categories.length }}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="card stagger-item p-4" style="animation-delay: 40ms">
-        <div class="flex items-center gap-3">
-          <div
-            class="bg-info-50 dark:bg-info-900/20 flex h-9 w-9 items-center justify-center rounded-lg"
-          >
-            <span
-              class="i-lucide-package text-info-600 dark:text-info-400 h-[18px] w-[18px]"
-              aria-hidden="true"
-            />
-          </div>
-          <div>
-            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">Tổng sản phẩm</p>
-            <p class="text-surface-foreground text-xl font-bold tabular-nums">
-              {{ products.length }}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="card stagger-item col-span-2 p-4 sm:col-span-1" style="animation-delay: 80ms">
-        <div class="flex items-center gap-3">
-          <div
-            class="bg-success-50 dark:bg-success-900/20 flex h-9 w-9 items-center justify-center rounded-lg"
-          >
-            <span
-              class="i-lucide-hash text-success-600 dark:text-success-400 h-[18px] w-[18px]"
-              aria-hidden="true"
-            />
-          </div>
-          <div>
-            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">TB SP/danh mục</p>
-            <p class="text-surface-foreground text-xl font-bold tabular-nums">
-              {{ categories.length ? Math.round(products.length / categories.length) : 0 }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Category Grid -->
-    <template v-if="loading">
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div v-for="i in 6" :key="i" class="card p-5">
-          <div class="mb-4 flex items-center gap-3">
-            <div class="skeleton h-10 w-10 rounded-lg" />
-            <div class="flex-1">
-              <div class="skeleton mb-1.5 h-4" />
-              <div class="skeleton h-3 w-1/2" />
-            </div>
-          </div>
-          <div class="skeleton mb-2 h-3" />
-          <div class="skeleton h-3 w-2/3" />
-        </div>
-      </div>
+
+    <template v-if="pending && !categories.length">
+      <BasePageLoading />
     </template>
-    <template v-else-if="categories.length">
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div
-          v-for="(cat, idx) in categories"
-          :key="cat.id"
-          class="card card-hover stagger-item group p-5"
-          :style="{ animationDelay: `${idx * 40}ms` }"
-        >
-          <div class="mb-4 flex items-start justify-between gap-3">
-            <div class="flex min-w-0 items-center gap-3">
-              <div
-                class="from-primary-100 to-primary-50 dark:from-primary-900/30 dark:to-primary-900/10 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br transition-transform group-hover:scale-105"
+    <template v-else>
+      <div class="card animate-fade-in-up p-5">
+        <div class="mb-4 flex items-center gap-4">
+          <div class="max-w-sm flex-1">
+            <BaseSearchInput v-model="search" placeholder="Lọc danh mục theo tên..." />
+          </div>
+        </div>
+
+        <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">
+          <UTable :columns="columns" :data="filteredCategories">
+            <template #thumbnail-cell="{ row }">
+              <NuxtImg
+                :src="
+                  getImageUrl(row.original.thumbnailUrl) || 'https://picsum.photos/100/100?random=3'
+                "
+                class="border-surface-border h-12 w-12 flex-shrink-0 rounded border object-cover shadow-sm"
+              />
+            </template>
+            <template #name-cell="{ row }">
+              <span class="text-surface-foreground font-semibold">{{ row.original.name }}</span>
+            </template>
+            <template #slug-cell="{ row }">
+              <span
+                class="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-500 dark:bg-zinc-800 dark:text-zinc-400"
               >
-                <span
-                  class="i-lucide-tag text-primary-600 dark:text-primary-400 h-5 w-5"
-                  aria-hidden="true"
+                /{{ row.original.slug }}
+              </span>
+            </template>
+            <template #description-cell="{ row }">
+              <span class="line-clamp-2 text-sm text-slate-500">{{
+                row.original.description || '-'
+              }}</span>
+            </template>
+            <template #actions-cell="{ row }">
+              <div class="flex items-center gap-1">
+                <UButton
+                  variant="ghost"
+                  color="neutral"
+                  size="sm"
+                  icon="i-lucide-pencil"
+                  @click="openEdit(row.original)"
+                />
+                <UButton
+                  variant="ghost"
+                  color="error"
+                  size="sm"
+                  icon="i-lucide-trash-2"
+                  @click="handleDelete(row.original.id)"
                 />
               </div>
-              <div class="min-w-0">
-                <p class="text-surface-foreground truncate font-semibold">{{ cat.name }}</p>
-                <p class="truncate font-mono text-xs text-slate-400 dark:text-zinc-500">
-                  {{ cat.slug }}
-                </p>
-              </div>
-            </div>
-            <div class="flex flex-shrink-0 gap-1">
-              <UButton
-                variant="ghost"
-                color="neutral"
-                class="hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg p-2 text-slate-400 transition-colors dark:text-zinc-500"
-                aria-label="Sửa danh mục"
-                @click="openEdit(cat)"
-              >
-                <span class="i-lucide-pencil h-4 w-4" aria-hidden="true" />
-              </UButton>
-              <UButton
-                variant="ghost"
-                color="neutral"
-                class="hover:text-danger-600 dark:hover:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex min-h-[36px] min-w-[36px] items-center justify-center rounded-lg p-2 text-slate-400 transition-colors dark:text-zinc-500"
-                aria-label="Xóa danh mục"
-                @click="
-                  () => {
-                    deleteTarget = cat
-                  }
-                "
-              >
-                <span class="i-lucide-trash-2 h-4 w-4" aria-hidden="true" />
-              </UButton>
-            </div>
-          </div>
-          <div class="border-surface-border flex items-center gap-3 border-t pt-3">
-            <div class="flex items-center gap-1.5">
-              <span
-                class="i-lucide-package h-3.5 w-3.5 text-slate-400 dark:text-zinc-500"
-                aria-hidden="true"
-              />
-              <span class="text-surface-foreground text-sm font-medium tabular-nums">{{
-                productCount(cat.id)
-              }}</span>
-              <span class="text-xs text-slate-500 dark:text-zinc-400">sản phẩm</span>
-            </div>
-            <div class="bg-surface-border h-3 w-px" aria-hidden="true" />
-            <div class="flex items-center gap-1.5">
-              <span class="bg-success-500 h-2 w-2 rounded-full" aria-hidden="true" />
-              <span class="text-surface-foreground text-sm font-medium tabular-nums">{{
-                activeProductCount(cat.id)
-              }}</span>
-              <span class="text-xs text-slate-500 dark:text-zinc-400">đang bán</span>
-            </div>
-            <span class="ml-auto text-xs text-slate-400 tabular-nums dark:text-zinc-500">{{
-              formatDate(cat.created_at)
-            }}</span>
+            </template>
+          </UTable>
+
+          <div
+            v-if="meta.total > 0"
+            class="border-surface-border flex items-center justify-between border-t px-4 py-3"
+          >
+            <span class="text-sm text-slate-500 tabular-nums">
+              {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, meta.total) }} /
+              {{ meta.total }}
+            </span>
+            <UPagination v-model="page" :total="meta.total" :items-per-page="perPage" />
           </div>
         </div>
       </div>
+
+      <!-- Add/Edit Modal -->
+      <UModal
+        v-model:open="showModal"
+        :title="isEditing ? 'Sửa danh mục' : 'Thêm danh mục mới'"
+        :ui="{ content: 'sm:max-w-xl' }"
+      >
+        <template #body>
+          <form id="categoryForm" class="space-y-4" @submit.prevent="handleSave">
+            <UFormField label="Tên danh mục" :error="formErrors.name" required>
+              <UInput v-model="formState.name" placeholder="VD: Bún Tươi, Phở Khô..." />
+            </UFormField>
+
+            <UFormField label="Đường dẫn (Slug)">
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-slate-400">/</span>
+                <UInput
+                  :model-value="slugify(formState.name)"
+                  disabled
+                  class="flex-1"
+                  :ui="{ base: 'bg-slate-50 dark:bg-zinc-800/50 text-slate-500' }"
+                />
+              </div>
+              <template #hint>
+                <span class="text-xs text-slate-500">Tự tạo từ tên danh mục. VD: bun-tuoi</span>
+              </template>
+            </UFormField>
+
+            <UFormField label="Mô tả" :error="formErrors.description">
+              <UTextarea
+                v-model="formState.description"
+                placeholder="Mô tả ngắn gọn về danh mục..."
+              />
+            </UFormField>
+
+            <UFormField label="Ảnh đại diện (Thumbnail)">
+              <input
+                ref="fileInputRef"
+                type="file"
+                class="hidden"
+                accept="image/jpeg,image/png,image/webp"
+                @change="handleFileChange"
+              />
+
+              <div
+                v-if="!previewUrl"
+                class="border-surface-border hover:bg-surface-50 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors dark:hover:bg-zinc-800/50"
+                @click="triggerFileSelect"
+              >
+                <UIcon name="i-lucide-image-plus" class="mb-2 h-8 w-8 text-slate-400" />
+                <p class="text-surface-foreground text-center text-sm font-medium">
+                  Click để chọn ảnh
+                </p>
+                <p class="mt-1 text-xs text-slate-500">JPG, PNG, WebP (Max 2MB)</p>
+              </div>
+
+              <div
+                v-else
+                class="group border-surface-border relative mx-auto h-32 w-48 overflow-hidden rounded-xl border"
+              >
+                <img :src="previewUrl" class="h-full w-full object-cover" />
+                <div
+                  class="absolute inset-0 flex items-center justify-center gap-2 bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <UButton color="neutral" size="sm" @click="triggerFileSelect">Đổi ảnh</UButton>
+                  <UButton color="error" size="sm" icon="i-lucide-trash-2" @click="clearImage" />
+                </div>
+              </div>
+            </UFormField>
+          </form>
+        </template>
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton variant="outline" color="neutral" @click="showModal = false">Hủy</UButton>
+            <UButton type="submit" form="categoryForm" :loading="isSubmitting">
+              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> Lưu
+            </UButton>
+          </div>
+        </template>
+      </UModal>
     </template>
-    <BaseEmptyState
-      v-else
-      title="Chưa có danh mục nào"
-      description="Tạo danh mục để phân loại sản phẩm bún, phở, miến..."
-      icon="i-lucide-folder"
-    >
-      <template #action>
-        <UButton color="primary" @click="openAdd">Thêm danh mục</UButton>
-      </template>
-    </BaseEmptyState>
-    <!-- Add/Edit Modal -->
-    <UModal v-model:open="showModal" :title="editingId ? 'Sửa danh mục' : 'Thêm danh mục mới'">
-      <template #body>
-        <form class="space-y-4" @submit.prevent="save">
-          <UFormField label="Tên danh mục" required>
-            <UInput v-model="form.name" placeholder="VD: Bún tươi, Phở tươi..." autofocus />
-          </UFormField>
-          <UFormField label="Đường dẫn (slug)" help="Để trống để tự tạo từ tên danh mục">
-            <UInput v-model="form.slug" placeholder="tu-dong-tao-tu-ten" />
-          </UFormField>
-        </form>
-      </template>
-      <template #footer>
-        <div class="flex w-full justify-end gap-3">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            @click="
-              () => {
-                showModal = false
-              }
-            "
-            >Hủy</UButton
-          >
-          <UButton :loading="saving" color="primary" @click="save">{{
-            editingId ? 'Cập nhật' : 'Thêm mới'
-          }}</UButton>
-        </div>
-      </template>
-    </UModal>
-    <UModal v-model:open="isDeleteModalOpen" title="Xóa danh mục">
-      <template #body>
-        <p>{{ deleteConfirmMessage }}</p>
-      </template>
-      <template #footer>
-        <div class="flex w-full justify-end gap-3">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            @click="
-              () => {
-                isDeleteModalOpen = false
-              }
-            "
-            >Hủy</UButton
-          >
-          <UButton color="error" :loading="deleting" @click="confirmDelete">Xóa</UButton>
-        </div>
-      </template>
-    </UModal>
   </div>
 </template>

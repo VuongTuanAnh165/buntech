@@ -1,7 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import ProductService from '#services/product_service'
-import { createProductValidator, updateProductValidator } from '#validators/product'
+import {
+  createProductValidator,
+  updateProductValidator,
+  productFilterValidator,
+} from '#validators/product'
 import { paginationValidator } from '#validators/pagination'
 import { Pagination } from '#enums/pagination'
 import { formatPagination } from '#utils/pagination'
@@ -19,14 +23,21 @@ export default class ProductsController {
    * @responseBody 200 - <PaginatedProductAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
-    const { page, limit } = await request.validateUsing(paginationValidator, {
-      data: request.qs(),
-    })
+    const { page, limit, search, status, categoryId } = await request.validateUsing(
+      productFilterValidator,
+      {
+        data: request.qs(),
+      }
+    )
 
     const pageNum = page || Pagination.DEFAULT_PAGE
     const limitNum = limit || Pagination.DEFAULT_LIMIT
 
-    const products = await this.productService.paginate(pageNum, limitNum)
+    const products = await this.productService.paginate(pageNum, limitNum, {
+      search,
+      status,
+      categoryId,
+    })
 
     return response.json({
       success: true,

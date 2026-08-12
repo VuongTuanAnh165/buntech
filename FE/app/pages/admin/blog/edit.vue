@@ -25,8 +25,6 @@ const formState = reactive({
   blogCategoryId: '' as string | number,
   excerpt: '',
   content: '',
-  metaTitle: '',
-  metaDescription: '',
   isPublished: false
 })
 
@@ -38,8 +36,6 @@ const schema = z.object({
   blogCategoryId: z.number().min(1, 'Danh mục không hợp lệ'),
   excerpt: z.string().optional().or(z.literal('')),
   content: z.string().min(1, 'Vui lòng nhập nội dung'),
-  metaTitle: z.string().max(60, 'Tối đa 60 ký tự').optional(),
-  metaDescription: z.string().max(160, 'Tối đa 160 ký tự').optional(),
   isPublished: z.boolean()
 })
 
@@ -58,8 +54,6 @@ onMounted(async () => {
         formState.blogCategoryId = res.data.blogCategoryId
         formState.excerpt = res.data.excerpt || ''
         formState.content = res.data.content || ''
-        formState.metaTitle = res.data.metaTitle || ''
-        formState.metaDescription = res.data.metaDescription || ''
         formState.isPublished = res.data.isPublished || false
         if (res.data.thumbnailUrl) {
           previewUrl.value = getImageUrl(res.data.thumbnailUrl)
@@ -130,9 +124,11 @@ async function handleSave(publish: boolean) {
     formData.append('blogCategoryId', parseResult.data.blogCategoryId.toString())
     if (parseResult.data.excerpt) formData.append('excerpt', parseResult.data.excerpt)
     formData.append('content', parseResult.data.content)
-    const finalMetaTitle = parseResult.data.metaTitle || parseResult.data.title
-    const finalMetaDescription =
-      parseResult.data.metaDescription || parseResult.data.excerpt || parseResult.data.title
+    const finalMetaTitle = parseResult.data.title.substring(0, 60)
+    const finalMetaDescription = (parseResult.data.excerpt || parseResult.data.title).substring(
+      0,
+      160
+    )
 
     formData.append('metaTitle', finalMetaTitle)
     formData.append('metaDescription', finalMetaDescription)
@@ -209,24 +205,6 @@ async function handleSave(publish: boolean) {
 
             <UFormField label="Nội dung" :error="formErrors.content" required>
               <BaseRichTextEditor v-model="formState.content" />
-            </UFormField>
-          </div>
-        </div>
-
-        <div class="card p-6">
-          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">SEO Meta Data</h2>
-          <div class="space-y-4">
-            <UFormField label="Meta Title" :error="formErrors.metaTitle">
-              <UInput
-                :model-value="formState.metaTitle || formState.title"
-                @update:model-value="formState.metaTitle = $event"
-              />
-            </UFormField>
-            <UFormField label="Meta Description" :error="formErrors.metaDescription">
-              <UTextarea
-                :model-value="formState.metaDescription || formState.excerpt || formState.title"
-                @update:model-value="formState.metaDescription = $event"
-              />
             </UFormField>
           </div>
         </div>

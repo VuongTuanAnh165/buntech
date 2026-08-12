@@ -105,3 +105,16 @@ export const updateProductValidator = vine.withMetaData<{ productId: number }>()
       .optional(),
   })
 )
+
+/**
+ * Validator for filtering products
+ */
+export const productFilterValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+    search: vine.string().optional(),
+    status: vine.enum(['ALL', 'PUBLISHED', 'DRAFT']).optional(),
+    categoryId: vine.number().optional(),
+  })
+)
