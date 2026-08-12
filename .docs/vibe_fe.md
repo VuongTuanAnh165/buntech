@@ -46,8 +46,8 @@ Không được bỏ sót.
 
 Chức năng cần triển khai
 
-SPRINT 1: Nền tảng lõi, Quản lý Khách hàng & Cấu hình
-6. Quản lý Khách hàng & Sổ địa chỉ (Danh sách phân trang với UTable chuẩn, Create, Update).
+SPRINT 2: Cửa ngõ Khách hàng, Sản phẩm & Nội dung
+1. Landing Page (Customer Site).
 
 ==================================================
 
