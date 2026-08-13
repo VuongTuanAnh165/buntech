@@ -27,11 +27,15 @@ const state = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
-const updateField = (field: 'province' | 'ward' | 'addressLine', value: string) => {
-  const newValue = { ...state.value, [field]: value }
+const updateField = (
+  field: 'province' | 'ward' | 'addressLine',
+  value: string | { label: string; value: string }
+) => {
+  const actualValue = value && typeof value === 'object' ? value.value : String(value || '')
+  const newValue = { ...state.value, [field]: actualValue }
 
   // If province changes, reset the ward
-  if (field === 'province' && state.value.province !== value) {
+  if (field === 'province' && state.value.province !== actualValue) {
     newValue.ward = ''
   }
 

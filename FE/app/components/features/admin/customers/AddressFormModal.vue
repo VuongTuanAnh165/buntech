@@ -121,7 +121,11 @@ const handleFormSubmit = () => {
   <UModal v-model:open="isOpen" :title="isEdit ? 'Cập nhật Địa chỉ' : 'Thêm mới Địa chỉ'">
     <template #body>
       <form id="address-form" class="space-y-4" @submit.prevent="handleFormSubmit">
-        <AddressSelect v-model="state" :errors="formErrors" />
+        <AddressSelect
+          :model-value="state"
+          :errors="formErrors"
+          @update:model-value="Object.assign(state, $event)"
+        />
 
         <UFormField name="isDefault">
           <UCheckbox v-model="state.isDefault" label="Đặt làm địa chỉ mặc định" />

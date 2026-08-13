@@ -483,7 +483,11 @@ const resetForm = () => {
                 <UInput v-model="formState.phone" placeholder="0901234567" class="w-full" />
               </UFormField>
 
-              <AddressSelect v-model="formState" :errors="formErrors" />
+              <AddressSelect
+                :model-value="formState"
+                :errors="formErrors"
+                @update:model-value="Object.assign(formState, $event)"
+              />
 
               <UFormField label="Ghi chú (tùy chọn)" :error="formErrors.note">
                 <UInput v-model="formState.note" placeholder="Giao trước 9h sáng" class="w-full" />
