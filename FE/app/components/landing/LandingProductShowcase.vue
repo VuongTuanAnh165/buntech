@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { mockProducts, mockCategories } from '~/utils/mockData'
+import { productService } from '~/services/productService'
+import { generateSeoSlug } from '~/utils/idEncoder'
 
-const loading = ref(true)
-
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 400)
-})
-
-const featuredProducts = computed(() =>
-  mockProducts.filter((p) => p.status === 'ACTIVE').slice(0, 8)
+const { pending: loading, data: featuredRes } = useAsyncData('landing-products', () =>
+  productService.getClientProducts({ limit: 8 })
 )
+
+const { data: catRes } = useAsyncData('landing-categories', () =>
+  productService.getClientCategories()
+)
+
+const featuredProducts = computed(() => featuredRes.value?.data?.data || [])
+const categories = computed(() => catRes.value?.data || [])
 </script>
 
 <template>
@@ -28,9 +28,9 @@ const featuredProducts = computed(() =>
       </div>
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
         <NuxtLink
-          v-for="(cat, i) in mockCategories"
+          v-for="(cat, i) in categories"
           :key="cat.id"
-          to="/products"
+          :to="`/products?category=${generateSeoSlug(cat.slug, cat.id)}`"
           class="card card-hover group stagger-item p-5 text-center"
           :style="{ animationDelay: `${i * 60}ms` }"
         >
@@ -47,9 +47,7 @@ const featuredProducts = computed(() =>
           >
             {{ cat.name }}
           </h3>
-          <p class="mt-1 text-xs text-slate-400 dark:text-zinc-500">
-            {{ mockProducts.filter((p) => p.category_id === cat.id).length }} sản phẩm
-          </p>
+          <p class="mt-1 text-xs text-slate-400 dark:text-zinc-500">Khám phá ngay</p>
         </NuxtLink>
       </div>
     </section>
@@ -86,14 +84,14 @@ const featuredProducts = computed(() =>
         <NuxtLink
           v-for="(product, i) in featuredProducts"
           :key="product.id"
-          :to="`/products/${product.slug}`"
+          :to="`/products/${generateSeoSlug(product.slug, product.id)}`"
           class="card card-hover card-gradient group stagger-item p-4"
           :style="{ animationDelay: `${i * 60}ms` }"
         >
           <div class="bg-surface-muted relative mb-3 aspect-square overflow-hidden rounded-lg">
             <NuxtImg
-              v-if="product.image_url"
-              :src="product.image_url"
+              v-if="product.thumbnailUrl"
+              :src="product.thumbnailUrl"
               :alt="product.name"
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
@@ -104,21 +102,18 @@ const featuredProducts = computed(() =>
                 aria-hidden="true"
               />
             </div>
-            <span
-              v-if="product.stock <= 0"
-              class="badge bg-danger-500 absolute top-2 right-2 text-white"
-              >Hết hàng</span
-            >
           </div>
           <h3
             class="text-surface-foreground group-hover:text-primary-600 dark:group-hover:text-primary-400 mb-1 truncate text-sm font-medium transition-colors sm:text-base"
           >
             {{ product.name }}
           </h3>
-          <p class="mb-2 text-xs text-slate-400 dark:text-zinc-500">{{ product.category }}</p>
+          <p class="mb-2 text-xs text-slate-400 dark:text-zinc-500">
+            {{ product.category?.name || 'Chưa phân loại' }}
+          </p>
           <div class="flex items-center justify-between">
             <p class="text-primary-600 dark:text-primary-400 text-sm font-semibold sm:text-base">
-              {{ formatVND(product.price) }}
+              {{ formatVND(product.basePrice) }}
             </p>
             <span class="text-xs text-slate-400 dark:text-zinc-500">/{{ product.unit }}</span>
           </div>

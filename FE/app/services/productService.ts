@@ -66,7 +66,9 @@ export const productService = {
     return ApiClient.get<ApiResponse<ProductCategory[]>>('/categories')
   },
 
-  getClientProducts(params?: PaginationParams & { categoryId?: number | string }) {
+  getClientProducts(
+    params?: PaginationParams & { categoryId?: number | string; search?: string; sortBy?: string }
+  ) {
     return ApiClient.get<PaginatedResponse<AdminProduct>>(
       '/products',
       params as Record<string, unknown>

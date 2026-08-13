@@ -1,13 +1,23 @@
 <script setup lang="ts">
-import { Grid2x2, LayoutGrid, Package, X, Search, ChevronDown } from 'lucide-vue-next'
+import { Grid2x2, LayoutGrid, Package, X, Search, ChevronDown, ChevronRight } from 'lucide-vue-next'
+import { generateSeoSlug } from '~/utils/idEncoder'
+import { productService } from '~/services/productService'
+
 useSeoMeta({ title: 'Sản phẩm - BunTech' })
 definePageMeta({ layout: 'default' })
-const loading = ref(true)
-const search = ref('')
-const selectedCategory = ref('')
-const sortBy = ref<'latest' | 'price-asc' | 'price-desc' | 'name'>('latest')
+
+const route = useRoute()
+const search = ref((route.query.search as string) || '')
+
+const initCategorySlug = route.query.category as string
+const initCategory = initCategorySlug ? extractIdFromSlug(initCategorySlug) || '' : ''
+const selectedCategory = ref<string | number>(initCategory)
+
+const sortBy = ref<'latest' | 'price-asc' | 'price-desc' | 'name'>(
+  (route.query.sortBy as 'latest' | 'price-asc' | 'price-desc' | 'name') || 'latest'
+)
 const viewMode = ref<'grid' | 'list'>('grid')
-const currentPage = ref(1)
+const currentPage = ref(Number(route.query.page) || 1)
 const perPage = 12
 const sortOptions = [
   { value: 'latest', label: 'Mới nhất' },
@@ -15,56 +25,45 @@ const sortOptions = [
   { value: 'price-desc', label: 'Giá cao → thấp' },
   { value: 'name', label: 'Tên A → Z' }
 ]
-const filteredProducts = computed(() => {
-  let result = mockProducts.filter((p) => p.status === 'ACTIVE')
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    result = result.filter(
-      (p) => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
-    )
+
+const { data: catRes } = useAsyncData('product-categories', () =>
+  productService.getClientCategories()
+)
+const categories = computed(() => catRes.value?.data || [])
+
+const { data: productsRes, pending: loading } = useAsyncData(
+  'products',
+  () =>
+    productService.getClientProducts({
+      page: currentPage.value,
+      limit: perPage,
+      search: search.value,
+      categoryId: selectedCategory.value,
+      sortBy: sortBy.value
+    }),
+  {
+    watch: [currentPage, search, selectedCategory, sortBy]
   }
-  if (selectedCategory.value) {
-    result = result.filter((p) => p.category_id === selectedCategory.value)
-  }
-  switch (sortBy.value) {
-    case 'price-asc':
-      result = [...result].sort((a, b) => a.price - b.price)
-      break
-    case 'price-desc':
-      result = [...result].sort((a, b) => b.price - a.price)
-      break
-    case 'name':
-      result = [...result].sort((a, b) => a.name.localeCompare(b.name))
-      break
-    default:
-      result = [...result].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
-  }
-  return result
-})
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / perPage))
-const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * perPage
-  return filteredProducts.value.slice(start, start + perPage)
-})
+)
+
+const paginatedProducts = computed(() => productsRes.value?.data?.data || [])
+const totalPages = computed(() => productsRes.value?.data?.meta?.lastPage || 1)
+const totalItems = computed(() => productsRes.value?.data?.meta?.total || 0)
+
 const hasActiveFilters = computed(
   () => selectedCategory.value || search.value || sortBy.value !== 'latest'
 )
+
 watch([search, selectedCategory, sortBy], () => {
-  currentPage.value = 1
+  if (currentPage.value !== 1) currentPage.value = 1
 })
+
 const clearFilters = () => {
   selectedCategory.value = ''
   search.value = ''
   sortBy.value = 'latest'
   currentPage.value = 1
 }
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 400)
-})
 </script>
 <template>
   <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -196,7 +195,7 @@ onMounted(() => {
         Tất cả
       </UButton>
       <UButton
-        v-for="cat in mockCategories"
+        v-for="cat in categories"
         :key="cat.id"
         variant="ghost"
         color="neutral"
@@ -219,7 +218,7 @@ onMounted(() => {
     <!-- Results count -->
     <div class="mb-4 flex items-center justify-between">
       <p class="text-sm text-gray-500 dark:text-zinc-400">
-        {{ loading ? 'Đang tải...' : `${filteredProducts.length} sản phẩm` }}
+        {{ loading ? 'Đang tải...' : `${totalItems} sản phẩm` }}
       </p>
     </div>
     <!-- Loading skeleton -->
@@ -238,14 +237,14 @@ onMounted(() => {
         <NuxtLink
           v-for="(product, i) in paginatedProducts"
           :key="product.id"
-          :to="`/products/${product.slug}`"
+          :to="`/products/${generateSeoSlug(product.slug, product.id)}`"
           class="card card-hover card-gradient group stagger-item p-4"
           :style="{ animationDelay: `${Math.min(i * 40, 400)}ms` }"
         >
           <div class="bg-surface-muted relative mb-3 aspect-[4/5] overflow-hidden rounded-xl">
             <NuxtImg
-              v-if="product.image_url"
-              :src="product.image_url"
+              v-if="product.thumbnailUrl"
+              :src="product.thumbnailUrl"
               :alt="product.name"
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
@@ -253,26 +252,18 @@ onMounted(() => {
             <div v-else class="flex h-full w-full items-center justify-center">
               <Package class="h-12 w-12 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
             </div>
-            <span
-              v-if="product.stock <= 0"
-              class="badge bg-danger-500 absolute top-2 right-2 text-white"
-              >Hết hàng</span
-            >
-            <span
-              v-else-if="product.stock <= 10"
-              class="badge bg-warning-500 absolute top-2 right-2 text-white"
-              >Sắp hết</span
-            >
           </div>
           <h3
             class="text-surface-foreground group-hover:text-primary-600 dark:group-hover:text-primary-400 mb-1 truncate text-sm font-medium transition-colors sm:text-base"
           >
             {{ product.name }}
           </h3>
-          <p class="mb-2 text-xs text-gray-400 dark:text-zinc-500">{{ product.category }}</p>
+          <p class="mb-2 text-xs text-gray-400 dark:text-zinc-500">
+            {{ product.category?.name || 'Chưa phân loại' }}
+          </p>
           <div class="flex items-center justify-between">
             <p class="text-primary-600 dark:text-primary-400 text-sm font-semibold sm:text-base">
-              {{ formatVND(product.price) }}
+              {{ formatVND(product.basePrice) }}
             </p>
             <span class="text-xs text-gray-400 dark:text-zinc-500">/{{ product.unit }}</span>
           </div>
@@ -294,16 +285,16 @@ onMounted(() => {
         <NuxtLink
           v-for="(product, i) in paginatedProducts"
           :key="product.id"
-          :to="`/products/${product.slug}`"
+          :to="`/products/${generateSeoSlug(product.slug, product.id)}`"
           class="card card-hover group stagger-item flex gap-4 p-4"
           :style="{ animationDelay: `${Math.min(i * 40, 400)}ms` }"
         >
           <div
-            class="bg-surface-muted h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg sm:h-24 sm:w-24"
+            class="bg-surface-muted relative aspect-square w-24 shrink-0 overflow-hidden rounded-lg sm:w-32"
           >
             <NuxtImg
-              v-if="product.image_url"
-              :src="product.image_url"
+              v-if="product.thumbnailUrl"
+              :src="product.thumbnailUrl"
               :alt="product.name"
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
@@ -319,23 +310,13 @@ onMounted(() => {
               {{ product.name }}
             </h3>
             <p class="mb-1 line-clamp-1 text-sm text-gray-500 dark:text-zinc-400">
-              {{ product.description }}
+              {{ product.shortDescription || 'Mô tả đang cập nhật' }}
             </p>
             <div class="flex flex-wrap items-center gap-2">
               <p class="text-primary-600 dark:text-primary-400 text-lg font-bold">
-                {{ formatVND(product.price) }}
+                {{ formatVND(product.basePrice) }}
               </p>
               <span class="text-xs text-gray-400 dark:text-zinc-500">/{{ product.unit }}</span>
-              <span
-                v-if="product.stock <= 0"
-                class="badge bg-danger-100 text-danger-700 dark:bg-danger-900/30 dark:text-danger-400"
-                >Hết hàng</span
-              >
-              <span
-                v-else
-                class="badge bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400"
-                >Còn {{ product.stock }} {{ product.unit }}</span
-              >
             </div>
           </div>
         </NuxtLink>

@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { mockBlogPosts } from '~/utils/mockData'
+import { blogService } from '~/services/blogService'
+import { generateSeoSlug } from '~/utils/idEncoder'
 
-const blogPosts = computed(() => mockBlogPosts.filter((p) => p.isPublished).slice(0, 3))
+const { data: blogPostsRes } = useAsyncData('landing-blog-posts', () =>
+  blogService.getPublicPosts({ limit: 3 })
+)
+const blogPosts = computed(() => blogPostsRes.value?.data?.data || [])
 </script>
 
 <template>
@@ -33,7 +37,7 @@ const blogPosts = computed(() => mockBlogPosts.filter((p) => p.isPublished).slic
           <NuxtLink
             v-for="post in blogPosts"
             :key="post.id"
-            :to="`/blog/${post.slug}`"
+            :to="`/blog/${generateSeoSlug(post.slug, post.id)}`"
             class="card card-hover group overflow-hidden"
           >
             <div class="bg-surface-muted aspect-[16/9] overflow-hidden">

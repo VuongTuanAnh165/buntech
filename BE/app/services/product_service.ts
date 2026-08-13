@@ -113,7 +113,11 @@ export default class ProductService {
   /**
    * Client: Phân trang / Lọc sản phẩm
    */
-  async clientList(page: number = 1, limit: number = 10, categoryId?: number) {
+  async clientList(
+    page: number = 1,
+    limit: number = 10,
+    filters?: { categoryId?: number; search?: string; sortBy?: string }
+  ) {
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
     const query = Product.query()
       .select(
@@ -130,10 +134,34 @@ export default class ProductService {
       )
       .where('isActive', true)
       .preload('category', (q) => q.select('id', 'name', 'slug'))
-      .orderBy('id', 'desc')
 
-    if (categoryId) {
-      query.where('categoryId', categoryId)
+    if (filters?.categoryId) {
+      query.where('categoryId', filters.categoryId)
+    }
+
+    if (filters?.search) {
+      query.where((q) => {
+        q.whereILike('name', `%${filters.search}%`).orWhereILike(
+          'shortDescription',
+          `%${filters.search}%`
+        )
+      })
+    }
+
+    switch (filters?.sortBy) {
+      case 'price-asc':
+        query.orderBy('basePrice', 'asc')
+        break
+      case 'price-desc':
+        query.orderBy('basePrice', 'desc')
+        break
+      case 'name':
+        query.orderBy('name', 'asc')
+        break
+      case 'latest':
+      default:
+        query.orderBy('id', 'desc')
+        break
     }
 
     return await query.paginate(page, safeLimit)

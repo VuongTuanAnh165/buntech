@@ -14,6 +14,13 @@ export const productReviewService = {
     return ApiClient.get<PaginatedResponse<ProductReview>>('/admin/product-reviews', params)
   },
 
+  getClientReviews: (productId: number | string, params?: { page?: number; limit?: number }) => {
+    return ApiClient.get<PaginatedResponse<ProductReview>>(
+      `/products/${productId}/reviews`,
+      params as Record<string, unknown>
+    )
+  },
+
   getReviewStats: () => {
     return ApiClient.get<{ success: boolean; message: string; data: ReviewStats }>(
       '/admin/product-reviews/stats'

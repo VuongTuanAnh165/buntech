@@ -5,8 +5,8 @@ import {
   createProductValidator,
   updateProductValidator,
   productFilterValidator,
+  clientProductFilterValidator,
 } from '#validators/product'
-import { paginationValidator } from '#validators/pagination'
 import { Pagination } from '#enums/pagination'
 import { formatPagination } from '#utils/pagination'
 
@@ -56,19 +56,21 @@ export default class ProductsController {
    * @responseBody 200 - <PaginatedProductClientListResponse>
    */
   async clientIndex({ request, response }: HttpContext) {
-    const { page, limit } = await request.validateUsing(paginationValidator, {
-      data: request.qs(),
-    })
+    const { page, limit, categoryId, search, sortBy } = await request.validateUsing(
+      clientProductFilterValidator,
+      {
+        data: request.qs(),
+      }
+    )
 
     const pageNum = page || Pagination.DEFAULT_PAGE
     const limitNum = limit || Pagination.DEFAULT_LIMIT
-    const categoryId = request.input('categoryId')
 
-    const products = await this.productService.clientList(
-      pageNum,
-      limitNum,
-      categoryId ? Number(categoryId) : undefined
-    )
+    const products = await this.productService.clientList(pageNum, limitNum, {
+      categoryId,
+      search,
+      sortBy,
+    })
 
     return response.json({
       success: true,

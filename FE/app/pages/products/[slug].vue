@@ -13,46 +13,70 @@ import {
   ShoppingCart,
   Zap
 } from 'lucide-vue-next'
+import { extractIdFromSlug, generateSeoSlug } from '~/utils/idEncoder'
+import { productService } from '~/services/productService'
+import { productReviewService } from '~/services/productReviewService'
 
 const toast = useToast()
 const route = useRoute()
 definePageMeta({ layout: 'default' })
 
 const slug = route.params.slug as string
-const loading = ref(true)
-const error = ref(false)
+const productId = extractIdFromSlug(slug)
+
 const activeTab = ref<'description' | 'reviews'>('description')
 const isWishlisted = ref(false)
 const quantity = ref(1)
 const activeImage = ref(0)
 
-const product = computed(() => mockProducts.find((p) => p.slug === slug && p.status === 'ACTIVE'))
+// Fetch Product
+const {
+  data: productRes,
+  pending: loading,
+  error: fetchError
+} = useAsyncData(`product-${productId}`, () => {
+  if (!productId) return Promise.reject(new Error('Invalid ID'))
+  return productService.getClientProduct(productId)
+})
 
-const reviews = computed(() =>
-  mockProductReviews.filter((r) => r.productId === product.value?.id && r.isApproved)
+const product = computed(() => productRes.value?.data)
+const error = computed(() => !productId || !!fetchError.value || (!loading.value && !product.value))
+
+// Fetch Reviews
+const { data: reviewsRes } = useAsyncData(
+  `product-reviews-${productId}`,
+  () => {
+    if (!productId) return Promise.resolve(null)
+    return productReviewService.getClientReviews(productId, { limit: 100 })
+  },
+  { lazy: true }
+)
+
+const reviews = computed(() => reviewsRes.value?.data?.data || [])
+
+// Fetch Related Products
+const { data: relatedRes } = useAsyncData(
+  `product-related-${productId}`,
+  () => {
+    if (!product.value?.categoryId) return Promise.resolve(null)
+    return productService.getClientProducts({ categoryId: product.value.categoryId, limit: 5 })
+  },
+  { watch: [() => product.value?.categoryId] }
 )
 
 const relatedProducts = computed(() => {
-  if (!product.value) return []
-  return mockProducts
-    .filter(
-      (p) =>
-        p.category_id === product.value!.category_id &&
-        p.id !== product.value!.id &&
-        p.status === 'ACTIVE'
-    )
-    .slice(0, 4)
+  const allRelated = relatedRes.value?.data?.data || []
+  return allRelated.filter((p) => p.id !== product.value?.id).slice(0, 4)
 })
 
 const galleryImages = computed(() => {
   if (!product.value) return []
-  // Use the product image + mock thumbnails
-  const imgs = [product.value.image_url]
-  // Generate 4 thumbnails from mock (same image with variations for demo)
-  for (let i = 0; i < 3; i++) {
-    imgs.push(product.value.image_url)
+  const imgs: string[] = []
+  if (product.value.thumbnailUrl) imgs.push(product.value.thumbnailUrl)
+  if (product.value.images && Array.isArray(product.value.images)) {
+    imgs.push(...product.value.images.map((g: { fileUrl: string }) => g.fileUrl))
   }
-  return imgs.filter(Boolean)
+  return imgs.length ? imgs : []
 })
 
 const avgRating = computed(() => {
@@ -70,11 +94,8 @@ const ratingDistribution = computed(() => {
 })
 
 const incrementQty = () => {
-  if (product.value && quantity.value < product.value.stock) {
-    quantity.value++
-  } else {
-    toast.add({ title: 'Cảnh báo', description: '', color: 'warning' })
-  }
+  // Assume unlimited stock if not provided
+  quantity.value++
 }
 
 const decrementQty = () => {
@@ -83,39 +104,29 @@ const decrementQty = () => {
 
 const toggleWishlist = () => {
   isWishlisted.value = !isWishlisted.value
-  toast.add({ title: 'Thành công', description: '', color: 'success' })
+  toast.add({
+    title: 'Thành công',
+    description: 'Đã cập nhật danh sách yêu thích',
+    color: 'success'
+  })
 }
 
 const shareProduct = () => {
   if (import.meta.client) {
     navigator.clipboard.writeText(window.location.href)
-    toast.add({ title: 'Thành công', description: '', color: 'success' })
+    toast.add({ title: 'Thành công', description: 'Đã copy đường dẫn', color: 'success' })
   }
 }
 
 const addToCart = () => {
   if (!product.value) return
-  if (product.value.stock <= 0) {
-    toast.add({ title: 'Thất bại', description: '', color: 'error' })
-    return
-  }
-  toast.add({ title: 'Thành công', description: '', color: 'success' })
+  toast.add({ title: 'Thành công', description: 'Đã thêm vào giỏ', color: 'success' })
 }
 
 const quickOrder = () => {
   if (!product.value) return
-  toast.add({ title: 'Thông báo', description: '', color: 'info' })
-  setTimeout(() => navigateTo('/quick-order'), 600)
+  navigateTo('/quick-order')
 }
-
-onMounted(() => {
-  setTimeout(() => {
-    if (!product.value) {
-      error.value = true
-    }
-    loading.value = false
-  }, 400)
-})
 
 useHead(() => ({
   title: product.value ? `${product.value.name} - BunTech` : 'Sản phẩm - BunTech'
@@ -196,16 +207,6 @@ useHead(() => ({
             <div v-else class="flex h-full w-full items-center justify-center">
               <Package class="h-24 w-24 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
             </div>
-            <span
-              v-if="product.stock <= 0"
-              class="badge bg-danger-500 absolute top-3 left-3 text-white"
-              >Hết hàng</span
-            >
-            <span
-              v-else-if="product.stock <= 10"
-              class="badge bg-warning-500 absolute top-3 left-3 text-white"
-              >Sắp hết hàng</span
-            >
           </div>
           <!-- Thumbnails -->
           <div class="grid grid-cols-4 gap-2 sm:gap-3">
@@ -271,7 +272,7 @@ useHead(() => ({
         <!-- Info -->
         <div>
           <p class="text-primary-600 dark:text-primary-400 mb-2 text-sm font-medium">
-            {{ product.category }}
+            {{ product.category?.name || 'Chưa phân loại' }}
           </p>
           <h1 class="text-surface-foreground mb-3 text-2xl font-bold tracking-tight sm:text-3xl">
             {{ product.name }}
@@ -300,19 +301,9 @@ useHead(() => ({
           <!-- Price -->
           <div class="mb-6 flex items-baseline gap-2">
             <span class="text-primary-600 dark:text-primary-400 text-3xl font-bold sm:text-4xl">{{
-              formatVND(product.price)
+              formatVND(product.basePrice)
             }}</span>
             <span class="text-sm text-gray-400 dark:text-zinc-500">/{{ product.unit }}</span>
-          </div>
-
-          <!-- Stock -->
-          <div class="mb-6 flex items-center gap-2">
-            <AppBadge :color="product.stock > 0 ? 'success' : 'danger'" :dot="true">
-              {{ product.stock > 0 ? 'Còn hàng' : 'Hết hàng' }}
-            </AppBadge>
-            <span v-if="product.stock > 0" class="text-sm text-gray-500 dark:text-zinc-400">
-              {{ product.stock }} {{ product.unit }} khả dụng
-            </span>
           </div>
 
           <!-- Quantity selector -->
@@ -341,7 +332,6 @@ useHead(() => ({
                 color="neutral"
                 type="button"
                 class="hover:bg-surface-hover flex h-11 min-h-[44px] w-11 min-w-[44px] items-center justify-center transition-colors disabled:opacity-40"
-                :disabled="quantity >= product.stock"
                 :aria-label="'Tăng số lượng'"
                 @click="incrementQty"
               >
@@ -349,7 +339,7 @@ useHead(() => ({
               </UButton>
             </div>
             <span class="text-sm text-gray-400 dark:text-zinc-500"
-              >Tổng: {{ formatVND(product.price * quantity) }}</span
+              >Tổng: {{ formatVND(product.basePrice * quantity) }}</span
             >
           </div>
 
@@ -403,13 +393,9 @@ useHead(() => ({
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500 dark:text-zinc-400">Danh mục</span>
-              <span class="text-surface-foreground font-medium">{{ product.category }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-500 dark:text-zinc-400">Tồn kho</span>
-              <span class="text-surface-foreground font-medium"
-                >{{ product.stock }} {{ product.unit }}</span
-              >
+              <span class="text-surface-foreground font-medium">{{
+                product.category?.name || 'Chưa phân loại'
+              }}</span>
             </div>
           </div>
         </div>
@@ -448,12 +434,11 @@ useHead(() => ({
 
         <!-- Description -->
         <div v-if="activeTab === 'description'" class="prose prose-sm max-w-none">
-          <p class="leading-relaxed text-gray-600 dark:text-zinc-300">
-            {{
-              product.description ||
-              'Bún tươi BunTech được làm từ 100% gạo tự nhiên, sản xuất theo quy trình truyền thống 3 đời. Bún mềm, dẻo, không hàn the, an toàn vệ sinh thực phẩm. Giao hàng tận nơi trong 2 giờ.'
-            }}
-          </p>
+          <div
+            class="prose prose-sm prose-primary dark:prose-invert max-w-none pb-8 text-gray-600 dark:text-zinc-300"
+          >
+            <div v-html="product.shortDescription || 'Mô tả đang cập nhật...'" />
+          </div>
         </div>
 
         <!-- Reviews -->
@@ -562,14 +547,14 @@ useHead(() => ({
           <NuxtLink
             v-for="(rp, i) in relatedProducts"
             :key="rp.id"
-            :to="`/products/${rp.slug}`"
+            :to="`/products/${generateSeoSlug(rp.slug, rp.id)}`"
             class="card card-hover card-gradient group stagger-item p-4"
             :style="{ animationDelay: `${i * 60}ms` }"
           >
             <div class="bg-surface-muted mb-3 aspect-square overflow-hidden rounded-lg">
               <NuxtImg
-                v-if="rp.image_url"
-                :src="rp.image_url"
+                v-if="rp.thumbnailUrl"
+                :src="rp.thumbnailUrl"
                 :alt="rp.name"
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
@@ -584,7 +569,7 @@ useHead(() => ({
               {{ rp.name }}
             </h3>
             <p class="text-primary-600 dark:text-primary-400 text-sm font-semibold">
-              {{ formatVND(rp.price) }}
+              {{ formatVND(rp.basePrice) }}
             </p>
           </NuxtLink>
         </div>
@@ -600,7 +585,7 @@ useHead(() => ({
         <div class="min-w-0 flex-1">
           <p class="truncate text-xs text-gray-500 dark:text-zinc-400">{{ product.name }}</p>
           <p class="text-primary-600 dark:text-primary-400 text-lg font-bold">
-            {{ formatVND(product.price * quantity) }}
+            {{ formatVND(product.basePrice * quantity) }}
           </p>
         </div>
         <UButton size="lg" class="!px-6" @click="quickOrder">

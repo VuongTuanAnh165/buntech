@@ -3,7 +3,7 @@ import { Search, X } from 'lucide-vue-next'
 import { blogService } from '~/services/blogService'
 import type { BlogPost, BlogCategory } from '~/utils/types'
 import { normalizePaginationResponse } from '~/utils/api'
-import { extractIdFromSlug } from '~/utils/idEncoder'
+import { extractIdFromSlug, generateSeoSlug } from '~/utils/idEncoder'
 
 useSeoMeta({ title: 'Tin tức - BunTech' })
 definePageMeta({ layout: 'default' })
@@ -139,13 +139,13 @@ const clearFilters = () => {
         type="button"
         :class="[
           'min-h-[40px] rounded-full border px-4 py-2 text-sm font-medium whitespace-nowrap transition-all',
-          selectedCategory === cat.slug
+          selectedCategory === generateSeoSlug(cat.slug, cat.id)
             ? 'bg-primary-600 border-primary-600 text-white shadow-sm'
             : 'bg-surface text-surface-foreground border-surface-border hover:border-primary-300'
         ]"
         @click="
           () => {
-            selectedCategory = cat.slug
+            selectedCategory = generateSeoSlug(cat.slug, cat.id)
           }
         "
       >

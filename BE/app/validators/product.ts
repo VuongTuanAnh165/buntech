@@ -118,3 +118,16 @@ export const productFilterValidator = vine.compile(
     categoryId: vine.number().optional(),
   })
 )
+
+/**
+ * Validator for filtering products on client side
+ */
+export const clientProductFilterValidator = vine.compile(
+  vine.object({
+    page: vine.number().min(1).optional(),
+    limit: vine.number().min(1).max(100).optional(),
+    categoryId: vine.number().optional(),
+    search: vine.string().optional(),
+    sortBy: vine.enum(['latest', 'price-asc', 'price-desc', 'name']).optional(),
+  })
+)
