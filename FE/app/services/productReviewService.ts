@@ -21,6 +21,12 @@ export const productReviewService = {
     )
   },
 
+  getFeaturedReviews: () => {
+    return ApiClient.get<{ success: boolean; message: string; data: ProductReview[] }>(
+      '/reviews/featured'
+    )
+  },
+
   getReviewStats: () => {
     return ApiClient.get<{ success: boolean; message: string; data: ReviewStats }>(
       '/admin/product-reviews/stats'

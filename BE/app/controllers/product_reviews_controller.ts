@@ -43,6 +43,21 @@ export default class ProductReviewsController {
   }
 
   /**
+   * @clientFeatured
+   * @summary Lấy đánh giá nổi bật (Client)
+   * @description Client API: Get featured product reviews for homepage
+   * @responseBody 200 - {"success": true, "message": "Lấy đánh giá nổi bật thành công", "data": []}
+   */
+  async clientFeatured({ response }: HttpContext) {
+    const reviews = await this.productReviewService.clientFeatured(6)
+    return response.json({
+      success: true,
+      message: 'Lấy đánh giá nổi bật thành công',
+      data: reviews,
+    })
+  }
+
+  /**
    * @store
    * @summary Gửi đánh giá sản phẩm
    * @description Client API: Post a new review

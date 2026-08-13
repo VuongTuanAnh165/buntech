@@ -92,6 +92,10 @@ router
     router.get('/products/:id', [() => import('#controllers/products_controller'), 'clientShow'])
 
     // Product Reviews (Client)
+    router.get('/reviews/featured', [
+      () => import('#controllers/product_reviews_controller'),
+      'clientFeatured',
+    ])
     router.get('/products/:id/reviews', [
       () => import('#controllers/product_reviews_controller'),
       'clientIndex',

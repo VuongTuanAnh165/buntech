@@ -41,6 +41,22 @@ export default class ProductReviewService {
   }
 
   /**
+   * Client: Get featured reviews for homepage
+   */
+  async clientFeatured(limit: number = 6) {
+    return await ProductReview.query()
+      .where('isApproved', true)
+      .whereNotNull('content')
+      .whereRaw('LENGTH(content) > 10') // To avoid too short reviews like 'ngon'
+      .preload('user', (q) => q.select('id', 'fullName'))
+      .preload('product', (q) => q.select('id', 'name'))
+      .select('id', 'rating', 'content', 'createdAt', 'userId', 'productId')
+      .orderBy('rating', 'desc')
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+  }
+
+  /**
    * Admin: Get all reviews
    */
   async adminList(page: number = 1, limit: number = 10, status?: string) {
