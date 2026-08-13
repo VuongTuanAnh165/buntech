@@ -42,7 +42,8 @@ export const useMasterData = () => {
 
     // 2. Fetch Constants với ETag (If-None-Match)
     try {
-      const currentConstHash = constantsVersion.value || undefined
+      // Chỉ gửi ETag nếu Constants đã được load thành công vào bộ nhớ
+      const currentConstHash = constants.value ? constantsVersion.value || undefined : undefined
 
       const data = await masterDataService.getConstants(currentConstHash, (newEtag) => {
         constantsVersion.value = newEtag
@@ -68,7 +69,8 @@ export const useMasterData = () => {
 
     // 3. Fetch Divisions với ETag (If-None-Match)
     try {
-      const currentHash = version.value || undefined
+      // Chỉ gửi ETag nếu Divisions đã được load thành công vào bộ nhớ
+      const currentHash = divisions.value.length > 0 ? version.value || undefined : undefined
 
       const divData = await masterDataService.getDivisions(currentHash, (newEtag) => {
         version.value = newEtag

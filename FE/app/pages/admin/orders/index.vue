@@ -385,7 +385,7 @@ const activeFilterCount = computed(() => {
               {{ Math.min((page - 1) * limit + 1, total) }}-{{ Math.min(page * limit, total) }} /
               {{ total }}
             </span>
-            <USelectMenu v-model="limit" :options="[10, 20, 50]" class="w-32">
+            <USelectMenu v-model="limit" :items="[10, 20, 50]" class="w-32">
               <template #default>{{ limit }} / trang</template>
             </USelectMenu>
           </div>

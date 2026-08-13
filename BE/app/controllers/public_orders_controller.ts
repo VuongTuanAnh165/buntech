@@ -28,7 +28,9 @@ export default class PublicOrdersController {
     const order = await this.publicOrderService.createQuickOrder({
       fullName: payload.fullName,
       phoneNumber: payload.phoneNumber,
-      address: payload.address,
+      addressLine: payload.addressLine,
+      province: payload.province,
+      ward: payload.ward,
       note: payload.note,
       items: payload.items,
     })

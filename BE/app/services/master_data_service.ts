@@ -124,9 +124,10 @@ export default class MasterDataService {
       const childWards = province.wards || province.districts
       if (childWards && Array.isArray(childWards)) {
         for (const ward of childWards) {
-          newCodes.add(ward.code)
+          const wCode = ward.code + 100000 // Offset to prevent overlap with Province codes
+          newCodes.add(wCode)
           itemsToUpsert.push({
-            code: ward.code,
+            code: wCode,
             parentCode: province.code,
             name: ward.name,
             codename: ward.codename,

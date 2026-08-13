@@ -12,11 +12,8 @@ export default class AddressService {
       .select(
         'id',
         'user_id',
-        'recipient_name',
-        'phone_number',
         'address_line',
         'ward',
-        'district',
         'province',
         'latitude',
         'longitude',
@@ -35,11 +32,8 @@ export default class AddressService {
       .select(
         'id',
         'user_id',
-        'recipient_name',
-        'phone_number',
         'address_line',
         'ward',
-        'district',
         'province',
         'latitude',
         'longitude',

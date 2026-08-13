@@ -413,16 +413,16 @@ function setLink() {
   </div>
 </template>
 
-<style>
+<style scoped>
 /* Prose CSS is applied natively via Tailwind Typography, but we can override tiptap-specific things here */
-.tiptap p.is-editor-empty:first-child::before {
+:deep(.tiptap p.is-editor-empty:first-child::before) {
   color: #adb5bd;
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
 }
-.tiptap img {
+:deep(.tiptap img) {
   display: block;
   max-width: 100%;
   height: auto;

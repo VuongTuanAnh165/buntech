@@ -22,7 +22,9 @@ export default class PublicOrderService {
   async createQuickOrder(data: {
     fullName: string
     phoneNumber: string
-    address: string
+    addressLine: string
+    province: string
+    ward: string
     note?: string
     items: Array<{ productId: number; quantity: number }>
   }) {
@@ -49,7 +51,12 @@ export default class PublicOrderService {
 
       // 3. Find or Create Address for this user
       let address = await Address.firstOrCreate(
-        { userId: user.id, addressLine: data.address },
+        {
+          userId: user.id,
+          addressLine: data.addressLine,
+          province: data.province,
+          ward: data.ward,
+        },
         {},
         { client: trx }
       )

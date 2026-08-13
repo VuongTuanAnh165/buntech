@@ -1,120 +1,194 @@
 <script setup lang="ts">
+import { z } from 'zod'
 import { Plus, Trash2, Minus, CheckCircle2, Package, Search, ShoppingCart } from 'lucide-vue-next'
+import { productService } from '~/services/productService'
+import { publicOrderService } from '~/services/publicOrderService'
+import { phoneSchema, requiredString } from '~/utils/validation'
+import AddressSelect from '~/components/base/AddressSelect.vue'
+
 const toast = useToast()
 useSeoMeta({ title: 'Đặt hàng nhanh - BunTech' })
 definePageMeta({ layout: 'default' })
-const loading = ref(true)
+
 const search = ref('')
-const selectedCategory = ref('')
+const selectedCategory = ref<number | ''>('')
 const orderItems = ref<
   {
-    product_id: string
-    product_name: string
+    productId: number
+    productName: string
     quantity: number
     price: number
-    stock: number
     unit: string
   }[]
 >([])
 const website_url = ref('')
-const form = ref({ name: '', phone: '', address: '', note: '' })
-const errors = ref<Record<string, string>>({})
-const submitting = ref(false)
+
+const formState = reactive({
+  name: '',
+  phone: '',
+  addressLine: '',
+  province: '',
+  ward: '',
+  note: ''
+})
+const formErrors = ref<Record<string, string>>({})
+
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    formErrors.value = {}
+    errors.forEach((e) => {
+      formErrors.value[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    formErrors.value = {}
+  }
+})
+
+const quickOrderSchema = z.object({
+  name: requiredString('Họ tên').max(100, 'Họ tên không được vượt quá 100 ký tự'),
+  phone: phoneSchema,
+  addressLine: requiredString('Địa chỉ cụ thể').max(191),
+  province: requiredString('Tỉnh/Thành phố').max(100),
+  ward: requiredString('Phường/Xã').max(100),
+  note: z.string().trim().optional()
+})
+
 const success = ref(false)
 const successOrderCode = ref('')
+
+const { data: categoriesRes } = await useAsyncData('clientCategories', () =>
+  productService.getClientCategories()
+)
+const categories = computed(() => categoriesRes.value?.data || [])
+
+const { data: productsRes, pending: loading } = await useAsyncData('clientProducts', () =>
+  productService.getClientProducts({ limit: 100 })
+)
+const products = computed(() => productsRes.value?.data?.data || [])
+
 const availableProducts = computed(() => {
-  let result = mockProducts.filter((p) => p.status === 'ACTIVE')
+  let result = products.value
+  if (selectedCategory.value) {
+    result = result.filter((p) => p.categoryId === selectedCategory.value)
+  }
   if (search.value) {
     const q = search.value.toLowerCase()
     result = result.filter((p) => p.name.toLowerCase().includes(q))
   }
-  if (selectedCategory.value) {
-    result = result.filter((p) => p.category_id === selectedCategory.value)
-  }
   return result
 })
+
 const total = computed(() =>
   orderItems.value.reduce((sum, item) => sum + item.quantity * item.price, 0)
 )
-const addProduct = (productId: string) => {
-  const product = mockProducts.find((p) => p.id === productId)
+
+const addProduct = (productId: number) => {
+  const product = products.value.find((p) => p.id === productId)
   if (!product) return
-  const existing = orderItems.value.find((i) => i.product_id === productId)
+  const existing = orderItems.value.find((i) => i.productId === productId)
   if (existing) {
-    if (existing.quantity >= existing.stock) {
-      toast.add({ title: 'Cảnh báo', description: '', color: 'warning' })
-      return
-    }
     existing.quantity++
-    toast.add({ title: 'Thành công', description: '', color: 'success' })
+    toast.add({ title: 'Thành công', description: 'Đã cập nhật giỏ hàng', color: 'success' })
     return
   }
   orderItems.value.push({
-    product_id: productId,
-    product_name: product.name,
+    productId: productId,
+    productName: product.name,
     quantity: 1,
-    price: Number(product.price),
-    stock: Number(product.stock),
+    price: Number(product.basePrice),
     unit: product.unit
   })
-  toast.add({ title: 'Thành công', description: '', color: 'success' })
+  toast.add({ title: 'Thành công', description: 'Đã thêm vào giỏ hàng', color: 'success' })
 }
+
 const incrementQty = (index: number) => {
-  const item = orderItems.value[index]!
-  if (item.quantity >= item.stock) {
-    toast.add({ title: 'Cảnh báo', description: '', color: 'warning' })
-    return
-  }
-  item.quantity++
+  orderItems.value[index]!.quantity++
 }
+
 const decrementQty = (index: number) => {
   if (orderItems.value[index]!.quantity > 1) {
     orderItems.value[index]!.quantity--
   }
 }
+
 const removeItem = (index: number) => {
-  const _item = orderItems.value[index]!
   orderItems.value.splice(index, 1)
-  toast.add({ title: 'Thông báo', description: '', color: 'info' })
+  toast.add({ title: 'Thông báo', description: 'Đã xóa sản phẩm', color: 'info' })
 }
+
 const clearCart = () => {
   orderItems.value = []
-  toast.add({ title: 'Thông báo', description: '', color: 'info' })
+  toast.add({ title: 'Thông báo', description: 'Đã xóa toàn bộ giỏ hàng', color: 'info' })
 }
-const submitOrder = () => {
-  errors.value = {}
-  if (website_url.value) return
-  if (!form.value.name) errors.value.name = 'Vui lòng nhập họ tên'
-  if (!form.value.phone) errors.value.phone = 'Vui lòng nhập số điện thoại'
-  else if (!/^(0[0-9]{9,10})$/.test(form.value.phone))
-    errors.value.phone = 'Số điện thoại không hợp lệ'
-  if (!form.value.address) errors.value.address = 'Vui lòng nhập địa chỉ'
-  if (orderItems.value.length === 0) {
-    toast.add({ title: 'Thất bại', description: '', color: 'error' })
-    return
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  if (website_url.value) {
+    return false // Honeypot trap
   }
-  if (Object.keys(errors.value).length) return
-  submitting.value = true
-  setTimeout(() => {
-    successOrderCode.value = 'BT' + Math.random().toString(36).substring(2, 8).toUpperCase()
-    submitting.value = false
-    success.value = true
-    toast.add({ title: 'Thành công', description: '', color: 'success' })
-  }, 1200)
+  if (orderItems.value.length === 0) {
+    toast.add({ title: 'Thất bại', description: 'Giỏ hàng trống', color: 'error' })
+    return false
+  }
+  const result = quickOrderSchema.safeParse(formState)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
 }
+
+const { handleSubmit, isSubmitting: submitting } = useFormSubmit()
+
+const handleQuickOrder = handleSubmit(
+  async () => {
+    const res = await publicOrderService.createQuickOrder({
+      fullName: formState.name,
+      phoneNumber: formState.phone,
+      addressLine: formState.addressLine,
+      province: formState.province,
+      ward: formState.ward,
+      note: formState.note,
+      website_url: website_url.value,
+      items: orderItems.value.map((i) => ({ productId: i.productId, quantity: i.quantity }))
+    })
+
+    if (res.data?.orderId) {
+      successOrderCode.value = `BT${res.data.orderId}`
+    } else {
+      successOrderCode.value = 'Đã tiếp nhận'
+    }
+    success.value = true
+  },
+  { formRef }
+)
+
+const submitOrder = () => {
+  if (validateForm()) {
+    handleQuickOrder(null)
+  }
+}
+
 const resetForm = () => {
   success.value = false
   orderItems.value = []
-  form.value = { name: '', phone: '', address: '', note: '' }
+  formState.name = ''
+  formState.phone = ''
+  formState.addressLine = ''
+  formState.province = ''
+  formState.ward = ''
+  formState.note = ''
+  website_url.value = ''
   search.value = ''
   selectedCategory.value = ''
 }
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 400)
-})
 </script>
+
 <template>
   <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
     <!-- Header -->
@@ -137,6 +211,7 @@ onMounted(() => {
     <p class="mb-8 text-sm text-gray-500 dark:text-zinc-400">
       Chọn sản phẩm, điền thông tin — giao hàng tận nơi trong 2 giờ
     </p>
+
     <!-- Success state -->
     <template v-if="success">
       <div class="card animate-fade-in-up mx-auto max-w-lg p-8 text-center sm:p-12">
@@ -156,11 +231,11 @@ onMounted(() => {
         <div class="card bg-surface-muted mb-6 p-4 text-left">
           <div class="mb-2 flex justify-between text-sm">
             <span class="text-gray-500 dark:text-zinc-400">Khách hàng</span>
-            <span class="text-surface-foreground font-medium">{{ form.name }}</span>
+            <span class="text-surface-foreground font-medium">{{ formState.name }}</span>
           </div>
           <div class="mb-2 flex justify-between text-sm">
             <span class="text-gray-500 dark:text-zinc-400">Số điện thoại</span>
-            <span class="text-surface-foreground font-medium">{{ form.phone }}</span>
+            <span class="text-surface-foreground font-medium">{{ formState.phone }}</span>
           </div>
           <div class="mb-2 flex justify-between text-sm">
             <span class="text-gray-500 dark:text-zinc-400">Số sản phẩm</span>
@@ -182,6 +257,7 @@ onMounted(() => {
         </div>
       </div>
     </template>
+
     <!-- Order form -->
     <template v-else>
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -201,6 +277,7 @@ onMounted(() => {
                 class="border-surface-border bg-surface text-surface-foreground focus:border-primary-400 focus:ring-primary-500/10 min-h-[44px] w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm placeholder-gray-400 transition-all focus:ring-4 focus:outline-none dark:placeholder-zinc-500"
               />
             </div>
+
             <!-- Category pills -->
             <div class="scrollbar-hide mb-4 flex items-center gap-2 overflow-x-auto pb-1">
               <UButton
@@ -222,7 +299,7 @@ onMounted(() => {
                 Tất cả
               </UButton>
               <UButton
-                v-for="cat in mockCategories"
+                v-for="cat in categories"
                 :key="cat.id"
                 variant="ghost"
                 color="neutral"
@@ -242,6 +319,7 @@ onMounted(() => {
                 {{ cat.name }}
               </UButton>
             </div>
+
             <!-- Product grid -->
             <template v-if="loading">
               <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -262,14 +340,13 @@ onMounted(() => {
                   type="button"
                   class="border-surface-border hover:border-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 group stagger-item min-h-[44px] rounded-lg border p-3 text-left transition-all"
                   :style="{ animationDelay: `${Math.min(i * 20, 200)}ms` }"
-                  :disabled="product.stock <= 0"
-                  :class="{ 'cursor-not-allowed opacity-50': product.stock <= 0 }"
+                  :disabled="false"
                   @click="addProduct(product.id)"
                 >
                   <div class="bg-surface-muted mb-2 aspect-square overflow-hidden rounded-md">
                     <NuxtImg
-                      v-if="product.image_url"
-                      :src="product.image_url"
+                      v-if="product.thumbnailUrl"
+                      :src="product.thumbnailUrl"
                       :alt="product.name"
                       class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"
@@ -285,7 +362,7 @@ onMounted(() => {
                     {{ product.name }}
                   </p>
                   <p class="text-primary-600 dark:text-primary-400 text-sm font-bold">
-                    {{ formatVND(product.price) }}
+                    {{ formatVND(product.basePrice) }}
                   </p>
                   <p class="text-xs text-gray-400 dark:text-zinc-500">/{{ product.unit }}</p>
                 </UButton>
@@ -296,6 +373,7 @@ onMounted(() => {
             </div>
           </div>
         </div>
+
         <!-- Cart + Form -->
         <div class="space-y-4">
           <!-- Cart -->
@@ -316,16 +394,17 @@ onMounted(() => {
                 Xóa tất cả
               </UButton>
             </div>
+
             <template v-if="orderItems.length">
               <div class="mb-4 max-h-64 space-y-2 overflow-y-auto pr-1">
                 <div
                   v-for="(item, i) in orderItems"
-                  :key="item.product_id"
+                  :key="item.productId"
                   class="border-surface-border flex items-center gap-2 border-b py-2 last:border-0"
                 >
                   <div class="min-w-0 flex-1">
                     <p class="text-surface-foreground truncate text-sm font-medium">
-                      {{ item.product_name }}
+                      {{ item.productName }}
                     </p>
                     <p class="text-xs text-gray-400 dark:text-zinc-500">
                       {{ formatVND(item.price) }} / {{ item.unit }}
@@ -362,7 +441,7 @@ onMounted(() => {
                     color="neutral"
                     type="button"
                     class="hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex h-8 min-h-[36px] w-8 min-w-[36px] flex-shrink-0 items-center justify-center rounded-md text-gray-400 transition-colors"
-                    :aria-label="'Xóa ' + item.product_name"
+                    :aria-label="'Xóa ' + item.productName"
                     @click="removeItem(i)"
                   >
                     <Trash2 class="h-3.5 w-3.5" aria-hidden="true" />
@@ -389,31 +468,27 @@ onMounted(() => {
                 Chọn sản phẩm bên cạnh để thêm vào giỏ
               </p>
             </div>
+
             <!-- Customer form -->
             <form
               v-if="orderItems.length"
               class="border-surface-border mt-4 space-y-3 border-t pt-4"
               @submit.prevent="submitOrder"
             >
-              <UFormField label="Họ và tên" :error="errors.name">
-                <UInput v-model="form.name" placeholder="Nguyễn Văn A" class="w-full" />
+              <UFormField label="Họ và tên" :error="formErrors.name">
+                <UInput v-model="formState.name" placeholder="Nguyễn Văn A" class="w-full" />
               </UFormField>
 
-              <UFormField label="Số điện thoại" :error="errors.phone">
-                <UInput v-model="form.phone" placeholder="0901234567" class="w-full" />
+              <UFormField label="Số điện thoại" :error="formErrors.phone">
+                <UInput v-model="formState.phone" placeholder="0901234567" class="w-full" />
               </UFormField>
 
-              <UFormField label="Địa chỉ giao hàng" :error="errors.address">
-                <UInput
-                  v-model="form.address"
-                  placeholder="123 Lê Lợi, Q.1, TP.HCM"
-                  class="w-full"
-                />
+              <AddressSelect v-model="formState" :errors="formErrors" />
+
+              <UFormField label="Ghi chú (tùy chọn)" :error="formErrors.note">
+                <UInput v-model="formState.note" placeholder="Giao trước 9h sáng" class="w-full" />
               </UFormField>
 
-              <UFormField label="Ghi chú (tùy chọn)">
-                <UInput v-model="form.note" placeholder="Giao trước 9h sáng" class="w-full" />
-              </UFormField>
               <!-- Honeypot -->
               <div
                 style="opacity: 0; position: absolute; z-index: -1; left: -9999px"
@@ -428,6 +503,7 @@ onMounted(() => {
                   autocomplete="off"
                 />
               </div>
+
               <UButton type="submit" :loading="submitting" size="lg" class="w-full justify-center">
                 <ShoppingCart class="mr-2 h-5 w-5" aria-hidden="true" />
                 Đặt hàng — {{ formatVND(total) }}

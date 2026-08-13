@@ -7,7 +7,7 @@ export const createUserValidator = vine.compile(
     phoneNumber: vine
       .string()
       .trim()
-      .regex(/^[0-9]{10,11}$/)
+      .regex(/^0[0-9]{9}$/)
       .unique(async (db, value) => {
         const user = await db.from('users').where('phone_number', value).first()
         return !user

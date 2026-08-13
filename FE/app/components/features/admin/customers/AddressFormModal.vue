@@ -4,6 +4,7 @@ import { requiredString } from '~/utils/validation'
 import { reactive, ref, computed, watch } from 'vue'
 import type { Address } from '~/utils/types'
 import { useUsers } from '~/composables/admin/useUsers'
+import AddressSelect from '~/components/base/AddressSelect.vue'
 
 const { createAddress, updateAddress } = useUsers()
 
@@ -28,8 +29,8 @@ const isEdit = computed(() => !!props.address)
 
 const schema = z.object({
   addressLine: requiredString('Địa chỉ cụ thể').max(191, 'Địa chỉ quá dài'),
-  province: z.string().max(100).optional(),
-  ward: z.string().max(100).optional(),
+  province: requiredString('Tỉnh/Thành phố').max(100),
+  ward: requiredString('Phường/Xã').max(100),
   isDefault: z.boolean().optional()
 })
 
@@ -120,19 +121,7 @@ const handleFormSubmit = () => {
   <UModal v-model:open="isOpen" :title="isEdit ? 'Cập nhật Địa chỉ' : 'Thêm mới Địa chỉ'">
     <template #body>
       <form id="address-form" class="space-y-4" @submit.prevent="handleFormSubmit">
-        <UFormField label="Địa chỉ cụ thể" name="addressLine" :error="formErrors.addressLine">
-          <UInput v-model="state.addressLine" placeholder="Số nhà, tên đường..." />
-        </UFormField>
-
-        <div class="grid grid-cols-2 gap-4">
-          <UFormField label="Tỉnh/Thành phố" name="province" :error="formErrors.province">
-            <UInput v-model="state.province" placeholder="VD: Hà Nội" />
-          </UFormField>
-
-          <UFormField label="Phường/Xã" name="ward" :error="formErrors.ward">
-            <UInput v-model="state.ward" placeholder="VD: Phường ABC" />
-          </UFormField>
-        </div>
+        <AddressSelect v-model="state" :errors="formErrors" />
 
         <UFormField name="isDefault">
           <UCheckbox v-model="state.isDefault" label="Đặt làm địa chỉ mặc định" />
