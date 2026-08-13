@@ -338,33 +338,45 @@ const resetForm = () => {
                   variant="ghost"
                   color="neutral"
                   type="button"
-                  class="border-surface-border hover:border-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 group stagger-item min-h-[44px] rounded-lg border p-3 text-left transition-all"
+                  class="border-surface-border hover:border-primary-400 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 group stagger-item h-auto w-full items-start justify-start rounded-lg border p-0 transition-all"
                   :style="{ animationDelay: `${Math.min(i * 20, 200)}ms` }"
-                  :disabled="false"
                   @click="addProduct(product.id)"
                 >
-                  <div class="bg-surface-muted mb-2 aspect-square overflow-hidden rounded-md">
-                    <NuxtImg
-                      v-if="product.thumbnailUrl"
-                      :src="product.thumbnailUrl"
-                      :alt="product.name"
-                      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div v-else class="flex h-full w-full items-center justify-center">
-                      <Package
-                        class="h-8 w-8 text-gray-300 dark:text-zinc-600"
-                        aria-hidden="true"
+                  <div class="flex w-full flex-col p-3 text-left">
+                    <div
+                      class="bg-surface-muted mb-3 aspect-square w-full overflow-hidden rounded-md"
+                    >
+                      <NuxtImg
+                        v-if="product.thumbnailUrl"
+                        :src="product.thumbnailUrl"
+                        :alt="product.name"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
                       />
+                      <div v-else class="flex h-full w-full items-center justify-center">
+                        <Package
+                          class="h-8 w-8 text-gray-300 dark:text-zinc-600"
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </div>
+                    <p
+                      class="text-surface-foreground mb-1 line-clamp-2 text-sm leading-tight font-medium"
+                      :title="product.name"
+                    >
+                      {{ product.name }}
+                    </p>
+                    <div class="mt-auto flex flex-wrap items-baseline gap-1 pt-1">
+                      <span
+                        class="text-primary-600 dark:text-primary-400 text-sm font-bold sm:text-base"
+                      >
+                        {{ formatVND(product.basePrice) }}
+                      </span>
+                      <span class="text-xs text-gray-400 dark:text-zinc-500"
+                        >/{{ product.unit }}</span
+                      >
                     </div>
                   </div>
-                  <p class="text-surface-foreground mb-0.5 truncate text-xs font-medium">
-                    {{ product.name }}
-                  </p>
-                  <p class="text-primary-600 dark:text-primary-400 text-sm font-bold">
-                    {{ formatVND(product.basePrice) }}
-                  </p>
-                  <p class="text-xs text-gray-400 dark:text-zinc-500">/{{ product.unit }}</p>
                 </UButton>
               </div>
             </template>
