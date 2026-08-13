@@ -72,11 +72,16 @@ export interface ProductReview {
 }
 
 export interface CustomPrice {
-  id: string
-  user_id: string
-  product_id: string
-  price: number
-  created_at: string
+  id: string | number
+  userId?: string | number
+  user_id?: string | number
+  productId?: string | number
+  product_id?: string | number
+  customPrice?: number | string
+  price?: number
+  createdAt?: string
+  created_at?: string
+  product?: (Pick<Product, 'id' | 'name' | 'image_url'> & { thumbnailUrl?: string | null }) | null
 }
 
 export interface Address {

@@ -12,10 +12,10 @@ export default class CustomerPriceService {
   async getUserPrices(userId: number, page: number = 1, limit: number = Pagination.DEFAULT_LIMIT) {
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
     return CustomerPrice.query()
-      .select('id', 'user_id', 'product_id', 'custom_price', 'created_at')
-      .where('user_id', userId)
+      .select('id', 'userId', 'productId', 'customPrice', 'createdAt')
+      .where('userId', userId)
       .preload('product', (q) => q.select('id', 'name', 'thumbnailUrl'))
-      .orderBy('created_at', 'desc')
+      .orderBy('createdAt', 'desc')
       .paginate(page, safeLimit)
   }
 
@@ -31,16 +31,17 @@ export default class CustomerPriceService {
   ) {
     // Check if product exists
     const product = await Product.query()
-      .select('id', 'name', 'thumbnail_url')
+      .select('id', 'name', 'thumbnailUrl')
       .where('id', data.productId)
+      .where('isActive', true)
       .firstOrFail()
 
     return await db.transaction(async (trx) => {
       // Find existing price
       let customerPrice = await CustomerPrice.query({ client: trx })
-        .select('id', 'user_id', 'product_id', 'custom_price')
-        .where('user_id', userId)
-        .where('product_id', data.productId)
+        .select('id', 'userId', 'productId', 'customPrice')
+        .where('userId', userId)
+        .where('productId', data.productId)
         .first()
 
       if (!customerPrice) {
@@ -66,12 +67,6 @@ export default class CustomerPriceService {
    * Delete a custom price (fallback to base price)
    */
   async deletePrice(userId: number, productId: number) {
-    const customerPrice = await CustomerPrice.query()
-      .select('id')
-      .where('user_id', userId)
-      .where('product_id', productId)
-      .firstOrFail()
-
-    await customerPrice.delete()
+    await CustomerPrice.query().where('userId', userId).where('productId', productId).delete()
   }
 }

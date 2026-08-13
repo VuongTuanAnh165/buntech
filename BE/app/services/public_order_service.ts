@@ -35,10 +35,10 @@ export default class PublicOrderService {
       // 2. Find or Create Guest User (Safe from Race Condition via firstOrCreate)
       let user = await User.firstOrCreate(
         { phoneNumber: data.phoneNumber },
-        { 
-          fullName: data.fullName, 
+        {
+          fullName: data.fullName,
           role: Role.GUEST,
-          password: Math.random().toString(36).substring(2, 10) + 'A1!'
+          password: Math.random().toString(36).substring(2, 10) + 'A1!',
         },
         { client: trx }
       )

@@ -137,13 +137,13 @@ onMounted(() => {
     .filter((tx) => tx.user_id === customerId)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-  const cps = mockCustomPrices.filter((cp) => cp.user_id === customerId)
+  const cps = mockCustomPrices.filter((cp) => String(cp.user_id) === customerId)
   customPrices.value = cps
     .map((cp) => {
       const product = mockProducts.find((p) => p.id === cp.product_id) || null
       return { ...cp, product }
     })
-    .sort((a, b) => b.price - a.price)
+    .sort((a, b) => Number(b.price) - Number(a.price))
 })
 
 const showCustomerEdit = ref(false)
@@ -157,7 +157,7 @@ function savePrice() {
   showPriceModal.value = false
 }
 
-function deletePrice(id: string) {
+function deletePrice(id: string | number) {
   customPrices.value = customPrices.value.filter((c) => c.id !== id)
 }
 </script>

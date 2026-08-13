@@ -104,8 +104,14 @@ async function onCustomerChange() {
   customerAddresses.value = []
   selectedAddressId.value = ''
   if (!selectedCustomerId.value) return
-  const cps = mockCustomPrices.filter((cp) => cp.user_id === selectedCustomerId.value)
-  for (const cp of cps) customPrices.value.set(cp.product_id, Number(cp.price))
+  const cps = mockCustomPrices.filter(
+    (cp) => String(cp.user_id || cp.userId) === selectedCustomerId.value
+  )
+  for (const cp of cps)
+    customPrices.value.set(
+      String(cp.product_id || cp.productId),
+      Number(cp.price || cp.customPrice)
+    )
 
   try {
     const res = await fetchAddresses(selectedCustomerId.value)

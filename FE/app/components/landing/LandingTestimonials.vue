@@ -30,12 +30,12 @@ const defaultTestimonials = [
 ]
 
 const testimonials = computed(() => {
-  let results = []
+  let results: Array<{ name: string; role: string; text: string; rating: number }> = []
   if (apiReviews.value.length > 0) {
     results = apiReviews.value.map((r) => ({
       name: r.user?.fullName || 'Khách hàng',
       role: r.product?.name ? `Đã mua: ${r.product.name}` : 'Khách hàng',
-      text: r.content,
+      text: r.content || '',
       rating: Number(r.rating) || 5
     }))
   }
@@ -49,11 +49,11 @@ const testimonials = computed(() => {
 const breakpoints = {
   768: {
     itemsToShow: 2,
-    snapAlign: 'start'
+    snapAlign: 'start' as const
   },
   1024: {
     itemsToShow: 3,
-    snapAlign: 'start'
+    snapAlign: 'start' as const
   }
 }
 </script>
