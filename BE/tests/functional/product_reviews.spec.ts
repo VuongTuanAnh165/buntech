@@ -35,7 +35,7 @@ test.group('Product Reviews', (group) => {
 
     response.assertStatus(200)
     response.assertBodyContains({ success: true })
-    assert.isAtLeast(response.body().data?.length, 2)
+    assert.isAtLeast(response.body().data?.data?.length, 2)
   })
 
   test('admin can approve review', async ({ client, assert }) => {

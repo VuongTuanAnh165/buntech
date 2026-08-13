@@ -242,8 +242,9 @@ export default class ProductReviewService {
       [productId]
     )
 
-    const totalReviews = result[0][0].total || 0
-    const averageRating = result[0][0].average ? Number.parseFloat(result[0][0].average) : 0.0
+    const row = result.rows ? result.rows[0] : result[0][0]
+    const totalReviews = row?.total || 0
+    const averageRating = row?.average ? Number.parseFloat(row.average) : 0.0
 
     // Update product
     const product = await Product.query({ client: trx })

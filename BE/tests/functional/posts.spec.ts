@@ -36,7 +36,7 @@ test.group('Posts', (group) => {
 
     response.assertStatus(200)
     response.assertBodyContains({ success: true })
-    assert.isAtLeast(response.body().data?.length, 3)
+    assert.isAtLeast(response.body().data?.data?.length, 3)
   })
 
   test('admin can update post', async ({ client, assert }) => {
