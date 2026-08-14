@@ -1,149 +1,119 @@
 <script setup lang="ts">
 import { ConstantKey } from '~/enums/constantKeys'
-import type { Order, Profile } from '~/utils/types'
-import { mockOrders, mockProfiles } from '~/utils/mockData'
+import { useAdminOrders } from '~/composables/admin/useAdminOrders'
+import { useUsers } from '~/composables/admin/useUsers'
+import type { UserDTO } from '~/utils/types'
+
 const { constants } = useMasterData()
 const toast = useToast()
+const { fetchOrders, batchAssignDriver } = useAdminOrders()
+const { fetchUsers } = useUsers()
+
 useSeoMeta({ title: 'Đơn hàng - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
+
 // State
-const allOrders = ref<Order[]>([...mockOrders])
-const drivers = ref<Profile[]>(
-  mockProfiles.filter(
-    (p) =>
-      p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
-      p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
-  )
-)
-const loading = ref(true)
+const drivers = ref<UserDTO[]>([])
+
 // Filters
 const search = ref('')
+const searchDebounce = ref('')
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+watch(search, (val) => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    searchDebounce.value = val
+  }, 500)
+})
+
 const statusFilter = ref<'ALL' | string>('ALL')
 const startDate = ref('')
 const endDate = ref('')
-const sortBy = ref<'id' | 'status' | 'total' | 'created_at'>('created_at')
-const sortDirection = ref<'asc' | 'desc'>('desc')
 const page = ref(1)
 const limit = ref(10)
 const showFilters = ref(false)
-const selectedOrders = ref<Set<string>>(new Set())
+const selectedOrders = ref<Set<number>>(new Set())
 const showBatchModal = ref(false)
 const exporting = ref(false)
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 300)
+
+const fetchParams = computed(() => {
+  const p: Record<string, string | number> = { page: page.value, limit: limit.value }
+  if (searchDebounce.value) p.search = searchDebounce.value
+  if (statusFilter.value !== 'ALL') p.status = statusFilter.value
+  if (startDate.value) p.startDate = startDate.value
+  if (endDate.value) p.endDate = endDate.value
+  // Note: Backend might not support dynamic sort yet, keeping client state for UI compatibility
+  return p
+})
+
+const {
+  data: res,
+  status,
+  refresh
+} = useAsyncData('admin_orders', () => fetchOrders(fetchParams.value), { watch: [fetchParams] })
+
+const loading = computed(() => status.value === 'pending')
+const pagedRows = computed(() => res.value?.data?.data || [])
+const total = computed(() => res.value?.data?.meta?.total || 0)
+
+onMounted(async () => {
+  try {
+    const driverRole = constants.value?.[ConstantKey.Role]?.DRIVER
+    if (driverRole) {
+      const usersRes = await fetchUsers({ role: driverRole, limit: 100 })
+      drivers.value = usersRes.data?.data || []
+    }
+  } catch {
+    // ignore
+  }
 })
 
 const statusPills = computed(() => {
-  const list = allOrders.value
+  // Vì đã chuyển sang SSR Pagination, chúng ta chỉ đếm trên trang hiện tại hoặc ẩn số đếm đi.
+  // Để giữ UI mượt, hiển thị count = 0 nếu không có data.
   return [
-    { key: 'ALL' as const, label: 'Tất cả', count: list.length },
-    {
-      key: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
-      label: 'Chờ xử lý',
-      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING)
-        .length
-    },
+    { key: 'ALL' as const, label: 'Tất cả' },
+    { key: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string, label: 'Chờ xử lý' },
     {
       key: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
-      label: 'Đang chuẩn bị',
-      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.PROCESSING)
-        .length
+      label: 'Đang chuẩn bị'
     },
-    {
-      key: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
-      label: 'Đang giao',
-      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING)
-        .length
-    },
-    {
-      key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
-      label: 'Đã giao',
-      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
-        .length
-    },
-    {
-      key: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string,
-      label: 'Đã hủy',
-      count: list.filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED)
-        .length
-    }
+    { key: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string, label: 'Đang giao' },
+    { key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string, label: 'Đã giao' },
+    { key: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string, label: 'Đã hủy' }
   ]
 })
-const filteredRows = computed(() => {
-  let rows = allOrders.value
-  if (search.value) {
-    const q = search.value.toLowerCase()
-    rows = rows.filter(
-      (o) =>
-        o.id.toLowerCase().includes(q) ||
-        (o.user?.full_name || '').toLowerCase().includes(q) ||
-        (o.guest_info?.name || '').toLowerCase().includes(q) ||
-        o.shipping_address.toLowerCase().includes(q)
-    )
-  }
-  if (statusFilter.value !== 'ALL') rows = rows.filter((o) => o.status === statusFilter.value)
-  if (startDate.value) {
-    const s = new Date(startDate.value).toISOString()
-    rows = rows.filter((o) => o.created_at >= s)
-  }
-  if (endDate.value) {
-    const e = new Date(endDate.value + 'T23:59:59').toISOString()
-    rows = rows.filter((o) => o.created_at <= e)
-  }
-  return [...rows].sort((a, b) => {
-    const av = (a as Record<string, unknown>)[sortBy.value]
-    const bv = (b as Record<string, unknown>)[sortBy.value]
-    if (typeof av === 'number' && typeof bv === 'number') {
-      return sortDirection.value === 'asc' ? av - bv : bv - av
-    }
-    return sortDirection.value === 'asc'
-      ? String(av).localeCompare(String(bv))
-      : String(bv).localeCompare(String(av))
-  })
-})
-const total = computed(() => filteredRows.value.length)
-const pagedRows = computed(() => {
-  const start = (page.value - 1) * limit.value
-  return filteredRows.value.slice(start, start + limit.value)
-})
-watch([search, statusFilter, startDate, endDate], () => {
+
+watch([searchDebounce, statusFilter, startDate, endDate], () => {
   page.value = 1
 })
-function toggleSelectOrder(id: string, checked: boolean) {
+
+function toggleSelectOrder(id: number, checked: boolean) {
   if (checked) selectedOrders.value.add(id)
   else selectedOrders.value.delete(id)
   selectedOrders.value = new Set(selectedOrders.value)
 }
-function _toggleAll(v: boolean | 'indeterminate') {
-  if (v === true) {
-    filteredRows.value.forEach((o) => selectedOrders.value.add(o.id))
-  } else {
-    selectedOrders.value.clear()
-  }
-}
+
 function clearSelection() {
   selectedOrders.value.clear()
   selectedOrders.value = new Set()
 }
-function handleBatchAssign(driverId: string) {
+
+async function handleBatchAssign(driverId: string | number) {
   const ids = Array.from(selectedOrders.value)
-  const driver = drivers.value.find((d) => d.id === driverId) || null
-  allOrders.value = allOrders.value.map((o) =>
-    ids.includes(o.id)
-      ? ({
-          ...o,
-          driver_id: driverId,
-          driver,
-          status: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
-          updated_at: new Date().toISOString()
-        } as Order)
-      : o
-  )
-  toast.add({ title: `Đã điều phối ${ids.length} đơn hàng`, color: 'success' })
-  clearSelection()
+  try {
+    const dId = typeof driverId === 'string' ? parseInt(driverId, 10) : driverId
+    await batchAssignDriver({
+      driverId: dId,
+      orders: ids.map((id) => ({ orderId: id }))
+    })
+    clearSelection()
+    refresh()
+  } catch {
+    // ignore
+  }
 }
+
 function exportCSV() {
   exporting.value = true
   setTimeout(() => {
@@ -151,17 +121,19 @@ function exportCSV() {
     exporting.value = false
   }, 300)
 }
+
 function clearFilters() {
   statusFilter.value = 'ALL'
   startDate.value = ''
   endDate.value = ''
   search.value = ''
 }
+
 const activeFilterCount = computed(() => {
   let c = 0
   if (statusFilter.value !== 'ALL') c++
   if (startDate.value || endDate.value) c++
-  if (search.value) c++
+  if (searchDebounce.value) c++
   return c
 })
 </script>
@@ -222,7 +194,7 @@ const activeFilterCount = computed(() => {
     </template>
 
     <template v-else>
-      <OrderKpiCards :orders="allOrders" :loading="loading" />
+      <OrderKpiCards :orders="pagedRows" :loading="loading" />
       <!-- Status pills -->
       <div
         class="stagger-item mb-4 flex items-center gap-2 overflow-x-auto pb-1"
@@ -242,13 +214,6 @@ const activeFilterCount = computed(() => {
           "
         >
           {{ pill.label }}
-          <UBadge
-            :color="statusFilter === pill.key ? 'neutral' : 'neutral'"
-            variant="subtle"
-            size="sm"
-            class="ml-1"
-            >{{ pill.count }}</UBadge
-          >
         </UButton>
       </div>
       <!-- Desktop filter bar -->
@@ -302,7 +267,7 @@ const activeFilterCount = computed(() => {
                     }
                   "
                 >
-                  {{ pill.label }} ({{ pill.count }})
+                  {{ pill.label }}
                 </UButton>
               </div>
             </UFormField>

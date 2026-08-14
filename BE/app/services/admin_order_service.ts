@@ -18,7 +18,14 @@ export default class AdminOrderService {
   async getOrders(
     page: number = 1,
     limit: number = Pagination.DEFAULT_LIMIT,
-    filters?: { status?: string; userId?: number; driverId?: number }
+    filters?: {
+      status?: string
+      userId?: number
+      driverId?: number
+      search?: string
+      startDate?: string
+      endDate?: string
+    }
   ) {
     const query = Order.query()
       .select('id', 'user_id', 'driver_id', 'total_amount', 'status', 'created_at')
@@ -34,6 +41,24 @@ export default class AdminOrderService {
     }
     if (filters?.driverId) {
       query.where('driver_id', filters.driverId)
+    }
+    if (filters?.startDate) {
+      query.where('created_at', '>=', `${filters.startDate} 00:00:00`)
+    }
+    if (filters?.endDate) {
+      query.where('created_at', '<=', `${filters.endDate} 23:59:59`)
+    }
+    if (filters?.search) {
+      const keyword = `%${filters.search}%`
+      query.where((q) => {
+        q.where('id', 'like', keyword)
+          .orWhereHas('user', (uq) => {
+            uq.where('full_name', 'like', keyword).orWhere('phone_number', 'like', keyword)
+          })
+          .orWhereHas('shippingAddress', (aq) => {
+            aq.where('address_line', 'like', keyword)
+          })
+      })
     }
 
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)

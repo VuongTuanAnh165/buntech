@@ -1,28 +1,37 @@
 <script setup lang="ts">
-import { mockOrders, mockProfiles, mockOrderItems } from '~/utils/mockData'
 import { ConstantKey } from '~/enums/constantKeys'
-import type { Order, OrderItem, Profile } from '~/utils/types'
+import { useAdminOrders } from '~/composables/admin/useAdminOrders'
+import { useUsers } from '~/composables/admin/useUsers'
 import {
   getOrderStatusColor,
   getOrderStatusIcon,
   getOrderStatusLabel,
   getOrderStatusList
 } from '~/utils/orderStatus'
+import type { UserDTO } from '~/utils/types'
 
 const { constants } = useMasterData()
-
 const toast = useToast()
 const route = useRoute()
 const _router = useRouter()
+const { getOrder, updateStatus, batchAssignDriver } = useAdminOrders()
+const { fetchUsers } = useUsers()
 definePageMeta({ layout: 'admin' })
 
 const orderId = route.params.id as string
 
-// State
-const loading = ref(true)
-const error = ref(false)
-const order = ref<Order | null>(null)
-const items = ref<OrderItem[]>([])
+const {
+  data: res,
+  status,
+  error: fetchError,
+  refresh
+} = useAsyncData(`admin_order_${orderId}`, () => getOrder(orderId))
+
+const loading = computed(() => status.value === 'pending')
+const error = computed(() => !!fetchError.value || !res.value?.data)
+const order = computed(() => res.value?.data || null)
+const items = computed(() => order.value?.items || [])
+
 const showStatusMenu = ref(false)
 const changingStatus = ref(false)
 const showAssignDriver = ref(false)
@@ -38,8 +47,8 @@ const isCancelled = computed(
   () => order.value?.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
 )
 
-const total = computed(() => Number(order.value?.total ?? 0))
-const amountCollected = computed(() => Number(order.value?.amount_collected ?? 0))
+const total = computed(() => Number(order.value?.totalAmount ?? 0))
+const amountCollected = computed(() => 0)
 const remaining = computed(() => Math.max(0, total.value - amountCollected.value))
 
 const paymentState = computed(() => {
@@ -49,81 +58,86 @@ const paymentState = computed(() => {
   return { label: 'Chưa thanh toán', color: 'error' as const }
 })
 
-const customer = computed(() => order.value?.user as Profile | null | undefined)
-const customerName = computed(
-  () => customer.value?.full_name || order.value?.guest_info?.name || 'Khách lẻ'
-)
-const customerPhone = computed(() => customer.value?.phone || order.value?.guest_info?.phone || '—')
-const shippingAddress = computed(
-  () => order.value?.shipping_address || order.value?.guest_info?.address || '—'
-)
-const driver = computed(() => order.value?.driver as Profile | null | undefined)
-const driverName = computed(() => driver.value?.full_name)
+const customer = computed(() => order.value?.user)
+const customerName = computed(() => customer.value?.fullName || 'Khách lẻ')
+const customerPhone = computed(() => customer.value?.phoneNumber || '—')
+const shippingAddress = computed(() => order.value?.shippingAddress?.addressLine || '—')
+const driver = computed(() => order.value?.driver)
+const driverName = computed(() => driver.value?.fullName)
 const orderNotes = computed(() => order.value?.note || 'Không có ghi chú cho đơn hàng này.')
 
-const availableDrivers = computed(() =>
-  mockProfiles.filter(
-    (p) =>
-      p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
-      p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
-  )
-)
+const availableDrivers = ref<UserDTO[]>([])
+onMounted(async () => {
+  try {
+    const driverRole = constants.value?.[ConstantKey.Role]?.DRIVER
+    if (driverRole) {
+      const usersRes = await fetchUsers({ role: driverRole, limit: 100 })
+      availableDrivers.value = usersRes.data?.data || []
+    }
+  } catch {
+    // ignore
+  }
+})
+
 const statusOptions = computed(() =>
   Object.values(constants.value?.[ConstantKey.OrderStatus] || {}).filter(
     (s) => s !== order.value?.status
   )
 )
 
-// History
 const orderHistory = ref<{ status: string; at: string; note: string }[]>([])
-function buildHistory() {
-  if (!order.value) return
-  const created = order.value.created_at
-  const base: { status: string; at: string; note: string }[] = [
-    {
-      status: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
-      at: created,
-      note: 'Đơn hàng được tạo'
+watch(
+  order,
+  () => {
+    if (!order.value) return
+    const created = order.value.createdAt
+    const base: { status: string; at: string; note: string }[] = [
+      {
+        status: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
+        at: created,
+        note: 'Đơn hàng được tạo'
+      }
+    ]
+    if (
+      order.value.status !== constants.value?.[ConstantKey.OrderStatus]?.PENDING &&
+      order.value.status !== constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
+    ) {
+      base.push({
+        status: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
+        at: addHours(created, 2),
+        note: 'Bắt đầu chuẩn bị hàng'
+      })
     }
-  ]
-  if (
-    order.value.status !== constants.value?.[ConstantKey.OrderStatus]?.PENDING &&
-    order.value.status !== constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
-  ) {
-    base.push({
-      status: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
-      at: addHours(created, 2),
-      note: 'Bắt đầu chuẩn bị hàng'
-    })
-  }
-  if (
-    [
-      constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
-      constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
-    ].includes(order.value.status)
-  ) {
-    base.push({
-      status: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
-      at: addHours(created, 4),
-      note: 'Đã giao cho tài xế'
-    })
-  }
-  if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED) {
-    base.push({
-      status: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
-      at: addHours(created, 8),
-      note: 'Khách đã nhận hàng'
-    })
-  }
-  if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED) {
-    base.push({
-      status: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string,
-      at: addHours(created, 1),
-      note: 'Đơn hàng bị hủy'
-    })
-  }
-  orderHistory.value = base
-}
+    if (
+      [
+        constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
+        constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+      ].includes(order.value.status)
+    ) {
+      base.push({
+        status: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
+        at: addHours(created, 4),
+        note: 'Đã giao cho tài xế'
+      })
+    }
+    if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED) {
+      base.push({
+        status: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
+        at: addHours(created, 8),
+        note: 'Khách đã nhận hàng'
+      })
+    }
+    if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED) {
+      base.push({
+        status: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string,
+        at: addHours(created, 1),
+        note: 'Đơn hàng bị hủy'
+      })
+    }
+    orderHistory.value = base
+  },
+  { immediate: true }
+)
 
 function addHours(iso: string, h: number): string {
   const d = new Date(iso)
@@ -143,65 +157,47 @@ const deliveryTimeline = computed(() => {
   ]
 })
 
-// Load
-function loadOrder() {
-  loading.value = true
-  error.value = false
-  try {
-    const found = mockOrders.find((o) => o.id === orderId)
-    if (!found) {
-      error.value = true
-      return
-    }
-    order.value = { ...found } as Order
-    items.value = found.order_items || mockOrderItems.filter((i) => i.order_id === orderId)
-    buildHistory()
-  } catch {
-    error.value = true
-  } finally {
-    setTimeout(() => {
-      loading.value = false
-    }, 300)
-  }
-}
-
-// Actions
-function changeStatus(newStatus: string) {
+async function changeStatus(newStatus: string) {
   if (!order.value) return
   showStatusMenu.value = false
   changingStatus.value = true
-  order.value.status = newStatus
-  setTimeout(() => {
-    toast.add({
-      title: `Đã cập nhật trạng thái: ${getOrderStatusLabel(constants)[newStatus as string]}`,
-      color: 'success'
+  try {
+    await updateStatus(orderId, {
+      status: newStatus,
+      updatedAt: order.value.updatedAt
     })
-    buildHistory()
+    refresh()
+  } catch {
+    // ignore
+  } finally {
     changingStatus.value = false
-  }, 500)
+  }
 }
 
-function assignDriver() {
+async function assignDriver() {
   if (!selectedDriverId.value || !order.value) return
-  const drv = availableDrivers.value.find((d) => d.id === selectedDriverId.value)
-  if (drv) {
-    order.value.driver = drv
-    order.value.driver_id = drv.id
-    toast.add({ title: `Đã gán tài xế: ${drv.full_name}`, color: 'success' })
+  try {
+    await batchAssignDriver({
+      driverId: parseInt(selectedDriverId.value, 10),
+      orders: [{ orderId: parseInt(orderId, 10) }]
+    })
+    showAssignDriver.value = false
+    selectedDriverId.value = ''
+    refresh()
+  } catch {
+    // ignore
   }
-  showAssignDriver.value = false
-  selectedDriverId.value = ''
 }
 
 function copyOrder() {
   if (!order.value) return
   const copyData = {
-    user_id: order.value.user_id,
+    userId: order.value.userId,
     items: items.value.map((i) => ({
-      product_id: i.product_id,
-      product_name: i.product_name,
+      productId: i.productId,
+      productName: i.product?.name,
       quantity: i.quantity,
-      price: i.price
+      price: i.unitPrice
     }))
   }
   if (import.meta.client) {
@@ -216,7 +212,10 @@ function printOrder() {
 }
 
 useSeoMeta({ title: () => `Đơn hàng #${String(orderId).slice(0, 8)} - BunTech Admin` })
-onMounted(loadOrder)
+
+function loadOrder() {
+  refresh()
+} // for retry button
 
 const breadcrumbItems = [
   { label: 'Admin', to: '/admin' },
@@ -289,7 +288,7 @@ const breadcrumbItems = [
             >
               <span class="flex items-center gap-1.5"
                 ><UIcon name="i-lucide-clock" class="h-4 w-4" />
-                {{ formatDateTime(order.created_at) }}</span
+                {{ formatDateTime(order.createdAt) }}</span
               >
               <span class="flex items-center gap-1.5"
                 ><UIcon name="i-lucide-shopping-bag" class="h-4 w-4" /> {{ items.length }} sản
@@ -391,9 +390,9 @@ const breadcrumbItems = [
                     class="bg-surface-hover ring-surface-border flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg ring-1"
                   >
                     <NuxtImg
-                      v-if="item.product?.image_url"
-                      :src="item.product.image_url"
-                      :alt="item.product?.name || item.product_name"
+                      v-if="item.product?.thumbnailUrl"
+                      :src="item.product.thumbnailUrl"
+                      :alt="item.product?.name"
                       class="h-full w-full object-cover"
                     />
                     <UIcon
@@ -404,17 +403,17 @@ const breadcrumbItems = [
                   </div>
                   <div class="min-w-0">
                     <p class="text-surface-foreground truncate text-sm font-medium">
-                      {{ item.product?.name || item.product_name }}
+                      {{ item.product?.name }}
                     </p>
                     <p class="text-xs text-slate-500 sm:hidden dark:text-zinc-400">
-                      {{ formatVND(Number(item.price)) }} × {{ item.quantity }}
+                      {{ formatVND(Number(item.unitPrice)) }} × {{ item.quantity }}
                     </p>
                   </div>
                 </div>
                 <div
                   class="col-span-2 hidden text-right text-sm text-slate-600 tabular-nums sm:block dark:text-zinc-300"
                 >
-                  {{ formatVND(Number(item.price)) }}
+                  {{ formatVND(Number(item.unitPrice)) }}
                 </div>
                 <div class="col-span-2 hidden text-right sm:block">
                   <UBadge color="neutral" variant="soft">× {{ item.quantity }}</UBadge>
@@ -422,7 +421,7 @@ const breadcrumbItems = [
                 <div
                   class="text-surface-foreground col-span-12 text-right text-sm font-semibold tabular-nums sm:col-span-2"
                 >
-                  {{ formatVND(Number(item.quantity) * Number(item.price)) }}
+                  {{ formatVND(Number(item.quantity) * Number(item.unitPrice)) }}
                 </div>
               </div>
 
@@ -613,14 +612,14 @@ const breadcrumbItems = [
               <h2 class="text-surface-foreground text-sm font-semibold">Khách hàng</h2>
             </div>
             <div class="mb-4 flex items-center gap-3">
-              <UAvatar :alt="customerName" size="lg" :src="customer?.avatar_url || undefined" />
+              <UAvatar :alt="customerName" size="lg" :src="customer?.avatarUrl || undefined" />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-semibold">
                   {{ customerName }}
                 </p>
                 <NuxtLink
-                  v-if="order?.user_id"
-                  :to="`/admin/customers/${order.user_id}`"
+                  v-if="order?.userId"
+                  :to="`/admin/customers/${order.userId}`"
                   class="text-primary-600 dark:text-primary-400 text-xs hover:underline"
                 >
                   Xem hồ sơ khách
@@ -721,7 +720,7 @@ const breadcrumbItems = [
               v-if="driverName"
               class="border-surface-border mb-4 flex items-center gap-3 border-b pb-4"
             >
-              <UAvatar :alt="driverName" size="md" :src="driver?.avatar_url || undefined" />
+              <UAvatar :alt="driverName" size="md" :src="driver?.avatarUrl || undefined" />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-medium">{{ driverName }}</p>
                 <p class="text-xs text-slate-500 dark:text-zinc-400">Tài xế giao hàng</p>
@@ -797,27 +796,27 @@ const breadcrumbItems = [
               color="neutral"
               :class="[
                 'flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors',
-                selectedDriverId === drv.id
-                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                selectedDriverId === String(drv.id)
+                  ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500'
                   : 'border-surface-border hover:bg-surface-hover'
               ]"
               @click="
                 () => {
-                  selectedDriverId = drv.id
+                  selectedDriverId = String(drv.id)
                 }
               "
             >
-              <UAvatar :alt="drv.full_name" size="sm" :src="drv.avatar_url || undefined" />
+              <UAvatar :alt="drv.fullName" size="sm" :src="drv.profile?.avatarUrl || undefined" />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-medium">
-                  {{ drv.full_name }}
+                  {{ drv.fullName }}
                 </p>
                 <p class="text-xs text-slate-500 tabular-nums dark:text-zinc-400">
-                  {{ drv.phone || 'Chưa có SĐT' }}
+                  {{ drv.phoneNumber || 'Chưa có SĐT' }}
                 </p>
               </div>
               <UIcon
-                v-if="selectedDriverId === drv.id"
+                v-if="selectedDriverId === String(drv.id)"
                 name="i-lucide-check-circle-2"
                 class="text-primary-600 dark:text-primary-400 ml-auto h-5 w-5 flex-shrink-0"
               />

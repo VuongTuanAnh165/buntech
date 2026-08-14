@@ -22,6 +22,9 @@ export default class AdminOrdersController {
    * @paramQuery status - Trạng thái đơn hàng
    * @paramQuery userId - ID khách hàng
    * @paramQuery driverId - ID tài xế
+   * @paramQuery search - Từ khóa tìm kiếm (mã đơn, tên khách, số điện thoại, địa chỉ)
+   * @paramQuery startDate - Lọc từ ngày
+   * @paramQuery endDate - Lọc đến ngày
    * @responseBody 200 - <PaginatedOrderAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
@@ -30,11 +33,17 @@ export default class AdminOrdersController {
     const status = request.input('status')
     const userId = request.input('userId')
     const driverId = request.input('driverId')
+    const search = request.input('search')
+    const startDate = request.input('startDate')
+    const endDate = request.input('endDate')
 
     const orders = await this.adminOrderService.getOrders(page, limit, {
       status,
       userId,
       driverId,
+      search,
+      startDate,
+      endDate,
     })
 
     return response.ok({
