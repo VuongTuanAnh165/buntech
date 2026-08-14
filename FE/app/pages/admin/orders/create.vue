@@ -1,30 +1,31 @@
 <script setup lang="ts">
-import { ConstantKey } from '~/enums/constantKeys'
-import type { UserDTO, Product, Address } from '~/utils/types'
-import { mockProducts, mockCustomPrices, mockTransactions } from '~/utils/mockData'
+import type { UserDTO, AdminProduct, Address } from '~/utils/types'
+import { productService } from '~/services/productService'
+import { customerPriceService } from '~/services/customerPriceService'
+import { useAdminOrders } from '~/composables/admin/useAdminOrders'
 import { useUsers } from '~/composables/admin/useUsers'
 
-const { constants } = useMasterData()
 const toast = useToast()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Tạo đơn hàng - BunTech Admin' })
 const { fetchUsers, fetchAddresses } = useUsers()
+const { createOrder } = useAdminOrders()
 const loading = ref(true)
 const customers = ref<UserDTO[]>([])
-const products = ref<Product[]>([])
+const products = ref<AdminProduct[]>([])
 const selectedCustomerId = ref('')
 const customPrices = ref<Map<string, number>>(new Map())
 const customerAddresses = ref<Address[]>([])
 const selectedAddressId = ref('')
 const orderItems = ref<
   {
-    product_id: string
-    product_name: string
+    productId: number
+    productName: string
     quantity: number
     price: number
     stock: number
     unit: string
-    image_url: string | null
+    thumbnailUrl: string | null
   }[]
 >([])
 const note = ref('')
@@ -50,15 +51,7 @@ const amountCollected = computed(() => {
   return Number.isNaN(n) ? 0 : n
 })
 const debtAmount = computed(() => Math.max(0, total.value - amountCollected.value))
-const customerDebt = computed(() => {
-  let debt = 0
-  const txs = mockTransactions.filter((tx) => tx.user_id === selectedCustomerId.value)
-  for (const tx of txs) {
-    if (tx.type === 'DEBT_INCREASE') debt += tx.amount
-    if (tx.type === 'DEBT_PAYMENT') debt -= tx.amount
-  }
-  return debt
-})
+const customerDebt = computed(() => Number(selectedCustomer.value?.profile?.currentDebt || 0))
 const debtLimit = computed(() => Number(selectedCustomer.value?.profile?.debtLimit ?? 0))
 const exceedsDebtLimit = computed(
   () => debtLimit.value > 0 && customerDebt.value + debtAmount.value > debtLimit.value
@@ -90,11 +83,9 @@ async function loadInitData() {
     const res = await fetchUsers({ role: 'CUSTOMER', limit: 100 })
     customers.value = res.data?.data || []
 
-    products.value = mockProducts
-      .filter(
-        (p) => !p.deleted_at && p.status === constants.value?.[ConstantKey.ProductStatus]?.ACTIVE
-      )
-      .sort((a, b) => a.name.localeCompare(b.name))
+    const pRes = await productService.getAdminProducts({ limit: 1000 })
+    products.value = pRes.data?.data?.filter((p) => p.isActive) || []
+    products.value.sort((a, b) => a.name.localeCompare(b.name))
   } finally {
     loading.value = false
   }
@@ -104,40 +95,43 @@ async function onCustomerChange() {
   customerAddresses.value = []
   selectedAddressId.value = ''
   if (!selectedCustomerId.value) return
-  const cps = mockCustomPrices.filter(
-    (cp) => String(cp.user_id || cp.userId) === selectedCustomerId.value
-  )
-  for (const cp of cps)
-    customPrices.value.set(
-      String(cp.product_id || cp.productId),
-      Number(cp.price || cp.customPrice)
-    )
 
   try {
-    const res = await fetchAddresses(selectedCustomerId.value)
-    customerAddresses.value = res.data || []
+    const [addrRes, priceRes] = await Promise.all([
+      fetchAddresses(selectedCustomerId.value),
+      customerPriceService.fetchPrices(selectedCustomerId.value, { limit: 1000 })
+    ])
+
+    customerAddresses.value = addrRes.data || []
     customerAddresses.value.sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0))
     const defaultAddr = customerAddresses.value.find((a) => a.isDefault)
     if (defaultAddr) selectedAddressId.value = String(defaultAddr.id)
+
+    const cps = priceRes.data?.data || []
+    for (const cp of cps) {
+      if (cp.productId) {
+        customPrices.value.set(String(cp.productId), Number(cp.customPrice))
+      }
+    }
   } catch {
     //
   }
 
   orderItems.value = orderItems.value.map((item) => ({
     ...item,
-    price: customPrices.value.has(item.product_id)
-      ? customPrices.value.get(item.product_id)!
+    price: customPrices.value.has(String(item.productId))
+      ? customPrices.value.get(String(item.productId))!
       : item.price
   }))
 }
-function getProductPrice(productId: string): number {
-  if (customPrices.value.has(productId)) return customPrices.value.get(productId)!
+function getProductPrice(productId: number): number {
+  if (customPrices.value.has(String(productId))) return customPrices.value.get(String(productId))!
   const p = products.value.find((p) => p.id === productId)
-  return Number(p?.price) || 0
+  return Number(p?.basePrice) || 0
 }
-function addProduct(productId: string) {
+function addProduct(productId: number) {
   if (!productId) return
-  const existing = orderItems.value.find((i) => i.product_id === productId)
+  const existing = orderItems.value.find((i) => i.productId === productId)
   if (existing) {
     existing.quantity++
     return
@@ -145,13 +139,13 @@ function addProduct(productId: string) {
   const product = products.value.find((p) => p.id === productId)
   if (product) {
     orderItems.value.push({
-      product_id: productId,
-      product_name: product.name,
+      productId,
+      productName: product.name,
       quantity: 1,
       price: getProductPrice(productId),
-      stock: Number(product.stock),
+      stock: 999,
       unit: product.unit,
-      image_url: product.image_url
+      thumbnailUrl: product.thumbnailUrl
     })
   }
 }
@@ -171,13 +165,17 @@ function updateQuantity(index: number, delta: number) {
 function setQuantity(index: number, quantity: number) {
   if (orderItems.value[index]) orderItems.value[index].quantity = quantity
 }
-function submitOrder() {
+async function submitOrder() {
   if (!orderItems.value.length) {
     toast.add({ title: 'Vui lòng chọn ít nhất một sản phẩm', color: 'error' })
     return
   }
   if (!selectedCustomerId.value) {
     toast.add({ title: 'Vui lòng chọn khách hàng', color: 'error' })
+    return
+  }
+  if (!selectedAddressId.value) {
+    toast.add({ title: 'Vui lòng chọn địa chỉ giao hàng', color: 'error' })
     return
   }
   if (exceedsDebtLimit.value) {
@@ -189,14 +187,29 @@ function submitOrder() {
   }
 
   saving.value = true
-  setTimeout(() => {
-    createdOrderId.value = `ord-${String(Date.now()).slice(-6)}`
-    success.value = true
+  try {
+    const payload = {
+      userId: Number(selectedCustomerId.value),
+      shippingAddressId: Number(selectedAddressId.value),
+      note: note.value,
+      deliveryFee: deliveryFee.value,
+      amountCollected: amountCollected.value,
+      items: orderItems.value.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity
+      }))
+    }
+    const res = await createOrder(payload)
+    if (res.data) {
+      createdOrderId.value = String(res.data.id)
+      success.value = true
+    }
+  } catch {
+    // API client auto handles error toast
+  } finally {
     saving.value = false
-    toast.add({ title: 'Tạo đơn hàng thành công!', color: 'success' })
-  }, 800)
+  }
 }
-
 function resetForm() {
   success.value = false
   orderItems.value = []

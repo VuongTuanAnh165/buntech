@@ -380,10 +380,12 @@ export class OrderItemSchema extends BaseModel {
 
 export class OrderSchema extends BaseModel {
   static $columns = [
+    'amountCollected',
     'createdAt',
     'createdBy',
     'deletedAt',
     'deliveryDate',
+    'deliveryFee',
     'deliveryStatus',
     'driverId',
     'id',
@@ -399,6 +401,8 @@ export class OrderSchema extends BaseModel {
     'userId',
   ] as const
   $columns = OrderSchema.$columns
+  @column()
+  declare amountCollected: string | null
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime | null
   @column()
@@ -407,6 +411,8 @@ export class OrderSchema extends BaseModel {
   declare deletedAt: DateTime | null
   @column.date()
   declare deliveryDate: DateTime
+  @column()
+  declare deliveryFee: string | null
   @column()
   declare deliveryStatus: string | null
   @column()

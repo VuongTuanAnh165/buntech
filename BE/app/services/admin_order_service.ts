@@ -9,6 +9,9 @@ import { inject } from '@adonisjs/core'
 import { Exception } from '@adonisjs/core/exceptions'
 import OrderCalculatorService from '#services/order_calculator_service'
 
+import Transaction from '#models/transaction'
+import { TransactionType } from '#enums/transaction_type'
+
 @inject()
 export default class AdminOrderService {
   constructor(protected orderCalculator: OrderCalculatorService) {}
@@ -102,12 +105,16 @@ export default class AdminOrderService {
     shippingAddressId: number
     note?: string
     deliveryDate?: Date
+    deliveryFee?: number
+    amountCollected?: number
     items: Array<{ productId: number; quantity: number }>
   }) {
     const { totalAmount, orderItemsData } = await this.orderCalculator.calculateOrder(
       data.items,
       data.userId
     )
+
+    const finalTotal = totalAmount + (data.deliveryFee || 0)
 
     // 4. DB Transaction
     return await db.transaction(async (trx) => {
@@ -116,7 +123,9 @@ export default class AdminOrderService {
       order.shippingAddressId = data.shippingAddressId
       order.source = OrderSource.ADMIN
       order.status = OrderStatus.PENDING
-      order.totalAmount = totalAmount.toString()
+      order.deliveryFee = (data.deliveryFee || 0).toString()
+      order.amountCollected = (data.amountCollected || 0).toString()
+      order.totalAmount = finalTotal.toString()
       order.note = data.note || null
       order.deliveryDate = data.deliveryDate
         ? DateTime.fromJSDate(data.deliveryDate)
@@ -132,6 +141,45 @@ export default class AdminOrderService {
         unitPrice: itemData.unitPrice,
       }))
       await OrderItem.createMany(itemsToCreate, { client: trx })
+
+      // Handle Debt and Transactions
+      const amountCollected = data.amountCollected || 0
+      const debtIncrease = finalTotal - amountCollected
+
+      if (debtIncrease !== 0) {
+        await db
+          .from('user_profiles')
+          .where('user_id', data.userId)
+          .update({
+            current_debt: db.raw('current_debt + ?', [debtIncrease]),
+            updated_at: DateTime.now().toSQL(),
+          })
+          .useTransaction(trx)
+      }
+
+      if (finalTotal > 0) {
+        const chargeTx = new Transaction()
+        chargeTx.userId = data.userId
+        chargeTx.orderId = order.id
+        chargeTx.amount = finalTotal.toString()
+        chargeTx.type = TransactionType.ORDER_CHARGE
+        chargeTx.paymentMethod = 'SYSTEM'
+        chargeTx.transactionDate = DateTime.now()
+        chargeTx.useTransaction(trx)
+        await chargeTx.save()
+      }
+
+      if (amountCollected > 0) {
+        const paymentTx = new Transaction()
+        paymentTx.userId = data.userId
+        paymentTx.orderId = order.id
+        paymentTx.amount = amountCollected.toString()
+        paymentTx.type = TransactionType.ORDER_PAYMENT
+        paymentTx.paymentMethod = 'CASH' // Mặc định là CASH nếu thu ngay
+        paymentTx.transactionDate = DateTime.now()
+        paymentTx.useTransaction(trx)
+        await paymentTx.save()
+      }
 
       return order
     })

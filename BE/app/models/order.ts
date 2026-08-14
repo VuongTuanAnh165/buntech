@@ -12,6 +12,12 @@ export default class Order extends OrderSchema {
   @column()
   declare userId: number
 
+  @column()
+  declare deliveryFee: string
+
+  @column()
+  declare amountCollected: string
+
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
 

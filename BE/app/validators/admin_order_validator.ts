@@ -6,6 +6,8 @@ export const createAdminOrderValidator = vine.compile(
     shippingAddressId: vine.number().positive(),
     note: vine.string().trim().optional(),
     deliveryDate: vine.date().optional(),
+    deliveryFee: vine.number().min(0).optional(),
+    amountCollected: vine.number().min(0).optional(),
     items: vine
       .array(
         vine.object({

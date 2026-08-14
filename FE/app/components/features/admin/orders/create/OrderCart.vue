@@ -6,13 +6,13 @@
 <script setup lang="ts">
 defineProps<{
   items: {
-    product_id: string
-    product_name: string
+    productId: number
+    productName: string
     quantity: number
     price: number
     stock: number
     unit: string
-    image_url: string
+    thumbnailUrl: string | null
   }[]
   customPrices: Map<string, number>
   subtotal: number
@@ -50,15 +50,15 @@ const emit = defineEmits<{
       >
         <div
           v-for="(item, i) in items"
-          :key="item.product_id"
+          :key="item.productId"
           class="bg-surface flex items-center gap-3 rounded-xl border border-transparent p-3 transition-colors hover:border-slate-200 hover:bg-slate-50 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
         >
           <div class="min-w-0 flex-1">
             <p class="text-surface-foreground truncate text-sm font-medium">
-              {{ item.product_name }}
+              {{ item.productName }}
             </p>
             <p
-              v-if="customPrices.has(item.product_id)"
+              v-if="customPrices.has(String(item.productId))"
               class="text-primary-600 text-[10px] font-medium"
             >
               Giá riêng

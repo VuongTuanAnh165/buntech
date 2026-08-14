@@ -1,7 +1,8 @@
 import {
   adminOrderService,
   type UpdateOrderStatusPayload,
-  type BatchAssignDriverPayload
+  type BatchAssignDriverPayload,
+  type AdminCreateOrderPayload
 } from '~/services/adminOrderService'
 
 export function useAdminOrders() {
@@ -21,10 +22,15 @@ export function useAdminOrders() {
     return await adminOrderService.batchAssignDriver(payload)
   }
 
+  const createOrder = async (payload: AdminCreateOrderPayload) => {
+    return await adminOrderService.createOrder(payload)
+  }
+
   return {
     fetchOrders,
     getOrder,
     updateStatus,
-    batchAssignDriver
+    batchAssignDriver,
+    createOrder
   }
 }

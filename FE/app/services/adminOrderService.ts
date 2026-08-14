@@ -56,6 +56,16 @@ export type BatchAssignDriverPayload = {
   orders: { orderId: number; routeOrder?: number }[]
 }
 
+export interface AdminCreateOrderPayload {
+  userId: number
+  shippingAddressId: number
+  note?: string
+  deliveryDate?: string | Date
+  deliveryFee?: number
+  amountCollected?: number
+  items: { productId: number; quantity: number }[]
+}
+
 export const adminOrderService = {
   fetchOrders(params?: Record<string, unknown>) {
     return ApiClient.get<PaginatedResponse<AdminOrderDTO>>('/admin/orders', params)
@@ -71,5 +81,9 @@ export const adminOrderService = {
 
   batchAssignDriver(payload: BatchAssignDriverPayload) {
     return ApiClient.patch<ApiResponse<{ message: string }>>('/admin/orders/batch-assign', payload)
+  },
+
+  createOrder(payload: AdminCreateOrderPayload) {
+    return ApiClient.post<ApiResponse<AdminOrderDTO>>('/admin/orders', payload)
   }
 }
