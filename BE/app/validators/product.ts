@@ -112,7 +112,7 @@ export const updateProductValidator = vine.withMetaData<{ productId: number }>()
 export const productFilterValidator = vine.compile(
   vine.object({
     page: vine.number().min(1).optional(),
-    limit: vine.number().min(1).max(100).optional(),
+    limit: vine.number().min(1).max(1000).optional(),
     search: vine.string().optional(),
     status: vine.enum(['ALL', 'PUBLISHED', 'DRAFT']).optional(),
     categoryId: vine.number().optional(),
@@ -125,7 +125,7 @@ export const productFilterValidator = vine.compile(
 export const clientProductFilterValidator = vine.compile(
   vine.object({
     page: vine.number().min(1).optional(),
-    limit: vine.number().min(1).max(100).optional(),
+    limit: vine.number().min(1).max(1000).optional(),
     categoryId: vine.number().optional(),
     search: vine.string().optional(),
     sortBy: vine.enum(['latest', 'price-asc', 'price-desc', 'name']).optional(),

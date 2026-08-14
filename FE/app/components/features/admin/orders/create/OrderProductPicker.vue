@@ -31,15 +31,13 @@ const searchQuery = defineModel<string>('searchQuery', { default: '' })
         </div>
       </div>
       <div class="relative w-48 text-sm">
-        <UInput
-          v-model="searchQuery"
-          icon="i-lucide-search"
-          placeholder="Tìm sản phẩm..."
-          class="w-full"
-        />
+        <BaseSearchInput v-model="searchQuery" placeholder="Tìm sản phẩm..." class="w-full" />
       </div>
     </div>
-    <div v-if="products.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+    <div
+      v-if="products.length"
+      class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5"
+    >
       <UButton
         v-for="p in products"
         :key="p.id"

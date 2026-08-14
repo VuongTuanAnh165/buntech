@@ -4,11 +4,11 @@
   Reason: Extracted from admin/orders/index.vue to meet line count limit
 -->
 <script setup lang="ts">
-import type { Profile } from '~/utils/types'
+import type { UserDTO } from '~/utils/types'
 
 const props = defineProps<{
   selectedCount: number
-  drivers: Profile[]
+  drivers: UserDTO[]
 }>()
 
 const emit = defineEmits<{
@@ -41,14 +41,14 @@ function handleAssign() {
           class="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 flex items-center gap-2 rounded-lg border p-3"
         >
           <div class="i-lucide-truck text-primary-600 dark:text-primary-400 h-5 w-5" />
-          <p class="text-primary-700 dark:text-primary-300 text-[13px]">
+          <p class="text-primary-700 dark:text-primary-300 text-sm">
             Đã chọn <strong class="font-bold">{{ selectedCount }}</strong> đơn hàng để điều phối
           </p>
         </div>
         <UFormField label="Chọn tài xế" required>
           <USelectMenu
             v-model="batchDriverId"
-            :items="drivers.map((d) => ({ value: d.id, label: d.full_name }))"
+            :items="drivers.map((d) => ({ value: d.id, label: d.fullName }))"
             value-key="value"
             label-key="label"
             placeholder="Chọn tài xế giao hàng"

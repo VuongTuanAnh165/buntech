@@ -32,10 +32,8 @@ const error = computed(() => !!fetchError.value || !res.value?.data)
 const order = computed(() => res.value?.data || null)
 const items = computed(() => order.value?.items || [])
 
-const showStatusMenu = ref(false)
-const changingStatus = ref(false)
 const showAssignDriver = ref(false)
-const selectedDriverId = ref('')
+const changingStatus = ref(false)
 
 const statusFlow = computed(() => getOrderStatusList(constants))
 const currentStatusIndex = computed(() => {
@@ -159,7 +157,6 @@ const deliveryTimeline = computed(() => {
 
 async function changeStatus(newStatus: string) {
   if (!order.value) return
-  showStatusMenu.value = false
   changingStatus.value = true
   try {
     await updateStatus(orderId, {
@@ -174,15 +171,14 @@ async function changeStatus(newStatus: string) {
   }
 }
 
-async function assignDriver() {
-  if (!selectedDriverId.value || !order.value) return
+async function assignDriver(driverId: string) {
+  if (!driverId || !order.value) return
   try {
     await batchAssignDriver({
-      driverId: parseInt(selectedDriverId.value, 10),
+      driverId: parseInt(driverId, 10),
       orders: [{ orderId: parseInt(orderId, 10) }]
     })
     showAssignDriver.value = false
-    selectedDriverId.value = ''
     refresh()
   } catch {
     // ignore
@@ -231,6 +227,7 @@ const breadcrumbItems = [
     <UButton
       variant="ghost"
       color="neutral"
+      icon="i-lucide-arrow-left"
       class="mb-4 flex min-h-[44px] items-center gap-1 px-2 text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200"
       @click="
         () => {
@@ -238,7 +235,7 @@ const breadcrumbItems = [
         }
       "
     >
-      <UIcon name="i-lucide-arrow-left" class="h-4 w-4" /> Quay lại
+      Quay lại
     </UButton>
 
     <BaseEmptyState
@@ -305,48 +302,42 @@ const breadcrumbItems = [
               </p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <UButton size="sm" variant="outline" color="neutral" @click="copyOrder">
-                <UIcon name="i-lucide-copy" class="h-4 w-4" /> Sao chép
+              <UButton
+                size="sm"
+                variant="outline"
+                color="neutral"
+                icon="i-lucide-copy"
+                @click="copyOrder"
+              >
+                Sao chép
               </UButton>
-              <UButton size="sm" variant="outline" color="neutral" @click="printOrder">
-                <UIcon name="i-lucide-printer" class="h-4 w-4" /> In
+              <UButton
+                size="sm"
+                variant="outline"
+                color="neutral"
+                icon="i-lucide-printer"
+                @click="printOrder"
+              >
+                In
               </UButton>
-              <div class="relative">
+              <UDropdownMenu
+                :items="[
+                  statusOptions.map((s) => ({
+                    label: getOrderStatusLabel(constants)[s],
+                    icon: getOrderStatusIcon(constants)[s],
+                    onSelect: () => changeStatus(s as string)
+                  }))
+                ]"
+              >
                 <UButton
                   size="sm"
                   :loading="changingStatus"
-                  @click="
-                    () => {
-                      showStatusMenu = !showStatusMenu
-                    }
-                  "
+                  icon="i-lucide-refresh-cw"
+                  trailing-icon="i-lucide-chevron-down"
                 >
-                  <UIcon name="i-lucide-refresh-cw" class="h-4 w-4" /> Đổi trạng thái
-                  <UIcon
-                    name="i-lucide-chevron-right"
-                    class="h-3.5 w-3.5 transition-transform"
-                    :class="showStatusMenu ? 'rotate-90' : ''"
-                  />
+                  Đổi trạng thái
                 </UButton>
-                <Transition name="fade">
-                  <div
-                    v-if="showStatusMenu"
-                    class="card absolute top-full right-0 z-20 mt-2 w-48 p-1.5 shadow-lg"
-                  >
-                    <UButton
-                      v-for="s in statusOptions"
-                      :key="s"
-                      variant="ghost"
-                      color="neutral"
-                      class="text-surface-foreground hover:bg-surface-hover flex min-h-[40px] w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors"
-                      @click="changeStatus(s as string)"
-                    >
-                      <UIcon :name="getOrderStatusIcon(constants)[s]" class="h-4 w-4" />
-                      {{ getOrderStatusLabel(constants)[s] }}
-                    </UButton>
-                  </div>
-                </Transition>
-              </div>
+              </UDropdownMenu>
             </div>
           </div>
         </div>
@@ -783,60 +774,11 @@ const breadcrumbItems = [
       description="Đơn hàng không tồn tại hoặc đã bị xoá"
     />
 
-    <!-- Assign Driver Modal -->
-    <UModal v-model:open="showAssignDriver">
-      <template #content>
-        <div class="space-y-4 p-6">
-          <h3 class="text-surface-foreground text-lg font-bold">Gán tài xế</h3>
-          <div class="max-h-80 space-y-2 overflow-y-auto p-1">
-            <UButton
-              v-for="drv in availableDrivers"
-              :key="drv.id"
-              variant="ghost"
-              color="neutral"
-              :class="[
-                'flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors',
-                selectedDriverId === String(drv.id)
-                  ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-500'
-                  : 'border-surface-border hover:bg-surface-hover'
-              ]"
-              @click="
-                () => {
-                  selectedDriverId = String(drv.id)
-                }
-              "
-            >
-              <UAvatar :alt="drv.fullName" size="sm" :src="drv.profile?.avatarUrl || undefined" />
-              <div class="min-w-0">
-                <p class="text-surface-foreground truncate text-sm font-medium">
-                  {{ drv.fullName }}
-                </p>
-                <p class="text-xs text-slate-500 tabular-nums dark:text-zinc-400">
-                  {{ drv.phoneNumber || 'Chưa có SĐT' }}
-                </p>
-              </div>
-              <UIcon
-                v-if="selectedDriverId === String(drv.id)"
-                name="i-lucide-check-circle-2"
-                class="text-primary-600 dark:text-primary-400 ml-auto h-5 w-5 flex-shrink-0"
-              />
-            </UButton>
-          </div>
-          <div class="flex justify-end gap-2 pt-2">
-            <UButton
-              variant="ghost"
-              color="neutral"
-              @click="
-                () => {
-                  showAssignDriver = false
-                }
-              "
-              >Huỷ</UButton
-            >
-            <UButton :disabled="!selectedDriverId" @click="assignDriver">Gán tài xế</UButton>
-          </div>
-        </div>
-      </template>
-    </UModal>
+    <OrderBatchAssignModal
+      v-model:open="showAssignDriver"
+      :selected-count="1"
+      :drivers="availableDrivers"
+      @assign="assignDriver"
+    />
   </div>
 </template>

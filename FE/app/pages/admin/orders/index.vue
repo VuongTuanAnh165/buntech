@@ -164,9 +164,9 @@ const activeFilterCount = computed(() => {
           color="neutral"
           :loading="exporting"
           class="hidden sm:inline-flex"
+          icon="i-lucide-download"
           @click="exportCSV"
         >
-          <div class="i-lucide-download mr-1 h-4 w-4" />
           <span class="hidden md:inline">Xuất CSV</span>
         </UButton>
         <UButton
@@ -174,17 +174,16 @@ const activeFilterCount = computed(() => {
           color="primary"
           :disabled="selectedOrders.size === 0"
           class="hidden md:inline-flex"
+          icon="i-lucide-truck"
           @click="
             () => {
               showBatchModal = true
             }
           "
         >
-          <div class="i-lucide-truck mr-1 h-4 w-4" />
           Điều phối ({{ selectedOrders.size }})
         </UButton>
-        <UButton to="/admin/orders/create">
-          <div class="i-lucide-plus mr-1 h-4 w-4" />
+        <UButton to="/admin/orders/create" icon="i-lucide-plus">
           <span class="hidden sm:inline">Tạo đơn</span>
         </UButton>
       </template>
@@ -218,18 +217,19 @@ const activeFilterCount = computed(() => {
       </div>
       <!-- Desktop filter bar -->
       <div
-        class="animate-fade-in-up mb-4 hidden flex-wrap items-center gap-3 lg:flex"
+        class="animate-fade-in-up bg-surface ring-surface-border mb-4 hidden items-center gap-3 rounded-xl p-2 ring-1 lg:flex"
         style="animation-delay: 240ms"
       >
-        <div class="max-w-xs min-w-[200px] flex-1">
-          <UInput
+        <div class="min-w-0 flex-1 pl-1">
+          <BaseSearchInput
             v-model="search"
-            icon="i-lucide-search"
             placeholder="Tìm theo mã đơn, khách hàng, địa chỉ..."
+            class="w-full"
           />
         </div>
-        <UInput v-model="startDate" type="date" />
-        <UInput v-model="endDate" type="date" />
+        <div class="bg-surface-border h-6 w-px" />
+        <UInput v-model="startDate" type="date" size="sm" class="w-36" placeholder="Từ ngày" />
+        <UInput v-model="endDate" type="date" size="sm" class="w-36" placeholder="Đến ngày" />
         <UButton
           v-if="activeFilterCount > 0"
           variant="ghost"
@@ -242,12 +242,7 @@ const activeFilterCount = computed(() => {
       </div>
       <!-- Mobile search -->
       <div class="mb-4 lg:hidden">
-        <UInput
-          v-model="search"
-          icon="i-lucide-search"
-          placeholder="Tìm đơn hàng..."
-          class="w-full"
-        />
+        <BaseSearchInput v-model="search" placeholder="Tìm đơn hàng..." class="w-full" />
       </div>
       <!-- Mobile filter slideover -->
       <USlideover v-model:open="showFilters" side="bottom" title="Bộ lọc">
@@ -319,13 +314,13 @@ const activeFilterCount = computed(() => {
             >
             <UButton
               size="sm"
+              icon="i-lucide-truck"
               @click="
                 () => {
                   showBatchModal = true
                 }
               "
             >
-              <div class="i-lucide-truck mr-1 h-3.5 w-3.5" />
               Điều phối
             </UButton>
           </div>

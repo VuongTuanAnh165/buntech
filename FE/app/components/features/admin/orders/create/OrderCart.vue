@@ -25,7 +25,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="bg-surface ring-surface-border rounded-xl p-5 shadow-sm ring-1">
+  <div class="w-full">
     <div class="mb-4 flex items-center gap-2">
       <div class="bg-info-50 flex h-8 w-8 items-center justify-center rounded-lg">
         <UIcon name="i-lucide-shopping-cart" class="text-info-600 h-4 w-4" />
