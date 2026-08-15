@@ -11,7 +11,7 @@ import {
 import type { UserDTO } from '~/utils/types'
 
 const { constants } = useMasterData()
-const toast = useToast()
+
 const route = useRoute()
 const _router = useRouter()
 const { getOrder, updateStatus, batchAssignDriver } = useAdminOrders()
@@ -187,20 +187,7 @@ async function assignDriver(driverId: string) {
 
 function copyOrder() {
   if (!order.value) return
-  const copyData = {
-    userId: order.value.userId,
-    items: items.value.map((i) => ({
-      productId: i.productId,
-      productName: i.product?.name,
-      quantity: i.quantity,
-      price: i.unitPrice
-    }))
-  }
-  if (import.meta.client) {
-    sessionStorage.setItem('copyOrderData', JSON.stringify(copyData))
-  }
-  toast.add({ title: 'Đã sao chép đơn hàng', color: 'success' })
-  navigateTo('/admin/orders/create')
+  navigateTo(`/admin/orders/create?copyFrom=${orderId}`)
 }
 
 function printOrder() {

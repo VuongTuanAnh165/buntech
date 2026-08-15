@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 3: Nghiệp vụ Bán sỉ & Xử lý Đơn hàng (Core Business)
-3. Form tạo đơn Admin (Tự động map giá sỉ từ user, tự tính tổng tiền). (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api)
+4. UX Flow: Copy đơn cũ tạo đơn mới. (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api)
 
 ==================================================
 

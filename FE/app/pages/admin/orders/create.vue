@@ -10,17 +10,18 @@ import OrderProductPicker from '~/components/features/admin/orders/create/OrderP
 import OrderCart from '~/components/features/admin/orders/create/OrderCart.vue'
 
 const toast = useToast()
+const route = useRoute()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Tạo đơn hàng - BunTech Admin' })
 const { fetchUsers, fetchAddresses } = useUsers()
-const { createOrder } = useAdminOrders()
+const { createOrder, getOrder } = useAdminOrders()
 const loading = ref(true)
 const customers = ref<UserDTO[]>([])
 const products = ref<AdminProduct[]>([])
-const selectedCustomerId = ref('')
+const selectedCustomerId = ref<number | ''>('')
 const customPrices = ref<Map<string, number>>(new Map())
 const customerAddresses = ref<Address[]>([])
-const selectedAddressId = ref('')
+const selectedAddressId = ref<number | ''>('')
 const orderItems = ref<
   {
     productId: number
@@ -109,6 +110,54 @@ async function loadInitData() {
     const normalizedProducts = normalizePaginationResponse<AdminProduct>(pRes)
     products.value = normalizedProducts.data.filter((p) => p.isActive) || []
     products.value.sort((a, b) => a.name.localeCompare(b.name))
+
+    if (route.query.copyFrom) {
+      try {
+        const orderRes = await getOrder(route.query.copyFrom as string)
+        const oldOrder = orderRes.data
+        if (oldOrder) {
+          selectedCustomerId.value = oldOrder.userId || ''
+
+          if (!customers.value.some((c) => c.id === selectedCustomerId.value)) {
+            const cRes = await fetchUsers({
+              role: 'CUSTOMER',
+              search: oldOrder.user?.phoneNumber || ''
+            })
+            const fetched = cRes.data?.data || []
+            fetched.forEach((f) => {
+              if (!customers.value.some((c) => c.id === f.id)) customers.value.push(f)
+            })
+          }
+
+          await onCustomerChange()
+
+          if (oldOrder.shippingAddress?.id) {
+            const hasAddress = customerAddresses.value.some(
+              (a) => a.id === oldOrder.shippingAddress?.id
+            )
+            if (hasAddress) selectedAddressId.value = Number(oldOrder.shippingAddress.id)
+          }
+
+          if (oldOrder.note) {
+            note.value = oldOrder.note
+          }
+
+          if (oldOrder.items?.length) {
+            for (const item of oldOrder.items) {
+              addProduct(Number(item.productId))
+              const idx = orderItems.value.findIndex((i) => i.productId === Number(item.productId))
+              if (idx !== -1) {
+                setQuantity(idx, Number(item.quantity))
+              }
+            }
+          }
+
+          toast.add({ title: 'Đã tải dữ liệu đơn hàng cũ', color: 'success' })
+        }
+      } catch {
+        toast.add({ title: 'Không thể tải đơn hàng cũ', color: 'error' })
+      }
+    }
   } finally {
     loading.value = false
   }
@@ -128,7 +177,7 @@ async function onCustomerChange() {
     customerAddresses.value = addrRes.data || []
     customerAddresses.value.sort((a, b) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0))
     const defaultAddr = customerAddresses.value.find((a) => a.isDefault)
-    if (defaultAddr) selectedAddressId.value = String(defaultAddr.id)
+    if (defaultAddr) selectedAddressId.value = Number(defaultAddr.id)
 
     const cps = priceRes.data?.data || []
     for (const cp of cps) {

@@ -107,15 +107,26 @@ function toggleSelectOrder(id: number, checked: boolean) {
       }}</span>
     </template>
     <template #actions-cell="{ row }">
-      <UButton
-        color="neutral"
-        variant="ghost"
-        size="sm"
-        :to="`/admin/orders/${row.original.id}`"
-        icon="i-lucide-eye"
-      >
-        Xem
-      </UButton>
+      <div class="flex items-center gap-1">
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          :to="`/admin/orders/create?copyFrom=${row.original.id}`"
+          icon="i-lucide-copy"
+        >
+          Sao chép
+        </UButton>
+        <UButton
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          :to="`/admin/orders/${row.original.id}`"
+          icon="i-lucide-eye"
+        >
+          Xem
+        </UButton>
+      </div>
     </template>
   </UTable>
 </template>
