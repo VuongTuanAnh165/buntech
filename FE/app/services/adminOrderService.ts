@@ -19,6 +19,7 @@ export interface AdminOrderDTO {
   userId: number | null
   driverId: number | null
   totalAmount: string | number
+  amountCollected: string | number
   status: string
   deliveryStatus: string | null
   paymentStatus: string | null

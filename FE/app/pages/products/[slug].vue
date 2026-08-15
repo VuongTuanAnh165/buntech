@@ -437,6 +437,7 @@ useHead(() => ({
           <div
             class="prose prose-sm prose-primary dark:prose-invert max-w-none pb-8 text-gray-600 dark:text-zinc-300"
           >
+            <!-- eslint-disable-next-line vue/no-v-html -->
             <div v-html="product.shortDescription || 'Mô tả đang cập nhật...'" />
           </div>
         </div>

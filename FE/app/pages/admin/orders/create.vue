@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import type { UserDTO, AdminProduct, Address } from '~/utils/types'
+import { normalizePaginationResponse } from '~/utils/api'
 import { productService } from '~/services/productService'
 import { customerPriceService } from '~/services/customerPriceService'
 import { useAdminOrders } from '~/composables/admin/useAdminOrders'
 import { useUsers } from '~/composables/admin/useUsers'
+
+import OrderProductPicker from '~/components/features/admin/orders/create/OrderProductPicker.vue'
+import OrderCart from '~/components/features/admin/orders/create/OrderCart.vue'
 
 const toast = useToast()
 definePageMeta({ layout: 'admin' })
@@ -102,7 +106,8 @@ async function loadInitData() {
     customers.value = res.data?.data || []
 
     const pRes = await productService.getAdminProducts({ limit: 1000 })
-    products.value = pRes.data?.data?.filter((p) => p.isActive) || []
+    const normalizedProducts = normalizePaginationResponse<AdminProduct>(pRes)
+    products.value = normalizedProducts.data.filter((p) => p.isActive) || []
     products.value.sort((a, b) => a.name.localeCompare(b.name))
   } finally {
     loading.value = false
@@ -275,9 +280,9 @@ onMounted(loadInitData)
         >
       </div>
     </div>
-    <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <!-- Left Column: Products -->
-      <div class="space-y-6 lg:col-span-7">
+      <div class="space-y-6 lg:col-span-2">
         <OrderProductPicker
           v-model:search-query="searchQuery"
           :products="filteredProducts"
@@ -286,7 +291,7 @@ onMounted(loadInitData)
         />
       </div>
       <!-- Right Column: Cart & Summary -->
-      <div class="space-y-6 lg:col-span-5">
+      <div class="space-y-6 lg:col-span-1">
         <div
           class="bg-surface ring-surface-border sticky top-20 flex flex-col gap-4 rounded-xl p-5 shadow-sm ring-1"
         >
@@ -375,7 +380,9 @@ onMounted(loadInitData)
                 <span class="text-slate-500">Phí giao hàng</span>
                 <UInput
                   :model-value="deliveryFeeInput"
-                  class="w-28 text-right"
+                  size="md"
+                  class="w-32"
+                  input-class="text-right text-sm font-medium"
                   :placeholder="formatVND(0)"
                   @update:model-value="handleDeliveryFeeInput"
                 />
@@ -384,7 +391,9 @@ onMounted(loadInitData)
                 <span class="text-slate-500 dark:text-zinc-400">Tiền thu</span>
                 <UInput
                   :model-value="amountCollectedInput"
-                  class="w-28 text-right"
+                  size="md"
+                  class="w-32"
+                  input-class="text-right text-sm font-medium"
                   :placeholder="formatVND(total)"
                   @update:model-value="handleAmountCollectedInput"
                 />

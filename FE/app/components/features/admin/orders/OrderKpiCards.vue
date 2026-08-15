@@ -5,12 +5,12 @@
 -->
 <script setup lang="ts">
 import { ConstantKey } from '~/enums/constantKeys'
-import type { Order } from '~/utils/types'
+import type { AdminOrderDTO } from '~/services/adminOrderService'
 
 const { constants } = useMasterData()
 
 const props = defineProps<{
-  orders: Order[]
+  orders: AdminOrderDTO[]
   loading: boolean
 }>()
 
@@ -60,7 +60,7 @@ const kpiStats = computed(() => {
 const totalRevenue = computed(() =>
   props.orders
     .filter((o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
-    .reduce((s, o) => s + o.total, 0)
+    .reduce((s, o) => s + Number(o.totalAmount || 0), 0)
 )
 </script>
 

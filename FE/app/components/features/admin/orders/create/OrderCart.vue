@@ -39,7 +39,7 @@ const emit = defineEmits<{
       <TransitionGroup
         name="list"
         tag="div"
-        class="space-y-2 overflow-hidden px-1"
+        class="max-h-80 space-y-2 overflow-x-hidden overflow-y-auto pr-2"
         enter-active-class="transition duration-300 ease-out"
         enter-from-class="opacity-0 translate-x-8"
         enter-to-class="opacity-100 translate-x-0"
@@ -54,60 +54,56 @@ const emit = defineEmits<{
           class="bg-surface flex items-center gap-3 rounded-xl border border-transparent p-3 transition-colors hover:border-slate-200 hover:bg-slate-50 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
         >
           <div class="min-w-0 flex-1">
-            <p class="text-surface-foreground truncate text-sm font-medium">
+            <p
+              class="text-surface-foreground truncate text-sm font-medium"
+              :title="item.productName"
+            >
               {{ item.productName }}
+            </p>
+            <p class="text-xs text-gray-400 dark:text-zinc-500">
+              {{ formatVND(item.price) }} / {{ item.unit }}
             </p>
             <p
               v-if="customPrices.has(String(item.productId))"
               class="text-primary-600 text-[10px] font-medium"
             >
-              Giá riêng
+              (Giá riêng)
             </p>
-            <p class="hidden text-xs text-slate-500 sm:block">{{ formatVND(item.price) }}</p>
           </div>
-          <div class="border-surface-border bg-surface flex items-center gap-1 rounded-lg border">
+          <div class="flex flex-shrink-0 items-center gap-1">
             <UButton
               variant="ghost"
               color="neutral"
-              size="xs"
-              icon="i-lucide-minus"
               aria-label="Giảm"
+              class="bg-surface-hover hover:bg-surface-border text-surface-foreground flex h-8 min-h-[36px] w-8 min-w-[36px] items-center justify-center rounded-md transition-colors"
               @click="emit('updateQuantity', i, -1)"
-            />
-            <UInput
-              :model-value="item.quantity"
-              type="number"
-              :min="1"
-              size="xs"
-              class="w-12 text-center"
-              @update:model-value="
-                (v: string | number) => {
-                  const num = Number(v)
-                  if (num > 0) emit('setQuantity', i, num)
-                }
-              "
-            />
+            >
+              <UIcon name="i-lucide-minus" class="h-3.5 w-3.5" aria-hidden="true" />
+            </UButton>
+            <span
+              class="text-surface-foreground w-8 text-center text-sm font-medium tabular-nums"
+              >{{ item.quantity }}</span
+            >
             <UButton
               variant="ghost"
               color="neutral"
-              size="xs"
-              icon="i-lucide-plus"
               aria-label="Tăng"
+              class="bg-surface-hover hover:bg-surface-border text-surface-foreground flex h-8 min-h-[36px] w-8 min-w-[36px] items-center justify-center rounded-md transition-colors"
               @click="emit('updateQuantity', i, 1)"
-            />
+            >
+              <UIcon name="i-lucide-plus" class="h-3.5 w-3.5" aria-hidden="true" />
+            </UButton>
           </div>
-          <div class="w-24 text-right">
-            <span class="text-surface-foreground text-sm font-semibold">{{
-              formatVND(item.quantity * item.price)
-            }}</span>
-          </div>
+
           <UButton
-            color="error"
             variant="ghost"
-            icon="i-lucide-trash-2"
-            size="sm"
+            color="neutral"
+            class="hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex h-8 min-h-[36px] w-8 min-w-[36px] flex-shrink-0 items-center justify-center rounded-md text-gray-400 transition-colors"
+            aria-label="Xóa"
             @click="emit('remove', i)"
-          />
+          >
+            <UIcon name="i-lucide-trash-2" class="h-3.5 w-3.5" aria-hidden="true" />
+          </UButton>
         </div>
       </TransitionGroup>
       <div class="border-surface-border mt-4 flex items-center justify-between border-t pt-4">

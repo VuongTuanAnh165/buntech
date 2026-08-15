@@ -4,6 +4,10 @@ import { useAdminOrders } from '~/composables/admin/useAdminOrders'
 import { useUsers } from '~/composables/admin/useUsers'
 import type { UserDTO } from '~/utils/types'
 
+import OrderListTable from '~/components/features/admin/orders/OrderListTable.vue'
+import OrderKpiCards from '~/components/features/admin/orders/OrderKpiCards.vue'
+import OrderBatchAssignModal from '~/components/features/admin/orders/OrderBatchAssignModal.vue'
+
 const { constants } = useMasterData()
 const toast = useToast()
 const { fetchOrders, batchAssignDriver } = useAdminOrders()
@@ -336,9 +340,6 @@ const activeFilterCount = computed(() => {
           :selected-orders="selectedOrders"
           @update:selected-orders="toggleSelectOrder"
         />
-        <div v-if="pagedRows.length === 0" class="text-surface-500 p-8 text-center">
-          Không tìm thấy đơn hàng nào.
-        </div>
         <div class="border-surface-border flex items-center justify-between border-t p-4">
           <div class="flex items-center gap-3">
             <span class="text-sm text-slate-500 dark:text-zinc-400">
