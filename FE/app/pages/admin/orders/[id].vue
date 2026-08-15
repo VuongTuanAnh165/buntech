@@ -34,6 +34,8 @@ const order = computed(() => res.value?.data || null)
 const items = computed(() => order.value?.items || [])
 
 const showAssignDriver = ref(false)
+
+// Map user to basic format for dropdown
 const changingStatus = ref(false)
 
 const statusFlow = computed(() => getOrderStatusList(constants))
@@ -179,17 +181,21 @@ async function changeStatus(newStatus: string) {
   }
 }
 
-async function assignDriver(driverId: string) {
-  if (!driverId || !order.value) return
+async function assignDriver(payload: {
+  driverId: number
+  orders: { orderId: number; routeOrder: number }[]
+}) {
+  if (!order.value) return
   try {
-    await batchAssignDriver({
-      driverId: parseInt(driverId, 10),
-      orders: [{ orderId: parseInt(orderId, 10), routeOrder: 1 }]
-    })
+    await batchAssignDriver(payload)
     showAssignDriver.value = false
+    const toast = useToast()
+    toast.add({ title: 'Gán tài xế thành công', color: 'success' })
     refresh()
-  } catch {
-    // ignore
+  } catch (error) {
+    const err = error as Error
+    const toast = useToast()
+    toast.add({ title: 'Có lỗi xảy ra', description: err.message, color: 'error' })
   }
 }
 

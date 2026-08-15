@@ -87,7 +87,19 @@ async function confirmDelivery() {
   if (success) {
     delivered.value = true
     showCollectModal.value = false
-    await refreshRoutes()
+
+    // Optimistic update cache
+    const targetOrder = driverRoutes.value.find((o: DriverRouteDTO) => o.id === order.value!.id)
+    if (targetOrder) {
+      targetOrder.status = constants.value?.[ConstantKey.OrderStatus]?.DELIVERED || 'DELIVERED'
+    }
+
+    try {
+      await refreshRoutes()
+    } catch {
+      // Ignore network error if offline
+    }
+
     setTimeout(() => navigateTo('/driver/delivery'), 2000)
   }
 }

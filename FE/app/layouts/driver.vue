@@ -2,16 +2,19 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 
 import { useAuthStore } from '~/stores/auth'
+import { useOfflineSync } from '~/composables/driver/useOfflineSync'
 
 const route = useRoute()
 const _router = useRouter()
 const colorMode = useColorMode()
 const authStore = useAuthStore()
+const { processQueue } = useOfflineSync()
 const isOnline = ref(true)
 const showMenu = ref(false)
 
 const handleOnline = () => {
   isOnline.value = true
+  processQueue()
 }
 const handleOffline = () => {
   isOnline.value = false
@@ -21,6 +24,10 @@ onMounted(() => {
   isOnline.value = navigator.onLine
   window.addEventListener('online', handleOnline)
   window.addEventListener('offline', handleOffline)
+
+  if (isOnline.value) {
+    processQueue()
+  }
 })
 onUnmounted(() => {
   window.removeEventListener('online', handleOnline)

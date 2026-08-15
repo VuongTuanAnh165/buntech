@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 4: Mobile App & Vận hành Giao nhận
-4. Chức năng Chốt giao hàng: Kéo trượt sang phải (Swipe to Confirm). (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api, cài thư viện thì phải cài version mới nhất hiện tại)
+5. Lưu tạm Offline Sync Queue bằng idb-keyval khi rớt mạng 4G. (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api, cài thư viện thì phải cài version mới nhất hiện tại)
 
 ==================================================
 
