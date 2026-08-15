@@ -147,14 +147,14 @@ const exportOptions = [
     {
       label: 'Danh sách hiện tại',
       icon: 'i-lucide-list-filter',
-      click: () => exportCSV()
+      onSelect: () => exportCSV()
     }
   ],
   [
     {
       label: 'Báo cáo hôm nay',
       icon: 'i-lucide-calendar-1',
-      click: () => {
+      onSelect: () => {
         const today = dayjs().format('YYYY-MM-DD')
         exportCSV({ startDate: today, endDate: today, status: 'ALL' })
       }
@@ -199,7 +199,7 @@ const activeFilterCount = computed(() => {
             >{{ activeFilterCount }}</span
           >
         </UButton>
-        <UDropdown :items="exportOptions" :popper="{ placement: 'bottom-end' }">
+        <UDropdownMenu :items="exportOptions" :popper="{ placement: 'bottom-end' }">
           <UButton
             variant="outline"
             color="neutral"
@@ -209,7 +209,7 @@ const activeFilterCount = computed(() => {
           >
             <span class="hidden md:inline">Xuất Excel</span>
           </UButton>
-        </UDropdown>
+        </UDropdownMenu>
         <UButton
           variant="outline"
           color="primary"

@@ -9,6 +9,7 @@ import {
 import emitter from '@adonisjs/core/services/emitter'
 import { formatPagination } from '#utils/pagination'
 import ExcelJS from 'exceljs'
+import { PassThrough } from 'node:stream'
 
 @inject()
 export default class AdminOrdersController {
@@ -93,45 +94,104 @@ export default class AdminOrdersController {
       `attachment; filename="DanhSachDonHang_${Date.now()}.xlsx"`
     )
 
-    // We use Node.js writable stream directly from response.response
-    const stream = response.response
-    const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({ stream })
+    // Use PassThrough stream to let Adonis properly apply headers (like CORS)
+    const passThrough = new PassThrough()
+    const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({ stream: passThrough })
 
-    const worksheet = workbook.addWorksheet('DanhSachDonHang')
-
-    worksheet.columns = [
-      { header: 'Mã đơn', key: 'id', width: 10 },
-      { header: 'Tên khách hàng', key: 'customerName', width: 25 },
-      { header: 'SĐT khách hàng', key: 'customerPhone', width: 15 },
-      { header: 'Tên tài xế', key: 'driverName', width: 25 },
-      { header: 'SĐT tài xế', key: 'driverPhone', width: 15 },
-      { header: 'Trạng thái', key: 'status', width: 15 },
-      { header: 'Tổng tiền', key: 'totalAmount', width: 15 },
-      { header: 'Đã thu', key: 'amountCollected', width: 15 },
-      { header: 'Ngày tạo', key: 'createdAt', width: 20 },
-    ]
-
-    const generator = this.adminOrderService.getOrdersExportGenerator(filters, 500)
-    for await (const chunk of generator) {
-      for (const order of chunk) {
-        worksheet.addRow({
-          id: order.id,
-          customerName: order.user?.fullName || '',
-          customerPhone: order.user?.phoneNumber || '',
-          driverName: order.driver?.fullName || '',
-          driverPhone: order.driver?.phoneNumber || '',
-          status: order.status,
-          totalAmount: Number(order.totalAmount || 0),
-          amountCollected: Number(order.amountCollected || 0),
-          createdAt: order.createdAt ? order.createdAt.toFormat('dd/MM/yyyy HH:mm:ss') : '',
+    // Process in background and pipe to passThrough
+    ;(async () => {
+      try {
+        const worksheet = workbook.addWorksheet('DanhSachDonHang', {
+          views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
         })
-      }
-      // Commit chunk to clear memory
-      worksheet.commit()
-    }
 
-    await workbook.commit()
-    return response
+        worksheet.columns = [
+          { key: 'id', width: 10 },
+          { key: 'customerName', width: 25 },
+          { key: 'customerPhone', width: 15 },
+          { key: 'driverName', width: 25 },
+          { key: 'driverPhone', width: 15 },
+          { key: 'status', width: 15 },
+          { key: 'totalAmount', width: 15 },
+          { key: 'amountCollected', width: 15 },
+          { key: 'createdAt', width: 20 },
+        ]
+
+        // Manual header row
+        const headerRow = worksheet.addRow({
+          id: 'Mã đơn',
+          customerName: 'Tên khách hàng',
+          customerPhone: 'SĐT khách hàng',
+          driverName: 'Tên tài xế',
+          driverPhone: 'SĐT tài xế',
+          status: 'Trạng thái',
+          totalAmount: 'Tổng tiền',
+          amountCollected: 'Đã thu',
+          createdAt: 'Ngày tạo',
+        })
+
+        headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } }
+        headerRow.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FF0F172A' }, // Slate 900
+        }
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center' }
+        headerRow.height = 25
+
+        const thinBorder: Partial<ExcelJS.Borders> = {
+          top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+          left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+          bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+          right: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+        }
+
+        headerRow.eachCell((cell) => {
+          cell.border = thinBorder
+        })
+
+        headerRow.commit()
+
+        const generator = this.adminOrderService.getOrdersExportGenerator(filters, 500)
+        for await (const chunk of generator) {
+          for (const order of chunk) {
+            const row = worksheet.addRow({
+              id: order.id,
+              customerName: order.user?.fullName || '',
+              customerPhone: order.user?.phoneNumber || '',
+              driverName: order.driver?.fullName || '',
+              driverPhone: order.driver?.phoneNumber || '',
+              status: order.status,
+              totalAmount: Number(order.totalAmount || 0),
+              amountCollected: Number(order.amountCollected || 0),
+              createdAt: order.createdAt ? order.createdAt.toFormat('dd/MM/yyyy HH:mm:ss') : '',
+            })
+
+            row.eachCell((cell, colNumber) => {
+              cell.border = thinBorder
+              cell.alignment = { vertical: 'middle' }
+
+              // Format số tiền (cột 7 và 8)
+              if (colNumber === 7 || colNumber === 8) {
+                cell.numFmt = '#,##0'
+                cell.alignment = { vertical: 'middle', horizontal: 'right' }
+              }
+            })
+
+            row.commit()
+          }
+          // Commit chunk to clear memory
+          worksheet.commit()
+        }
+
+        await workbook.commit()
+      } catch (error) {
+        console.error('EXCEL_EXPORT_ERROR:', error)
+        passThrough.destroy(error as Error)
+      }
+    })()
+
+    return response.stream(passThrough)
   }
 
   /**
