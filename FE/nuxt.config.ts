@@ -14,7 +14,8 @@ export default defineNuxtConfig({
     'pinia-plugin-persistedstate/nuxt',
     'nuxt-security',
     '@vite-pwa/nuxt',
-    '@nuxtjs/google-fonts'
+    '@nuxtjs/google-fonts',
+    '@vueuse/nuxt'
   ],
 
   googleFonts: {

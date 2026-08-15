@@ -1,153 +1,137 @@
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { usePointerSwipe, useResizeObserver } from '@vueuse/core'
+
 const props = defineProps<{
   text?: string
-  successText?: string
-  disabled?: boolean
+  loading?: boolean
 }>()
 
 const emit = defineEmits<{
-  (e: 'confirm'): void
+  (e: 'confirmed'): void
 }>()
 
-const trackRef = ref<HTMLElement | null>(null)
-const thumbRef = ref<HTMLElement | null>(null)
+const target = ref<HTMLElement | null>(null)
+const container = ref<HTMLElement | null>(null)
+const containerWidth = ref(0)
+const thumbWidth = 48
+const threshold = 0.85 // 85% to trigger
 
-const isDragging = ref(false)
-const dragOffset = ref(0)
-const isConfirmed = ref(false)
-
-const trackWidth = ref(0)
-const thumbWidth = 56 // Fixed thumb width (14 * 4 = 56px)
-const maxOffset = computed(() => Math.max(0, trackWidth.value - thumbWidth))
-const _progress = computed(() => {
-  if (isConfirmed.value) return 1
-  if (!maxOffset.value) return 0
-  return dragOffset.value / maxOffset.value
+useResizeObserver(container, (entries) => {
+  const entry = entries[0]
+  if (entry) {
+    containerWidth.value = entry.contentRect.width
+  }
 })
 
-let startX = 0
+// Calculate max distance thumb can travel
+const maxDistance = computed(() => {
+  // Container width minus thumb width minus left padding minus right padding
+  return Math.max(0, containerWidth.value - thumbWidth - 8)
+})
 
-function handleStart(e: MouseEvent | TouchEvent) {
-  if (props.disabled || isConfirmed.value) return
-  isDragging.value = true
-  startX = e instanceof MouseEvent ? e.clientX : e.touches[0]?.clientX || 0
-  if (trackRef.value) {
-    trackWidth.value = trackRef.value.offsetWidth
+const isConfirmed = ref(false)
+
+const { distanceX, isSwiping } = usePointerSwipe(target, {
+  threshold: 0,
+  onSwipeEnd() {
+    if (leftOffset.value >= maxDistance.value * threshold && !props.loading && !isConfirmed.value) {
+      isConfirmed.value = true
+      emit('confirmed')
+    }
   }
+})
 
-  window.addEventListener('mousemove', handleMove)
-  window.addEventListener('touchmove', handleMove, { passive: false })
-  window.addEventListener('mouseup', handleEnd)
-  window.addEventListener('touchend', handleEnd)
-}
+const leftOffset = computed(() => {
+  if (isConfirmed.value) return maxDistance.value
 
-function handleMove(e: MouseEvent | TouchEvent) {
-  if (!isDragging.value) return
-  // e.preventDefault() // prevent scrolling while dragging
-  const currentX = e instanceof MouseEvent ? e.clientX : e.touches[0]?.clientX || 0
-  const deltaX = currentX - startX
-  dragOffset.value = Math.max(0, Math.min(deltaX, maxOffset.value))
-}
+  // usePointerSwipe distanceX is startX - currentX.
+  // Swiping right makes distanceX negative.
+  let dist = -distanceX.value
 
-function handleEnd() {
-  if (!isDragging.value) return
-  isDragging.value = false
+  if (dist < 0) dist = 0
+  if (dist > maxDistance.value) dist = maxDistance.value
 
-  if (dragOffset.value >= maxOffset.value * 0.8) {
-    // Snap to end and confirm
-    dragOffset.value = maxOffset.value
-    isConfirmed.value = true
-    emit('confirm')
-  } else {
-    // Snap back
-    dragOffset.value = 0
+  if (!isSwiping.value && !isConfirmed.value) {
+    return 0 // Reset if not swiping and not confirmed
   }
+  return dist
+})
 
-  window.removeEventListener('mousemove', handleMove)
-  window.removeEventListener('touchmove', handleMove)
-  window.removeEventListener('mouseup', handleEnd)
-  window.removeEventListener('touchend', handleEnd)
-}
+// Reset if loading finishes and we don't unmount (e.g., API error)
+watch(
+  () => props.loading,
+  (newVal, oldVal) => {
+    if (oldVal && !newVal) {
+      isConfirmed.value = false
+    }
+  }
+)
 </script>
 
 <template>
   <div
-    ref="trackRef"
-    class="relative h-14 w-full overflow-hidden rounded-full transition-all duration-300 select-none"
-    :class="[
-      disabled
-        ? 'cursor-not-allowed bg-slate-100 opacity-70 dark:bg-zinc-800'
-        : 'bg-primary-50 dark:bg-primary-950/30 ring-primary-200/50 dark:ring-primary-900/50 ring-1 ring-inset',
-      isConfirmed ? 'bg-success-500 ring-success-500' : ''
-    ]"
+    ref="container"
+    class="relative flex h-14 w-full items-center overflow-hidden rounded-2xl bg-neutral-100 shadow-inner dark:bg-zinc-800"
+    :class="[isConfirmed ? 'ring-success-500/50 ring-2' : '']"
   >
-    <!-- Background Progress Gradient -->
-    <div
-      v-if="!isConfirmed && !disabled"
-      class="bg-primary-100 dark:bg-primary-900/50 absolute inset-y-0 left-0 transition-all"
-      :class="isDragging ? 'duration-0' : 'duration-300 ease-out'"
-      :style="{ width: `${(dragOffset / maxOffset) * 100}%` }"
-    />
-
-    <!-- Shimmer Effect -->
-    <div
-      v-if="!disabled && !isConfirmed"
-      class="animate-shimmer pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent"
-    />
-
-    <!-- Text -->
-    <div class="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+    <!-- Background Text -->
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center pl-8">
       <span
-        class="text-sm font-semibold transition-colors duration-300"
-        :class="[
-          disabled
-            ? 'text-slate-400'
-            : isConfirmed
-              ? 'text-white'
-              : 'text-primary-700 dark:text-primary-400',
-          isConfirmed ? 'animate-fade-in-up' : ''
-        ]"
+        class="text-sm font-medium transition-opacity duration-300"
+        :class="[isConfirmed || isSwiping ? 'opacity-0' : 'text-slate-500 dark:text-zinc-400']"
       >
-        {{ isConfirmed ? successText || 'Đã xác nhận' : text || 'Vuốt để xác nhận' }}
+        {{ text || 'Vuốt để xác nhận' }}
       </span>
     </div>
 
-    <!-- Thumb -->
-    <div
-      ref="thumbRef"
-      class="absolute top-0 bottom-0 left-0 z-20 flex w-14 items-center justify-center rounded-full transition-all"
-      :class="[
-        disabled
-          ? 'bg-slate-200 text-slate-400 dark:bg-zinc-700'
-          : isConfirmed
-            ? 'text-success-500 bg-white shadow-md'
-            : 'bg-primary-500 shadow-primary-500/30 cursor-grab text-white shadow-lg active:cursor-grabbing',
-        isDragging ? 'scale-95 duration-0' : 'ease-spring duration-300',
-        isConfirmed ? 'scale-0 opacity-0' : '' // Hide thumb when confirmed
-      ]"
-      :style="{ transform: `translateX(${dragOffset}px) ${isDragging ? 'scale(0.95)' : ''}` }"
-      @mousedown="handleStart"
-      @touchstart.passive="handleStart"
-    >
-      <UIcon
-        :name="disabled ? 'i-lucide-lock' : 'i-lucide-chevron-right'"
-        class="h-6 w-6 transition-transform duration-300"
-        :class="isDragging ? 'translate-x-1' : ''"
-      />
+    <!-- Success Text -->
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center pl-8">
+      <span
+        class="text-success-600 dark:text-success-400 text-sm font-bold transition-opacity duration-300"
+        :class="[isConfirmed && !loading ? 'opacity-100' : 'opacity-0']"
+      >
+        Đã xác nhận
+      </span>
     </div>
 
-    <!-- Checkmark (Shows on confirm) -->
+    <!-- Loading Text -->
+    <div class="pointer-events-none absolute inset-0 flex items-center justify-center pl-8">
+      <span
+        class="text-primary-600 dark:text-primary-400 text-sm font-bold transition-opacity duration-300"
+        :class="[loading ? 'opacity-100' : 'opacity-0']"
+      >
+        Đang xử lý...
+      </span>
+    </div>
+
+    <!-- Background Fill for progress -->
     <div
-      class="pointer-events-none absolute top-0 bottom-0 left-4 z-20 flex items-center transition-all duration-500"
-      :class="isConfirmed ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
+      class="bg-success-500/20 dark:bg-success-900/30 absolute top-0 bottom-0 left-0 transition-all"
+      :class="[!isSwiping ? 'duration-300 ease-out' : 'duration-0']"
+      :style="{ width: `${leftOffset + thumbWidth + 8}px` }"
+    />
+
+    <!-- Thumb (Draggable handle) -->
+    <div
+      ref="target"
+      class="absolute top-1 bottom-1 left-1 z-10 flex w-[48px] touch-none items-center justify-center rounded-xl bg-white shadow-md transition-all select-none dark:bg-zinc-700"
+      :class="[
+        !isSwiping ? 'duration-300 ease-out' : 'duration-0',
+        isSwiping ? 'scale-95 cursor-grabbing' : 'cursor-grab',
+        isConfirmed
+          ? 'bg-success-500 dark:bg-success-600 text-white'
+          : 'text-slate-400 dark:text-zinc-300'
+      ]"
+      :style="{ transform: `translateX(${leftOffset}px)` }"
     >
-      <UIcon name="i-lucide-check-circle-2" class="h-6 w-6 text-white" />
+      <UIcon
+        v-if="loading"
+        name="i-lucide-loader-2"
+        class="text-primary-500 dark:text-primary-400 h-5 w-5 animate-spin"
+      />
+      <UIcon v-else-if="isConfirmed" name="i-lucide-check" class="h-6 w-6 text-white" />
+      <UIcon v-else name="i-lucide-chevrons-right" class="h-6 w-6" />
     </div>
   </div>
 </template>
-
-<style scoped>
-.ease-spring {
-  transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-</style>

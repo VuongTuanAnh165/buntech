@@ -9,6 +9,7 @@ import {
   getOrderStatusList
 } from '~/utils/orderStatus'
 import type { UserDTO } from '~/utils/types'
+import OrderBatchAssignModal from '~/components/features/admin/orders/OrderBatchAssignModal.vue'
 
 const { constants } = useMasterData()
 

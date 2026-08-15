@@ -330,15 +330,16 @@ onMounted(() => {
       </div>
 
       <!-- Action buttons -->
-      <div class="grid grid-cols-2 gap-3 pb-4">
-        <UButton variant="outline" size="lg" block @click="openCollectModal">
+      <div class="grid grid-cols-1 gap-3 pb-4">
+        <UButton v-if="remaining > 0" variant="outline" size="lg" block @click="openCollectModal">
           <UIcon name="i-lucide-wallet" class="mr-1 h-4 w-4" />
           Thu tiền
         </UButton>
-        <UButton color="success" size="lg" block :loading="isSubmitting" @click="confirmDelivery">
-          <UIcon name="i-lucide-check-circle-2" class="mr-1 h-4 w-4" />
-          Xác nhận giao
-        </UButton>
+        <BaseSwipeToConfirm
+          :loading="isSubmitting"
+          text="Vuốt để xác nhận giao"
+          @confirmed="confirmDelivery"
+        />
       </div>
     </template>
 
@@ -375,9 +376,11 @@ onMounted(() => {
               formatVND(Math.max(0, Number(amountInput) - remaining))
             }}</span>
           </div>
-          <UButton color="primary" size="lg" block :loading="isSubmitting" @click="confirmDelivery">
-            Xác nhận đã thu
-          </UButton>
+          <BaseSwipeToConfirm
+            :loading="isSubmitting"
+            text="Vuốt để chốt đơn"
+            @confirmed="confirmDelivery"
+          />
         </div>
       </template>
     </UModal>
