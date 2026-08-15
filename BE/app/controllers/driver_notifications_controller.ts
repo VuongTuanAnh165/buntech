@@ -2,6 +2,10 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import NotificationService from '#services/notification_service'
 import { formatPagination } from '#utils/pagination'
+import {
+  driverNotificationIndexValidator,
+  driverNotificationMarkAsReadValidator,
+} from '#validators/driver_notification_validator'
 
 @inject()
 export default class DriverNotificationsController {
@@ -17,9 +21,10 @@ export default class DriverNotificationsController {
    * @responseBody 200 - <PaginatedNotificationListResponse>
    */
   async index({ request, response, auth }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
-    const unreadOnly = request.input('unreadOnly') === 'true'
+    const payload = await request.validateUsing(driverNotificationIndexValidator)
+    const page = payload.page || 1
+    const limit = payload.limit || 20
+    const unreadOnly = payload.unreadOnly || false
     const userId = auth.user!.id
 
     const notifications = await this.notificationService.getUserNotifications(
@@ -43,14 +48,32 @@ export default class DriverNotificationsController {
    * @paramPath id - ID thông báo
    * @responseBody 200 - <NotificationResponse>
    */
-  async markAsRead({ params, response, auth }: HttpContext) {
+  async markAsRead({ request, response, auth }: HttpContext) {
+    const payload = await request.validateUsing(driverNotificationMarkAsReadValidator)
     const userId = auth.user!.id
-    const notification = await this.notificationService.markAsRead(params.id, userId)
+    const notification = await this.notificationService.markAsRead(payload.params.id, userId)
 
     return response.ok({
       success: true,
       message: 'Đánh dấu đã đọc thành công',
       data: notification,
+    })
+  }
+
+  /**
+   * @markAllAsRead
+   * @summary Đánh dấu tất cả đã đọc
+   * @description Đánh dấu tất cả thông báo của tài xế là đã đọc
+   * @responseBody 200 - <SuccessResponse>
+   */
+  async markAllAsRead({ response, auth }: HttpContext) {
+    const userId = auth.user!.id
+    await this.notificationService.markAllAsRead(userId)
+
+    return response.ok({
+      success: true,
+      message: 'Đã đánh dấu tất cả là đã đọc',
+      data: null,
     })
   }
 }

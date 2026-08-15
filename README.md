@@ -140,3 +140,28 @@ Bất cứ khi nào bạn sửa code hiển thị ở thư mục FE và muốn c
 npm run build:mobile
 ```
 Sau đó mở lại Android Studio/Xcode và ấn nút **Run** (Play) là app sẽ nhận diện giao diện và code mới nhất!
+
+---
+
+## 🔔 5. Hướng Dẫn Thiết Lập Push Notification (FCM)
+
+Hệ thống hỗ trợ Push Notification trên cả Web (PWA) và Mobile App (Native Capacitor). 
+
+### 5.1. Thiết lập cho Web Push
+Để nhận thông báo trên Web, bạn cần cấu hình các biến môi trường Firebase trong thư mục `FE`.
+1. Mở file `FE/.env`
+2. Bổ sung và điền các thông tin sau lấy từ Firebase Console:
+   ```env
+   NUXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+   NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   NUXT_PUBLIC_FIREBASE_PROJECT_ID=your_project
+   NUXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+   NUXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   NUXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+   NUXT_PUBLIC_FIREBASE_VAPID_KEY=your_vapid_key
+   ```
+
+### 5.2. Thiết lập cho Mobile Native (Capacitor)
+Đối với ứng dụng Native, Capacitor sử dụng file cấu hình trực tiếp của Firebase thay vì biến môi trường.
+- **Android**: Tải file `google-services.json` từ Firebase Console và đặt vào thư mục `FE/android/app/`.
+- **iOS**: Tải file `GoogleService-Info.plist` từ Firebase Console. Sau đó mở `FE/ios/App/App.xcworkspace` bằng Xcode, kéo thả file này vào thư mục `App` (Cùng cấp với `Info.plist`), và đảm bảo tick chọn "Copy items if needed".

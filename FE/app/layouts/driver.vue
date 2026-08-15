@@ -3,12 +3,18 @@ import { ref, onMounted, onUnmounted } from 'vue'
 
 import { useAuthStore } from '~/stores/auth'
 import { useOfflineSync } from '~/composables/driver/useOfflineSync'
+import { useFCM } from '~/composables/useFCM'
+import { useDriverNotifications } from '~/composables/driver/useDriverNotifications'
 
 const route = useRoute()
 const _router = useRouter()
 const colorMode = useColorMode()
 const authStore = useAuthStore()
 const { processQueue } = useOfflineSync()
+const { initFCM } = useFCM()
+const { meta: notifMeta, fetchNotifications: fetchNotifs } = useDriverNotifications()
+const hasUnread = computed(() => notifMeta.value?.total > 0)
+
 const isOnline = ref(true)
 const showMenu = ref(false)
 
@@ -27,6 +33,12 @@ onMounted(() => {
 
   if (isOnline.value) {
     processQueue()
+  }
+
+  // Khởi tạo FCM và đếm thông báo chưa đọc nếu đã đăng nhập
+  if (authStore.isAuthenticated) {
+    initFCM()
+    fetchNotifs(1, true)
   }
 })
 onUnmounted(() => {
@@ -192,7 +204,7 @@ const navItems = [
           ]"
         >
           <UIcon name="i-lucide-bell" class="h-5 w-5" />
-          <span class="bg-error-500 absolute top-1 right-2 h-2 w-2 rounded-full" />
+          <span v-if="hasUnread" class="bg-error-500 absolute top-1 right-2 h-2 w-2 rounded-full" />
           <span class="text-[10px] font-medium">Thông báo</span>
         </NuxtLink>
         <NuxtLink

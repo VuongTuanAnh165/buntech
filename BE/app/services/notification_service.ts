@@ -40,4 +40,16 @@ export default class NotificationService {
 
     return notification
   }
+
+  /**
+   * Đánh dấu tất cả thông báo đã đọc
+   */
+  async markAllAsRead(userId: number) {
+    const updated = await Notification.query()
+      .where('user_id', userId)
+      .where('is_read', false)
+      .update({ is_read: true })
+
+    return updated
+  }
 }

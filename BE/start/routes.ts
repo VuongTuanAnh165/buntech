@@ -384,6 +384,10 @@ router
       () => import('#controllers/driver_notifications_controller'),
       'index',
     ])
+    router.patch('/notifications/mark-all-read', [
+      () => import('#controllers/driver_notifications_controller'),
+      'markAllAsRead',
+    ])
     router.patch('/notifications/:id/read', [
       () => import('#controllers/driver_notifications_controller'),
       'markAsRead',
