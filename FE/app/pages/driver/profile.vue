@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { mockOrders, mockProfiles } from '~/utils/mockData'
+import { useAuthStore } from '~/stores/auth'
+import { useDriverHistory } from '~/composables/driver/useDriverHistory'
+import type { DriverRouteDTO } from '~/services/driverService'
 import { ConstantKey } from '~/enums/constantKeys'
 const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
@@ -7,27 +9,24 @@ useSeoMeta({ title: 'Hồ sơ tài xế - BunTech Driver' })
 const _router = useRouter()
 const toast = useToast()
 const loading = ref(true)
-const driver = computed(
-  () =>
-    mockProfiles.find(
-      (p) =>
-        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
-        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
-    ) || mockProfiles[2]
-)
+
+const authStore = useAuthStore()
+const { history } = useDriverHistory()
+
+const driver = computed(() => authStore.user)
+
 const driverOrders = computed(() => {
-  const id = driver.value?.id
-  if (!id) return []
-  return mockOrders
-    .filter((o) => o.driver_id === id)
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  return history.value
 })
 const stats = computed(() => {
   const orders = driverOrders.value
   const delivered = orders.filter(
-    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    (o: DriverRouteDTO) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
   )
-  const totalEarnings = delivered.reduce((sum, o) => sum + Math.round((o.total || 0) * 0.03), 0)
+  const totalEarnings = delivered.reduce(
+    (sum: number, o: DriverRouteDTO) => sum + Math.round((Number(o.totalAmount) || 0) * 0.03),
+    0
+  )
   const successRate = orders.length ? Math.round((delivered.length / orders.length) * 100) : 0
   return { totalDeliveries: delivered.length, successRate, totalEarnings, rating: 4.8 }
 })
@@ -46,7 +45,7 @@ const stableWeekly = ref<{ day: string; count: number; isToday: boolean }[]>([])
 const maxWeekly = computed(() => Math.max(...stableWeekly.value.map((d) => d.count), 1))
 // Recent activity timeline
 const recentActivity = computed(() =>
-  driverOrders.value.slice(0, 6).map((o) => ({
+  driverOrders.value.slice(0, 6).map((o: DriverRouteDTO) => ({
     id: o.id,
     type:
       o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
@@ -60,16 +59,16 @@ const recentActivity = computed(() =>
         : o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
           ? `Đơn hủy #${o.id}`
           : `Đang giao #${o.id}`,
-    customer: o.user?.full_name || o.guest_info?.name || 'Khách vãng lai',
-    address: o.shipping_address,
-    amount: o.amount_collected || 0,
-    time: o.created_at
+    customer: o.user?.fullName || 'Khách vãng lai',
+    address: o.shippingAddress?.addressLine || '',
+    amount: Number(o.amountCollected) || 0,
+    time: o.createdAt
   }))
 )
 function copyPhone() {
-  if (driver.value?.phone) {
+  if (driver.value?.phoneNumber) {
     navigator.clipboard
-      ?.writeText(driver.value.phone)
+      ?.writeText(driver.value.phoneNumber)
       .then(() => toast.add({ title: 'Đã sao chép số điện thoại', color: 'success' }))
       .catch(() => toast.add({ title: 'Không thể sao chép', color: 'error' }))
   }
@@ -115,13 +114,13 @@ onMounted(() => {
         <div class="relative">
           <div class="mb-4 flex items-center gap-4">
             <UAvatar
-              :src="driver?.avatar_url || ''"
-              :alt="driver?.full_name || 'Tài xế'"
+              :src="driver?.profile?.avatarUrl || ''"
+              :alt="driver?.fullName || 'Tài xế'"
               size="lg"
             />
             <div class="min-w-0 flex-1">
-              <p class="truncate text-lg font-bold">{{ driver?.full_name }}</p>
-              <p class="font-mono text-xs text-slate-400">{{ driver?.id }}</p>
+              <p class="truncate text-lg font-bold">{{ driver?.fullName }}</p>
+              <p class="font-mono text-xs text-slate-400">ID: {{ driver?.id }}</p>
               <div class="mt-1.5 flex items-center gap-2">
                 <UBadge color="success" variant="solid" size="xs">Đang hoạt động</UBadge>
                 <span class="flex items-center gap-0.5 text-xs">
@@ -213,7 +212,7 @@ onMounted(() => {
             <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Số điện thoại</p>
               <p class="text-sm font-medium text-neutral-900 tabular-nums dark:text-white">
-                {{ driver?.phone || 'Chưa có' }}
+                {{ driver?.phoneNumber || 'Chưa có' }}
               </p>
             </div>
             <UButton
@@ -233,7 +232,11 @@ onMounted(() => {
             <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Email</p>
               <p class="truncate text-sm font-medium text-neutral-900 dark:text-white">
-                {{ driver?.phone ? `driver${driver.phone.slice(-4)}@buntech.vn` : 'Chưa có' }}
+                {{
+                  driver?.phoneNumber
+                    ? `driver${driver.phoneNumber.slice(-4)}@buntech.vn`
+                    : 'Chưa có'
+                }}
               </p>
             </div>
           </div>
@@ -246,7 +249,7 @@ onMounted(() => {
             <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Số giấy phép lái</p>
               <p class="text-sm font-medium text-neutral-900 tabular-nums dark:text-white">
-                B2-0{{ (driver?.phone || '000').slice(-6) }}
+                B2-0{{ (driver?.phoneNumber || '000').slice(-6) }}
               </p>
             </div>
           </div>
@@ -258,9 +261,7 @@ onMounted(() => {
             </div>
             <div class="min-w-0 flex-1">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Ngày tham gia</p>
-              <p class="text-sm font-medium text-neutral-900 dark:text-white">
-                {{ formatDate(driver?.created_at) }}
-              </p>
+              <p class="text-sm font-medium text-neutral-900 dark:text-white">Đang cập nhật</p>
             </div>
           </div>
         </div>

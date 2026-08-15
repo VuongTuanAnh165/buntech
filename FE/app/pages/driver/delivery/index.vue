@@ -1,86 +1,60 @@
 <script setup lang="ts">
-import { mockOrders, mockProfiles } from '~/utils/mockData'
 import { ConstantKey } from '~/enums/constantKeys'
+import type { DriverRouteDTO } from '~/services/driverService'
+import { useDriverRoutes } from '~/composables/driver/useDriverRoutes'
+
 const { constants } = useMasterData()
+const { driverRoutes, loading, refresh: refreshRoutes } = useDriverRoutes()
 
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Tuyến giao hàng - BunTech Driver' })
-const _router = useRouter()
 const toast = useToast()
-const loading = ref(true)
 const refreshing = ref(false)
 const isOnline = ref(true)
 const activeTab = ref<'all' | 'shipping' | 'pending' | 'delivered'>('all')
-// Current driver
-const currentDriver = computed(
-  () =>
-    mockProfiles.find(
-      (p) =>
-        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
-        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
-    ) || mockProfiles[2]
-)
-// All active orders assigned to this driver
-const driverOrders = computed(() => {
-  const driverId = currentDriver.value?.id
-  if (!driverId) return []
-  return mockOrders
-    .filter((o) => o.driver_id === driverId)
-    .filter((o) =>
-      [
-        constants.value?.[ConstantKey.OrderStatus]?.DELIVERING,
-        constants.value?.[ConstantKey.OrderStatus]?.PROCESSING,
-        constants.value?.[ConstantKey.OrderStatus]?.PENDING,
-        constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
-      ].includes(o.status)
-    )
-    .sort((a, b) => {
-      const order: Record<string, number> = {
-        DELIVERING: 0,
-        PROCESSING: 1,
-        PENDING: 2,
-        DELIVERED: 3
-      }
-      const sa = order[a.status] ?? 9
-      const sb = order[b.status] ?? 9
-      if (sa !== sb) return sa - sb
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    })
-})
+
 const filteredOrders = computed(() => {
-  if (activeTab.value === 'all') return driverOrders.value
+  if (activeTab.value === 'all') return driverRoutes.value
   if (activeTab.value === 'shipping')
-    return driverOrders.value.filter(
-      (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
+    return driverRoutes.value.filter(
+      (o: DriverRouteDTO) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
     )
   if (activeTab.value === 'pending')
-    return driverOrders.value.filter(
-      (o) =>
+    return driverRoutes.value.filter(
+      (o: DriverRouteDTO) =>
         o.status === constants.value?.[ConstantKey.OrderStatus]?.PROCESSING ||
         o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING
     )
   if (activeTab.value === 'delivered')
-    return driverOrders.value.filter(
-      (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    return driverRoutes.value.filter(
+      (o: DriverRouteDTO) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
     )
-  return driverOrders.value
+  return driverRoutes.value
 })
+
 const stats = computed(() => {
-  const all = driverOrders.value
+  const all = driverRoutes.value
   const delivered = all.filter(
-    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    (o: DriverRouteDTO) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
   )
   const pending = all.filter(
-    (o) =>
+    (o: DriverRouteDTO) =>
       o.status === constants.value?.[ConstantKey.OrderStatus]?.PROCESSING ||
       o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING
   )
   const shipping = all.filter(
-    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
+    (o: DriverRouteDTO) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
   )
   const totalToCollect = all
-    .filter((o) => o.status !== constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
-    .reduce((sum, o) => sum + ((o.total || 0) - (o.amount_collected || 0)), 0)
+    .filter(
+      (o: DriverRouteDTO) => o.status !== constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    )
+    .reduce(
+      (sum: number, o: DriverRouteDTO) =>
+        sum + (Number(o.totalAmount) || 0) - (Number(o.amountCollected) || 0),
+      0
+    )
+
   return {
     todayDeliveries: delivered.length,
     totalToCollect,
@@ -88,12 +62,15 @@ const stats = computed(() => {
     pending: pending.length + shipping.length
   }
 })
-function distanceFor(orderId: string): string {
+
+function distanceFor(orderId: number): string {
   let seed = 0
-  for (let i = 0; i < orderId.length; i++) seed = (seed * 31 + orderId.charCodeAt(i)) >>> 0
+  const idStr = orderId.toString()
+  for (let i = 0; i < idStr.length; i++) seed = (seed * 31 + idStr.charCodeAt(i)) >>> 0
   const km = 2 + (seed % 18) + (seed % 7) / 10
   return `${km.toFixed(1)} km`
 }
+
 const statusLabel: Record<string, string> = {
   DELIVERING: 'Đang giao',
   PROCESSING: 'Đang xử lý',
@@ -101,6 +78,7 @@ const statusLabel: Record<string, string> = {
   DELIVERED: 'Đã giao',
   CANCELLED: 'Đã hủy'
 }
+
 function toggleOnline() {
   isOnline.value = !isOnline.value
   toast.add({
@@ -108,18 +86,13 @@ function toggleOnline() {
     color: 'success'
   })
 }
-function refresh() {
+
+async function refresh() {
   refreshing.value = true
-  setTimeout(() => {
-    refreshing.value = false
-    toast.add({ title: 'Đã làm mới danh sách', color: 'success' })
-  }, 700)
+  await refreshRoutes()
+  refreshing.value = false
+  toast.add({ title: 'Đã làm mới danh sách', color: 'success' })
 }
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 500)
-})
 </script>
 <template>
   <div class="p-4 pb-6">
@@ -222,7 +195,7 @@ onMounted(() => {
               <UIcon name="i-lucide-package" class="text-warning-400 h-3.5 w-3.5" />
               <span class="text-xs text-slate-400">Tổng tuyến</span>
             </div>
-            <p class="text-lg font-bold tabular-nums">{{ driverOrders.length }}</p>
+            <p class="text-lg font-bold tabular-nums">{{ driverRoutes.length }}</p>
           </div>
         </div>
       </div>
@@ -234,19 +207,19 @@ onMounted(() => {
       >
         <UButton
           v-for="tab in [
-            { accessorKey: 'all', header: 'Tất cả', count: driverOrders.length },
+            { accessorKey: 'all', header: 'Tất cả', count: driverRoutes.length },
             {
               accessorKey: 'shipping',
               header: 'Đang giao',
-              count: driverOrders.filter(
-                (o) => o.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
+              count: driverRoutes.filter(
+                (o: DriverRouteDTO) => o.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
               ).length
             },
             {
               accessorKey: 'pending',
               header: 'Chưa giao',
-              count: driverOrders.filter(
-                (o) =>
+              count: driverRoutes.filter(
+                (o: DriverRouteDTO) =>
                   o.status === constants?.[ConstantKey.OrderStatus]?.PROCESSING ||
                   o.status === constants?.[ConstantKey.OrderStatus]?.PENDING
               ).length
@@ -254,8 +227,8 @@ onMounted(() => {
             {
               accessorKey: 'delivered',
               header: 'Đã giao',
-              count: driverOrders.filter(
-                (o) => o.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
+              count: driverRoutes.filter(
+                (o: DriverRouteDTO) => o.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
               ).length
             }
           ]"
@@ -347,7 +320,7 @@ onMounted(() => {
             <div>
               <p class="font-mono text-xs text-slate-400 dark:text-zinc-500">#{{ order.id }}</p>
               <p class="font-semibold text-neutral-900 dark:text-white">
-                {{ order.user?.full_name || order.guest_info?.name || 'Khách vãng lai' }}
+                {{ order.user?.fullName || 'Khách vãng lai' }}
               </p>
             </div>
           </div>
@@ -372,7 +345,7 @@ onMounted(() => {
               name="i-lucide-map-pin"
               class="h-4 w-4 flex-shrink-0 text-slate-400 dark:text-zinc-500"
             />
-            <span class="line-clamp-1">{{ order.shipping_address }}</span>
+            <span class="line-clamp-1">{{ order.shippingAddress?.addressLine || '' }}</span>
           </div>
           <div
             class="flex items-center justify-between border-t border-neutral-100 pt-2 dark:border-neutral-800"
@@ -384,7 +357,7 @@ onMounted(() => {
                   class="h-3.5 w-3.5 text-slate-400 dark:text-zinc-500"
                 />
                 <span class="font-semibold text-neutral-900 tabular-nums dark:text-white">{{
-                  formatVND(order.total || 0)
+                  formatVND(Number(order.totalAmount) || 0)
                 }}</span>
               </div>
               <span class="text-slate-300 dark:text-zinc-600">·</span>

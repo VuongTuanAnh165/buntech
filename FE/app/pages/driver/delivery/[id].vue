@@ -1,36 +1,38 @@
 <script setup lang="ts">
-import { mockOrders, mockProfiles } from '~/utils/mockData'
 import { ConstantKey } from '~/enums/constantKeys'
+import { useDriverRoutes } from '~/composables/driver/useDriverRoutes'
+import { useDriverDeliver } from '~/composables/driver/useDriverDeliver'
+import { useIdempotencyKey } from '~/composables/useIdempotencyKey'
+import type { DriverRouteDTO } from '~/services/driverService'
+
 const { constants } = useMasterData()
+const { driverRoutes, refresh: refreshRoutes } = useDriverRoutes()
+const { deliverOrder, isSubmitting } = useDriverDeliver()
+const { generate: generateIdempotencyKey } = useIdempotencyKey()
 
 definePageMeta({ layout: 'driver' })
 
 const _router = useRouter()
 const route = useRoute()
 const toast = useToast()
-const orderId = computed(() => route.params.id as string)
+const orderId = computed(() => Number(route.params.id))
 const loading = ref(true)
 const delivered = ref(false)
 const showCollectModal = ref(false)
 const amountInput = ref('')
-const submitting = ref(false)
 
-const _currentDriver = computed(
-  () =>
-    mockProfiles.find(
-      (p) =>
-        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
-        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
-    ) || mockProfiles[2]
+const order = computed(
+  () => driverRoutes.value.find((o: DriverRouteDTO) => o.id === orderId.value) || null
 )
-
-const order = computed(() => mockOrders.find((o) => o.id === orderId.value) || null)
 useSeoMeta({ title: `Chi tiết đơn giao - BunTech Driver` })
 
-const orderItems = computed(() => order.value?.order_items || [])
+const orderItems = computed(() => order.value?.items || [])
 const remaining = computed(() => {
   if (!order.value) return 0
-  return Math.max(0, (order.value.total || 0) - (order.value.amount_collected || 0))
+  return Math.max(
+    0,
+    (Number(order.value.totalAmount) || 0) - (Number(order.value.amountCollected) || 0)
+  )
 })
 
 const statusGradient = computed(() => {
@@ -56,7 +58,7 @@ const statusLabel: Record<string, string> = {
 }
 
 function callCustomer() {
-  const phone = order.value?.user?.phone || order.value?.guest_info?.phone
+  const phone = order.value?.user?.phoneNumber || order.value?.shippingAddress?.phoneNumber
   if (phone) {
     toast.add({ title: `Đang gọi ${phone}`, color: 'success' })
   } else {
@@ -72,22 +74,28 @@ function openCollectModal() {
   showCollectModal.value = true
 }
 
-function confirmDelivery() {
-  if (submitting.value) return
-  submitting.value = true
-  setTimeout(() => {
-    submitting.value = false
+async function confirmDelivery() {
+  if (isSubmitting.value || !order.value) return
+
+  const payload = {
+    amountCollected: Number(amountInput.value) || 0,
+    idempotencyKey: generateIdempotencyKey(),
+    updatedAt: order.value.updatedAt
+  }
+
+  const success = await deliverOrder(order.value.id, payload)
+  if (success) {
     delivered.value = true
     showCollectModal.value = false
-    toast.add({ title: 'Đã xác nhận giao hàng thành công!', color: 'success' })
+    await refreshRoutes()
     setTimeout(() => navigateTo('/driver/delivery'), 2000)
-  }, 1000)
+  }
 }
 
 onMounted(() => {
   setTimeout(() => {
     if (order.value) {
-      amountInput.value = String(order.value.total || 0)
+      amountInput.value = String(remaining.value)
     }
     loading.value = false
   }, 500)
@@ -175,7 +183,7 @@ onMounted(() => {
           <div class="flex items-center gap-4 text-sm text-white/90">
             <div class="flex items-center gap-1.5">
               <UIcon name="i-lucide-clock" class="h-4 w-4" />
-              <span>{{ formatDateTime(order.created_at) }}</span>
+              <span>{{ formatDateTime(order.createdAt) }}</span>
             </div>
             <div class="flex items-center gap-1.5">
               <UIcon name="i-lucide-truck" class="h-4 w-4" />
@@ -192,13 +200,13 @@ onMounted(() => {
           Thông tin khách hàng
         </h2>
         <div class="mb-4 flex items-center gap-3">
-          <UAvatar :alt="order.user?.full_name || order.guest_info?.name || 'Khách'" size="md" />
+          <UAvatar :alt="order.user?.fullName || 'Khách'" size="md" />
           <div class="min-w-0 flex-1">
             <p class="font-semibold text-neutral-900 dark:text-white">
-              {{ order.user?.full_name || order.guest_info?.name || 'Khách vãng lai' }}
+              {{ order.user?.fullName || order.shippingAddress?.recipientName || 'Khách vãng lai' }}
             </p>
             <p class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">
-              {{ order.user?.phone || order.guest_info?.phone || 'Chưa có SĐT' }}
+              {{ order.user?.phoneNumber || order.shippingAddress?.phoneNumber || 'Chưa có SĐT' }}
             </p>
           </div>
           <UButton
@@ -243,7 +251,12 @@ onMounted(() => {
           </div>
           <div class="min-w-0 flex-1">
             <p class="text-sm leading-relaxed font-medium text-neutral-900 dark:text-white">
-              {{ order.shipping_address }}
+              {{ order.shippingAddress?.addressLine || '' }}
+              {{
+                [order.shippingAddress?.ward, order.shippingAddress?.province]
+                  .filter(Boolean)
+                  .join(', ')
+              }}
             </p>
             <p
               v-if="order.note"
@@ -280,13 +293,8 @@ onMounted(() => {
               <p class="text-sm font-medium text-neutral-900 dark:text-white">
                 {{ item.product?.name || 'Sản phẩm' }}
               </p>
-              <p class="text-xs text-slate-500 dark:text-zinc-400">
-                x{{ item.quantity }} · {{ formatVND(item.price) }}
-              </p>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">x{{ item.quantity }}</p>
             </div>
-            <p class="text-sm font-semibold text-neutral-900 tabular-nums dark:text-white">
-              {{ formatVND(item.quantity * item.price) }}
-            </p>
           </div>
         </div>
       </div>
@@ -301,13 +309,13 @@ onMounted(() => {
           <div class="flex items-center justify-between text-sm">
             <span class="text-slate-500 dark:text-zinc-400">Tổng giá trị đơn</span>
             <span class="font-semibold text-neutral-900 tabular-nums dark:text-white">{{
-              formatVND(order.total || 0)
+              formatVND(Number(order.totalAmount) || 0)
             }}</span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-slate-500 dark:text-zinc-400">Đã thu</span>
             <span class="text-success-600 dark:text-success-400 font-semibold tabular-nums">{{
-              formatVND(order.amount_collected || 0)
+              formatVND(Number(order.amountCollected) || 0)
             }}</span>
           </div>
           <div
@@ -327,7 +335,7 @@ onMounted(() => {
           <UIcon name="i-lucide-wallet" class="mr-1 h-4 w-4" />
           Thu tiền
         </UButton>
-        <UButton color="success" size="lg" block :loading="submitting" @click="confirmDelivery">
+        <UButton color="success" size="lg" block :loading="isSubmitting" @click="confirmDelivery">
           <UIcon name="i-lucide-check-circle-2" class="mr-1 h-4 w-4" />
           Xác nhận giao
         </UButton>
@@ -367,7 +375,7 @@ onMounted(() => {
               formatVND(Math.max(0, Number(amountInput) - remaining))
             }}</span>
           </div>
-          <UButton color="primary" size="lg" block :loading="submitting" @click="confirmDelivery">
+          <UButton color="primary" size="lg" block :loading="isSubmitting" @click="confirmDelivery">
             Xác nhận đã thu
           </UButton>
         </div>

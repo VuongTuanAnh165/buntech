@@ -1,108 +1,110 @@
 <script setup lang="ts">
-import { mockOrders, mockProfiles } from '~/utils/mockData'
 import { ConstantKey } from '~/enums/constantKeys'
+import type { DriverRouteDTO } from '~/services/driverService'
+import { useDriverHistory } from '~/composables/driver/useDriverHistory'
+
 const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Lịch sử giao hàng - BunTech Driver' })
-const _router = useRouter()
 const toast = useToast()
+const refreshing = ref(false)
+
 type DateRange = 'today' | '7days' | '30days'
 type StatusFilter = 'all' | 'delivered' | 'cancelled'
-const loading = ref(true)
-const refreshing = ref(false)
-const dateRange = ref<DateRange>('7days')
-const statusFilter = ref<StatusFilter>('all')
-const visibleCount = ref(8)
-const currentDriver = computed(
-  () =>
-    mockProfiles.find(
-      (p) =>
-        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
-        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
-    ) || mockProfiles[2]
+
+const dateRangeStr = ref<DateRange>('7days')
+const statusFilterStr = ref<StatusFilter>('all')
+
+const {
+  history,
+  meta,
+  loading,
+  refresh: refreshHistory,
+  loadMore,
+  hasMore,
+  params
+} = useDriverHistory()
+
+// Tự động map filter UI vào params call API
+watch(
+  [dateRangeStr, statusFilterStr],
+  ([range, status]) => {
+    // Reset date
+    const now = new Date()
+    let dateFrom = ''
+    if (range === 'today') {
+      dateFrom = new Date(now.setHours(0, 0, 0, 0)).toISOString()
+    } else if (range === '7days') {
+      dateFrom = new Date(now.setDate(now.getDate() - 7)).toISOString()
+    } else if (range === '30days') {
+      dateFrom = new Date(now.setDate(now.getDate() - 30)).toISOString()
+    }
+
+    params.dateFrom = dateFrom
+    params.dateTo = new Date().toISOString()
+
+    // Status
+    if (status === 'all') {
+      params.status = undefined
+    } else if (status === 'delivered') {
+      params.status = constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    } else if (status === 'cancelled') {
+      params.status = constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
+    }
+
+    // Khi đổi filter thì reset về page 1
+    params.page = 1
+  },
+  { immediate: true }
 )
-const dateRangeDays = computed(() => {
-  if (dateRange.value === 'today') return 1
-  if (dateRange.value === '7days') return 7
-  return 30
-})
-const allHistory = computed(() => {
-  const driverId = currentDriver.value?.id
-  if (!driverId) return []
-  const cutoff = Date.now() - dateRangeDays.value * 86400000
-  return mockOrders
-    .filter((o) => o.driver_id === driverId)
-    .filter(
-      (o) =>
-        o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED ||
-        o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
-    )
-    .filter((o) => new Date(o.created_at).getTime() >= cutoff)
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-})
-const filteredHistory = computed(() => {
-  if (statusFilter.value === 'all') return allHistory.value
-  if (statusFilter.value === 'delivered')
-    return allHistory.value.filter(
-      (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
-    )
-  return allHistory.value.filter(
-    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
-  )
-})
+
 const stats = computed(() => {
-  const list = allHistory.value
+  const list = history.value
   const delivered = list.filter(
-    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
+    (o: DriverRouteDTO) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
   )
   const cancelled = list.filter(
-    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
+    (o: DriverRouteDTO) => o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
   )
-  const totalCollected = delivered.reduce((sum, o) => sum + (o.amount_collected || 0), 0)
+  const totalCollected = delivered.reduce(
+    (sum: number, o: DriverRouteDTO) => sum + (Number(o.amountCollected) || 0),
+    0
+  )
   const successRate = list.length ? Math.round((delivered.length / list.length) * 100) : 0
-  const totalDistance = delivered.reduce((sum, o) => {
-    const seed = o.id.charCodeAt(o.id.length - 1) || 1
+  const totalDistance = delivered.reduce((sum: number, o: DriverRouteDTO) => {
+    const seed = Number(o.id) || 1
     return sum + (6 + (seed % 18))
   }, 0)
   return {
-    total: list.length,
-    delivered: delivered.length,
+    total: meta.value?.total || list.length,
+    delivered: delivered.length, // Tạm tính theo current page vì api k gom tổng
     cancelled: cancelled.length,
     totalCollected,
     successRate,
     totalDistance
   }
 })
-const visibleHistory = computed(() => filteredHistory.value.slice(0, visibleCount.value))
-const hasMore = computed(() => visibleCount.value < filteredHistory.value.length)
-function loadMore() {
-  visibleCount.value += 8
-}
+
 function setRange(range: DateRange) {
-  dateRange.value = range
-  visibleCount.value = 8
+  dateRangeStr.value = range
 }
+
 function setStatusFilter(filter: StatusFilter) {
-  statusFilter.value = filter
-  visibleCount.value = 8
+  statusFilterStr.value = filter
 }
-function distanceFor(orderId: string): string {
-  const seed = orderId.charCodeAt(orderId.length - 1) || 1
+
+function distanceFor(orderId: number): string {
+  const seed = orderId || 1
   const km = 6 + (seed % 18) + (seed % 7) / 10
   return `${km.toFixed(1)} km`
 }
-function refresh() {
+
+async function refresh() {
   refreshing.value = true
-  setTimeout(() => {
-    refreshing.value = false
-    toast.add({ title: 'Đã làm mới lịch sử', color: 'success' })
-  }, 700)
+  await refreshHistory()
+  refreshing.value = false
+  toast.add({ title: 'Đã làm mới lịch sử', color: 'success' })
 }
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 500)
-})
 </script>
 <template>
   <div class="p-4">
@@ -146,7 +148,7 @@ onMounted(() => {
           color="neutral"
           :class="[
             'min-w-fit flex-1 rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all',
-            dateRange === opt.accessorKey
+            dateRangeStr === opt.accessorKey
               ? 'bg-primary-600 text-white shadow-sm'
               : 'text-slate-500 hover:bg-neutral-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
           ]"
@@ -226,7 +228,7 @@ onMounted(() => {
           color="neutral"
           :class="[
             'min-w-fit flex-1 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all',
-            statusFilter === tab.accessorKey
+            statusFilterStr === tab.accessorKey
               ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
               : 'text-slate-500 hover:bg-neutral-100 dark:text-zinc-400 dark:hover:bg-zinc-800'
           ]"
@@ -250,9 +252,9 @@ onMounted(() => {
       </div>
     </template>
     <!-- History list -->
-    <template v-else-if="visibleHistory.length">
+    <template v-else-if="history.length">
       <div
-        v-for="(order, i) in visibleHistory"
+        v-for="(order, i) in history"
         :key="order.id"
         class="card card-hover animate-fade-in-up relative mb-3 cursor-pointer overflow-hidden p-4"
         :style="{ animationDelay: `${i * 50}ms` }"
@@ -298,7 +300,7 @@ onMounted(() => {
             <div>
               <p class="font-mono text-xs text-slate-400 dark:text-zinc-500">#{{ order.id }}</p>
               <p class="font-semibold text-neutral-900 dark:text-white">
-                {{ order.user?.full_name || order.guest_info?.name || 'Khách vãng lai' }}
+                {{ order.user?.fullName || 'Khách vãng lai' }}
               </p>
             </div>
           </div>
@@ -321,7 +323,7 @@ onMounted(() => {
               name="i-lucide-map-pin"
               class="h-4 w-4 flex-shrink-0 text-slate-400 dark:text-zinc-500"
             />
-            <span class="line-clamp-1">{{ order.shipping_address }}</span>
+            <span class="line-clamp-1">{{ order.shippingAddress?.addressLine || '' }}</span>
           </div>
           <div
             class="flex items-center justify-between border-t border-neutral-100 pt-2 dark:border-neutral-800"
@@ -333,7 +335,7 @@ onMounted(() => {
                   class="h-3.5 w-3.5 text-slate-400 dark:text-zinc-500"
                 />
                 <span class="font-semibold text-neutral-900 tabular-nums dark:text-white">{{
-                  formatVND(order.amount_collected || 0)
+                  formatVND(Number(order.amountCollected) || 0)
                 }}</span>
               </div>
               <span class="text-slate-300 dark:text-zinc-600">·</span>
@@ -344,7 +346,7 @@ onMounted(() => {
             </div>
             <div class="flex items-center gap-1.5">
               <span class="text-xs text-slate-400 dark:text-zinc-500">{{
-                formatTimeAgo(order.created_at)
+                formatTimeAgo(order.createdAt)
               }}</span>
               <UIcon
                 name="i-lucide-chevron-right"
@@ -356,12 +358,10 @@ onMounted(() => {
       </div>
       <!-- Load more -->
       <div v-if="hasMore" class="flex justify-center pt-2 pb-4">
-        <UButton variant="outline" @click="loadMore">
-          Xem thêm {{ filteredHistory.length - visibleCount }} chuyến
-        </UButton>
+        <UButton variant="outline" :loading="loading" @click="loadMore"> Xem thêm </UButton>
       </div>
       <p v-else class="py-4 text-center text-xs text-slate-400 dark:text-zinc-500">
-        Đã hiển thị tất cả {{ filteredHistory.length }} chuyến
+        Đã hiển thị tất cả {{ meta?.total || history.length }} chuyến
       </p>
     </template>
     <!-- Empty -->
@@ -369,7 +369,7 @@ onMounted(() => {
       v-else
       title="Chưa có lịch sử giao hàng"
       :description="
-        statusFilter === 'all'
+        statusFilterStr === 'all'
           ? 'Chưa có chuyến giao nào trong khoảng thời gian này.'
           : 'Không có chuyến nào phù hợp với bộ lọc đã chọn.'
       "

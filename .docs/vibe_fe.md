@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 4: Mobile App & Vận hành Giao nhận
-2. Cài đặt Capacitor App và SSE Realtime (EventSource) để admin thấy tài xế chốt đơn tự động nhảy. (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api, cài thư viện thì phải cài version mới nhất hiện tại)
+3. Lộ trình hôm nay (Driver) & Lịch sử chuyến đi. (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api, cài thư viện thì phải cài version mới nhất hiện tại)
 
 ==================================================
 

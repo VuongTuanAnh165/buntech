@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
+import { useAuthStore } from '~/stores/auth'
+
 const route = useRoute()
 const _router = useRouter()
 const colorMode = useColorMode()
+const authStore = useAuthStore()
 const isOnline = ref(true)
 const showMenu = ref(false)
 
@@ -30,10 +33,6 @@ function closeMenu() {
 function toggleDark() {
   colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
 }
-function handleLogout() {
-  navigateTo('/auth/login')
-  closeMenu()
-}
 
 const navItems = [
   { to: '/driver/delivery', label: 'Tuyến giao hàng', icon: 'i-lucide-route' },
@@ -56,11 +55,13 @@ const navItems = [
         <div
           class="from-primary-500 to-primary-600 shadow-primary-600/25 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white shadow-md"
         >
-          B
+          {{ authStore.userInitials || 'B' }}
         </div>
         <div>
           <p class="text-sm leading-tight font-bold">BunTech Driver</p>
-          <p class="mt-0.5 text-[11px] leading-tight text-slate-400">Tài xế Tâm</p>
+          <p class="mt-0.5 text-[11px] leading-tight text-slate-400">
+            {{ authStore.user?.fullName || 'Tài xế' }}
+          </p>
         </div>
       </div>
       <div class="flex items-center gap-1">
@@ -132,7 +133,7 @@ const navItems = [
             variant="ghost"
             color="neutral"
             class="text-error-400 hover:bg-error-500/10 flex min-h-[48px] w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors"
-            @click="handleLogout"
+            @click="authStore.logout()"
           >
             <UIcon name="i-lucide-log-out" class="h-5 w-5" />
             Đăng xuất
