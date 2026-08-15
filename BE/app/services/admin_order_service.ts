@@ -15,23 +15,25 @@ import { TransactionType } from '#enums/transaction_type'
 @inject()
 export default class AdminOrderService {
   constructor(protected orderCalculator: OrderCalculatorService) {}
-  /**
-   * Lấy danh sách Order (Admin)
-   */
-  async getOrders(
-    page: number = 1,
-    limit: number = Pagination.DEFAULT_LIMIT,
-    filters?: {
-      status?: string
-      userId?: number
-      driverId?: number
-      search?: string
-      startDate?: string
-      endDate?: string
-    }
-  ) {
+
+  private _buildQuery(filters?: {
+    status?: string
+    userId?: number
+    driverId?: number
+    search?: string
+    startDate?: string
+    endDate?: string
+  }) {
     const query = Order.query()
-      .select('id', 'user_id', 'driver_id', 'total_amount', 'status', 'created_at')
+      .select(
+        'id',
+        'user_id',
+        'driver_id',
+        'total_amount',
+        'amount_collected',
+        'status',
+        'created_at'
+      )
       .preload('user', (q) => q.select('id', 'full_name', 'phone_number'))
       .preload('driver', (q) => q.select('id', 'full_name', 'phone_number'))
       .orderBy('created_at', 'desc')
@@ -63,9 +65,54 @@ export default class AdminOrderService {
           })
       })
     }
+    return query
+  }
+
+  /**
+   * Lấy danh sách Order (Admin)
+   */
+  async getOrders(
+    page: number = 1,
+    limit: number = Pagination.DEFAULT_LIMIT,
+    filters?: {
+      status?: string
+      userId?: number
+      driverId?: number
+      search?: string
+      startDate?: string
+      endDate?: string
+    }
+  ) {
+    const query = this._buildQuery(filters)
 
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
     return query.paginate(page, safeLimit)
+  }
+
+  /**
+   * Xuất danh sách Order (Admin) dưới dạng chunk stream generator
+   */
+  async *getOrdersExportGenerator(
+    filters?: Parameters<typeof this._buildQuery>[0],
+    chunkSize: number = 500
+  ) {
+    const baseQuery = this._buildQuery(filters)
+    let page = 1
+    let hasMore = true
+
+    while (hasMore) {
+      // Chunking by pagination to avoid Memory Spike
+      const chunk = await baseQuery.clone().paginate(page, chunkSize)
+      if (chunk.all().length === 0) {
+        hasMore = false
+        break
+      }
+      yield chunk.all()
+      if (chunk.currentPage >= chunk.lastPage) {
+        hasMore = false
+      }
+      page++
+    }
   }
 
   /**

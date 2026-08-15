@@ -8,6 +8,7 @@ import {
 } from '#validators/admin_order_validator'
 import emitter from '@adonisjs/core/services/emitter'
 import { formatPagination } from '#utils/pagination'
+import ExcelJS from 'exceljs'
 
 @inject()
 export default class AdminOrdersController {
@@ -51,6 +52,86 @@ export default class AdminOrdersController {
       message: 'Lấy danh sách đơn hàng thành công',
       data: formatPagination(orders),
     })
+  }
+
+  /**
+   * @export
+   * @summary Xuất danh sách đơn hàng ra Excel
+   * @description Lấy danh sách toàn bộ đơn hàng khớp với bộ lọc và xuất ra file Excel (.xlsx) thông qua Stream
+   * @paramQuery status - Trạng thái đơn hàng
+   * @paramQuery userId - ID khách hàng
+   * @paramQuery driverId - ID tài xế
+   * @paramQuery search - Từ khóa tìm kiếm (mã đơn, tên khách, số điện thoại, địa chỉ)
+   * @paramQuery startDate - Lọc từ ngày
+   * @paramQuery endDate - Lọc đến ngày
+   * @responseBody 200 - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+   */
+  async export({ request, response }: HttpContext) {
+    const status = request.input('status')
+    const userId = request.input('userId')
+    const driverId = request.input('driverId')
+    const search = request.input('search')
+    const startDate = request.input('startDate')
+    const endDate = request.input('endDate')
+
+    const filters = {
+      status,
+      userId,
+      driverId,
+      search,
+      startDate,
+      endDate,
+    }
+
+    // Set headers for file download
+    response.header(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response.header(
+      'Content-Disposition',
+      `attachment; filename="DanhSachDonHang_${Date.now()}.xlsx"`
+    )
+
+    // We use Node.js writable stream directly from response.response
+    const stream = response.response
+    const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({ stream })
+
+    const worksheet = workbook.addWorksheet('DanhSachDonHang')
+
+    worksheet.columns = [
+      { header: 'Mã đơn', key: 'id', width: 10 },
+      { header: 'Tên khách hàng', key: 'customerName', width: 25 },
+      { header: 'SĐT khách hàng', key: 'customerPhone', width: 15 },
+      { header: 'Tên tài xế', key: 'driverName', width: 25 },
+      { header: 'SĐT tài xế', key: 'driverPhone', width: 15 },
+      { header: 'Trạng thái', key: 'status', width: 15 },
+      { header: 'Tổng tiền', key: 'totalAmount', width: 15 },
+      { header: 'Đã thu', key: 'amountCollected', width: 15 },
+      { header: 'Ngày tạo', key: 'createdAt', width: 20 },
+    ]
+
+    const generator = this.adminOrderService.getOrdersExportGenerator(filters, 500)
+    for await (const chunk of generator) {
+      for (const order of chunk) {
+        worksheet.addRow({
+          id: order.id,
+          customerName: order.user?.fullName || '',
+          customerPhone: order.user?.phoneNumber || '',
+          driverName: order.driver?.fullName || '',
+          driverPhone: order.driver?.phoneNumber || '',
+          status: order.status,
+          totalAmount: Number(order.totalAmount || 0),
+          amountCollected: Number(order.amountCollected || 0),
+          createdAt: order.createdAt ? order.createdAt.toFormat('dd/MM/yyyy HH:mm:ss') : '',
+        })
+      }
+      // Commit chunk to clear memory
+      worksheet.commit()
+    }
+
+    await workbook.commit()
+    return response
   }
 
   /**

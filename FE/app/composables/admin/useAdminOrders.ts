@@ -26,11 +26,16 @@ export function useAdminOrders() {
     return await adminOrderService.createOrder(payload)
   }
 
+  const exportOrders = async (params?: Record<string, unknown>) => {
+    return await adminOrderService.exportOrders(params)
+  }
+
   return {
     fetchOrders,
     getOrder,
     updateStatus,
     batchAssignDriver,
-    createOrder
+    createOrder,
+    exportOrders
   }
 }

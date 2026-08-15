@@ -86,5 +86,9 @@ export const adminOrderService = {
 
   createOrder(payload: AdminCreateOrderPayload) {
     return ApiClient.post<ApiResponse<AdminOrderDTO>>('/admin/orders', payload)
+  },
+
+  exportOrders(params?: Record<string, unknown>) {
+    return ApiClient.download('/admin/orders/export', params, 'DanhSachDonHang.xlsx')
   }
 }

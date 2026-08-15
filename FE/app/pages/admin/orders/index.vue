@@ -3,6 +3,7 @@ import { ConstantKey } from '~/enums/constantKeys'
 import { useAdminOrders } from '~/composables/admin/useAdminOrders'
 import { useUsers } from '~/composables/admin/useUsers'
 import type { UserDTO } from '~/utils/types'
+import dayjs from 'dayjs'
 
 import OrderListTable from '~/components/features/admin/orders/OrderListTable.vue'
 import OrderKpiCards from '~/components/features/admin/orders/OrderKpiCards.vue'
@@ -10,7 +11,7 @@ import OrderBatchAssignModal from '~/components/features/admin/orders/OrderBatch
 
 const { constants } = useMasterData()
 const toast = useToast()
-const { fetchOrders, batchAssignDriver } = useAdminOrders()
+const { fetchOrders, batchAssignDriver, exportOrders } = useAdminOrders()
 const { fetchUsers } = useUsers()
 
 useSeoMeta({ title: 'Đơn hàng - BunTech Admin' })
@@ -118,13 +119,48 @@ async function handleBatchAssign(driverId: string | number) {
   }
 }
 
-function exportCSV() {
+async function exportCSV(overrideParams?: Record<string, unknown>) {
   exporting.value = true
-  setTimeout(() => {
-    toast.add({ title: 'Xuất CSV thành công', color: 'success' })
+  try {
+    const params = { ...fetchParams.value, ...overrideParams }
+    // Remove pagination params as BE export handles all matching
+    delete params.page
+    delete params.limit
+
+    // ApiClient.download automatically handles blob generation and downloading
+    await exportOrders(params)
+
+    toast.add({ title: 'Xuất Excel thành công', color: 'success' })
+  } catch (error: unknown) {
+    toast.add({
+      title: 'Lỗi khi xuất file',
+      description: (error as Error)?.message || 'Có lỗi xảy ra',
+      color: 'error'
+    })
+  } finally {
     exporting.value = false
-  }, 300)
+  }
 }
+
+const exportOptions = [
+  [
+    {
+      label: 'Danh sách hiện tại',
+      icon: 'i-lucide-list-filter',
+      click: () => exportCSV()
+    }
+  ],
+  [
+    {
+      label: 'Báo cáo hôm nay',
+      icon: 'i-lucide-calendar-1',
+      click: () => {
+        const today = dayjs().format('YYYY-MM-DD')
+        exportCSV({ startDate: today, endDate: today, status: 'ALL' })
+      }
+    }
+  ]
+]
 
 function clearFilters() {
   statusFilter.value = 'ALL'
@@ -163,16 +199,17 @@ const activeFilterCount = computed(() => {
             >{{ activeFilterCount }}</span
           >
         </UButton>
-        <UButton
-          variant="outline"
-          color="neutral"
-          :loading="exporting"
-          class="hidden sm:inline-flex"
-          icon="i-lucide-download"
-          @click="exportCSV"
-        >
-          <span class="hidden md:inline">Xuất CSV</span>
-        </UButton>
+        <UDropdown :items="exportOptions" :popper="{ placement: 'bottom-end' }">
+          <UButton
+            variant="outline"
+            color="neutral"
+            :loading="exporting"
+            class="hidden sm:inline-flex"
+            icon="i-lucide-download"
+          >
+            <span class="hidden md:inline">Xuất Excel</span>
+          </UButton>
+        </UDropdown>
         <UButton
           variant="outline"
           color="primary"

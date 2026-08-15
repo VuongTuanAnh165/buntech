@@ -263,6 +263,10 @@ router
     ])
 
     // Admin Orders (M5)
+    router.get('/admin/orders/export', [
+      () => import('#controllers/admin_orders_controller'),
+      'export',
+    ])
     router.get('/admin/orders', [() => import('#controllers/admin_orders_controller'), 'index'])
     router.get('/admin/orders/:id', [() => import('#controllers/admin_orders_controller'), 'show'])
     router.post('/admin/orders', [() => import('#controllers/admin_orders_controller'), 'store'])
