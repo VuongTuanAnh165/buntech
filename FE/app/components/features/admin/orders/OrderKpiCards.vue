@@ -20,7 +20,7 @@ const kpiStats = computed(() => {
     (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING
   ).length
   const shipping = list.filter(
-    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
   ).length
   const delivered = list.filter(
     (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED

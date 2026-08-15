@@ -46,7 +46,7 @@ const isCancelled = computed(
 )
 
 const total = computed(() => Number(order.value?.totalAmount ?? 0))
-const amountCollected = computed(() => 0)
+const amountCollected = computed(() => Number(order.value?.amountCollected ?? 0))
 const remaining = computed(() => Math.max(0, total.value - amountCollected.value))
 
 const paymentState = computed(() => {
@@ -59,7 +59,14 @@ const paymentState = computed(() => {
 const customer = computed(() => order.value?.user)
 const customerName = computed(() => customer.value?.fullName || 'Khách lẻ')
 const customerPhone = computed(() => customer.value?.phoneNumber || '—')
-const shippingAddress = computed(() => order.value?.shippingAddress?.addressLine || '—')
+const shippingAddress = computed(() => {
+  if (!order.value?.shippingAddress) return '—'
+  const parts = []
+  if (order.value.shippingAddress.addressLine) parts.push(order.value.shippingAddress.addressLine)
+  if (order.value.shippingAddress.ward) parts.push(order.value.shippingAddress.ward)
+  if (order.value.shippingAddress.province) parts.push(order.value.shippingAddress.province)
+  return parts.length > 0 ? parts.join(', ') : '—'
+})
 const driver = computed(() => order.value?.driver)
 const driverName = computed(() => driver.value?.fullName)
 const orderNotes = computed(() => order.value?.note || 'Không có ghi chú cho đơn hàng này.')
@@ -108,12 +115,12 @@ watch(
     }
     if (
       [
-        constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
+        constants.value?.[ConstantKey.OrderStatus]?.DELIVERING,
         constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
       ].includes(order.value.status)
     ) {
       base.push({
-        status: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
+        status: constants.value?.[ConstantKey.OrderStatus]?.DELIVERING as string,
         at: addHours(created, 4),
         note: 'Đã giao cho tài xế'
       })
@@ -176,7 +183,7 @@ async function assignDriver(driverId: string) {
   try {
     await batchAssignDriver({
       driverId: parseInt(driverId, 10),
-      orders: [{ orderId: parseInt(orderId, 10) }]
+      orders: [{ orderId: parseInt(orderId, 10), routeOrder: 1 }]
     })
     showAssignDriver.value = false
     refresh()
@@ -763,7 +770,7 @@ const breadcrumbItems = [
 
     <OrderBatchAssignModal
       v-model:open="showAssignDriver"
-      :selected-count="1"
+      :selected-orders="order ? [order as any] : []"
       :drivers="availableDrivers"
       @assign="assignDriver"
     />

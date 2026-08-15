@@ -28,9 +28,9 @@ const isOpen = computed({
 const isEdit = computed(() => !!props.user)
 
 const roleOptions = computed(() => [
-  { label: 'Khách hàng', value: constants.value?.[ConstantKey.Role]?.CUSTOMER || 'CUSTOMER' },
-  { label: 'Tài xế', value: constants.value?.[ConstantKey.Role]?.DRIVER || 'DRIVER' },
-  { label: 'Quản trị viên', value: constants.value?.[ConstantKey.Role]?.ADMIN || 'ADMIN' }
+  { label: 'Khách hàng', value: constants.value?.[ConstantKey.Role]?.CUSTOMER || 'customer' },
+  { label: 'Tài xế', value: constants.value?.[ConstantKey.Role]?.DRIVER || 'driver' },
+  { label: 'Quản trị viên', value: constants.value?.[ConstantKey.Role]?.ADMIN || 'admin' }
 ])
 
 const schema = computed(() => {
@@ -110,10 +110,12 @@ type SchemaType = z.infer<typeof schema.value>
 
 const onSubmit = handleSubmit(
   async (data: SchemaType) => {
+    const roleValue =
+      typeof data.role === 'object' ? (data.role as { value: string }).value : data.role
     if (isEdit.value && props.user) {
       await updateUser(props.user.id, {
         fullName: data.fullName,
-        role: data.role
+        role: roleValue
         // Note: Password update usually requires a separate endpoint or field
       })
     } else {
@@ -121,7 +123,7 @@ const onSubmit = handleSubmit(
         phoneNumber: data.phoneNumber || '',
         password: data.password || '',
         fullName: data.fullName,
-        role: data.role
+        role: roleValue
       })
     }
   },
@@ -135,6 +137,11 @@ const onSubmit = handleSubmit(
 )
 
 const handleFormSubmit = () => {
+  // Tự động chuyển đổi object sang value trước khi validate
+  if (typeof state.role === 'object' && state.role !== null) {
+    state.role = (state.role as { value: string }).value
+  }
+
   if (validateForm()) {
     onSubmit(state)
   }
@@ -172,7 +179,6 @@ const handleFormSubmit = () => {
             :items="roleOptions"
             value-key="value"
             label-key="label"
-            value-attribute="value"
             placeholder="Chọn vai trò"
           />
         </UFormField>

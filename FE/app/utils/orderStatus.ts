@@ -8,7 +8,7 @@ export const getOrderStatusLabel = (
 ) => ({
   [unref(constants)?.[ConstantKey.OrderStatus]?.PENDING || 'PENDING']: 'Chờ xử lý',
   [unref(constants)?.[ConstantKey.OrderStatus]?.PROCESSING || 'PROCESSING']: 'Đang chuẩn bị',
-  [unref(constants)?.[ConstantKey.OrderStatus]?.SHIPPING || 'SHIPPING']: 'Đang giao',
+  [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERING || 'DELIVERING']: 'Đang giao',
   [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERED || 'DELIVERED']: 'Đã giao',
   [unref(constants)?.[ConstantKey.OrderStatus]?.CANCELLED || 'CANCELLED']: 'Đã hủy'
 })
@@ -19,7 +19,7 @@ export const getOrderStatusColor = (
 ) => ({
   [unref(constants)?.[ConstantKey.OrderStatus]?.PENDING || 'PENDING']: 'warning',
   [unref(constants)?.[ConstantKey.OrderStatus]?.PROCESSING || 'PROCESSING']: 'info',
-  [unref(constants)?.[ConstantKey.OrderStatus]?.SHIPPING || 'SHIPPING']: 'primary',
+  [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERING || 'DELIVERING']: 'primary',
   [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERED || 'DELIVERED']: 'success',
   [unref(constants)?.[ConstantKey.OrderStatus]?.CANCELLED || 'CANCELLED']: 'neutral'
 })
@@ -30,7 +30,7 @@ export const getOrderStatusIcon = (
 ) => ({
   [unref(constants)?.[ConstantKey.OrderStatus]?.PENDING || 'PENDING']: 'i-lucide-clock',
   [unref(constants)?.[ConstantKey.OrderStatus]?.PROCESSING || 'PROCESSING']: 'i-lucide-package',
-  [unref(constants)?.[ConstantKey.OrderStatus]?.SHIPPING || 'SHIPPING']: 'i-lucide-truck',
+  [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERING || 'DELIVERING']: 'i-lucide-truck',
   [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERED || 'DELIVERED']:
     'i-lucide-check-circle-2',
   [unref(constants)?.[ConstantKey.OrderStatus]?.CANCELLED || 'CANCELLED']: 'i-lucide-x-circle'
@@ -41,6 +41,6 @@ export const getOrderStatusList = (constants: MaybeRef<MasterDataConstants | nul
   [
     unref(constants)?.[ConstantKey.OrderStatus]?.PENDING || 'PENDING',
     unref(constants)?.[ConstantKey.OrderStatus]?.PROCESSING || 'PROCESSING',
-    unref(constants)?.[ConstantKey.OrderStatus]?.SHIPPING || 'SHIPPING',
+    unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERING || 'DELIVERING',
     unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERED || 'DELIVERED'
   ] as const

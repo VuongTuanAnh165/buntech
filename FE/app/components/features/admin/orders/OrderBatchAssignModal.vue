@@ -5,14 +5,19 @@
 -->
 <script setup lang="ts">
 import type { UserDTO } from '~/utils/types'
+import type { AdminOrderDTO } from '~/services/adminOrderService'
+import BaseCurrencyDisplay from '~/components/base/CurrencyDisplay.vue'
 
 const props = defineProps<{
-  selectedCount: number
+  selectedOrders: AdminOrderDTO[]
   drivers: UserDTO[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'assign', driverId: string): void
+  (
+    e: 'assign',
+    payload: { driverId: number; orders: { orderId: number; routeOrder: number }[] }
+  ): void
 }>()
 
 const isOpen = defineModel<boolean>('open', { default: false })
@@ -20,11 +25,52 @@ const isOpen = defineModel<boolean>('open', { default: false })
 const batchDriverId = ref('')
 const batchAssigning = ref(false)
 
+// Local state for sorting
+const localOrders = ref<AdminOrderDTO[]>([])
+
+watch(
+  () => props.selectedOrders,
+  (newVal) => {
+    localOrders.value = [...newVal]
+  },
+  { immediate: true }
+)
+
+function moveUp(index: number) {
+  if (index > 0) {
+    const temp = localOrders.value[index]
+    const prev = localOrders.value[index - 1]
+    if (temp && prev) {
+      localOrders.value[index] = prev
+      localOrders.value[index - 1] = temp
+    }
+  }
+}
+
+function moveDown(index: number) {
+  if (index < localOrders.value.length - 1) {
+    const temp = localOrders.value[index]
+    const next = localOrders.value[index + 1]
+    if (temp && next) {
+      localOrders.value[index] = next
+      localOrders.value[index + 1] = temp
+    }
+  }
+}
+
 function handleAssign() {
-  if (!batchDriverId.value || props.selectedCount === 0) return
+  if (!batchDriverId.value || localOrders.value.length === 0) return
   batchAssigning.value = true
-  // Fake API delay inside the parent, but we can do it here or pass the event
-  emit('assign', batchDriverId.value)
+
+  const payload = {
+    driverId: Number(batchDriverId.value),
+    orders: localOrders.value.map((order, index) => ({
+      orderId: order.id,
+      routeOrder: index + 1
+    }))
+  }
+
+  emit('assign', payload)
   setTimeout(() => {
     batchAssigning.value = false
     isOpen.value = false
@@ -34,7 +80,7 @@ function handleAssign() {
 </script>
 
 <template>
-  <UModal v-model:open="isOpen" title="Điều phối đơn hàng">
+  <UModal v-model:open="isOpen" title="Điều phối đơn hàng" :ui="{ content: 'sm:max-w-xl' }">
     <template #body>
       <div class="space-y-4">
         <div
@@ -42,9 +88,72 @@ function handleAssign() {
         >
           <div class="i-lucide-truck text-primary-600 dark:text-primary-400 h-5 w-5" />
           <p class="text-primary-700 dark:text-primary-300 text-sm">
-            Đã chọn <strong class="font-bold">{{ selectedCount }}</strong> đơn hàng để điều phối
+            Đã chọn <strong class="font-bold">{{ localOrders.length }}</strong> đơn hàng để điều
+            phối
           </p>
         </div>
+
+        <div
+          v-if="localOrders.length > 0"
+          class="border-surface-border overflow-hidden rounded-lg border"
+        >
+          <div
+            class="bg-surface-elevated border-surface-border text-muted border-b px-3 py-2 text-xs font-semibold"
+          >
+            THỨ TỰ GIAO HÀNG
+          </div>
+          <div class="max-h-60 overflow-y-auto">
+            <div
+              v-for="(order, index) in localOrders"
+              :key="order.id"
+              class="border-surface-border hover:bg-surface-elevated flex items-center gap-3 border-b p-3 transition-colors last:border-b-0"
+            >
+              <div class="flex flex-col gap-1">
+                <UButton
+                  icon="i-lucide-chevron-up"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  :disabled="index === 0"
+                  class="p-0.5"
+                  @click="moveUp(index)"
+                />
+                <UButton
+                  icon="i-lucide-chevron-down"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  :disabled="index === localOrders.length - 1"
+                  class="p-0.5"
+                  @click="moveDown(index)"
+                />
+              </div>
+              <div
+                class="bg-surface-elevated text-muted flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+              >
+                {{ index + 1 }}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-foreground text-sm font-semibold">#{{ order.id }}</span>
+                  <span class="text-foreground truncate text-sm">{{
+                    order.user?.fullName || 'Khách lẻ'
+                  }}</span>
+                </div>
+                <div class="text-muted truncate text-xs">
+                  {{ order.shippingAddress?.addressLine || 'Không có địa chỉ' }}
+                </div>
+              </div>
+              <div class="shrink-0 text-right">
+                <BaseCurrencyDisplay
+                  :amount="Number(order.totalAmount)"
+                  class="text-foreground text-sm font-semibold"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <UFormField label="Chọn tài xế" required>
           <USelectMenu
             v-model="batchDriverId"
@@ -52,6 +161,7 @@ function handleAssign() {
             value-key="value"
             label-key="label"
             placeholder="Chọn tài xế giao hàng"
+            class="w-full"
           />
         </UFormField>
       </div>
@@ -71,7 +181,7 @@ function handleAssign() {
         </UButton>
         <UButton
           :loading="batchAssigning"
-          :disabled="!batchDriverId || selectedCount === 0"
+          :disabled="!batchDriverId || localOrders.length === 0"
           @click="handleAssign"
         >
           Điều phối ngay

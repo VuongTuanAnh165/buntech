@@ -127,6 +127,8 @@ export default class AdminOrderService {
         'driver_id',
         'shipping_address_id',
         'total_amount',
+        'amount_collected',
+        'delivery_fee',
         'status',
         'note',
         'delivery_date',
@@ -135,6 +137,7 @@ export default class AdminOrderService {
       )
       .preload('user', (q) => q.select('id', 'full_name', 'phone_number'))
       .preload('driver', (q) => q.select('id', 'full_name', 'phone_number'))
+      .preload('shippingAddress')
       .preload('items', (q) => {
         q.select('id', 'order_id', 'product_id', 'quantity', 'unit_price').preload(
           'product',

@@ -83,7 +83,7 @@ const statusPills = computed(() => {
       key: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
       label: 'Đang chuẩn bị'
     },
-    { key: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string, label: 'Đang giao' },
+    { key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERING as string, label: 'Đang giao' },
     { key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string, label: 'Đã giao' },
     { key: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string, label: 'Đã hủy' }
   ]
@@ -104,14 +104,16 @@ function clearSelection() {
   selectedOrders.value = new Set()
 }
 
-async function handleBatchAssign(driverId: string | number) {
-  const ids = Array.from(selectedOrders.value)
+const selectedOrderDetails = computed(() => {
+  return pagedRows.value.filter((o) => selectedOrders.value.has(o.id))
+})
+
+async function handleBatchAssign(payload: {
+  driverId: number
+  orders: { orderId: number; routeOrder: number }[]
+}) {
   try {
-    const dId = typeof driverId === 'string' ? parseInt(driverId, 10) : driverId
-    await batchAssignDriver({
-      driverId: dId,
-      orders: ids.map((id) => ({ orderId: id }))
-    })
+    await batchAssignDriver(payload)
     clearSelection()
     refresh()
   } catch {
@@ -394,7 +396,7 @@ const activeFilterCount = computed(() => {
     <!-- Batch Assign Modal -->
     <OrderBatchAssignModal
       v-model:open="showBatchModal"
-      :selected-count="selectedOrders.size"
+      :selected-orders="selectedOrderDetails"
       :drivers="drivers"
       @assign="handleBatchAssign"
     />

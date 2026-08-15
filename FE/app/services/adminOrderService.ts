@@ -54,7 +54,7 @@ export type UpdateOrderStatusPayload = {
 
 export type BatchAssignDriverPayload = {
   driverId: number
-  orders: { orderId: number; routeOrder?: number }[]
+  orders: { orderId: number; routeOrder: number }[]
 }
 
 export interface AdminCreateOrderPayload {

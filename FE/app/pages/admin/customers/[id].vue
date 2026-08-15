@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { mockOrders, mockTransactions, mockCustomPrices, mockProducts } from '~/utils/mockData'
-import type { Order, Transaction, CustomPrice, Product } from '~/utils/types'
+import { mockOrders, mockTransactions } from '~/utils/mockData'
+import type { Order, Transaction } from '~/utils/types'
 import { ConstantKey } from '~/enums/constantKeys'
 import CustomerAddressBook from '~/components/features/admin/customers/CustomerAddressBook.vue'
 import CustomerFormDrawer from '~/components/features/admin/customers/CustomerFormDrawer.vue'
+import CustomerPricesTab from '~/components/features/admin/customers/CustomerPricesTab.vue'
 
 import { useUsers } from '~/composables/admin/useUsers'
 
@@ -19,10 +20,6 @@ const activeTab = ref('orders')
 
 const orders = ref<Order[]>([])
 const transactions = ref<Transaction[]>([])
-const customPrices = ref<(CustomPrice & { product?: Product | null })[]>([])
-
-const showPriceModal = ref(false)
-const priceForm = ref({ product_id: '', price: 0 })
 
 const {
   data: customerData,
@@ -95,8 +92,7 @@ const tabs = computed(() => [
   {
     value: 'prices',
     label: 'Bảng giá riêng',
-    icon: 'i-lucide-tag',
-    count: customPrices.value.length
+    icon: 'i-lucide-tag'
   }
 ])
 
@@ -136,30 +132,9 @@ onMounted(() => {
   transactions.value = mockTransactions
     .filter((tx) => tx.user_id === customerId)
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-
-  const cps = mockCustomPrices.filter((cp) => String(cp.user_id) === customerId)
-  customPrices.value = cps
-    .map((cp) => {
-      const product = mockProducts.find((p) => p.id === cp.product_id) || null
-      return { ...cp, product }
-    })
-    .sort((a, b) => Number(b.price) - Number(a.price))
 })
 
 const showCustomerEdit = ref(false)
-
-function openAddPrice() {
-  priceForm.value = { product_id: '', price: 0 }
-  showPriceModal.value = true
-}
-
-function savePrice() {
-  showPriceModal.value = false
-}
-
-function deletePrice(id: string | number) {
-  customPrices.value = customPrices.value.filter((c) => c.id !== id)
-}
 </script>
 
 <template>
@@ -298,53 +273,7 @@ function deletePrice(id: string | number) {
 
             <!-- ===== Custom Prices Tab ===== -->
             <div v-else-if="item.value === 'prices'" key="prices" class="animate-fade-in-up">
-              <div class="mb-4 flex justify-end">
-                <UButton icon="i-lucide-plus" color="primary" @click="openAddPrice"
-                  >Thiết lập giá riêng</UButton
-                >
-              </div>
-              <BaseDataTable
-                :columns="[
-                  { accessorKey: 'product', header: 'Sản phẩm' },
-                  { accessorKey: 'unit', header: 'Đơn vị' },
-                  { accessorKey: 'default_price', header: 'Giá gốc' },
-                  { accessorKey: 'price', header: 'Giá riêng' },
-                  { accessorKey: 'discount', header: 'Chiết khấu' },
-                  { accessorKey: 'actions', header: '' }
-                ]"
-                :rows="customPrices"
-                empty-title="Chưa có giá riêng"
-              >
-                <template #product-cell="{ row }">
-                  <div class="flex items-center gap-2.5">
-                    <span class="text-surface-foreground font-medium">{{
-                      row.product?.name || 'Sản phẩm đã xoá'
-                    }}</span>
-                  </div>
-                </template>
-                <template #unit-cell="{ row }"
-                  ><span class="text-slate-500">{{ row.product?.unit || '—' }}</span></template
-                >
-                <template #default_price-cell="{ row }"
-                  ><span class="text-slate-500 line-through">{{
-                    formatVND(Number(row.product?.price ?? 0))
-                  }}</span></template
-                >
-                <template #price-cell="{ row }"
-                  ><span class="text-primary-600 font-semibold">{{
-                    formatVND(Number(row.price))
-                  }}</span></template
-                >
-                <template #actions-cell="{ row }"
-                  ><div class="flex justify-end">
-                    <UButton
-                      icon="i-lucide-trash-2"
-                      color="error"
-                      variant="ghost"
-                      @click.stop="deletePrice(row.id)"
-                    /></div
-                ></template>
-              </BaseDataTable>
+              <CustomerPricesTab :user-id="customerId" />
             </div>
           </Transition>
         </template>
@@ -356,19 +285,5 @@ function deletePrice(id: string | number) {
       :user="customer"
       @refresh="refreshCustomer"
     />
-
-    <UModal v-model:open="showPriceModal" title="Thiết lập giá riêng">
-      <!-- Mapped Price Modal content from before -->
-      <template #body>
-        <div class="space-y-4">
-          <UFormField label="Giá riêng">
-            <UInput v-model="priceForm.price" type="number" />
-          </UFormField>
-        </div>
-      </template>
-      <template #footer>
-        <UButton color="primary" @click="savePrice">Lưu giá</UButton>
-      </template>
-    </UModal>
   </div>
 </template>

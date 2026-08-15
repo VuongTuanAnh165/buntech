@@ -28,14 +28,19 @@ const driverOrders = computed(() => {
     .filter((o) => o.driver_id === driverId)
     .filter((o) =>
       [
-        constants.value?.[ConstantKey.OrderStatus]?.SHIPPING,
+        constants.value?.[ConstantKey.OrderStatus]?.DELIVERING,
         constants.value?.[ConstantKey.OrderStatus]?.PROCESSING,
         constants.value?.[ConstantKey.OrderStatus]?.PENDING,
         constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
       ].includes(o.status)
     )
     .sort((a, b) => {
-      const order: Record<string, number> = { SHIPPING: 0, PROCESSING: 1, PENDING: 2, DELIVERED: 3 }
+      const order: Record<string, number> = {
+        DELIVERING: 0,
+        PROCESSING: 1,
+        PENDING: 2,
+        DELIVERED: 3
+      }
       const sa = order[a.status] ?? 9
       const sb = order[b.status] ?? 9
       if (sa !== sb) return sa - sb
@@ -46,7 +51,7 @@ const filteredOrders = computed(() => {
   if (activeTab.value === 'all') return driverOrders.value
   if (activeTab.value === 'shipping')
     return driverOrders.value.filter(
-      (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+      (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
     )
   if (activeTab.value === 'pending')
     return driverOrders.value.filter(
@@ -71,7 +76,7 @@ const stats = computed(() => {
       o.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING
   )
   const shipping = all.filter(
-    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+    (o) => o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
   )
   const totalToCollect = all
     .filter((o) => o.status !== constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
@@ -90,7 +95,7 @@ function distanceFor(orderId: string): string {
   return `${km.toFixed(1)} km`
 }
 const statusLabel: Record<string, string> = {
-  SHIPPING: 'Đang giao',
+  DELIVERING: 'Đang giao',
   PROCESSING: 'Đang xử lý',
   PENDING: 'Chờ giao',
   DELIVERED: 'Đã giao',
@@ -234,7 +239,7 @@ onMounted(() => {
               accessorKey: 'shipping',
               header: 'Đang giao',
               count: driverOrders.filter(
-                (o) => o.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
+                (o) => o.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
               ).length
             },
             {
@@ -306,7 +311,7 @@ onMounted(() => {
         <div
           :class="[
             'absolute top-0 bottom-0 left-0 w-1',
-            order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
+            order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
               ? 'bg-primary-500'
               : order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                 ? 'bg-success-500'
@@ -320,7 +325,7 @@ onMounted(() => {
             <div
               :class="[
                 'flex h-10 w-10 items-center justify-center rounded-xl',
-                order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
+                order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
                   ? 'bg-primary-50 dark:bg-primary-900/20'
                   : order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                     ? 'bg-success-50 dark:bg-success-900/20'
@@ -331,7 +336,7 @@ onMounted(() => {
                 name="i-lucide-package"
                 :class="[
                   'h-5 w-5',
-                  order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
+                  order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
                     ? 'text-primary-600 dark:text-primary-400'
                     : order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                       ? 'text-success-600 dark:text-success-400'
@@ -348,7 +353,7 @@ onMounted(() => {
           </div>
           <UBadge
             :color="
-              order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
+              order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
                 ? 'primary'
                 : order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
                   ? 'success'

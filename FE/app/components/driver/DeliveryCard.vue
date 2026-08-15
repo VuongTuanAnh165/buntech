@@ -10,7 +10,7 @@ const statusColor = computed(() => {
   if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING) return 'warning'
   if (
     props.order.status === constants.value?.[ConstantKey.OrderStatus]?.IN_PROGRESS ||
-    props.order.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+    props.order.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
   )
     return 'primary'
   if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED) return 'success'
@@ -20,7 +20,7 @@ const statusLabel = computed(() => {
   if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING) return 'Chờ giao'
   if (
     props.order.status === constants.value?.[ConstantKey.OrderStatus]?.IN_PROGRESS ||
-    props.order.status === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING
+    props.order.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
   )
     return 'Đang giao'
   if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
@@ -56,7 +56,7 @@ const statusLabel = computed(() => {
             <span
               v-if="
                 order.status === constants?.[ConstantKey.OrderStatus]?.IN_PROGRESS ||
-                order.status === constants?.[ConstantKey.OrderStatus]?.SHIPPING
+                order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
               "
               class="bg-primary-500 h-1.5 w-1.5 animate-pulse rounded-full"
             />

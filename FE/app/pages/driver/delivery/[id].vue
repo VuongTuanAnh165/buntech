@@ -36,7 +36,7 @@ const remaining = computed(() => {
 const statusGradient = computed(() => {
   if (!order.value) return 'from-slate-700 to-slate-800'
   const s = order.value.status
-  if (s === constants.value?.[ConstantKey.OrderStatus]?.SHIPPING)
+  if (s === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING)
     return 'from-primary-600 to-indigo-700'
   if (s === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
     return 'from-success-600 to-emerald-700'
@@ -48,7 +48,7 @@ const statusGradient = computed(() => {
 })
 
 const statusLabel: Record<string, string> = {
-  SHIPPING: 'Đang giao hàng',
+  DELIVERING: 'Đang giao hàng',
   PROCESSING: 'Đang xử lý',
   PENDING: 'Chờ giao',
   DELIVERED: 'Đã giao',

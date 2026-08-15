@@ -19,7 +19,7 @@ const timelineSteps = computed(() => [
     icon: 'i-lucide-package'
   },
   {
-    value: constants.value?.[ConstantKey.OrderStatus]?.SHIPPING as string,
+    value: constants.value?.[ConstantKey.OrderStatus]?.DELIVERING as string,
     label: 'Đang giao',
     icon: 'i-lucide-truck'
   },

@@ -15,7 +15,7 @@ const statusConfig = computed<{ label: string; color: BadgeColor }>(() => {
     const map: Record<string, { label: string; color: BadgeColor }> = {
       PENDING: { label: 'Chờ xử lý', color: 'warning' },
       PROCESSING: { label: 'Đang xử lý', color: 'info' },
-      SHIPPING: { label: 'Đang giao', color: 'primary' },
+      DELIVERING: { label: 'Đang giao', color: 'primary' },
       DELIVERED: { label: 'Đã giao', color: 'success' },
       CANCELLED: { label: 'Đã hủy', color: 'error' }
     }

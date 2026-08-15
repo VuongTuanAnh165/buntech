@@ -81,7 +81,7 @@ const selectedProduct = ref<AdminProduct | undefined>(undefined)
 
 const schema = z.object({
   productId: z.number({ message: 'Vui lòng chọn sản phẩm' }),
-  customPrice: z.number({ message: 'Vui lòng nhập giá riêng' }).min(1, 'Giá phải lớn hơn 0')
+  customPrice: z.coerce.number({ message: 'Vui lòng nhập giá riêng' }).min(1, 'Giá phải lớn hơn 0')
 })
 
 const state = reactive({
@@ -154,7 +154,10 @@ const handleSave = handleSubmit(
 
 const handleFormSubmit = () => {
   if (validateForm()) {
-    handleSave(state as { productId: number; customPrice: number })
+    handleSave({
+      productId: Number(state.productId),
+      customPrice: Number(state.customPrice)
+    })
   }
 }
 

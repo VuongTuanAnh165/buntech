@@ -80,7 +80,7 @@ const loadingCustomers = ref(false)
 async function searchCustomers(q: string) {
   loadingCustomers.value = true
   try {
-    const res = await fetchUsers({ role: 'CUSTOMER', search: q, limit: 10 })
+    const res = await fetchUsers({ role: 'customer', search: q, limit: 10 })
     const fetched = res.data?.data || []
     fetched.forEach((f) => {
       if (!customers.value.some((c) => c.id === f.id)) customers.value.push(f)
@@ -103,7 +103,7 @@ function handleAmountCollectedInput(val: string) {
 async function loadInitData() {
   loading.value = true
   try {
-    const res = await fetchUsers({ role: 'CUSTOMER', limit: 10 })
+    const res = await fetchUsers({ role: 'customer', limit: 10 })
     customers.value = res.data?.data || []
 
     const pRes = await productService.getAdminProducts({ limit: 1000 })
@@ -120,7 +120,7 @@ async function loadInitData() {
 
           if (!customers.value.some((c) => c.id === selectedCustomerId.value)) {
             const cRes = await fetchUsers({
-              role: 'CUSTOMER',
+              role: 'customer',
               search: oldOrder.user?.phoneNumber || ''
             })
             const fetched = cRes.data?.data || []
