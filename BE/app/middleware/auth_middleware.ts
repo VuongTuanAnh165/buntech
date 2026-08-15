@@ -14,6 +14,11 @@ export default class AuthMiddleware {
       guards?: (keyof Authenticators)[]
     } = {}
   ) {
+    const token = ctx.request.input('token')
+    if (token && ctx.request.url().includes('/sse')) {
+      ctx.request.request.headers.authorization = `Bearer ${token}`
+    }
+
     await ctx.auth.authenticateUsing(options.guards)
     return next()
   }

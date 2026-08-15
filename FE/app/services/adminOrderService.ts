@@ -41,6 +41,8 @@ export interface AdminOrderDTO {
   shippingAddress?: {
     id: number
     addressLine: string | null
+    ward?: string | null
+    province?: string | null
   }
   items?: AdminOrderItemDTO[]
 }

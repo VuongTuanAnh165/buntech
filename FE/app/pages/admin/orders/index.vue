@@ -8,11 +8,13 @@ import dayjs from 'dayjs'
 import OrderListTable from '~/components/features/admin/orders/OrderListTable.vue'
 import OrderKpiCards from '~/components/features/admin/orders/OrderKpiCards.vue'
 import OrderBatchAssignModal from '~/components/features/admin/orders/OrderBatchAssignModal.vue'
+import { useAdminSSE } from '~/composables/admin/useSSE'
 
 const { constants } = useMasterData()
 const toast = useToast()
 const { fetchOrders, batchAssignDriver, exportOrders } = useAdminOrders()
 const { fetchUsers } = useUsers()
+const { connect } = useAdminSSE()
 
 useSeoMeta({ title: 'Đơn hàng - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
@@ -71,6 +73,18 @@ onMounted(async () => {
   } catch {
     // ignore
   }
+
+  connect({
+    onOrderDelivered: (orderData: { id: number }) => {
+      toast.add({
+        title: 'Đơn hàng đã được giao!',
+        description: `Tài xế vừa chốt thành công đơn hàng #${orderData.id}`,
+        color: 'success',
+        icon: 'i-lucide-check-circle'
+      })
+      refresh()
+    }
+  })
 })
 
 const statusPills = computed(() => {
