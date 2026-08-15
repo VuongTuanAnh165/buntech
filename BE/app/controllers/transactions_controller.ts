@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import TransactionService from '#services/transaction_service'
-import { payDebtValidator } from '#validators/transaction_validator'
+import { payDebtValidator, transactionIndexValidator } from '#validators/transaction_validator'
 import { formatPagination } from '#utils/pagination'
 
 @inject()
@@ -19,14 +19,17 @@ export default class TransactionsController {
    * @responseBody 200 - <PaginatedTransactionListResponse>
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
-    const userId = request.input('userId')
-    const type = request.input('type')
+    const payload = await request.validateUsing(transactionIndexValidator)
+    const page = payload.page || 1
+    const limit = payload.limit || 20
+    const userId = payload.userId
+    const type = payload.type
+    const search = payload.search
 
     const transactions = await this.transactionService.getTransactions(page, limit, {
       userId,
       type,
+      search,
     })
 
     return response.ok({

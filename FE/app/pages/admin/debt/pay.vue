@@ -1,49 +1,119 @@
 <script setup lang="ts">
-import { mockCustomers } from '~/utils/mockData'
+import { transactionService } from '~/services/transactionService'
+import { userService } from '~/services/userService'
+import type { UserDTO } from '~/utils/types'
+
+import { z } from 'zod'
+
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Thu nợ - BunTech Admin' })
 const toast = useToast()
+
 // ─── State ────────────────────────────────────────────────
-const selectedCustomerId = ref('')
-const amount = ref<number | undefined>()
-const note = ref('')
-const submitting = ref(false)
-// ─── Computed ─────────────────────────────────────────────
-const debtCustomers = computed(() =>
-  mockCustomers
-    .filter((c) => c.debt_limit > 0)
-    .map((c) => ({
-      label: `${c.full_name} — ${c.phone}`,
-      value: c.id,
-      avatar: c.avatar_url ? { src: c.avatar_url } : undefined,
-      avatarUrl: c.avatar_url || undefined,
-      debt: c.debt_limit
-    }))
-)
-const selectedCustomer = computed(() =>
-  debtCustomers.value.find((c) => c.value === selectedCustomerId.value)
-)
-// ─── Handlers ─────────────────────────────────────────────
-async function handleSubmit() {
-  if (!selectedCustomerId.value || !amount.value) {
-    toast.add({ title: 'Vui lòng điền đầy đủ thông tin', color: 'warning' })
-    return
+const state = reactive({
+  userId: '' as number | '',
+  amount: undefined as number | undefined,
+  paymentMethod: 'CASH',
+  note: ''
+})
+
+const schema = z.object({
+  userId: z.number({ message: 'Vui lòng chọn khách hàng' }),
+  amount: z.number({ message: 'Vui lòng nhập số tiền' }).min(1000, 'Số tiền tối thiểu 1.000đ'),
+  paymentMethod: z.string(),
+  note: z.string().optional()
+})
+
+const formErrors = ref<Record<string, string>>({})
+
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    formErrors.value = {}
+    errors.forEach((e) => {
+      formErrors.value[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    formErrors.value = {}
   }
-  submitting.value = true
-  await new Promise((resolve) => setTimeout(resolve, 800))
-  toast.add({
-    title: 'Thu nợ thành công',
-    description: `Đã ghi nhận ${formatVND(amount.value)} từ khách hàng`,
-    color: 'success'
-  })
-  submitting.value = false
-  selectedCustomerId.value = ''
-  amount.value = undefined
-  note.value = ''
+})
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  const result = schema.safeParse(state)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
+}
+
+// ─── Data Fetching ────────────────────────────────────────
+const { data: usersResponse } = useAsyncData('debt-customers', async () => {
+  const res = await userService.fetchUsers({ role: 'CUSTOMER', limit: 500 })
+  return res.data
+})
+
+// ─── Computed ─────────────────────────────────────────────
+const debtCustomers = computed(() => {
+  if (!usersResponse.value?.data) return []
+  return usersResponse.value.data
+    .filter((c: UserDTO) => Number(c.profile?.currentDebt) > 0)
+    .map((c: UserDTO) => ({
+      label: `${c.fullName} — ${c.phoneNumber}`,
+      value: c.id,
+      avatar: c.profile?.avatarUrl ? { src: c.profile.avatarUrl } : undefined,
+      avatarUrl: c.profile?.avatarUrl || undefined,
+      debt: Number(c.profile?.currentDebt) || 0
+    }))
+})
+
+const selectedCustomer = computed(() => debtCustomers.value.find((c) => c.value === state.userId))
+
+// ─── Handlers ─────────────────────────────────────────────
+const { handleSubmit, isSubmitting } = useFormSubmit()
+
+const payDebtAction = handleSubmit(
+  async (data: typeof state) => {
+    await transactionService.payDebt({
+      userId: data.userId as number,
+      amount: data.amount!,
+      paymentMethod: data.paymentMethod,
+      note: data.note
+    })
+  },
+  {
+    formRef,
+    onSuccess: () => {
+      toast.add({
+        title: 'Thu nợ thành công',
+        description: `Đã ghi nhận ${formatVND(state.amount)} từ khách hàng`,
+        color: 'success'
+      })
+      navigateTo('/admin/debt')
+    },
+    onError: (err: unknown) => {
+      toast.add({
+        title: 'Thất bại',
+        description: err instanceof Error ? err.message : String(err),
+        color: 'error'
+      })
+    }
+  }
+)
+
+const handleFormSubmit = () => {
+  if (validateForm()) {
+    payDebtAction(state)
+  }
 }
 </script>
 <template>
-  <div>
+  <form @submit.prevent="handleFormSubmit">
     <BasePageHeader
       title="Thu nợ"
       description="Ghi nhận khách trả nợ"
@@ -76,9 +146,9 @@ async function handleSubmit() {
         </div>
         <div class="space-y-5">
           <!-- Customer select -->
-          <UFormField label="Khách hàng" required>
+          <UFormField label="Khách hàng" name="userId" :error="formErrors.userId" required>
             <USelectMenu
-              v-model="selectedCustomerId"
+              v-model="state.userId"
               :items="debtCustomers"
               value-key="value"
               placeholder="Chọn khách hàng..."
@@ -113,24 +183,44 @@ async function handleSubmit() {
             </div>
           </Transition>
           <!-- Amount -->
-          <UFormField label="Số tiền thanh toán" required>
+          <UFormField label="Số tiền thanh toán" name="amount" :error="formErrors.amount" required>
             <UInput
-              v-model="amount"
+              v-model="state.amount"
               type="number"
               placeholder="Nhập số tiền..."
               icon="i-lucide-banknote"
               :ui="{ base: 'tabular-nums' }"
             />
             <template #hint>
-              <span v-if="amount" class="text-primary-600 dark:text-primary-400 font-medium">{{
-                formatVND(amount)
-              }}</span>
+              <span
+                v-if="state.amount"
+                class="text-primary-600 dark:text-primary-400 font-medium"
+                >{{ formatVND(state.amount) }}</span
+              >
             </template>
           </UFormField>
+          <!-- Payment Method -->
+          <UFormField
+            label="Phương thức thanh toán"
+            name="paymentMethod"
+            :error="formErrors.paymentMethod"
+            required
+          >
+            <USelectMenu
+              v-model="state.paymentMethod"
+              :items="[
+                { label: 'Tiền mặt', value: 'CASH' },
+                { label: 'Chuyển khoản', value: 'BANK_TRANSFER' }
+              ]"
+              value-key="value"
+              placeholder="Chọn phương thức..."
+              class="w-full"
+            />
+          </UFormField>
           <!-- Note -->
-          <UFormField label="Ghi chú">
+          <UFormField label="Ghi chú" name="note" :error="formErrors.note">
             <UTextarea
-              v-model="note"
+              v-model="state.note"
               placeholder="Ghi chú thanh toán (không bắt buộc)..."
               :rows="3"
             />
@@ -138,12 +228,11 @@ async function handleSubmit() {
           <!-- Actions -->
           <div class="flex items-center gap-3 pt-2">
             <UButton
+              type="submit"
               color="primary"
               size="lg"
-              :loading="submitting"
-              :disabled="!selectedCustomerId || !amount"
+              :loading="isSubmitting"
               class="flex-1 justify-center"
-              @click="handleSubmit"
             >
               <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> Xác nhận thu nợ
             </UButton>
@@ -152,5 +241,5 @@ async function handleSubmit() {
         </div>
       </div>
     </div>
-  </div>
+  </form>
 </template>

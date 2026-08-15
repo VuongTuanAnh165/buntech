@@ -14,7 +14,7 @@ export default class TransactionService {
   async getTransactions(
     page: number = 1,
     limit: number = Pagination.DEFAULT_LIMIT,
-    filters?: { userId?: number; type?: string }
+    filters?: { userId?: number; type?: string; search?: string }
   ) {
     const query = Transaction.query()
       .select(
@@ -27,6 +27,11 @@ export default class TransactionService {
         'transaction_date',
         'created_at'
       )
+      .preload('user', (q) => {
+        q.select('id', 'full_name', 'phone_number').preload('profile', (pq) =>
+          pq.select('user_id', 'avatar_url')
+        )
+      })
       .orderBy('created_at', 'desc')
 
     if (filters?.userId) {
@@ -34,6 +39,14 @@ export default class TransactionService {
     }
     if (filters?.type) {
       query.where('type', filters.type)
+    }
+    if (filters?.search) {
+      const searchTerm = `%${filters.search}%`
+      query.where((b) => {
+        b.where('reference_code', 'like', searchTerm).orWhereHas('user', (q) => {
+          q.where('full_name', 'like', searchTerm).orWhere('phone_number', 'like', searchTerm)
+        })
+      })
     }
 
     const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
@@ -55,7 +68,7 @@ export default class TransactionService {
     return await db.transaction(async (trx) => {
       // 1. Lock UserProfile row for update to prevent Race Condition
       const profile = await UserProfile.query({ client: trx })
-        .select('id', 'user_id', 'current_debt')
+        .select('user_id', 'current_debt')
         .where('user_id', data.userId)
         .forUpdate() // CRITICAL: Row-level lock
         .firstOrFail()
@@ -120,7 +133,13 @@ export default class TransactionService {
       .join('users', 'users.id', 'user_profiles.user_id')
       .whereNull('user_profiles.deleted_at')
       .where('current_debt', '>', 0)
-      .select('users.id', 'users.full_name', 'users.phone_number', 'user_profiles.current_debt')
+      .select(
+        'users.id',
+        'users.full_name',
+        'users.phone_number',
+        'user_profiles.current_debt',
+        'user_profiles.avatar_url'
+      )
       .orderBy('current_debt', 'desc')
       .limit(10)
 

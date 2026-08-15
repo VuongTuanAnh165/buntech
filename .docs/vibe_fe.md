@@ -46,8 +46,8 @@ Không được bỏ sót.
 
 Chức năng cần triển khai
 
-SPRINT 4: Mobile App & Vận hành Giao nhận
-6. Xin quyền Push Notification (FCM) và hiển thị Danh sách Thông báo (Chuông báo). (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api, cài thư viện thì phải cài version mới nhất hiện tại)
+SPRINT 5: Kế toán, Kho vận & Thống kê
+1. Sổ cái Kế toán & Thanh toán Nợ. (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api, cài thư viện thì phải cài version mới nhất hiện tại)
 
 ==================================================
 

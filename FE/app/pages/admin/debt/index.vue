@@ -1,87 +1,92 @@
 <script setup lang="ts">
-import { ConstantKey } from '~/enums/constantKeys'
-import { mockTransactions } from '~/utils/mockData'
+import { transactionService } from '~/services/transactionService'
 
-const { constants } = useMasterData()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Tài chính - BunTech Admin' })
 const toast = useToast()
+
 // ─── State ────────────────────────────────────────────────
-const loading = ref(true)
 const search = ref('')
 const typeFilter = ref<string>('ALL')
 const page = ref(1)
-const perPage = ref(10)
+const perPage = ref(20)
+
+// ─── Data Fetching ────────────────────────────────────────
+const { data: debtSummary, status: debtStatus } = useAsyncData('debt-summary', async () => {
+  const res = await transactionService.getDebtSummary()
+  return res.data
+})
+
+const { data: txData, status: txStatus } = useAsyncData(
+  'transactions',
+  async () => {
+    const res = await transactionService.getTransactions(
+      page.value,
+      perPage.value,
+      typeFilter.value === 'ALL' ? undefined : typeFilter.value,
+      undefined,
+      search.value
+    )
+    return res.data
+  },
+  { watch: [page, typeFilter, search] }
+)
+
+watch(search, () => {
+  page.value = 1
+})
+
+const loading = computed(() => debtStatus.value === 'pending')
+
 // ─── Computed KPIs ────────────────────────────────────────
-const totalRevenue = computed(() =>
-  mockTransactions
-    .filter((t) => t.type === constants.value?.[ConstantKey.TransactionType]?.PAYMENT)
-    .reduce((s, t) => s + t.amount, 0)
-)
-const totalDebt = computed(() =>
-  mockTransactions
-    .filter((t) => t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE)
-    .reduce((s, t) => s + t.amount, 0)
-)
-const totalCollected = computed(() =>
-  mockTransactions
-    .filter((t) => t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT)
-    .reduce((s, t) => s + t.amount, 0)
-)
-const debtRemaining = computed(() => totalDebt.value - totalCollected.value)
+const totalDebt = computed(() => debtSummary.value?.totalDebt || 0)
+const totalRevenue = ref(0)
+const totalCollected = ref(0)
+const debtRemaining = computed(() => totalDebt.value)
+
 const kpiStats = computed(() => [
   {
     title: 'Tổng doanh thu',
     value: formatVND(totalRevenue.value),
     icon: 'i-lucide-wallet',
     color: 'primary' as const,
-    trend: { value: 12.4, isPositive: true }
+    trend: { value: 0, isPositive: true }
   },
   {
     title: 'Tổng công nợ',
     value: formatVND(totalDebt.value),
     icon: 'i-lucide-credit-card',
     color: 'error' as const,
-    trend: { value: 5.2, isPositive: false }
+    trend: { value: 0, isPositive: false }
   },
   {
     title: 'Đã thu hồi',
     value: formatVND(totalCollected.value),
     icon: 'i-lucide-trending-up',
     color: 'success' as const,
-    trend: { value: 8.7, isPositive: true }
+    trend: { value: 0, isPositive: true }
   },
   {
     title: 'Công nợ còn lại',
     value: formatVND(debtRemaining.value),
     icon: 'i-lucide-alert-circle',
     color: 'warning' as const,
-    trend: { value: 15.3, isPositive: false }
+    trend: { value: 0, isPositive: false }
   }
 ])
+
 // ─── Top debtors ──────────────────────────────────────────
 const topDebtors = computed(() => {
-  const debtMap = new Map<string, { name: string; avatar: string; total: number }>()
-  for (const t of mockTransactions) {
-    if (t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE && t.user) {
-      const existing = debtMap.get(t.user.id)
-      if (existing) {
-        existing.total += t.amount
-      } else {
-        debtMap.set(t.user.id, {
-          name: t.user.full_name,
-          avatar: t.user.avatar_url || '',
-          total: t.amount
-        })
-      }
-    }
-  }
-  const arr = Array.from(debtMap.values())
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5)
-  const max = arr[0]?.total || 1
-  return arr.map((d) => ({ ...d, percent: Math.round((d.total / max) * 100) }))
+  const debtors = debtSummary.value?.topDebtors || []
+  const max = debtors[0]?.current_debt || 1
+  return debtors.map((d) => ({
+    name: d.full_name,
+    avatar: d.avatar_url || '',
+    total: d.current_debt || 0,
+    percent: Math.round(((d.current_debt || 0) / max) * 100)
+  }))
 })
+
 // ─── Cashflow chart data (7 days) ─────────────────────────
 const cashflowData = computed(() => {
   const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
@@ -99,83 +104,63 @@ const cashflowData = computed(() => {
     ...deterministicData[i]
   }))
 })
+
 // ─── Filter & Pagination ─────────────────────────────────
 const typePills = computed(() => {
-  const counts = {
-    ALL: mockTransactions.length,
-    PAYMENT: mockTransactions.filter(
-      (t) => t.type === constants.value?.[ConstantKey.TransactionType]?.PAYMENT
-    ).length,
-    REFUND: mockTransactions.filter(
-      (t) => t.type === constants.value?.[ConstantKey.TransactionType]?.REFUND
-    ).length,
-    DEBT_INCREASE: mockTransactions.filter(
-      (t) => t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE
-    ).length,
-    DEBT_PAYMENT: mockTransactions.filter(
-      (t) => t.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT
-    ).length
-  }
   return [
-    { accessorKey: 'ALL', header: 'Tất cả', icon: 'i-lucide-list', count: counts.ALL },
+    { accessorKey: 'ALL', header: 'Tất cả', icon: 'i-lucide-list' },
     {
-      accessorKey: 'PAYMENT',
+      accessorKey: 'payment',
       header: 'Thanh toán',
-      icon: 'i-lucide-banknote',
-      count: counts.PAYMENT
+      icon: 'i-lucide-banknote'
     },
-    { accessorKey: 'REFUND', header: 'Hoàn tiền', icon: 'i-lucide-undo-2', count: counts.REFUND },
+    { accessorKey: 'order_payment', header: 'Thanh toán đơn', icon: 'i-lucide-shopping-cart' },
     {
-      accessorKey: 'DEBT_INCREASE',
-      header: 'Tăng nợ',
-      icon: 'i-lucide-arrow-down-left',
-      count: counts.DEBT_INCREASE
+      accessorKey: 'order_charge',
+      header: 'Ghi nợ đơn',
+      icon: 'i-lucide-arrow-down-left'
     },
     {
-      accessorKey: 'DEBT_PAYMENT',
+      accessorKey: 'debt_record',
+      header: 'Ghi nhận nợ',
+      icon: 'i-lucide-arrow-down-left'
+    },
+    {
+      accessorKey: 'debt_payment',
       header: 'Trả nợ',
-      icon: 'i-lucide-arrow-up-right',
-      count: counts.DEBT_PAYMENT
+      icon: 'i-lucide-arrow-up-right'
     }
   ]
 })
+
 const transactionTypeLabel: Record<string, string> = {
-  PAYMENT: 'Thanh toán',
-  REFUND: 'Hoàn tiền',
-  DEBT_INCREASE: 'Tăng nợ',
-  DEBT_PAYMENT: 'Trả nợ'
+  payment: 'Thanh toán',
+  order_payment: 'Thanh toán đơn',
+  order_charge: 'Ghi nợ đơn',
+  debt_record: 'Ghi nhận nợ',
+  debt_payment: 'Trả nợ'
 }
+
 const transactionTypeColor: Record<string, 'success' | 'error' | 'warning' | 'info'> = {
-  PAYMENT: 'success',
-  REFUND: 'error',
-  DEBT_INCREASE: 'error',
-  DEBT_PAYMENT: 'success'
+  payment: 'success',
+  order_payment: 'success',
+  order_charge: 'error',
+  debt_record: 'error',
+  debt_payment: 'success'
 }
-const filteredTransactions = computed(() => {
-  let list = [...mockTransactions]
-  if (typeFilter.value !== 'ALL') {
-    list = list.filter((t) => t.type === typeFilter.value)
-  }
-  if (search.value.trim()) {
-    const q = search.value.toLowerCase()
-    list = list.filter(
-      (t) => t.user?.full_name.toLowerCase().includes(q) || t.note.toLowerCase().includes(q)
-    )
-  }
-  return list
-})
-const totalPages = computed(() => Math.ceil(filteredTransactions.value.length / perPage.value))
-const pagedTransactions = computed(() => {
-  const start = (page.value - 1) * perPage.value
-  return filteredTransactions.value.slice(start, start + perPage.value)
-})
+
+const filteredTransactions = computed(() => txData.value?.data || [])
+
+const totalItems = computed(() => txData.value?.meta.total || 0)
+
 const columns = [
   { accessorKey: 'user', header: 'Khách hàng' },
   { accessorKey: 'type', header: 'Loại giao dịch' },
   { accessorKey: 'amount', header: 'Số tiền' },
-  { accessorKey: 'note', header: 'Ghi chú' },
-  { accessorKey: 'created_at', header: 'Ngày' }
+  { accessorKey: 'referenceCode', header: 'Mã tham chiếu' },
+  { accessorKey: 'createdAt', header: 'Ngày' }
 ]
+
 // ─── Quick actions ────────────────────────────────────────
 const quickActions = [
   {
@@ -191,6 +176,7 @@ const quickActions = [
     description: 'Xem báo cáo chi tiết'
   }
 ]
+
 function handleQuickAction(action: (typeof quickActions)[0]) {
   if (action.to) {
     navigateTo(action.to)
@@ -198,12 +184,6 @@ function handleQuickAction(action: (typeof quickActions)[0]) {
     toast.add({ title: action.label, description: 'Tính năng đang phát triển', color: 'info' })
   }
 }
-// ─── Lifecycle ────────────────────────────────────────────
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 300)
-})
 
 function setFilter(filterKey: string) {
   typeFilter.value = filterKey
@@ -378,16 +358,14 @@ function setFilter(filterKey: string) {
         >
           <UIcon :name="pill.icon" class="mr-1 h-3.5 w-3.5" />
           {{ pill.header }}
-          <UBadge color="neutral" variant="subtle" size="sm" class="ml-1">{{ pill.count }}</UBadge>
         </UButton>
       </div>
       <!-- Search -->
       <div class="animate-fade-in-up mb-4 flex items-center gap-3" style="animation-delay: 540ms">
         <div class="max-w-md flex-1">
-          <UInput
+          <BaseSearchInput
             v-model="search"
-            icon="i-lucide-search"
-            placeholder="Tìm giao dịch theo ghi chú hoặc khách hàng..."
+            placeholder="Tìm giao dịch theo mã hoặc khách hàng..."
           />
         </div>
       </div>
@@ -396,89 +374,89 @@ function setFilter(filterKey: string) {
         class="animate-fade-in-up bg-surface ring-surface-border overflow-hidden rounded-xl ring-1"
         style="animation-delay: 580ms"
       >
-        <UTable :columns="columns" :data="pagedTransactions">
+        <BaseDataTable
+          :columns="columns"
+          :rows="filteredTransactions"
+          :loading="txStatus === 'pending'"
+        >
           <template #user-cell="{ row }">
             <div class="flex items-center gap-2">
               <UAvatar
-                :alt="row.original.user?.full_name || 'Khách'"
-                :src="row.original.user?.avatar_url ?? undefined"
+                :alt="row.user?.full_name || 'Khách'"
+                :src="row.user?.profile?.avatar_url || row.user?.avatar_url || undefined"
                 size="sm"
               />
               <div>
                 <p class="text-surface-foreground text-sm font-medium">
-                  {{ row.original.user?.full_name || 'Khách' }}
+                  {{ row.user?.full_name || 'Khách' }}
                 </p>
                 <p class="text-xs text-slate-400 dark:text-zinc-500">
-                  {{ row.original.user?.phone || '' }}
+                  {{ row.user?.phone_number || '' }}
                 </p>
               </div>
             </div>
           </template>
           <template #type-cell="{ row }">
-            <UBadge
-              :color="transactionTypeColor[row.original.type] || 'neutral'"
-              variant="subtle"
-              size="sm"
-            >
+            <UBadge :color="transactionTypeColor[row.type] || 'neutral'" variant="subtle" size="sm">
               <UIcon
                 :name="
-                  row.original.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
+                  row.type === 'order_charge' || row.type === 'debt_record'
                     ? 'i-lucide-arrow-down-left'
-                    : row.original.type === constants?.[ConstantKey.TransactionType]?.DEBT_PAYMENT
+                    : row.type === 'debt_payment'
                       ? 'i-lucide-arrow-up-right'
-                      : row.original.type === constants?.[ConstantKey.TransactionType]?.PAYMENT
+                      : row.type === 'payment'
                         ? 'i-lucide-banknote'
                         : 'i-lucide-undo-2'
                 "
                 class="mr-1 h-3.5 w-3.5"
               />
-              {{ transactionTypeLabel[row.original.type] || row.original.type }}
+              {{ transactionTypeLabel[row.type] || row.type }}
             </UBadge>
           </template>
           <template #amount-cell="{ row }">
             <span
               :class="[
                 'font-semibold tabular-nums',
-                row.original.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE ||
-                row.original.type === constants?.[ConstantKey.TransactionType]?.REFUND
+                row.type === 'order_charge' || row.type === 'debt_record'
                   ? 'text-error-600 dark:text-error-400'
                   : 'text-success-600 dark:text-success-400'
               ]"
             >
-              {{
-                row.original.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE ||
-                row.original.type === constants?.[ConstantKey.TransactionType]?.REFUND
-                  ? '-'
-                  : '+'
-              }}{{ formatVND(row.original.amount) }}
+              {{ row.type === 'order_charge' || row.type === 'debt_record' ? '-' : '+'
+              }}{{ formatVND(row.amount) }}
             </span>
           </template>
-          <template #note-cell="{ row }">
-            <span class="text-sm text-slate-600 dark:text-zinc-300">{{ row.original.note }}</span>
-          </template>
-          <template #created_at-cell="{ row }">
-            <span class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">{{
-              formatDate(row.original.created_at)
+          <template #referenceCode-cell="{ row }">
+            <span class="text-sm text-slate-600 dark:text-zinc-300">{{
+              row.referenceCode || '-'
             }}</span>
           </template>
-        </UTable>
-        <!-- Pagination -->
-        <div
-          v-if="totalPages > 1"
-          class="border-surface-border flex items-center justify-between border-t px-4 py-3"
-        >
-          <span class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">
-            {{ (page - 1) * perPage + 1 }}-{{
-              Math.min(page * perPage, filteredTransactions.length)
-            }}
-            / {{ filteredTransactions.length }}
-          </span>
-          <UPagination
-            v-model="page"
-            :total="filteredTransactions.length"
-            :items-per-page="perPage"
-          />
-        </div>
+          <template #createdAt-cell="{ row }">
+            <span class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">{{
+              formatDate(row.createdAt)
+            }}</span>
+          </template>
+          <template #pagination>
+            <!-- Pagination -->
+            <div
+              class="border-surface-border mt-4 flex items-center justify-between border-t px-4 py-2"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">
+                  {{ totalItems === 0 ? 0 : (page - 1) * perPage + 1 }}-{{
+                    Math.min(page * perPage, totalItems)
+                  }}
+                  /
+                  {{ totalItems }}
+                </span>
+                <USelectMenu v-model="perPage" :items="[10, 20, 50]" class="w-32">
+                  <template #default>{{ perPage }} / trang</template>
+                </USelectMenu>
+              </div>
+              <UPagination v-model="page" :total="totalItems" :page-count="perPage" :max="5" />
+            </div>
+          </template>
+        </BaseDataTable>
       </div>
     </template>
   </div>
