@@ -2,9 +2,7 @@ import { ApiClient } from '~/utils/api'
 
 export const rawMaterialService = {
   getRawMaterials(page: number = 1, limit: number = 20, search?: string) {
-    return ApiClient.get('/admin/raw-materials', {
-      params: { page, limit, search }
-    })
+    return ApiClient.get('/admin/raw-materials', { page, limit, search })
   },
 
   getRawMaterial(id: number) {

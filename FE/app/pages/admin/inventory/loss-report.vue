@@ -1,58 +1,61 @@
 <script setup lang="ts">
-import { ConstantKey } from '~/enums/constantKeys'
-import { mockInventoryMovements } from '~/utils/mockData'
-const { constants } = useMasterData()
+import { inventoryService } from '~/services/inventoryService'
+
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Báo cáo hao hụt - BunTech Admin' })
-const _toast = useToast()
+
 // ─── State ────────────────────────────────────────────────
-const loading = ref(true)
 const search = ref('')
 const selectedRange = ref('30')
 const page = ref(1)
 const perPage = ref(10)
+
 const rangeOptions = [
   { label: '7 ngày qua', value: '7' },
   { label: '30 ngày qua', value: '30' },
   { label: '90 ngày qua', value: '90' }
 ]
-// ─── Filtered Data ────────────────────────────────────────
+
 const rangeDays = computed(() => Number(selectedRange.value))
-const sinceDate = computed(() => new Date(Date.now() - rangeDays.value * 86400000).toISOString())
-const lossMovements = computed(() =>
-  mockInventoryMovements
-    .filter(
-      (m) =>
-        m.type === constants.value?.[ConstantKey.InventoryMovementType]?.LOSS &&
-        m.created_at >= sinceDate.value
-    )
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-)
-const totalLossEvents = computed(() => lossMovements.value.length)
-const totalQuantityLost = computed(() => lossMovements.value.reduce((s, m) => s + m.quantity, 0))
-// For loss rate calculation
-const importedMovements = computed(() =>
-  mockInventoryMovements.filter(
-    (m) =>
-      m.type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT &&
-      m.created_at >= sinceDate.value
-  )
-)
-const totalImported = computed(() => importedMovements.value.reduce((s, m) => s + m.quantity, 0))
-const lossRate = computed(() => {
-  if (totalImported.value === 0) return 0
-  return Math.round((totalQuantityLost.value / totalImported.value) * 1000) / 10
+
+const dateFilters = computed(() => {
+  const endDate = new Date()
+  const startDate = new Date(Date.now() - rangeDays.value * 86400000)
+  return {
+    startDate: startDate.toISOString(),
+    endDate: endDate.toISOString()
+  }
 })
+
+// ─── Data Fetching ────────────────────────────────────────
+const { data: lossData, status: lossStatus } = useAsyncData(
+  'loss-report',
+  async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res: any = await inventoryService.getLossReport(
+      dateFilters.value.startDate,
+      dateFilters.value.endDate
+    )
+    return res.data
+  },
+  { watch: [selectedRange] }
+)
+
+const loading = computed(() => lossStatus.value === 'pending')
+
 // ─── KPIs ─────────────────────────────────────────────────
+const totalQuantityLost = computed(() => lossData.value?.lossQuantityKg || 0)
+const lossRate = computed(() => lossData.value?.lossPercentage || 0)
+
 const kpiStats = computed(() => [
   {
-    title: 'Số lần ghi nhận hao hụt',
-    value: formatNumber(totalLossEvents.value),
-    icon: 'i-lucide-alert-circle',
-    color: 'error' as const
+    title: 'Tổng nguyên liệu xuất (kg)',
+    value: formatNumber(lossData.value?.totalMaterialExportedKg || 0),
+    icon: 'i-lucide-arrow-up-from-line',
+    color: 'primary' as const
   },
   {
-    title: 'Tổng khối lượng hao hụt',
+    title: 'Tổng lượng hao hụt (kg)',
     value: formatNumber(totalQuantityLost.value),
     icon: 'i-lucide-package-minus',
     color: 'warning' as const
@@ -65,49 +68,47 @@ const kpiStats = computed(() => [
   },
   { title: 'Mục tiêu ngành', value: '< 5%', icon: 'i-lucide-target', color: 'info' as const }
 ])
-// ─── Chart Data (last 7 days) ─────────────────────────────
+
+// ─── Chart Data ─────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const dailyTrends = computed(() => (lossData.value?.dailyTrends || []) as any[])
+
 const lossTrend = computed(() => {
-  const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
-  const now = new Date()
-  return Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date(now.getTime() - (6 - i) * 86400000)
-    const dateStr = d.toISOString().slice(0, 10)
-    const dayLoss = mockInventoryMovements.filter(
-      (m) =>
-        m.type === constants.value?.[ConstantKey.InventoryMovementType]?.LOSS &&
-        m.created_at.slice(0, 10) === dateStr
-    )
-    return {
-      label: days[d.getDay()],
-      total: dayLoss.reduce((s, m) => s + m.quantity, 0)
-    }
-  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return dailyTrends.value.map((day: any) => ({
+    label: formatDate(day.date),
+    total: day.loss
+  }))
 })
-const maxTrendTotal = computed(() => Math.max(...lossTrend.value.map((d) => d.total), 1))
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const maxTrendTotal = computed(() => Math.max(...lossTrend.value.map((d: any) => d.total), 1))
+
 // ─── Table ────────────────────────────────────────────────
 const filteredList = computed(() => {
-  if (!search.value.trim()) return lossMovements.value
+  if (!search.value.trim()) return dailyTrends.value
   const q = search.value.toLowerCase()
-  return lossMovements.value.filter(
-    (m) => m.inventory_item?.name.toLowerCase().includes(q) || m.note.toLowerCase().includes(q)
-  )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return dailyTrends.value.filter((m: any) => formatDate(m.date).toLowerCase().includes(q))
 })
+
 const totalPages = computed(() => Math.ceil(filteredList.value.length / perPage.value))
+
 const pagedList = computed(() => {
   const start = (page.value - 1) * perPage.value
   return filteredList.value.slice(start, start + perPage.value)
 })
+
 const columns = [
-  { accessorKey: 'item', header: 'Nguyên liệu' },
-  { accessorKey: 'quantity', header: 'Khối lượng hao hụt' },
-  { accessorKey: 'note', header: 'Lý do/Ghi chú' },
-  { accessorKey: 'created_at', header: 'Ngày ghi nhận' }
+  { accessorKey: 'date', header: 'Ngày' },
+  { accessorKey: 'exported', header: 'Tổng lượng xuất (kg)' },
+  { accessorKey: 'delivered', header: 'Tổng lượng bán (kg)' },
+  { accessorKey: 'loss', header: 'Hao hụt (kg)' },
+  { accessorKey: 'lossPercentage', header: 'Tỷ lệ hao hụt (%)' }
 ]
-// ─── Lifecycle ────────────────────────────────────────────
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 300)
+
+watch(search, () => {
+  page.value = 1
 })
 </script>
 <template>
@@ -138,14 +139,14 @@ onMounted(() => {
           <div class="mb-4 flex items-center justify-between">
             <h3 class="text-surface-foreground flex items-center gap-2 text-sm font-semibold">
               <UIcon name="i-lucide-bar-chart-2" class="text-error-500 h-4 w-4" />
-              Biểu đồ hao hụt (7 ngày)
+              Biểu đồ hao hụt ({{ rangeDays }} ngày)
             </h3>
           </div>
-          <div class="flex h-48 items-end gap-2">
+          <div class="flex h-48 items-end gap-2 overflow-x-auto pb-4">
             <div
               v-for="(day, i) in lossTrend"
               :key="i"
-              class="flex flex-1 flex-col items-center gap-2"
+              class="flex min-w-[40px] flex-1 flex-col items-center gap-2"
             >
               <div class="flex h-40 w-full items-end justify-center">
                 <div class="group relative flex w-full max-w-[40px] justify-center">
@@ -164,7 +165,7 @@ onMounted(() => {
                   </div>
                 </div>
               </div>
-              <span class="text-[10px] font-medium text-slate-400 dark:text-zinc-500">{{
+              <span class="text-center text-[10px] font-medium text-slate-400 dark:text-zinc-500">{{
                 day.label
               }}</span>
             </div>
@@ -224,10 +225,10 @@ onMounted(() => {
               />
               <div>
                 <p class="text-primary-800 dark:text-primary-300 text-sm font-semibold">
-                  Gạo tẻ hao hụt nhiều nhất
+                  Gạo tẻ thường có tỷ lệ hao hụt cao
                 </p>
                 <p class="text-primary-600 dark:text-primary-400 mt-1 text-xs">
-                  Nên kiểm tra lại bồn ngâm gạo số 2 có thể bị rò rỉ dẫn đến thất thoát.
+                  Thường xuyên kiểm tra lại bồn ngâm gạo có thể giảm thiểu tỷ lệ thất thoát.
                 </p>
               </div>
             </div>
@@ -238,11 +239,7 @@ onMounted(() => {
       <div class="card stagger-item p-5" style="animation-delay: 360ms">
         <div class="mb-4 flex items-center gap-3">
           <div class="max-w-sm flex-1">
-            <UInput
-              v-model="search"
-              icon="i-lucide-search"
-              placeholder="Tìm kiếm phiếu hao hụt..."
-            />
+            <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm kiếm theo ngày..." />
           </div>
           <UButton color="neutral" variant="outline" icon="i-lucide-download">
             Xuất báo cáo
@@ -256,31 +253,44 @@ onMounted(() => {
             empty-description="Không tìm thấy dữ liệu báo cáo."
             empty-icon="i-lucide-clipboard-list"
           >
-            <template #item-cell="{ row }">
+            <template #date-cell="{ row }">
               <div class="flex items-center gap-2">
                 <div
-                  class="flex h-8 w-8 items-center justify-center rounded bg-slate-100 dark:bg-zinc-800"
+                  class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded bg-slate-100 dark:bg-zinc-800"
                 >
-                  <UIcon name="i-lucide-package" class="h-4 w-4 text-slate-500" />
+                  <UIcon name="i-lucide-calendar" class="h-4 w-4 text-slate-500" />
                 </div>
                 <p class="text-surface-foreground font-medium">
-                  {{ row.inventory_item?.name || 'Nguyên liệu' }}
+                  {{ formatDate(row.date) }}
                 </p>
               </div>
             </template>
-            <template #quantity-cell="{ row }">
-              <span class="text-error-600 dark:text-error-400 font-semibold tabular-nums">
-                -{{ formatNumber(row.quantity) }}
-                {{ row.inventory_item?.unit || '' }}
+            <template #exported-cell="{ row }">
+              <span class="font-semibold text-slate-600 tabular-nums dark:text-slate-300">
+                {{ formatNumber(row.exported) }} kg
               </span>
             </template>
-            <template #note-cell="{ row }">
-              <span class="text-sm text-slate-600 dark:text-zinc-300">{{ row.note }}</span>
+            <template #delivered-cell="{ row }">
+              <span class="font-semibold text-slate-600 tabular-nums dark:text-slate-300">
+                {{ formatNumber(row.delivered) }} kg
+              </span>
             </template>
-            <template #created_at-cell="{ row }">
-              <span class="text-sm text-slate-500 tabular-nums">{{
-                formatDate(row.created_at)
-              }}</span>
+            <template #loss-cell="{ row }">
+              <span class="text-error-600 dark:text-error-400 font-semibold tabular-nums">
+                -{{ formatNumber(row.loss) }} kg
+              </span>
+            </template>
+            <template #lossPercentage-cell="{ row }">
+              <span
+                class="font-semibold tabular-nums"
+                :class="
+                  row.lossPercentage > 5
+                    ? 'text-error-600 dark:text-error-400'
+                    : 'text-success-600 dark:text-success-400'
+                "
+              >
+                {{ row.lossPercentage }}%
+              </span>
             </template>
           </BaseDataTable>
           <div

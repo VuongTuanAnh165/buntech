@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { z } from 'zod'
-import { ConstantKey } from '~/enums/constantKeys'
 import { rawMaterialService } from '~/services/rawMaterialService'
 import { inventoryService } from '~/services/inventoryService'
 
-const { constants } = useMasterData()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Kho nguyên liệu - BunTech Admin' })
 const toast = useToast()
@@ -43,7 +41,11 @@ const {
   { watch: [page, search, perPage] }
 )
 
-const { data: historyData, status: historyStatus } = useAsyncData('inventory-history', async () => {
+const {
+  data: historyData,
+  status: historyStatus,
+  refresh: refreshHistory
+} = useAsyncData('inventory-history', async () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res: any = await inventoryService.getHistory(10)
   return res.data
@@ -125,22 +127,18 @@ const stockLabels: Record<string, string> = {
 const recentMovements = computed(() => (historyData.value || []) as any[])
 
 function movementIcon(type: string) {
-  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT)
-    return 'i-lucide-arrow-down-to-line'
-  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT)
-    return 'i-lucide-arrow-up-from-line'
+  if (type === 'in') return 'i-lucide-arrow-down-to-line'
+  if (type === 'out') return 'i-lucide-arrow-up-from-line'
   return 'i-lucide-alert-circle'
 }
 function movementColor(type: string) {
-  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT)
-    return 'text-success-500'
-  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT)
-    return 'text-primary-500'
+  if (type === 'in') return 'text-success-500'
+  if (type === 'out') return 'text-primary-500'
   return 'text-error-500'
 }
 function movementLabel(type: string) {
-  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT) return 'Nhập kho'
-  if (type === constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT) return 'Xuất kho'
+  if (type === 'in') return 'Nhập kho'
+  if (type === 'out') return 'Xuất kho'
   return 'Hao hụt'
 }
 
@@ -246,6 +244,96 @@ function handleEdit(item: any) {
   showFormModal.value = true
 }
 
+// ─── Import/Export Logic ──────────────────────────────────────────
+const showImportModal = ref(false)
+const showExportModal = ref(false)
+const movementItemId = ref<number | ''>('')
+const movementQuantity = ref<number | undefined>()
+const movementNote = ref('')
+const movementSubmitting = ref(false)
+
+const movementOptions = computed(() =>
+  rawMaterials.value.map((item) => ({
+    label: `${item.name} (${formatNumber(item.currentStock || 0)} ${item.unit})`,
+    value: item.id
+  }))
+)
+
+const movementSelectedItem = computed(() =>
+  rawMaterials.value.find((i) => i.id === movementItemId.value)
+)
+const movementExceedsStock = computed(() =>
+  movementSelectedItem.value && movementQuantity.value
+    ? movementQuantity.value > Number(movementSelectedItem.value.currentStock || 0)
+    : false
+)
+
+function openImportModal() {
+  movementItemId.value = ''
+  movementQuantity.value = undefined
+  movementNote.value = ''
+  showImportModal.value = true
+}
+
+function openExportModal() {
+  movementItemId.value = ''
+  movementQuantity.value = undefined
+  movementNote.value = ''
+  showExportModal.value = true
+}
+
+async function handleImportSubmit() {
+  if (!movementItemId.value || !movementQuantity.value) {
+    toast.add({ title: 'Vui lòng điền đầy đủ thông tin', color: 'warning' })
+    return
+  }
+  movementSubmitting.value = true
+  try {
+    await inventoryService.importMaterial({
+      materialId: Number(movementItemId.value),
+      quantity: Number(movementQuantity.value),
+      note: movementNote.value
+    })
+    showImportModal.value = false
+    refreshMaterials()
+    refreshSummary()
+    refreshHistory()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    toast.add({ title: 'Có lỗi xảy ra', description: error.message, color: 'error' })
+  } finally {
+    movementSubmitting.value = false
+  }
+}
+
+async function handleExportSubmit() {
+  if (!movementItemId.value || !movementQuantity.value) {
+    toast.add({ title: 'Vui lòng điền đầy đủ thông tin', color: 'warning' })
+    return
+  }
+  if (movementExceedsStock.value) {
+    toast.add({ title: 'Số lượng xuất vượt tồn kho', color: 'error' })
+    return
+  }
+  movementSubmitting.value = true
+  try {
+    await inventoryService.exportMaterial({
+      materialId: Number(movementItemId.value),
+      quantity: Number(movementQuantity.value),
+      note: movementNote.value
+    })
+    showExportModal.value = false
+    refreshMaterials()
+    refreshSummary()
+    refreshHistory()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    toast.add({ title: 'Có lỗi xảy ra', description: error.message, color: 'error' })
+  } finally {
+    movementSubmitting.value = false
+  }
+}
+
 // ─── Delete Dialog ────────────────────────────────────────
 const { confirm } = useConfirmDialog()
 
@@ -280,10 +368,10 @@ async function handleDelete(item: any) {
       :breadcrumbs="[{ label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' }, { label: 'Kho' }]"
     >
       <template #actions>
-        <UButton variant="outline" color="neutral" to="/admin/inventory/import">
+        <UButton variant="outline" color="neutral" @click="openImportModal">
           <UIcon name="i-lucide-arrow-down-to-line" class="mr-1 h-4 w-4" /> Nhập kho
         </UButton>
-        <UButton to="/admin/inventory/export">
+        <UButton color="primary" @click="openExportModal">
           <UIcon name="i-lucide-arrow-up-from-line" class="mr-1 h-4 w-4" /> Xuất kho
         </UButton>
       </template>
@@ -296,7 +384,7 @@ async function handleDelete(item: any) {
         <BaseStatsGrid :stats="kpiStats" />
       </div>
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div class="lg:col-span-2">
+        <div class="flex h-full flex-col lg:col-span-2">
           <div class="stagger-item mb-4 flex items-center gap-3" style="animation-delay: 200ms">
             <div class="flex-1">
               <BaseSearchInput v-model="search" placeholder="Tìm nguyên liệu..." />
@@ -413,7 +501,7 @@ async function handleDelete(item: any) {
             </BaseDataTable>
           </div>
         </div>
-        <div class="card stagger-item h-fit p-5" style="animation-delay: 360ms">
+        <div class="card stagger-item flex h-full flex-col p-5" style="animation-delay: 360ms">
           <div class="mb-4 flex items-center justify-between">
             <h3 class="text-surface-foreground flex items-center gap-2 text-sm font-semibold">
               <UIcon name="i-lucide-activity" class="text-primary-500 h-4 w-4" />
@@ -452,13 +540,7 @@ async function handleDelete(item: any) {
                 </p>
                 <div class="mt-0.5 flex items-center gap-1.5">
                   <UBadge
-                    :color="
-                      mov.type === constants?.[ConstantKey.InventoryMovementType]?.IMPORT
-                        ? 'success'
-                        : mov.type === constants?.[ConstantKey.InventoryMovementType]?.EXPORT
-                          ? 'info'
-                          : 'error'
-                    "
+                    :color="mov.type === 'in' ? 'success' : mov.type === 'out' ? 'info' : 'error'"
                     variant="subtle"
                     size="xs"
                   >
@@ -478,13 +560,12 @@ async function handleDelete(item: any) {
               <span
                 class="flex-shrink-0 text-sm font-semibold tabular-nums"
                 :class="
-                  mov.type === constants?.[ConstantKey.InventoryMovementType]?.IMPORT
+                  mov.type === 'in'
                     ? 'text-success-600 dark:text-success-400'
                     : 'text-error-600 dark:text-error-400'
                 "
               >
-                {{ mov.type === constants?.[ConstantKey.InventoryMovementType]?.IMPORT ? '+' : '-'
-                }}{{ formatNumber(Number(mov.quantity || 0)) }}
+                {{ mov.type === 'in' ? '+' : '-' }}{{ formatNumber(Number(mov.quantity || 0)) }}
               </span>
             </div>
           </div>
@@ -521,6 +602,132 @@ async function handleDelete(item: any) {
               </UButton>
             </div>
           </form>
+        </template>
+      </UModal>
+      <!-- Import Modal -->
+      <UModal v-model:open="showImportModal" title="Nhập kho">
+        <template #body>
+          <div class="space-y-4">
+            <UFormField label="Nguyên liệu" required>
+              <USelectMenu
+                v-model="movementItemId"
+                :items="movementOptions"
+                value-key="value"
+                placeholder="Chọn nguyên liệu..."
+                searchable
+                class="w-full"
+              />
+            </UFormField>
+            <Transition name="fade">
+              <div
+                v-if="movementSelectedItem"
+                class="bg-success-50 dark:bg-success-900/10 border-success-200 dark:border-success-800/30 rounded-xl border p-3"
+              >
+                <div class="flex items-center justify-between">
+                  <p class="text-surface-foreground text-xs font-medium">Tồn kho hiện tại</p>
+                  <p class="text-success-600 dark:text-success-400 text-sm font-bold tabular-nums">
+                    {{ formatNumber(movementSelectedItem.currentStock || 0) }}
+                    {{ movementSelectedItem.unit }}
+                  </p>
+                </div>
+              </div>
+            </Transition>
+            <UFormField label="Số lượng nhập" required>
+              <UInput v-model="movementQuantity" type="number" placeholder="Nhập số lượng...">
+                <template #trailing>
+                  <span class="text-sm font-medium text-slate-500">{{
+                    movementSelectedItem?.unit || '...'
+                  }}</span>
+                </template>
+              </UInput>
+            </UFormField>
+            <UFormField label="Ghi chú">
+              <UTextarea
+                v-model="movementNote"
+                placeholder="VD: Nhập từ nhà cung cấp..."
+                :rows="2"
+              />
+            </UFormField>
+            <div class="mt-6 flex justify-end gap-3">
+              <UButton variant="outline" color="neutral" @click="showImportModal = false"
+                >Hủy</UButton
+              >
+              <UButton
+                color="success"
+                :loading="movementSubmitting"
+                :disabled="!movementItemId || !movementQuantity"
+                @click="handleImportSubmit"
+              >
+                <UIcon name="i-lucide-arrow-down-to-line" class="mr-1 h-4 w-4" />
+                Nhập kho
+              </UButton>
+            </div>
+          </div>
+        </template>
+      </UModal>
+
+      <!-- Export Modal -->
+      <UModal v-model:open="showExportModal" title="Xuất kho">
+        <template #body>
+          <div class="space-y-4">
+            <UFormField label="Nguyên liệu" required>
+              <USelectMenu
+                v-model="movementItemId"
+                :items="movementOptions"
+                value-key="value"
+                placeholder="Chọn nguyên liệu..."
+                searchable
+                class="w-full"
+              />
+            </UFormField>
+            <Transition name="fade">
+              <div
+                v-if="movementSelectedItem"
+                class="bg-primary-50 dark:bg-primary-900/10 border-primary-200 dark:border-primary-800/30 rounded-xl border p-3"
+              >
+                <div class="flex items-center justify-between">
+                  <p class="text-surface-foreground text-xs font-medium">Tồn kho hiện tại</p>
+                  <p
+                    class="text-sm font-bold tabular-nums"
+                    :class="
+                      movementExceedsStock
+                        ? 'text-error-600 dark:text-error-400'
+                        : 'text-primary-600 dark:text-primary-400'
+                    "
+                  >
+                    {{ formatNumber(movementSelectedItem.currentStock || 0) }}
+                    {{ movementSelectedItem.unit }}
+                  </p>
+                </div>
+              </div>
+            </Transition>
+            <UFormField label="Số lượng xuất" required>
+              <UInput v-model="movementQuantity" type="number" placeholder="Nhập số lượng...">
+                <template #trailing>
+                  <span class="text-sm font-medium text-slate-500">{{
+                    movementSelectedItem?.unit || '...'
+                  }}</span>
+                </template>
+              </UInput>
+            </UFormField>
+            <UFormField label="Ghi chú">
+              <UTextarea v-model="movementNote" placeholder="VD: Xuất sản xuất..." :rows="2" />
+            </UFormField>
+            <div class="mt-6 flex justify-end gap-3">
+              <UButton variant="outline" color="neutral" @click="showExportModal = false"
+                >Hủy</UButton
+              >
+              <UButton
+                color="primary"
+                :loading="movementSubmitting"
+                :disabled="!movementItemId || !movementQuantity || movementExceedsStock"
+                @click="handleExportSubmit"
+              >
+                <UIcon name="i-lucide-arrow-up-from-line" class="mr-1 h-4 w-4" />
+                Xuất kho
+              </UButton>
+            </div>
+          </div>
         </template>
       </UModal>
     </template>

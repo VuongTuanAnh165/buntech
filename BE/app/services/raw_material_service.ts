@@ -77,9 +77,7 @@ export default class RawMaterialService {
       (acc, item) => acc + Number(item.currentStock || 0),
       0
     )
-    const lowStockItems = rawMaterials.filter(
-      (item) => Number(item.currentStock || 0) <= 50
-    ).length
+    const lowStockItems = rawMaterials.filter((item) => Number(item.currentStock || 0) <= 50).length
 
     return {
       totalItems,

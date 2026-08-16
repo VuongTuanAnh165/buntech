@@ -52,43 +52,33 @@ const mappedColumns = computed(() => {
 
 <template>
   <div>
-    <!-- Loading state -->
-    <BasePageLoading v-if="props.loading" variant="table" :lines="props.loadingLines" />
-
     <!-- Data table -->
-    <!-- Data table -->
-    <template v-else>
-      <UTable :columns="mappedColumns" :data="props.rows">
-        <!-- Forward all column slots -->
-        <template
-          v-for="col in mappedColumns"
-          :key="col.key"
-          #[`${col.key}-cell`]="{ row, column }"
+    <UTable :columns="mappedColumns" :data="props.rows" :loading="props.loading">
+      <!-- Forward all column slots -->
+      <template v-for="col in mappedColumns" :key="col.key" #[`${col.key}-cell`]="{ row, column }">
+        <slot
+          :name="`${col.key}-cell`"
+          :row="(row.original ? row.original : row) as T"
+          :column="column"
         >
-          <slot
-            :name="`${col.key}-cell`"
-            :row="(row.original ? row.original : row) as T"
-            :column="column"
-          >
-            <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
-            {{ row.original ? (row.original as any)[col.key] : (row as any)[col.key] }}
-          </slot>
-        </template>
+          <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
+          {{ row.original ? (row.original as any)[col.key] : (row as any)[col.key] }}
+        </slot>
+      </template>
 
-        <template #empty>
-          <BaseEmptyState
-            :icon="props.emptyIcon"
-            :title="props.emptyTitle"
-            :description="props.emptyDescription"
-          >
-            <template #action>
-              <slot name="empty-action" />
-            </template>
-          </BaseEmptyState>
-        </template>
-      </UTable>
+      <template #empty>
+        <BaseEmptyState
+          :icon="props.emptyIcon"
+          :title="props.emptyTitle"
+          :description="props.emptyDescription"
+        >
+          <template #action>
+            <slot name="empty-action" />
+          </template>
+        </BaseEmptyState>
+      </template>
+    </UTable>
 
-      <slot v-if="props.rows.length" name="pagination" />
-    </template>
+    <slot v-if="props.rows.length" name="pagination" />
   </div>
 </template>

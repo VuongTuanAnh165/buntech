@@ -3,6 +3,7 @@ import RawMaterial from '#models/raw_material'
 import InventoryLog from '#models/inventory_log'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
+import { InventoryType } from '#enums/inventory_type'
 
 @inject()
 export default class InventoryService {
@@ -23,7 +24,6 @@ export default class InventoryService {
       const material = await RawMaterial.query({ client: trx })
         .select('id', 'current_stock')
         .where('id', data.materialId)
-        .whereNull('deleted_at')
         .forUpdate()
         .firstOrFail()
 
@@ -50,7 +50,7 @@ export default class InventoryService {
       const log = new InventoryLog()
       log.materialId = data.materialId
       log.quantity = data.quantity.toString()
-      log.type = 'IMPORT'
+      log.type = InventoryType.IN
       log.note = data.note || null
       log.referenceId = data.referenceId || null
       log.date = DateTime.now()
@@ -82,7 +82,6 @@ export default class InventoryService {
       const material = await RawMaterial.query({ client: trx })
         .select('id', 'current_stock')
         .where('id', data.materialId)
-        .whereNull('deleted_at')
         .forUpdate()
         .firstOrFail()
 
@@ -114,7 +113,7 @@ export default class InventoryService {
       const log = new InventoryLog()
       log.materialId = data.materialId
       log.quantity = data.quantity.toString()
-      log.type = 'EXPORT'
+      log.type = InventoryType.OUT
       log.note = data.note || null
       log.referenceId = data.referenceId || null
       log.date = DateTime.now()
@@ -133,36 +132,86 @@ export default class InventoryService {
    * Lấy báo cáo hao hụt (Loss Report)
    */
   async getLossReport(filters: { startDate?: any; endDate?: any }) {
-    let exportQuery = db
+    let exportDailyQuery = db
       .from('inventory_logs')
-      .where('type', 'EXPORT')
+      .where('type', InventoryType.OUT)
+      .select(db.raw('DATE(created_at) as date'))
       .sum('quantity as totalMaterialExported')
+      .groupByRaw('DATE(created_at)')
+      .orderBy('date', 'asc')
 
     // For a real app, we need to join products and sum(quantity * weight_per_unit).
     // To satisfy the requirement conceptually:
-    let productQuery = db
+    let productDailyQuery = db
       .from('orders')
       .join('order_items', 'orders.id', '=', 'order_items.order_id')
       .where('orders.status', 'DELIVERED')
+      .select(db.raw('DATE(orders.created_at) as date'))
       .sum('order_items.quantity as totalProductDelivered')
+      .groupByRaw('DATE(orders.created_at)')
+      .orderBy('date', 'asc')
 
     if (filters.startDate) {
-      exportQuery.where('created_at', '>=', filters.startDate)
-      productQuery.where('orders.created_at', '>=', filters.startDate)
+      exportDailyQuery.where('created_at', '>=', filters.startDate)
+      productDailyQuery.where('orders.created_at', '>=', filters.startDate)
     }
     if (filters.endDate) {
-      exportQuery.where('created_at', '<=', filters.endDate)
-      productQuery.where('orders.created_at', '<=', filters.endDate)
+      exportDailyQuery.where('created_at', '<=', filters.endDate)
+      productDailyQuery.where('orders.created_at', '<=', filters.endDate)
     }
 
-    const [[exportResult], [productResult]] = await Promise.all([exportQuery, productQuery])
+    const [exportDaily, productDaily] = await Promise.all([exportDailyQuery, productDailyQuery])
 
-    const totalMaterialExportedKg = Number.parseFloat(
-      exportResult?.totalMaterialExported?.toString() || '0'
-    )
-    const totalProductDeliveredKg = Number.parseFloat(
-      productResult?.totalProductDelivered?.toString() || '0'
-    ) // Assume quantity is in Kg for products
+    // Merge by date
+    const dailyMap = new Map<string, any>()
+    let totalMaterialExportedKg = 0
+    let totalProductDeliveredKg = 0
+
+    for (const row of exportDaily) {
+      const dateStr =
+        row.date instanceof Date
+          ? row.date.toISOString().slice(0, 10)
+          : String(row.date).slice(0, 10)
+      const qty = Number.parseFloat(row.totalMaterialExported?.toString() || '0')
+      totalMaterialExportedKg += qty
+      dailyMap.set(dateStr, {
+        date: dateStr,
+        exported: qty,
+        delivered: 0,
+        loss: 0,
+        lossPercentage: 0,
+      })
+    }
+
+    for (const row of productDaily) {
+      const dateStr =
+        row.date instanceof Date
+          ? row.date.toISOString().slice(0, 10)
+          : String(row.date).slice(0, 10)
+      const qty = Number.parseFloat(row.totalProductDelivered?.toString() || '0')
+      totalProductDeliveredKg += qty
+      if (!dailyMap.has(dateStr)) {
+        dailyMap.set(dateStr, {
+          date: dateStr,
+          exported: 0,
+          delivered: 0,
+          loss: 0,
+          lossPercentage: 0,
+        })
+      }
+      dailyMap.get(dateStr)!.delivered = qty
+    }
+
+    // Calculate loss per day
+    const dailyTrends = Array.from(dailyMap.values())
+      .map((day) => {
+        const lossQty = day.exported - day.delivered
+        day.loss = lossQty > 0 ? lossQty : 0
+        day.lossPercentage =
+          day.exported > 0 ? Number.parseFloat(((day.loss / day.exported) * 100).toFixed(2)) : 0
+        return day
+      })
+      .sort((a, b) => a.date.localeCompare(b.date))
 
     const lossQuantityKg = totalMaterialExportedKg - totalProductDeliveredKg
     const lossPercentage =
@@ -173,6 +222,7 @@ export default class InventoryService {
       totalProductDeliveredKg,
       lossQuantityKg: lossQuantityKg > 0 ? lossQuantityKg : 0, // avoid negative loss if import wasn't logged correctly
       lossPercentage: lossPercentage > 0 ? Number.parseFloat(lossPercentage.toFixed(2)) : 0,
+      dailyTrends,
     }
   }
 
