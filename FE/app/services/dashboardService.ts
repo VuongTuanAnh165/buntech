@@ -30,6 +30,7 @@ export interface TopBuyer {
   phoneNumber: string
   totalRevenue: number
   ordersCount: number
+  totalQuantity: number
   avatarUrl?: string
 }
 

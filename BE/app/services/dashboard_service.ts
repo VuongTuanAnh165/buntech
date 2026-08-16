@@ -133,38 +133,71 @@ export default class DashboardService {
     limit: number
     sortBy: 'revenue' | 'quantity'
   }) {
-    let query = Order.query()
-      .where('status', OrderStatus.DELIVERED)
-      .join('users', 'orders.user_id', '=', 'users.id')
-      .select(
-        'users.id as userId',
-        'users.full_name as fullName',
-        'users.phone_number as phoneNumber'
-      )
-      .sum('orders.total_amount as totalRevenue')
-      .count('orders.id as ordersCount')
-      // Note: for totalQuantityKg, we would need to join order_items and sum quantity * product weight
-      // But keeping it simple based on the current schema context
-      .groupBy('users.id')
-
     const parseDate = (d: any) =>
       d && typeof d.toSQLDate === 'function'
         ? d.toSQLDate()
         : DateTime.fromJSDate(new Date(d)).toSQLDate()
 
+    let dateCondition = ''
+    const dateBindings: any[] = []
+
     if (filters.startDate) {
-      query.where('orders.created_at', '>=', parseDate(filters.startDate) as string)
+      dateCondition += ' AND created_at >= ?'
+      dateBindings.push(parseDate(filters.startDate) as string)
     }
     if (filters.endDate) {
-      query.where('orders.created_at', '<=', parseDate(filters.endDate) as string)
+      dateCondition += ' AND created_at <= ?'
+      dateBindings.push(parseDate(filters.endDate) as string)
     }
+
+    let dateConditionOrders = ''
+    const dateBindingsOrders: any[] = []
+
+    if (filters.startDate) {
+      dateConditionOrders += ' AND o.created_at >= ?'
+      dateBindingsOrders.push(parseDate(filters.startDate) as string)
+    }
+    if (filters.endDate) {
+      dateConditionOrders += ' AND o.created_at <= ?'
+      dateBindingsOrders.push(parseDate(filters.endDate) as string)
+    }
+
+    const query = db
+      .from('users')
+      .where('role', 'CUSTOMER')
+      .whereExists((q) => {
+        q.from('orders')
+          .whereRaw('orders.user_id = users.id')
+          .where('status', OrderStatus.DELIVERED)
+        if (filters.startDate) {
+          q.where('created_at', '>=', parseDate(filters.startDate) as string)
+        }
+        if (filters.endDate) {
+          q.where('created_at', '<=', parseDate(filters.endDate) as string)
+        }
+      })
+      .select(
+        'users.id as userId',
+        'users.full_name as fullName',
+        'users.phone_number as phoneNumber',
+        db.raw(
+          `(SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE user_id = users.id AND status = '${OrderStatus.DELIVERED}'${dateCondition}) as totalRevenue`,
+          dateBindings
+        ),
+        db.raw(
+          `(SELECT COUNT(id) FROM orders WHERE user_id = users.id AND status = '${OrderStatus.DELIVERED}'${dateCondition}) as ordersCount`,
+          dateBindings
+        ),
+        db.raw(
+          `(SELECT COALESCE(SUM(oi.quantity), 0) FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.user_id = users.id AND o.status = '${OrderStatus.DELIVERED}'${dateConditionOrders}) as totalQuantity`,
+          dateBindingsOrders
+        )
+      )
 
     if (filters.sortBy === 'revenue') {
       query.orderBy('totalRevenue', 'desc')
     } else {
-      // If we don't have quantity easily sum-able without deep joins, we fallback to ordersCount or mock it
-      // query.orderBy('totalQuantityKg', 'desc')
-      query.orderBy('ordersCount', 'desc')
+      query.orderBy('totalQuantity', 'desc')
     }
 
     query.limit(filters.limit)
@@ -172,11 +205,12 @@ export default class DashboardService {
     const result = await query
 
     return result.map((row) => ({
-      userId: row.$extras.userId,
-      fullName: row.$extras.fullName,
-      phoneNumber: row.$extras.phoneNumber,
-      totalRevenue: Number.parseFloat(row.$extras.totalRevenue?.toString() || '0'),
-      ordersCount: Number.parseInt(row.$extras.ordersCount?.toString() || '0', 10),
+      userId: row.userId,
+      fullName: row.fullName,
+      phoneNumber: row.phoneNumber,
+      totalRevenue: Number.parseFloat(row.totalRevenue?.toString() || '0'),
+      ordersCount: Number.parseInt(row.ordersCount?.toString() || '0', 10),
+      totalQuantity: Number.parseInt(row.totalQuantity?.toString() || '0', 10),
     }))
   }
 }
