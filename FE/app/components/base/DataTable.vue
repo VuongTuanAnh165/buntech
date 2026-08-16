@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="T extends Record<string, unknown>">
+<script setup lang="ts" generic="T extends Record<string, any>">
 interface Column {
   key?: string
   label?: string
@@ -26,6 +26,15 @@ const props = withDefaults(defineProps<Props>(), {
   emptyIcon: 'i-lucide-inbox'
 })
 
+defineSlots<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: (props: { row: T; column: any }) => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pagination: () => any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  'empty-action': () => any
+}>()
+
 const mappedColumns = computed(() => {
   return props.columns.map((col) => {
     const finalKey = col.key || col.accessorKey || ''
@@ -47,28 +56,39 @@ const mappedColumns = computed(() => {
     <BasePageLoading v-if="props.loading" variant="table" :lines="props.loadingLines" />
 
     <!-- Data table -->
-    <template v-else-if="props.rows.length">
+    <!-- Data table -->
+    <template v-else>
       <UTable :columns="mappedColumns" :data="props.rows">
         <!-- Forward all column slots -->
-        <template v-for="col in mappedColumns" :key="col.key" #[`${col.key}-cell`]="{ row }">
-          <slot :name="`${col.key}-cell`" :row="(row.original ? row.original : row) as T">
+        <template
+          v-for="col in mappedColumns"
+          :key="col.key"
+          #[`${col.key}-cell`]="{ row, column }"
+        >
+          <slot
+            :name="`${col.key}-cell`"
+            :row="(row.original ? row.original : row) as T"
+            :column="column"
+          >
+            <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
             {{ row.original ? (row.original as any)[col.key] : (row as any)[col.key] }}
           </slot>
         </template>
-      </UTable>
-      <slot name="pagination" />
-    </template>
 
-    <!-- Empty state -->
-    <BaseEmptyState
-      v-else
-      :icon="props.emptyIcon"
-      :title="props.emptyTitle"
-      :description="props.emptyDescription"
-    >
-      <template #action>
-        <slot name="empty-action" />
-      </template>
-    </BaseEmptyState>
+        <template #empty>
+          <BaseEmptyState
+            :icon="props.emptyIcon"
+            :title="props.emptyTitle"
+            :description="props.emptyDescription"
+          >
+            <template #action>
+              <slot name="empty-action" />
+            </template>
+          </BaseEmptyState>
+        </template>
+      </UTable>
+
+      <slot v-if="props.rows.length" name="pagination" />
+    </template>
   </div>
 </template>

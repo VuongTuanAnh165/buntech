@@ -181,44 +181,39 @@ const tableColumns = [
           </UButton>
         </div>
         <div class="card animate-fade-in-up overflow-hidden p-0" style="animation-delay: 200ms">
-          <BaseEmptyState
-            v-if="!loading && customerOrders.length === 0"
-            title="Chưa có đơn hàng"
-            description="Bạn chưa đặt đơn hàng nào."
-          />
-          <UTable
-            v-else
-            :data="customerOrders.slice(0, 5)"
+          <BaseDataTable
+            :rows="customerOrders.slice(0, 5)"
             :columns="tableColumns"
             :loading="loading"
+            empty-title="Chưa có đơn hàng"
+            empty-description="Bạn chưa đặt đơn hàng nào."
+            empty-icon="i-lucide-package-open"
             class="w-full"
             :ui="{ th: 'bg-surface-muted' }"
           >
             <template #id-cell="{ row }">
               <span class="text-surface-foreground font-mono text-xs font-medium"
-                >#{{ String(row.original.id).slice(0, 8) }}</span
+                >#{{ String(row.id).slice(0, 8) }}</span
               >
             </template>
             <template #created_at-cell="{ row }">
-              <span class="text-sm text-slate-500">{{
-                formatDateTime(row.original.created_at)
-              }}</span>
+              <span class="text-sm text-slate-500">{{ formatDateTime(row.created_at) }}</span>
             </template>
             <template #status-cell="{ row }">
               <UBadge
-                :color="getOrderStatusColor(constants)[row.original.status] as any"
+                :color="getOrderStatusColor(constants)[row.status] as any"
                 variant="subtle"
                 size="sm"
               >
-                {{ getOrderStatusLabel(constants)[row.original.status] }}
+                {{ getOrderStatusLabel(constants)[row.status] }}
               </UBadge>
             </template>
             <template #total-cell="{ row }">
               <span class="text-surface-foreground font-semibold tabular-nums">{{
-                formatVND(Number(row.original.total))
+                formatVND(Number(row.total))
               }}</span>
             </template>
-          </UTable>
+          </BaseDataTable>
         </div>
       </div>
       <div>

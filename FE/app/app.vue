@@ -18,5 +18,6 @@ onMounted(() => {
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <BaseConfirmDialog />
   </UApp>
 </template>

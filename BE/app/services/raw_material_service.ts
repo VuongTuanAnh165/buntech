@@ -66,4 +66,25 @@ export default class RawMaterialService {
     const rawMaterial = await this.getRawMaterial(id)
     await rawMaterial.delete()
   }
+  /**
+   * Lấy thống kê kho nguyên liệu
+   */
+  async getSummary() {
+    const rawMaterials = await RawMaterial.query().select('current_stock')
+
+    const totalItems = rawMaterials.length
+    const totalQuantity = rawMaterials.reduce(
+      (acc, item) => acc + Number(item.currentStock || 0),
+      0
+    )
+    const lowStockItems = rawMaterials.filter(
+      (item) => Number(item.currentStock || 0) <= 50
+    ).length
+
+    return {
+      totalItems,
+      totalQuantity,
+      lowStockItems,
+    }
+  }
 }

@@ -1,69 +1,110 @@
 <script setup lang="ts">
-import { mockInventoryItems, mockInventoryMovements } from '~/utils/mockData'
+import { z } from 'zod'
 import { ConstantKey } from '~/enums/constantKeys'
+import { rawMaterialService } from '~/services/rawMaterialService'
+import { inventoryService } from '~/services/inventoryService'
+
 const { constants } = useMasterData()
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Kho nguyên liệu - BunTech Admin' })
 const toast = useToast()
+
 // ─── State ────────────────────────────────────────────────
-const loading = ref(true)
 const search = ref('')
-const showAddModal = ref(false)
-const editItem = ref<(typeof mockInventoryItems)[0] | null>(null)
-const newItemName = ref('')
-const newItemUnit = ref('')
-const newItemQty = ref<number>(0)
+const page = ref(1)
+const perPage = ref(20)
+
+// ─── Data Fetching ────────────────────────────────────────
+const {
+  data: summaryData,
+  status: summaryStatus,
+  refresh: refreshSummary
+} = useAsyncData('inventory-summary', async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const res: any = await rawMaterialService.getSummary()
+  return res.data
+})
+
+const {
+  data: txData,
+  status: txStatus,
+  refresh: refreshMaterials
+} = useAsyncData(
+  'raw-materials',
+  async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res: any = await rawMaterialService.getRawMaterials(
+      page.value,
+      perPage.value,
+      search.value
+    )
+    return res.data
+  },
+  { watch: [page, search, perPage] }
+)
+
+const { data: historyData, status: historyStatus } = useAsyncData('inventory-history', async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const res: any = await inventoryService.getHistory(10)
+  return res.data
+})
+
+watch(search, () => {
+  page.value = 1
+})
+
+const loading = computed(() => summaryStatus.value === 'pending')
+
 // ─── Computed KPIs ────────────────────────────────────────
-const totalItems = computed(() => mockInventoryItems.length)
-const totalQuantity = computed(() => mockInventoryItems.reduce((s, i) => s + i.quantity, 0))
-const lowStockItems = computed(() => mockInventoryItems.filter((i) => i.quantity <= 50).length)
-const monthMovements = computed(() => {
-  const now = Date.now()
-  const thirtyDays = 30 * 86400000
-  return mockInventoryMovements.filter((m) => now - new Date(m.created_at).getTime() < thirtyDays)
-    .length
+const kpiStats = computed(() => {
+  const summary = summaryData.value || { totalItems: 0, totalQuantity: 0, lowStockItems: 0 }
+  return [
+    {
+      title: 'Tổng nguyên liệu',
+      value: formatNumber(summary.totalItems),
+      icon: 'i-lucide-package',
+      color: 'primary' as const,
+      trend: { value: 0, isPositive: true }
+    },
+    {
+      title: 'Tổng số lượng',
+      value: formatNumber(summary.totalQuantity),
+      icon: 'i-lucide-layers',
+      color: 'success' as const,
+      trend: { value: 0, isPositive: true }
+    },
+    {
+      title: 'Sắp hết hàng',
+      value: String(summary.lowStockItems),
+      icon: 'i-lucide-alert-triangle',
+      color: 'warning' as const
+    },
+    {
+      title: 'Giao dịch (10 gần nhất)',
+      value: String(historyData.value?.length || 0),
+      icon: 'i-lucide-repeat',
+      color: 'info' as const,
+      trend: { value: 0, isPositive: true }
+    }
+  ]
 })
-const kpiStats = computed(() => [
-  {
-    title: 'Tổng nguyên liệu',
-    value: formatNumber(totalItems.value),
-    icon: 'i-lucide-package',
-    color: 'primary' as const,
-    trend: { value: 2, isPositive: true }
-  },
-  {
-    title: 'Tổng số lượng',
-    value: formatNumber(totalQuantity.value),
-    icon: 'i-lucide-layers',
-    color: 'success' as const,
-    trend: { value: 8.4, isPositive: true }
-  },
-  {
-    title: 'Sắp hết hàng',
-    value: String(lowStockItems.value),
-    icon: 'i-lucide-alert-triangle',
-    color: 'warning' as const
-  },
-  {
-    title: 'Giao dịch tháng này',
-    value: formatNumber(monthMovements.value),
-    icon: 'i-lucide-repeat',
-    color: 'info' as const,
-    trend: { value: 15, isPositive: true }
-  }
-])
+
 // ─── Filtered items ───────────────────────────────────────
-const filteredItems = computed(() => {
-  if (!search.value.trim()) return mockInventoryItems
-  const q = search.value.toLowerCase()
-  return mockInventoryItems.filter((i) => i.name.toLowerCase().includes(q))
-})
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const rawMaterials = computed(() => (txData.value?.data || []) as any[])
+const totalItems = computed(() => txData.value?.meta?.total || 0)
+
 // ─── Stock level helpers ──────────────────────────────────
-const maxQty = computed(() => Math.max(...mockInventoryItems.map((i) => i.quantity), 1))
-function stockLevel(qty: number): 'high' | 'medium' | 'low' | 'out' {
+const maxQty = computed(() => {
+  if (!rawMaterials.value.length) return 1
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return Math.max(...rawMaterials.value.map((i: any) => Number(i.currentStock || 0)), 1)
+})
+function stockLevel(qtyStr: string | number): 'high' | 'medium' | 'low' | 'out' {
+  const qty = Number(qtyStr || 0)
   if (qty === 0) return 'out'
-  if (qty <= 30) return 'low'
-  if (qty <= 100) return 'medium'
+  if (qty <= 50) return 'low'
+  if (qty <= 200) return 'medium'
   return 'high'
 }
 const stockColors: Record<string, string> = {
@@ -78,12 +119,11 @@ const stockLabels: Record<string, string> = {
   low: 'Thấp',
   out: 'Sắp hết'
 }
+
 // ─── Recent activity ──────────────────────────────────────
-const recentMovements = computed(() =>
-  [...mockInventoryMovements]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 10)
-)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const recentMovements = computed(() => (historyData.value || []) as any[])
+
 function movementIcon(type: string) {
   if (type === constants.value?.[ConstantKey.InventoryMovementType]?.IMPORT)
     return 'i-lucide-arrow-down-to-line'
@@ -103,38 +143,134 @@ function movementLabel(type: string) {
   if (type === constants.value?.[ConstantKey.InventoryMovementType]?.EXPORT) return 'Xuất kho'
   return 'Hao hụt'
 }
+
 // ─── Table columns ────────────────────────────────────────
 const columns = [
   { accessorKey: 'name', header: 'Nguyên liệu' },
   { accessorKey: 'unit', header: 'Đơn vị' },
   { accessorKey: 'quantity', header: 'Số lượng' },
-  { accessorKey: 'updated_at', header: 'Cập nhật' },
+  { accessorKey: 'createdAt', header: 'Ngày tạo' },
   { accessorKey: 'actions', header: 'Hành động' }
 ]
-// ─── Handlers ─────────────────────────────────────────────
-function handleAdd() {
-  if (!newItemName.value.trim() || !newItemUnit.value.trim()) {
-    toast.add({ title: 'Vui lòng điền đầy đủ', color: 'warning' })
-    return
-  }
-  toast.add({ title: 'Thêm nguyên liệu thành công', color: 'success' })
-  showAddModal.value = false
-  newItemName.value = ''
-  newItemUnit.value = ''
-  newItemQty.value = 0
-}
-function handleEdit(item: (typeof mockInventoryItems)[0]) {
-  editItem.value = { ...item }
-}
-function handleDelete(item: (typeof mockInventoryItems)[0]) {
-  toast.add({ title: `Đã xóa ${item.name}`, color: 'success' })
-}
-// ─── Lifecycle ────────────────────────────────────────────
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 300)
+
+// ─── Form Logic (Native + Zod) ────────────────────────────
+const showFormModal = ref(false)
+const isEditing = ref(false)
+const editId = ref<number | null>(null)
+
+const formSchema = z.object({
+  name: z.string().min(1, 'Tên nguyên liệu không được để trống').max(191),
+  unit: z.string().min(1, 'Đơn vị không được để trống').max(50)
 })
+
+const state = reactive({
+  name: '',
+  unit: ''
+})
+
+const formErrors = reactive<Record<string, string>>({})
+const formRef = ref({
+  setErrors: (errors: { path: string; message: string }[]) => {
+    for (const key of Object.keys(formErrors)) {
+      formErrors[key] = ''
+    }
+    errors.forEach((e) => {
+      formErrors[e.path] = e.message
+    })
+  },
+  clearErrors: () => {
+    for (const key of Object.keys(formErrors)) {
+      formErrors[key] = ''
+    }
+  }
+})
+
+const validateForm = () => {
+  formRef.value.clearErrors()
+  const result = formSchema.safeParse(state)
+  if (!result.success) {
+    const errors = result.error.issues.map((issue) => ({
+      path: issue.path[0]?.toString() || '',
+      message: issue.message
+    }))
+    formRef.value.setErrors(errors)
+    return false
+  }
+  return true
+}
+
+const { handleSubmit, isSubmitting: formLoading } = useFormSubmit()
+
+const submitData = handleSubmit(
+  async (data: { name: string; unit: string }) => {
+    if (isEditing.value && editId.value) {
+      await rawMaterialService.updateRawMaterial(editId.value, data)
+      toast.add({ title: 'Cập nhật thành công', color: 'success' })
+    } else {
+      await rawMaterialService.createRawMaterial(data)
+      toast.add({ title: 'Thêm nguyên liệu thành công', color: 'success' })
+    }
+  },
+  {
+    formRef,
+    onSuccess: () => {
+      showFormModal.value = false
+      refreshMaterials()
+      refreshSummary()
+    }
+  }
+)
+
+const handleFormSubmit = () => {
+  if (validateForm()) {
+    submitData(state)
+  }
+}
+
+function handleAdd() {
+  isEditing.value = false
+  editId.value = null
+  state.name = ''
+  state.unit = ''
+  formRef.value.clearErrors()
+  showFormModal.value = true
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function handleEdit(item: any) {
+  isEditing.value = true
+  editId.value = item.id
+  state.name = item.name
+  state.unit = item.unit
+  formRef.value.clearErrors()
+  showFormModal.value = true
+}
+
+// ─── Delete Dialog ────────────────────────────────────────
+const { confirm } = useConfirmDialog()
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function handleDelete(item: any) {
+  const confirmed = await confirm({
+    title: 'Xóa nguyên liệu',
+    description: `Bạn có chắc chắn muốn xóa nguyên liệu "${item.name}"? Hành động này có thể ẩn dữ liệu tồn kho.`,
+    confirmLabel: 'Xóa',
+    cancelLabel: 'Hủy',
+    color: 'error'
+  })
+
+  if (confirmed) {
+    try {
+      await rawMaterialService.deleteRawMaterial(item.id)
+      toast.add({ title: `Đã xóa ${item.name}`, color: 'success' })
+      refreshMaterials()
+      refreshSummary()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      toast.add({ title: 'Có lỗi xảy ra', description: err.message, color: 'error' })
+    }
+  }
+}
 </script>
 <template>
   <div>
@@ -156,35 +292,28 @@ onMounted(() => {
       <BasePageLoading />
     </template>
     <template v-else>
-      <!-- KPI Stats -->
       <div class="mb-6">
         <BaseStatsGrid :stats="kpiStats" />
       </div>
-      <!-- Main content: Table + Activity -->
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <!-- Left: Search + Table -->
         <div class="lg:col-span-2">
-          <!-- Search + Add -->
           <div class="stagger-item mb-4 flex items-center gap-3" style="animation-delay: 200ms">
             <div class="flex-1">
-              <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm nguyên liệu..." />
+              <BaseSearchInput v-model="search" placeholder="Tìm nguyên liệu..." />
             </div>
-            <UButton
-              @click="
-                () => {
-                  showAddModal = true
-                }
-              "
-            >
+            <UButton @click="handleAdd">
               <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm nguyên liệu
             </UButton>
           </div>
-          <!-- Table -->
           <div
             class="animate-fade-in-up bg-surface ring-surface-border overflow-hidden rounded-xl ring-1"
             style="animation-delay: 280ms"
           >
-            <UTable :columns="columns" :data="filteredItems">
+            <BaseDataTable
+              :columns="columns"
+              :rows="rawMaterials"
+              :loading="txStatus === 'pending'"
+            >
               <template #name-cell="{ row }">
                 <div class="flex items-center gap-3">
                   <div
@@ -194,7 +323,7 @@ onMounted(() => {
                   </div>
                   <div>
                     <p class="text-surface-foreground text-sm font-medium">
-                      {{ row.original.name }}
+                      {{ row.name }}
                     </p>
                     <div class="mt-0.5 flex items-center gap-1.5">
                       <div
@@ -202,48 +331,46 @@ onMounted(() => {
                       >
                         <div
                           class="h-full rounded-full transition-all duration-500"
-                          :class="stockColors[stockLevel(row.original.quantity)]"
+                          :class="stockColors[stockLevel(row.currentStock)]"
                           :style="{
-                            width: `${Math.min((row.original.quantity / maxQty) * 100, 100)}%`
+                            width: `${Math.min((Number(row.currentStock || 0) / maxQty) * 100, 100)}%`
                           }"
                         />
                       </div>
                       <span
                         class="text-[10px] font-medium"
                         :class="{
-                          'text-success-500': stockLevel(row.original.quantity) === 'high',
-                          'text-primary-500': stockLevel(row.original.quantity) === 'medium',
-                          'text-warning-500': stockLevel(row.original.quantity) === 'low',
-                          'text-error-500': stockLevel(row.original.quantity) === 'out'
+                          'text-success-500': stockLevel(row.currentStock) === 'high',
+                          'text-primary-500': stockLevel(row.currentStock) === 'medium',
+                          'text-warning-500': stockLevel(row.currentStock) === 'low',
+                          'text-error-500': stockLevel(row.currentStock) === 'out'
                         }"
                       >
-                        {{ stockLabels[stockLevel(row.original.quantity)] }}
+                        {{ stockLabels[stockLevel(row.currentStock)] }}
                       </span>
                     </div>
                   </div>
                 </div>
               </template>
               <template #unit-cell="{ row }">
-                <span class="text-sm text-slate-600 dark:text-zinc-300">{{
-                  row.original.unit
-                }}</span>
+                <span class="text-sm text-slate-600 dark:text-zinc-300">{{ row.unit }}</span>
               </template>
               <template #quantity-cell="{ row }">
                 <span
                   class="text-sm font-semibold tabular-nums"
                   :class="
-                    row.original.quantity <= 30
+                    Number(row.currentStock || 0) <= 50
                       ? 'text-error-600 dark:text-error-400'
                       : 'text-surface-foreground'
                   "
                 >
-                  {{ formatNumber(row.original.quantity) }}
+                  {{ formatNumber(Number(row.currentStock || 0)) }}
                 </span>
-                <span class="ml-1 text-xs text-slate-400">{{ row.original.unit }}</span>
+                <span class="ml-1 text-xs text-slate-400">{{ row.unit }}</span>
               </template>
-              <template #updated_at-cell="{ row }">
+              <template #createdAt-cell="{ row }">
                 <span class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">{{
-                  formatDate(row.original.updated_at)
+                  formatDate(row.createdAt)
                 }}</span>
               </template>
               <template #actions-cell="{ row }">
@@ -253,21 +380,39 @@ onMounted(() => {
                     color="neutral"
                     size="sm"
                     icon="i-lucide-pencil"
-                    @click="handleEdit(row.original)"
+                    @click="handleEdit(row)"
                   />
                   <UButton
                     variant="ghost"
                     color="error"
                     size="sm"
                     icon="i-lucide-trash-2"
-                    @click="handleDelete(row.original)"
+                    @click="handleDelete(row)"
                   />
                 </div>
               </template>
-            </UTable>
+              <template #pagination>
+                <div
+                  class="border-surface-border mt-4 flex items-center justify-between border-t px-4 py-2"
+                >
+                  <div class="flex items-center gap-3">
+                    <span class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">
+                      {{ totalItems === 0 ? 0 : (page - 1) * perPage + 1 }}-{{
+                        Math.min(page * perPage, Number(totalItems))
+                      }}
+                      /
+                      {{ totalItems }}
+                    </span>
+                    <USelectMenu v-model="perPage" :items="[10, 20, 50]" class="w-32">
+                      <template #default>{{ perPage }} / trang</template>
+                    </USelectMenu>
+                  </div>
+                  <UPagination v-model="page" :total="totalItems" :page-count="perPage" :max="5" />
+                </div>
+              </template>
+            </BaseDataTable>
           </div>
         </div>
-        <!-- Right: Activity Timeline -->
         <div class="card stagger-item h-fit p-5" style="animation-delay: 360ms">
           <div class="mb-4 flex items-center justify-between">
             <h3 class="text-surface-foreground flex items-center gap-2 text-sm font-semibold">
@@ -279,7 +424,16 @@ onMounted(() => {
               >Tất cả →</span
             >
           </div>
-          <div class="space-y-3">
+          <div v-if="historyStatus === 'pending'" class="flex justify-center py-4">
+            <UIcon name="i-lucide-loader-2" class="text-primary-500 h-5 w-5 animate-spin" />
+          </div>
+          <div
+            v-else-if="recentMovements.length === 0"
+            class="py-4 text-center text-sm text-slate-500"
+          >
+            Chưa có giao dịch nào
+          </div>
+          <div v-else class="space-y-3">
             <div
               v-for="(mov, i) in recentMovements"
               :key="mov.id"
@@ -294,7 +448,7 @@ onMounted(() => {
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-surface-foreground truncate text-sm font-medium">
-                  {{ mov.inventory_item?.name || 'Nguyên liệu' }}
+                  {{ mov.rawMaterial?.name || 'Nguyên liệu' }}
                 </p>
                 <div class="mt-0.5 flex items-center gap-1.5">
                   <UBadge
@@ -310,9 +464,14 @@ onMounted(() => {
                   >
                     {{ movementLabel(mov.type) }}
                   </UBadge>
-                  <span class="text-[10px] text-slate-400">{{ formatDate(mov.created_at) }}</span>
+                  <span class="text-[10px] text-slate-400">{{
+                    formatDate(String(mov.createdAt || mov.created_at))
+                  }}</span>
                 </div>
-                <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-zinc-400">
+                <p
+                  v-if="mov.note"
+                  class="mt-0.5 truncate text-xs text-slate-500 dark:text-zinc-400"
+                >
                   {{ mov.note }}
                 </p>
               </div>
@@ -325,43 +484,43 @@ onMounted(() => {
                 "
               >
                 {{ mov.type === constants?.[ConstantKey.InventoryMovementType]?.IMPORT ? '+' : '-'
-                }}{{ formatNumber(mov.quantity) }}
+                }}{{ formatNumber(Number(mov.quantity || 0)) }}
               </span>
             </div>
           </div>
         </div>
       </div>
-      <!-- Add Modal -->
-      <UModal v-model:open="showAddModal" title="Thêm nguyên liệu">
+      <!-- Add/Edit Modal -->
+      <UModal
+        v-model:open="showFormModal"
+        :title="isEditing ? 'Cập nhật nguyên liệu' : 'Thêm nguyên liệu'"
+      >
         <template #body>
-          <div class="space-y-4">
-            <UFormField label="Tên nguyên liệu" required>
-              <UInput v-model="newItemName" placeholder="VD: Gạo tẻ nguyên liệu..." />
+          <form class="space-y-4" @submit.prevent="handleFormSubmit">
+            <UFormField label="Tên nguyên liệu" name="name" :error="formErrors.name" required>
+              <UInput v-model="state.name" placeholder="VD: Gạo tẻ nguyên liệu..." />
             </UFormField>
-            <UFormField label="Đơn vị" required>
-              <UInput v-model="newItemUnit" placeholder="VD: kg, lít, cái..." />
+            <UFormField label="Đơn vị" name="unit" :error="formErrors.unit" required>
+              <UInput v-model="state.unit" placeholder="VD: kg, lít, cái..." />
             </UFormField>
-            <UFormField label="Số lượng ban đầu">
-              <UInput v-model="newItemQty" type="number" placeholder="0" />
-            </UFormField>
-          </div>
-        </template>
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton
-              variant="outline"
-              color="neutral"
-              @click="
-                () => {
-                  showAddModal = false
-                }
-              "
-              >Hủy</UButton
-            >
-            <UButton @click="handleAdd">
-              <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm
-            </UButton>
-          </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+              <UButton
+                variant="outline"
+                color="neutral"
+                @click="
+                  () => {
+                    showFormModal = false
+                  }
+                "
+                >Hủy</UButton
+              >
+              <UButton type="submit" :loading="formLoading">
+                <UIcon name="i-lucide-save" class="mr-1 h-4 w-4" />
+                {{ isEditing ? 'Cập nhật' : 'Thêm' }}
+              </UButton>
+            </div>
+          </form>
         </template>
       </UModal>
     </template>

@@ -175,4 +175,16 @@ export default class InventoryService {
       lossPercentage: lossPercentage > 0 ? Number.parseFloat(lossPercentage.toFixed(2)) : 0,
     }
   }
+
+  /**
+   * Lấy lịch sử giao dịch kho
+   */
+  async getHistory(limit: number = 10) {
+    return InventoryLog.query()
+      .preload('rawMaterial', (query) => {
+        query.select('id', 'name', 'unit')
+      })
+      .orderBy('created_at', 'desc')
+      .limit(limit)
+  }
 }

@@ -73,4 +73,22 @@ export default class InventoryController {
       data,
     })
   }
+
+  /**
+   * @history
+   * @summary Lấy lịch sử giao dịch kho
+   * @description Lấy danh sách các hoạt động Nhập/Xuất kho gần đây.
+   * @paramQuery limit - Số lượng bản ghi (mặc định 10)
+   * @responseBody 200 - {"success": true, "message": "String", "data": [{ "id": "Number", "type": "String", "quantity": "Number", "rawMaterial": { "id": "Number", "name": "String" } }]}
+   */
+  async history({ request, response }: HttpContext) {
+    const limit = request.input('limit', 10)
+    const data = await this.inventoryService.getHistory(limit)
+
+    return response.ok({
+      success: true,
+      message: 'Lấy lịch sử giao dịch kho thành công',
+      data,
+    })
+  }
 }

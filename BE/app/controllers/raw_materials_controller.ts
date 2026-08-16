@@ -99,4 +99,19 @@ export default class RawMaterialsController {
       message: 'Xóa nguyên vật liệu thành công',
     })
   }
+
+  /**
+   * @summary Thống kê kho nguyên vật liệu
+   * @description Lấy tổng quan: số loại nguyên liệu, tổng số lượng tồn, số loại sắp hết hàng.
+   * @responseBody 200 - {"success": true, "message": "String", "data": {"totalItems": "Number", "totalQuantity": "Number", "lowStockItems": "Number"}}
+   */
+  async summary({ response }: HttpContext) {
+    const data = await this.rawMaterialService.getSummary()
+
+    return response.ok({
+      success: true,
+      message: 'Lấy thống kê nguyên vật liệu thành công',
+      data,
+    })
+  }
 }

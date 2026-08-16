@@ -305,6 +305,10 @@ router
     ])
 
     // Raw Materials CRUD
+    router.get('/admin/raw-materials/summary', [
+      () => import('#controllers/raw_materials_controller'),
+      'summary',
+    ])
     router.get('/admin/raw-materials', [
       () => import('#controllers/raw_materials_controller'),
       'index',
@@ -327,6 +331,10 @@ router
     ])
 
     // Inventory
+    router.get('/admin/inventory/history', [
+      () => import('#controllers/inventory_controller'),
+      'history',
+    ])
     router.post('/admin/inventory/import', [
       () => import('#controllers/inventory_controller'),
       'importMaterial',

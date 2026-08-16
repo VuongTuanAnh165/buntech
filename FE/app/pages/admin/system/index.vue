@@ -153,47 +153,40 @@ async function handleDelete(row: unknown) {
       />
     </div>
 
-    <UTable
-      :data="configs"
+    <BaseDataTable
+      :rows="configs"
       :columns="columns"
       :loading="loading"
       class="bg-surface ring-surface-border min-h-[400px] rounded-b-xl ring-1"
+      empty-title="Không có cấu hình"
+      empty-description="Chưa có cấu hình hệ thống nào."
+      empty-icon="i-lucide-settings"
     >
-      <template #empty>
-        <BaseEmptyState
-          title="Chưa có cấu hình nào"
-          description="Hệ thống chưa có cấu hình động nào. Hãy tạo cấu hình mới."
-          icon="i-lucide-settings"
-        >
-          <UButton color="primary" @click="openAdd">Thêm cấu hình</UButton>
-        </BaseEmptyState>
-      </template>
-
       <template #actions-header>
         <div class="w-full text-right">Thao tác</div>
       </template>
 
       <template #key-cell="{ row }">
         <span class="text-primary-600 dark:text-primary-400 font-mono text-sm font-medium">
-          {{ row.original.key }}
+          {{ row.key }}
         </span>
       </template>
 
       <template #value-cell="{ row }">
         <span class="text-slate-700 dark:text-slate-300">
-          {{ row.original.value }}
+          {{ row.value }}
         </span>
       </template>
 
       <template #description-cell="{ row }">
         <span class="text-sm text-slate-500">
-          {{ row.original.description || '-' }}
+          {{ row.description || '-' }}
         </span>
       </template>
 
       <template #created_at-cell="{ row }">
         <span class="text-slate-500 dark:text-zinc-400">
-          {{ formatDate(row.original.created_at || new Date()) }}
+          {{ formatDate(row.created_at || new Date()) }}
         </span>
       </template>
 
@@ -205,7 +198,7 @@ async function handleDelete(row: unknown) {
               variant="ghost"
               icon="i-lucide-edit"
               size="sm"
-              @click="openEdit(row.original)"
+              @click="openEdit(row)"
             />
           </UTooltip>
           <UTooltip text="Xóa">
@@ -214,12 +207,12 @@ async function handleDelete(row: unknown) {
               variant="ghost"
               icon="i-lucide-trash-2"
               size="sm"
-              @click="handleDelete(row.original)"
+              @click="handleDelete(row)"
             />
           </UTooltip>
         </div>
       </template>
-    </UTable>
+    </BaseDataTable>
 
     <!-- Pagination -->
     <div v-if="total > 0" class="mt-4 flex items-center justify-between">

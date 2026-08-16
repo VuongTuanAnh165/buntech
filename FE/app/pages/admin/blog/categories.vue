@@ -143,23 +143,29 @@ async function handleSave() {
           </div>
         </div>
         <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">
-          <UTable :columns="columns" :data="filteredCategories">
+          <BaseDataTable
+            :columns="columns"
+            :rows="filteredCategories"
+            empty-title="Không tìm thấy danh mục"
+            empty-description="Chưa có danh mục nào được tìm thấy."
+            empty-icon="i-lucide-folder"
+          >
             <template #name-cell="{ row }">
-              <span class="text-surface-foreground font-semibold">{{ row.original.name }}</span>
+              <span class="text-surface-foreground font-semibold">{{ row.name }}</span>
             </template>
             <template #slug-cell="{ row }">
               <span
                 class="rounded bg-slate-100 px-2 py-0.5 font-mono text-sm text-slate-500 dark:bg-zinc-800 dark:text-zinc-400"
               >
-                /{{ row.original.slug }}
+                /{{ row.slug }}
               </span>
             </template>
             <template #description-cell="{ row }">
-              <span class="text-sm text-slate-500">{{ row.original.description || '-' }}</span>
+              <span class="text-sm text-slate-500">{{ row.description || '-' }}</span>
             </template>
             <template #createdAt-cell="{ row }">
               <span class="text-sm text-slate-500 tabular-nums">{{
-                formatDate(row.original.createdAt)
+                formatDate(row.createdAt)
               }}</span>
             </template>
             <template #actions-cell="{ row }">
@@ -169,18 +175,18 @@ async function handleSave() {
                   color="neutral"
                   size="sm"
                   icon="i-lucide-pencil"
-                  @click="openEdit(row.original)"
+                  @click="openEdit(row)"
                 />
                 <UButton
                   variant="ghost"
                   color="error"
                   size="sm"
                   icon="i-lucide-trash-2"
-                  @click="handleDelete(row.original.id)"
+                  @click="handleDelete(row.id)"
                 />
               </div>
             </template>
-          </UTable>
+          </BaseDataTable>
         </div>
       </div>
       <!-- Add/Edit Modal -->

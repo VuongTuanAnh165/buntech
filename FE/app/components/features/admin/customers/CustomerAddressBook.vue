@@ -75,20 +75,17 @@ const columns = [
     </div>
 
     <!-- Data table -->
-    <UTable
-      :data="sortedAddresses"
+    <BaseDataTable
+      :rows="sortedAddresses"
       :columns="columns"
       :loading="loading"
+      empty-title="Chưa có địa chỉ nào"
+      empty-description="Khách hàng chưa có địa chỉ nào trong sổ."
+      empty-icon="i-lucide-map-pin"
       class="bg-surface ring-surface-border min-h-[300px] rounded-xl ring-1"
     >
-      <template #empty>
-        <BaseEmptyState
-          title="Chưa có địa chỉ nào"
-          description="Khách hàng chưa có địa chỉ nào trong sổ."
-          icon="i-lucide-map-pin"
-        >
-          <UButton color="primary" @click="openAdd">Thêm địa chỉ mới</UButton>
-        </BaseEmptyState>
+      <template #empty-action>
+        <UButton color="primary" @click="openAdd">Thêm địa chỉ mới</UButton>
       </template>
 
       <template #actions-header>
@@ -97,23 +94,19 @@ const columns = [
 
       <template #address-cell="{ row }">
         <span class="font-medium text-slate-900 dark:text-white">
-          {{ row.original.addressLine || row.original.street }}
+          {{ row.addressLine || row.street }}
         </span>
       </template>
 
       <template #location-cell="{ row }">
         <span class="text-slate-500 dark:text-zinc-400">
-          {{
-            [row.original.ward, row.original.district, row.original.province || row.original.city]
-              .filter(Boolean)
-              .join(', ')
-          }}
+          {{ [row.ward, row.district, row.province || row.city].filter(Boolean).join(', ') }}
         </span>
       </template>
 
       <template #isDefault-cell="{ row }">
         <span
-          v-if="row.original.isDefault"
+          v-if="row.isDefault"
           class="bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-400 rounded px-2 py-0.5 text-xs font-medium"
         >
           Mặc định
@@ -128,7 +121,7 @@ const columns = [
               variant="ghost"
               icon="i-lucide-edit"
               size="sm"
-              @click="openEdit(row.original)"
+              @click="openEdit(row)"
             />
           </UTooltip>
           <UTooltip text="Xóa">
@@ -137,12 +130,12 @@ const columns = [
               variant="ghost"
               icon="i-lucide-trash-2"
               size="sm"
-              @click="handleDelete(row.original)"
+              @click="handleDelete(row)"
             />
           </UTooltip>
         </div>
       </template>
-    </UTable>
+    </BaseDataTable>
 
     <AddressFormModal
       v-model:open="showAddressModal"

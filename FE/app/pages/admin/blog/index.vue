@@ -198,65 +198,60 @@ async function handleDelete(id: number) {
           </div>
         </div>
         <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">
-          <UTable :columns="columns" :data="filteredPosts">
+          <BaseDataTable
+            :columns="columns"
+            :rows="filteredPosts"
+            empty-title="Không tìm thấy bài viết"
+            empty-description="Thử đổi bộ lọc hoặc thêm bài viết mới."
+            empty-icon="i-lucide-file-text"
+          >
             <template #title-cell="{ row }">
               <div class="flex max-w-sm gap-3">
                 <NuxtImg
-                  :src="
-                    getImageUrl(row.original.thumbnailUrl) ||
-                    'https://picsum.photos/100/100?random=1'
-                  "
+                  :src="getImageUrl(row.thumbnailUrl) || 'https://picsum.photos/100/100?random=1'"
                   class="border-surface-border h-12 w-12 flex-shrink-0 rounded border object-cover"
                 />
                 <div class="min-w-0">
                   <NuxtLink
-                    :to="`/admin/blog/edit?id=${row.original.id}`"
+                    :to="`/admin/blog/edit?id=${row.id}`"
                     class="text-surface-foreground hover:text-primary-600 line-clamp-1 cursor-pointer text-sm font-medium transition-colors"
                   >
-                    {{ row.original.title }}
+                    {{ row.title }}
                   </NuxtLink>
                   <p class="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-zinc-400">
-                    {{ row.original.excerpt }}
+                    {{ row.excerpt }}
                   </p>
                 </div>
               </div>
             </template>
             <template #category-cell="{ row }">
               <UBadge color="primary" variant="subtle" size="sm">
-                {{ row.original.category?.name || 'Chưa phân loại' }}
+                {{ row.category?.name || 'Chưa phân loại' }}
               </UBadge>
             </template>
             <template #author-cell="{ row }">
               <div class="flex items-center gap-2">
-                <UAvatar :alt="row.original.author?.fullName || 'A'" size="xs" />
+                <UAvatar :alt="row.author?.fullName || 'A'" size="xs" />
                 <span class="text-surface-foreground text-sm font-medium">
-                  {{ row.original.author?.fullName || `ID: ${row.original.authorId}` }}
+                  {{ row.author?.fullName || `ID: ${row.authorId}` }}
                 </span>
               </div>
             </template>
             <template #status-cell="{ row }">
-              <UBadge
-                :color="row.original.isPublished ? 'success' : 'warning'"
-                variant="subtle"
-                size="sm"
-              >
+              <UBadge :color="row.isPublished ? 'success' : 'warning'" variant="subtle" size="sm">
                 <span class="flex items-center gap-1">
                   <span
                     class="h-1.5 w-1.5 rounded-full"
-                    :class="row.original.isPublished ? 'bg-success-500' : 'bg-warning-500'"
+                    :class="row.isPublished ? 'bg-success-500' : 'bg-warning-500'"
                   />
-                  {{ row.original.isPublished ? 'Đã xuất bản' : 'Bản nháp' }}
+                  {{ row.isPublished ? 'Đã xuất bản' : 'Bản nháp' }}
                 </span>
               </UBadge>
             </template>
             <template #date-cell="{ row }">
               <span class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-zinc-400">
                 <UIcon name="i-lucide-clock" class="h-3.5 w-3.5" />
-                {{
-                  row.original.isPublished && row.original.publishedAt
-                    ? formatDate(row.original.publishedAt)
-                    : 'Chưa XB'
-                }}
+                {{ row.isPublished && row.publishedAt ? formatDate(row.publishedAt) : 'Chưa XB' }}
               </span>
             </template>
             <template #actions-cell="{ row }">
@@ -266,18 +261,30 @@ async function handleDelete(id: number) {
                   color="neutral"
                   size="sm"
                   icon="i-lucide-pencil"
-                  :to="`/admin/blog/edit?id=${row.original.id}`"
+                  :to="`/admin/blog/edit?id=${row.id}`"
                 />
                 <UButton
                   variant="ghost"
                   color="error"
                   size="sm"
                   icon="i-lucide-trash-2"
-                  @click="handleDelete(row.original.id)"
+                  @click="handleDelete(row.id)"
                 />
               </div>
             </template>
-          </UTable>
+            <template #pagination>
+              <div
+                v-if="meta.total > 0"
+                class="border-surface-border flex items-center justify-between border-t px-4 py-3"
+              >
+                <span class="text-sm text-slate-500 tabular-nums">
+                  {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, meta.total) }} /
+                  {{ meta.total }}
+                </span>
+                <UPagination v-model="page" :total="meta.total" :items-per-page="perPage" />
+              </div>
+            </template>
+          </BaseDataTable>
           <div
             v-if="meta.total > 0"
             class="border-surface-border flex items-center justify-between border-t px-4 py-3"

@@ -208,29 +208,31 @@ async function handleSave() {
         </div>
 
         <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">
-          <UTable :columns="columns" :data="filteredCategories">
+          <BaseDataTable
+            :columns="columns"
+            :rows="filteredCategories"
+            empty-title="Không tìm thấy danh mục"
+            empty-description="Thử đổi bộ lọc hoặc thêm danh mục mới."
+            empty-icon="i-lucide-folder"
+          >
             <template #thumbnail-cell="{ row }">
               <NuxtImg
-                :src="
-                  getImageUrl(row.original.thumbnailUrl) || 'https://picsum.photos/100/100?random=3'
-                "
+                :src="getImageUrl(row.thumbnailUrl) || 'https://picsum.photos/100/100?random=3'"
                 class="border-surface-border h-12 w-12 flex-shrink-0 rounded border object-cover shadow-sm"
               />
             </template>
             <template #name-cell="{ row }">
-              <span class="text-surface-foreground font-semibold">{{ row.original.name }}</span>
+              <span class="text-surface-foreground font-semibold">{{ row.name }}</span>
             </template>
             <template #slug-cell="{ row }">
               <span
                 class="rounded bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-500 dark:bg-zinc-800 dark:text-zinc-400"
               >
-                /{{ row.original.slug }}
+                /{{ row.slug }}
               </span>
             </template>
             <template #description-cell="{ row }">
-              <span class="line-clamp-2 text-sm text-slate-500">{{
-                row.original.description || '-'
-              }}</span>
+              <span class="line-clamp-2 text-sm text-slate-500">{{ row.description || '-' }}</span>
             </template>
             <template #actions-cell="{ row }">
               <div class="flex items-center gap-1">
@@ -239,18 +241,30 @@ async function handleSave() {
                   color="neutral"
                   size="sm"
                   icon="i-lucide-pencil"
-                  @click="openEdit(row.original)"
+                  @click="openEdit(row)"
                 />
                 <UButton
                   variant="ghost"
                   color="error"
                   size="sm"
                   icon="i-lucide-trash-2"
-                  @click="handleDelete(row.original.id)"
+                  @click="handleDelete(row.id)"
                 />
               </div>
             </template>
-          </UTable>
+            <template #pagination>
+              <div
+                v-if="meta.total > 0"
+                class="border-surface-border flex items-center justify-between border-t px-4 py-3"
+              >
+                <span class="text-sm text-slate-500 tabular-nums">
+                  {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, meta.total) }} /
+                  {{ meta.total }}
+                </span>
+                <UPagination v-model="page" :total="meta.total" :items-per-page="perPage" />
+              </div>
+            </template>
+          </BaseDataTable>
 
           <div
             v-if="meta.total > 0"

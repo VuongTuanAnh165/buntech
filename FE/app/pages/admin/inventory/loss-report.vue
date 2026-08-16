@@ -249,7 +249,13 @@ onMounted(() => {
           </UButton>
         </div>
         <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">
-          <UTable :columns="columns" :data="pagedList">
+          <BaseDataTable
+            :columns="columns"
+            :rows="pagedList"
+            empty-title="Chưa có báo cáo hao hụt"
+            empty-description="Không tìm thấy dữ liệu báo cáo."
+            empty-icon="i-lucide-clipboard-list"
+          >
             <template #item-cell="{ row }">
               <div class="flex items-center gap-2">
                 <div
@@ -258,25 +264,25 @@ onMounted(() => {
                   <UIcon name="i-lucide-package" class="h-4 w-4 text-slate-500" />
                 </div>
                 <p class="text-surface-foreground font-medium">
-                  {{ row.original.inventory_item?.name || 'Nguyên liệu' }}
+                  {{ row.inventory_item?.name || 'Nguyên liệu' }}
                 </p>
               </div>
             </template>
             <template #quantity-cell="{ row }">
               <span class="text-error-600 dark:text-error-400 font-semibold tabular-nums">
-                -{{ formatNumber(row.original.quantity) }}
-                {{ row.original.inventory_item?.unit || '' }}
+                -{{ formatNumber(row.quantity) }}
+                {{ row.inventory_item?.unit || '' }}
               </span>
             </template>
             <template #note-cell="{ row }">
-              <span class="text-sm text-slate-600 dark:text-zinc-300">{{ row.original.note }}</span>
+              <span class="text-sm text-slate-600 dark:text-zinc-300">{{ row.note }}</span>
             </template>
             <template #created_at-cell="{ row }">
               <span class="text-sm text-slate-500 tabular-nums">{{
-                formatDate(row.original.created_at)
+                formatDate(row.created_at)
               }}</span>
             </template>
-          </UTable>
+          </BaseDataTable>
           <div
             v-if="totalPages > 1"
             class="border-surface-border flex items-center justify-between border-t px-4 py-3"
