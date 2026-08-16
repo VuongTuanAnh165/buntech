@@ -47,7 +47,7 @@ Không được bỏ sót.
 Chức năng cần triển khai
 
 SPRINT 6: Cổng thông tin Khách sỉ (Wholesale Portal)
-2. Lịch sử đặt hàng cá nhân. (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api, cài thư viện thì phải cài version mới nhất hiện tại)
+3. Form tự đặt hàng sỉ (Tự load bảng giá riêng). (phải đọc kĩ code BE xem chính xác các chức năng CURD nếu có xử lý như nào, có thể yêu cầu BE update như nào cũng được miễn sao đúng chuẩn, đọc kĩ code BE nhé, không chỉ đọc docs api, cài thư viện thì phải cài version mới nhất hiện tại)
 
 ==================================================
 

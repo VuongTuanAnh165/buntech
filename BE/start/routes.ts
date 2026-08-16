@@ -416,6 +416,8 @@ router
     router.get('/orders', [() => import('#controllers/customer_orders_controller'), 'index'])
     router.get('/orders/:id', [() => import('#controllers/customer_orders_controller'), 'show'])
     router.post('/orders', [() => import('#controllers/customer_orders_controller'), 'store'])
+    router.get('/products', [() => import('#controllers/customer_products_controller'), 'index'])
+    router.get('/addresses', [() => import('#controllers/customer_addresses_controller'), 'index'])
   })
   .prefix('/api/v1/customer')
   .use(middleware.auth())

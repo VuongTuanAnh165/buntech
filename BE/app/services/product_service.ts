@@ -378,6 +378,72 @@ export default class ProductService {
   }
 
   /**
+   * Khách Sỉ: Phân trang danh sách sản phẩm kèm bảng giá riêng
+   */
+  async getCustomerProducts(
+    userId: number,
+    page: number = 1,
+    limit: number = 10,
+    filters?: { categoryId?: number; search?: string }
+  ) {
+    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const query = Product.query()
+      .select(
+        'products.id',
+        'products.name',
+        'products.slug',
+        'products.base_price',
+        'products.unit',
+        'products.thumbnail_url',
+        'products.short_description',
+        'products.category_id'
+      )
+      .leftJoin('customer_prices', (join) => {
+        join
+          .on('products.id', '=', 'customer_prices.product_id')
+          .andOnVal('customer_prices.user_id', '=', userId)
+      })
+      .select('customer_prices.custom_price')
+      .where('products.is_active', true)
+      .preload('category', (q) => q.select('id', 'name', 'slug'))
+
+    if (filters?.categoryId) {
+      query.where('products.category_id', filters.categoryId)
+    }
+
+    if (filters?.search) {
+      query.where((q) => {
+        q.whereILike('products.name', `%${filters.search}%`).orWhereILike(
+          'products.short_description',
+          `%${filters.search}%`
+        )
+      })
+    }
+
+    query.orderBy('products.id', 'desc')
+
+    const paginated = await query.paginate(page, safeLimit)
+
+    // Parse and override base_price with custom_price
+    const mappedData = paginated.map((product) => {
+      const data = product.toJSON()
+      // If custom_price exists, override base_price
+      const customPrice = product.$extras.custom_price
+      return {
+        ...data,
+        basePrice: customPrice ? customPrice : data.basePrice,
+        originalBasePrice: data.basePrice, // Keep track of original
+        hasCustomPrice: !!customPrice,
+      }
+    })
+
+    return {
+      meta: paginated.getMeta(),
+      data: mappedData,
+    }
+  }
+
+  /**
    * Xóa mềm sản phẩm
    */
   async delete(id: number, userId: number) {
