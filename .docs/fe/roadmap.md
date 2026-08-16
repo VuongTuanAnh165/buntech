@@ -107,7 +107,7 @@
 | **Module** | Core, UI/UX, Performance |
 | **Chức năng** | 1. **Dark Mode Audit**: Fix lỗi độ tương phản, border ở chế độ tối.<br>2. **Responsive Audit**: Test hiển thị trên iPhone SE, Tablet, Desktop.<br>3. **Accessibility Audit**: Kiểm tra Tab navigation, screen reader.<br>4. **Performance Audit**: Lazy load `<NuxtImg>`, chống reflow/repaint.<br>5. **Empty States & Error Pages**: Tối ưu UI khi danh sách trống hoặc lỗi 404/500. |
 | **API** | Không yêu cầu API mới. |
-| **Dependency** | Phải hoàn thành toàn bộ Sprint 1 -> 5. |
+| **Dependency** | Phải hoàn thành toàn bộ Sprint 1 -> 6. |
 | **Estimate** | 4 Man-days |
 | **Risk** | Fix Responsive có thể làm vỡ layout của Dark Mode nếu viết CSS bất cẩn. |
 | **Priority** | Medium |
