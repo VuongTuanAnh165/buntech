@@ -409,6 +409,10 @@ router
 router
   .group(() => {
     router.get('/debt', [() => import('#controllers/customer_debt_controller'), 'index'])
+    router.get('/dashboard/overview', [
+      () => import('#controllers/customer_dashboard_controller'),
+      'overview',
+    ])
     router.get('/orders', [() => import('#controllers/customer_orders_controller'), 'index'])
     router.get('/orders/:id', [() => import('#controllers/customer_orders_controller'), 'show'])
     router.post('/orders', [() => import('#controllers/customer_orders_controller'), 'store'])

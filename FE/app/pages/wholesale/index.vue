@@ -1,45 +1,46 @@
 <script setup lang="ts">
-import { mockProfiles, mockOrders } from '~/utils/mockData'
+import { customerService } from '~/services/customerService'
 import { getOrderStatusColor, getOrderStatusLabel } from '~/utils/orderStatus'
+
 const { constants } = useMasterData()
+const authStore = useAuthStore()
+
 useSeoMeta({ title: 'Khách hàng - BunTech' })
 definePageMeta({ layout: 'default' })
-const loading = ref(true)
-const customerProfile = computed(
-  () =>
-    mockProfiles[0] || {
-      id: 'cust-1',
-      full_name: 'Nguyễn Văn An',
-      phone: '0901234567',
-      avatar_url: '',
-      role: 'WHOLESALE_CUSTOMER'
+
+const { data: dashboardData, pending: loading } = useAsyncData(
+  'wholesale-dashboard',
+  async () => {
+    const [overviewRes, ordersRes] = await Promise.all([
+      customerService.getDashboardOverview(),
+      customerService.getOrders({ page: 1, limit: 5 })
+    ])
+
+    return {
+      overview: overviewRes.data,
+      recentOrders: ordersRes.data?.data || []
     }
+  },
+  { lazy: false }
 )
-const customerOrders = computed(() =>
-  mockOrders.filter((o) => o.user_id === customerProfile.value?.id).slice(0, 20)
-)
-const totalSpent = computed(() =>
-  customerOrders.value.reduce((sum, o) => sum + Number(o.total || 0), 0)
-)
-const totalDebt = computed(() =>
-  customerOrders.value.reduce((sum, o) => {
-    const debt = Number(o.total || 0) - Number(o.amount_collected || 0)
-    return sum + (debt > 0 ? debt : 0)
-  }, 0)
-)
-const creditLimit = 10000000
-const debtPercentage = computed(() => Math.min(100, (totalDebt.value / creditLimit) * 100))
+
+const customerProfile = computed(() => authStore.user)
+const overview = computed(() => dashboardData.value?.overview)
+const recentOrders = computed(() => dashboardData.value?.recentOrders || [])
+
+const totalSpent = computed(() => overview.value?.totalSpent || 0)
+const totalDebt = computed(() => overview.value?.currentDebt || 0)
+const creditLimit = computed(() => overview.value?.debtLimit || 1)
+const debtPercentage = computed(() => Math.min(100, (totalDebt.value / creditLimit.value) * 100))
+const totalOrders30Days = computed(() => overview.value?.totalOrders30Days || 0)
+
 const quickActions = [
   { icon: 'i-lucide-shopping-bag', label: 'Đặt hàng', to: '/wholesale/order', color: 'primary' },
   { icon: 'i-lucide-file-text', label: 'Lịch sử đơn', to: '/wholesale', color: 'secondary' },
   { icon: 'i-lucide-credit-card', label: 'Thanh toán', to: '/wholesale', color: 'success' },
   { icon: 'i-lucide-store', label: 'Sản phẩm', to: '/', color: 'warning' }
 ]
-onMounted(() => {
-  setTimeout(() => {
-    loading.value = false
-  }, 400)
-})
+
 const colorMap: Record<string, string> = {
   primary:
     'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 ring-primary-100 dark:ring-primary-900/30',
@@ -50,11 +51,12 @@ const colorMap: Record<string, string> = {
   warning:
     'text-warning-600 dark:text-warning-400 bg-warning-50 dark:bg-warning-900/20 ring-warning-100 dark:ring-warning-900/30'
 }
+
 const tableColumns = [
   { accessorKey: 'id', header: 'Mã đơn' },
-  { accessorKey: 'created_at', header: 'Ngày đặt' },
+  { accessorKey: 'createdAt', header: 'Ngày đặt' },
   { accessorKey: 'status', header: 'Trạng thái' },
-  { accessorKey: 'total', header: 'Tổng tiền' }
+  { accessorKey: 'totalAmount', header: 'Tổng tiền' }
 ]
 </script>
 <template>
@@ -65,22 +67,22 @@ const tableColumns = [
     >
       <div class="flex items-center gap-4">
         <UAvatar
-          :alt="customerProfile?.full_name"
-          :src="customerProfile?.avatar_url || undefined"
+          :alt="customerProfile?.fullName || 'User'"
+          :src="customerProfile?.profile?.avatarUrl || undefined"
           size="lg"
         />
         <div>
           <div class="flex flex-wrap items-center gap-2">
             <h1 class="text-surface-foreground text-xl font-bold tracking-tight sm:text-2xl">
-              {{ customerProfile?.full_name }}
+              {{ customerProfile?.fullName || 'Khách Sỉ' }}
             </h1>
             <UBadge color="primary" variant="subtle">Khách sỉ</UBadge>
           </div>
           <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">
-            Xin chào, {{ customerProfile?.full_name?.split(' ').pop() }} 👋
+            Xin chào, {{ customerProfile?.fullName?.split(' ').pop() || 'Bạn' }} 👋
           </p>
           <p class="mt-0.5 text-xs text-slate-400 dark:text-zinc-500">
-            {{ customerProfile?.phone }}
+            {{ customerProfile?.phoneNumber || 'Chưa có SĐT' }}
           </p>
         </div>
       </div>
@@ -136,7 +138,9 @@ const tableColumns = [
         </p>
         <div class="relative mt-2">
           <div class="mb-1 flex justify-between text-[10px] text-slate-500 dark:text-zinc-400">
-            <span>Hạn mức: {{ formatVND(creditLimit) }}</span>
+            <span
+              >Hạn mức: {{ creditLimit === 1 ? 'Chưa thiết lập' : formatVND(creditLimit) }}</span
+            >
             <span>{{ Math.round(debtPercentage) }}%</span>
           </div>
           <UProgress :value="debtPercentage" color="error" size="sm" />
@@ -156,7 +160,7 @@ const tableColumns = [
         </div>
         <div class="relative flex items-end gap-2">
           <p class="text-surface-foreground text-2xl font-bold tabular-nums">
-            {{ customerOrders.length }}
+            {{ totalOrders30Days }}
           </p>
           <p class="mb-1 text-sm text-slate-500 dark:text-zinc-400">đơn đã đặt</p>
         </div>
@@ -182,7 +186,7 @@ const tableColumns = [
         </div>
         <div class="card animate-fade-in-up overflow-hidden p-0" style="animation-delay: 200ms">
           <BaseDataTable
-            :rows="customerOrders.slice(0, 5)"
+            :rows="recentOrders"
             :columns="tableColumns"
             :loading="loading"
             empty-title="Chưa có đơn hàng"
@@ -196,8 +200,8 @@ const tableColumns = [
                 >#{{ String(row.id).slice(0, 8) }}</span
               >
             </template>
-            <template #created_at-cell="{ row }">
-              <span class="text-sm text-slate-500">{{ formatDateTime(row.created_at) }}</span>
+            <template #createdAt-cell="{ row }">
+              <span class="text-sm text-slate-500">{{ formatDateTime(row.createdAt) }}</span>
             </template>
             <template #status-cell="{ row }">
               <UBadge
@@ -208,9 +212,9 @@ const tableColumns = [
                 {{ getOrderStatusLabel(constants)[row.status] }}
               </UBadge>
             </template>
-            <template #total-cell="{ row }">
+            <template #totalAmount-cell="{ row }">
               <span class="text-surface-foreground font-semibold tabular-nums">{{
-                formatVND(Number(row.total))
+                formatVND(Number(row.totalAmount))
               }}</span>
             </template>
           </BaseDataTable>

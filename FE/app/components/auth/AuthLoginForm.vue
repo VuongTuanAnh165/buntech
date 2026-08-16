@@ -26,7 +26,38 @@ const handleLogin = handleSubmit(
   async (data: Schema) => {
     await authStore.login({ phoneNumber: data.phoneNumber, password: data.password })
 
-    if (authStore.role?.toLowerCase() !== props.role) {
+    const userRole = authStore.role?.toLowerCase()
+    const customerType = authStore.user?.profile?.customerType?.toLowerCase()
+
+    let isValid = false
+    let defaultRedirect = '/'
+
+    if (props.role === 'admin' && userRole === 'admin') {
+      isValid = true
+      defaultRedirect = '/admin'
+    } else if (props.role === 'driver' && userRole === 'driver') {
+      isValid = true
+      defaultRedirect = '/driver'
+    } else if (props.role === 'retail' && userRole === 'customer' && customerType === 'retail') {
+      isValid = true
+      defaultRedirect = '/'
+    } else if (
+      props.role === 'wholesale' &&
+      userRole === 'customer' &&
+      customerType === 'wholesale'
+    ) {
+      isValid = true
+      defaultRedirect = '/wholesale'
+    } else if (
+      ['retail', 'wholesale', 'customer'].includes(props.role) &&
+      userRole === 'customer'
+    ) {
+      // Fallback if the user logs in from a general customer portal but has a specific type
+      isValid = true
+      defaultRedirect = customerType === 'wholesale' ? '/wholesale' : '/'
+    }
+
+    if (!isValid) {
       toast.add({ title: 'Bạn không có quyền truy cập vào trang này', color: 'error' })
       await authStore.logout()
       return
@@ -38,9 +69,7 @@ const handleLogin = handleSubmit(
     if (redirectPath) {
       await navigateTo(redirectPath)
     } else {
-      if (props.role === 'admin') await navigateTo('/admin')
-      else if (props.role === 'driver') await navigateTo('/driver')
-      else await navigateTo('/portal')
+      await navigateTo(defaultRedirect)
     }
   },
   { formRef }
