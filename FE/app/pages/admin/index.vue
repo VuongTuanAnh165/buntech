@@ -1,131 +1,86 @@
 <script setup lang="ts">
-import {
-  mockOrders,
-  mockTopBuyers,
-  mockProducts,
-  mockDashboardKPI,
-  mockRevenueData
-} from '~/utils/mockData'
+import { dashboardService } from '~/services/dashboardService'
+import { adminOrderService } from '~/services/adminOrderService'
 import { getOrderStatusColor, getOrderStatusIcon, getOrderStatusLabel } from '~/utils/orderStatus'
-import type { Order } from '~/utils/types'
+import dayjs from 'dayjs'
+
 useSeoMeta({ title: 'Dashboard - BunTech Admin' })
 definePageMeta({ layout: 'admin' })
-const loading = ref(true)
-const error = ref(false)
-const kpi = reactive({
-  revenueToday: 0,
-  ordersToday: 0,
-  customersTotal: 0,
-  productsTotal: 0
-})
+
 const { constants } = useMasterData()
-const revenueData = ref<{ day: string; revenue: number }[]>([])
-const topBuyers = ref(mockTopBuyers)
-const recentOrders = ref<Order[]>([])
-const topProducts = ref<{ name: string; value: number }[]>([])
-const orderStatusData = ref<{ name: string; value: number }[]>([])
+
+const { data, status, error } = useAsyncData('dashboard-data', async () => {
+  const endDate = dayjs().endOf('day').format('YYYY-MM-DD')
+  const startDate = dayjs().subtract(6, 'day').startOf('day').format('YYYY-MM-DD')
+
+  const [overviewRes, topBuyersRes, recentOrdersRes] = await Promise.all([
+    dashboardService.getOverview({ startDate, endDate }),
+    dashboardService.getTopBuyers({ startDate, endDate, limit: 5 }),
+    adminOrderService.fetchOrders({ page: 1, limit: 6 })
+  ])
+
+  return {
+    overview: overviewRes.data,
+    topBuyers: topBuyersRes.data,
+    recentOrders: recentOrdersRes.data?.data || []
+  }
+})
+
+const loading = computed(() => status.value === 'pending')
+
 const kpiStats = computed(() => [
   {
     title: 'Doanh thu hôm nay',
-    value: formatVND(kpi.revenueToday),
+    value: formatVND(data.value?.overview?.revenueToday || 0),
     icon: 'i-lucide-wallet',
     color: 'primary' as const,
-    trend: { value: 12, isPositive: true }
+    trend: { value: 0, isPositive: true }
   },
   {
     title: 'Đơn hàng hôm nay',
-    value: kpi.ordersToday,
+    value: data.value?.overview?.ordersToday || 0,
     icon: 'i-lucide-shopping-cart',
     color: 'info' as const,
-    trend: { value: 8, isPositive: true }
+    trend: { value: 0, isPositive: true }
   },
   {
     title: 'Tổng khách hàng',
-    value: kpi.customersTotal,
+    value: data.value?.overview?.totalCustomers || 0,
     icon: 'i-lucide-users',
     color: 'success' as const,
-    trend: { value: 5, isPositive: true }
+    trend: { value: 0, isPositive: true }
   },
   {
     title: 'Tổng sản phẩm',
-    value: kpi.productsTotal,
+    value: data.value?.overview?.totalProducts || 0,
     icon: 'i-lucide-package',
     color: 'warning' as const,
-    trend: { value: 2, isPositive: true }
+    trend: { value: 0, isPositive: true }
   }
 ])
-const mockStatusData = [
-  { name: 'Chờ xử lý', value: 5 },
-  { name: 'Đang chuẩn bị', value: 3 },
-  { name: 'Đang giao', value: 8 },
-  { name: 'Đã giao', value: 32 },
-  { name: 'Đã hủy', value: 2 }
-]
-const mockTopProducts = [
-  { name: 'Bún tươi sợi nhỏ', value: 8500000 },
-  { name: 'Bún tươi sợi lớn', value: 6200000 },
-  { name: 'Phở tươi mỏng', value: 4800000 },
-  { name: 'Bún khô sợi nhỏ', value: 3600000 },
-  { name: 'Hủ tiếu tươi', value: 2900000 },
-  { name: 'Miến dong lớn', value: 2100000 }
-]
-async function loadData() {
-  loading.value = true
-  error.value = false
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 400))
-    kpi.revenueToday = mockDashboardKPI.revenueToday
-    kpi.ordersToday = mockDashboardKPI.ordersToday
-    kpi.customersTotal = mockDashboardKPI.newCustomers
-    kpi.productsTotal = mockProducts.length
-    revenueData.value = mockRevenueData.map((r, _i) => ({
-      day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()] || '',
-      revenue: r.revenue
-    }))
-    recentOrders.value = mockOrders.slice(0, 6)
-    const productTotals: Record<string, number> = {}
-    for (const order of mockOrders) {
-      for (const item of order.order_items || []) {
-        productTotals[item.product_name] =
-          (productTotals[item.product_name] || 0) + item.quantity * item.price
-      }
-    }
-    topProducts.value = Object.entries(productTotals)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 6)
-      .map(([name, value]) => ({ name, value }))
-    const statusCounts: Record<string, number> = {}
-    for (const order of mockOrders) {
-      statusCounts[order.status] = (statusCounts[order.status] || 0) + 1
-    }
-    orderStatusData.value = Object.entries(statusCounts).map(([status, count]) => ({
-      name: getOrderStatusLabel(constants)[status as string] || status,
-      value: count
-    }))
-  } catch {
-    error.value = true
-  } finally {
-    loading.value = false
-  }
-}
-onMounted(loadData)
-const displayRevenue = computed(() =>
-  revenueData.value.length
-    ? revenueData.value
-    : mockRevenueData.map((r, _i) => ({
-        day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()] || '',
-        revenue: r.revenue
-      }))
-)
-const displayStatusData = computed(() =>
-  orderStatusData.value.length ? orderStatusData.value : mockStatusData
-)
-const displayTopProducts = computed(() =>
-  topProducts.value.length ? topProducts.value : mockTopProducts
-)
-const displayRecentOrders = computed(() =>
-  recentOrders.value.length ? recentOrders.value : mockOrders.slice(0, 6)
-)
+
+const displayRevenue = computed(() => {
+  if (!data.value?.overview?.revenueChart) return []
+  return data.value.overview.revenueChart.map((r) => ({
+    day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()] || '',
+    revenue: r.value
+  }))
+})
+
+const displayStatusData = computed(() => {
+  if (!data.value?.overview?.orderStatuses) return []
+  return data.value.overview.orderStatuses.map((os) => ({
+    name: getOrderStatusLabel(constants)[os.status] || os.status,
+    value: os.count
+  }))
+})
+
+const displayTopProducts = computed(() => {
+  return data.value?.overview?.topProducts || []
+})
+
+const topBuyers = computed(() => data.value?.topBuyers || [])
+const displayRecentOrders = computed(() => data.value?.recentOrders || [])
 </script>
 <template>
   <div>
@@ -153,7 +108,7 @@ const displayRecentOrders = computed(() =>
                 class="text-success-600 dark:text-success-400 bg-success-50 dark:bg-success-900/20 flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium tabular-nums"
               >
                 <UIcon name="i-lucide-trending-up" class="h-3.5 w-3.5" />
-                <span>{{ formatVND(kpi.revenueToday) }}</span>
+                <span>{{ formatVND(data?.overview?.revenueToday || 0) }}</span>
               </div>
             </div>
           </template>
@@ -241,11 +196,11 @@ const displayRecentOrders = computed(() =>
             <div class="divide-surface-border -my-2 divide-y">
               <div
                 v-for="(buyer, i) in topBuyers"
-                :key="buyer.user_id"
+                :key="buyer.userId"
                 class="hover:bg-surface-hover/60 flex items-center gap-2.5 py-3 transition-colors duration-150"
               >
                 <div class="relative">
-                  <UAvatar :alt="buyer.full_name" :src="buyer.avatar_url || undefined" size="sm" />
+                  <UAvatar :alt="buyer.fullName" :src="buyer.avatarUrl || undefined" size="sm" />
                   <span
                     :class="[
                       'ring-surface absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ring-2',
@@ -260,10 +215,10 @@ const displayRecentOrders = computed(() =>
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="text-surface-foreground truncate text-sm font-medium">
-                    {{ buyer.full_name }}
+                    {{ buyer.fullName }}
                   </p>
                   <p class="text-xs text-slate-500 tabular-nums dark:text-zinc-400">
-                    {{ formatVND(buyer.total) }}
+                    {{ formatVND(buyer.totalRevenue) }}
                   </p>
                 </div>
               </div>
@@ -336,10 +291,10 @@ const displayRecentOrders = computed(() =>
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-surface-foreground truncate text-sm font-medium">
-                  {{ order.user?.full_name || order.guest_info?.name || 'Khách vãng lai' }}
+                  {{ order.user?.fullName || 'Khách vãng lai' }}
                 </p>
                 <p class="mt-0.5 flex items-center gap-1 text-xs text-slate-500 dark:text-zinc-400">
-                  <UIcon name="i-lucide-clock" class="h-3 w-3" /> {{ formatDate(order.created_at) }}
+                  <UIcon name="i-lucide-clock" class="h-3 w-3" /> {{ formatDate(order.createdAt) }}
                 </p>
               </div>
               <UBadge
@@ -349,7 +304,7 @@ const displayRecentOrders = computed(() =>
               >
               <span
                 class="text-surface-foreground ml-2 hidden min-w-[80px] text-right text-sm font-semibold tabular-nums sm:inline"
-                >{{ formatVND(Number(order.total)) }}</span
+                >{{ formatVND(Number(order.totalAmount)) }}</span
               >
             </NuxtLink>
           </div>
