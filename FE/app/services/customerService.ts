@@ -16,6 +16,9 @@ export const customerService = {
     return ApiClient.get<ApiResponse<CustomerDashboardOverview>>('/customer/dashboard/overview')
   },
   getOrders: (params?: { page?: number; limit?: number; status?: string }) => {
-    return ApiClient.get<PaginatedResponse<AdminOrderDTO>>('/customer/orders', { params })
+    return ApiClient.get<PaginatedResponse<AdminOrderDTO>>('/customer/orders', params)
+  },
+  getOrder: (id: string | number) => {
+    return ApiClient.get<ApiResponse<AdminOrderDTO>>(`/customer/orders/${id}`)
   }
 }

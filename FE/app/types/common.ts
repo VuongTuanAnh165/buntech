@@ -38,6 +38,7 @@ export interface CurrentUserProfile {
   currentDebt: string | null
   debtLimit: string | null
   zaloUserId: string | null
+  customerType?: string | null
 }
 
 /**

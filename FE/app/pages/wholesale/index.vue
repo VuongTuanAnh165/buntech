@@ -36,7 +36,7 @@ const totalOrders30Days = computed(() => overview.value?.totalOrders30Days || 0)
 
 const quickActions = [
   { icon: 'i-lucide-shopping-bag', label: 'Đặt hàng', to: '/wholesale/order', color: 'primary' },
-  { icon: 'i-lucide-file-text', label: 'Lịch sử đơn', to: '/wholesale', color: 'secondary' },
+  { icon: 'i-lucide-file-text', label: 'Lịch sử đơn', to: '/wholesale/orders', color: 'secondary' },
   { icon: 'i-lucide-credit-card', label: 'Thanh toán', to: '/wholesale', color: 'success' },
   { icon: 'i-lucide-store', label: 'Sản phẩm', to: '/', color: 'warning' }
 ]
@@ -177,7 +177,7 @@ const tableColumns = [
           <UButton
             variant="ghost"
             color="neutral"
-            to="/wholesale"
+            to="/wholesale/orders"
             trailing-icon="i-lucide-chevron-right"
             size="sm"
           >
