@@ -112,7 +112,9 @@ const emit = defineEmits<{
       </div>
     </template>
     <div v-else class="py-12 text-center">
-      <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50">
+      <div
+        class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-zinc-800/50"
+      >
         <UIcon name="i-lucide-shopping-cart" class="h-6 w-6 text-slate-300" />
       </div>
       <p class="text-surface-foreground text-sm font-medium">Giỏ hàng trống</p>

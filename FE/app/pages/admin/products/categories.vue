@@ -219,6 +219,7 @@ async function handleSave() {
               <NuxtImg
                 :src="getImageUrl(row.thumbnailUrl) || 'https://picsum.photos/100/100?random=3'"
                 class="border-surface-border h-12 w-12 flex-shrink-0 rounded border object-cover shadow-sm"
+                loading="lazy"
               />
             </template>
             <template #name-cell="{ row }">
@@ -343,7 +344,13 @@ async function handleSave() {
                   class="absolute inset-0 flex items-center justify-center gap-2 bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
                 >
                   <UButton color="neutral" size="sm" @click="triggerFileSelect">Đổi ảnh</UButton>
-                  <UButton color="error" size="sm" icon="i-lucide-trash-2" @click="clearImage" />
+                  <UButton
+                    aria-label="Xóa ảnh"
+                    color="error"
+                    size="sm"
+                    icon="i-lucide-trash-2"
+                    @click="clearImage"
+                  />
                 </div>
               </div>
             </UFormField>

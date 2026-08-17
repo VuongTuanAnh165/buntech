@@ -51,33 +51,44 @@ const mappedColumns = computed(() => {
 </script>
 
 <template>
-  <div>
-    <!-- Data table -->
-    <UTable :columns="mappedColumns" :data="props.rows" :loading="props.loading">
-      <!-- Forward all column slots -->
-      <template v-for="col in mappedColumns" :key="col.key" #[`${col.key}-cell`]="{ row, column }">
-        <slot
-          :name="`${col.key}-cell`"
-          :row="(row.original ? row.original : row) as T"
-          :column="column"
+  <div class="w-full">
+    <!-- Data table wrapper for responsive scroll -->
+    <div class="scrollbar-hide overflow-x-auto">
+      <UTable
+        :columns="mappedColumns"
+        :data="props.rows"
+        :loading="props.loading"
+        class="min-w-full"
+      >
+        <!-- Forward all column slots -->
+        <template
+          v-for="col in mappedColumns"
+          :key="col.key"
+          #[`${col.key}-cell`]="{ row, column }"
         >
-          <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
-          {{ row.original ? (row.original as any)[col.key] : (row as any)[col.key] }}
-        </slot>
-      </template>
+          <slot
+            :name="`${col.key}-cell`"
+            :row="(row.original ? row.original : row) as T"
+            :column="column"
+          >
+            <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
+            {{ row.original ? (row.original as any)[col.key] : (row as any)[col.key] }}
+          </slot>
+        </template>
 
-      <template #empty>
-        <BaseEmptyState
-          :icon="props.emptyIcon"
-          :title="props.emptyTitle"
-          :description="props.emptyDescription"
-        >
-          <template #action>
-            <slot name="empty-action" />
-          </template>
-        </BaseEmptyState>
-      </template>
-    </UTable>
+        <template #empty>
+          <BaseEmptyState
+            :icon="props.emptyIcon"
+            :title="props.emptyTitle"
+            :description="props.emptyDescription"
+          >
+            <template #action>
+              <slot name="empty-action" />
+            </template>
+          </BaseEmptyState>
+        </template>
+      </UTable>
+    </div>
 
     <slot v-if="props.rows.length" name="pagination" />
   </div>

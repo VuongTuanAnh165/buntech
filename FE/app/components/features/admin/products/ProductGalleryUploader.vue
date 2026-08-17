@@ -90,7 +90,13 @@ function handleGalleryChange(event: Event) {
         <div
           class="absolute inset-0 flex items-center justify-center bg-slate-900/50 opacity-0 transition-opacity group-hover:opacity-100"
         >
-          <UButton color="error" size="sm" icon="i-lucide-x" @click="emit('removeNew', idx)" />
+          <UButton
+            aria-label="Xóa ảnh này"
+            color="error"
+            size="sm"
+            icon="i-lucide-x"
+            @click="emit('removeNew', idx)"
+          />
         </div>
       </div>
 

@@ -234,6 +234,7 @@ useHead(() => ({
                 :src="img"
                 :alt="`Ảnh ${i + 1}`"
                 class="h-full w-full object-cover"
+                loading="lazy"
               />
               <div v-else class="bg-surface-muted flex h-full w-full items-center justify-center">
                 <Package class="h-6 w-6 text-gray-300 dark:text-zinc-600" aria-hidden="true" />
@@ -531,7 +532,7 @@ useHead(() => ({
               </div>
             </div>
           </template>
-          <AppEmptyState
+          <BaseEmptyState
             v-else
             title="Chưa có đánh giá"
             description="Hãy là người đầu tiên đánh giá sản phẩm này!"

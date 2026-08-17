@@ -236,22 +236,32 @@ const columns = [
                   color="neutral"
                   variant="soft"
                   icon="i-lucide-minus"
-                  :disabled="getProductQuantity(Number(row.id)) <= 0"
-                  @click="handleQuantityChange(row, getProductQuantity(Number(row.id)) - 1)"
+                  :disabled="getProductQuantity(Number((row as any).id)) <= 0"
+                  @click="
+                    handleQuantityChange(
+                      row as any,
+                      getProductQuantity(Number((row as any).id)) - 1
+                    )
+                  "
                 />
                 <UInput
-                  :model-value="getProductQuantity(Number(row.id))"
+                  :model-value="getProductQuantity(Number((row as any).id))"
                   type="number"
                   min="0"
                   class="w-16 text-center"
-                  @update:model-value="(val) => handleQuantityChange(row, Number(val))"
+                  @update:model-value="(val) => handleQuantityChange(row as any, Number(val))"
                 />
                 <UButton
                   size="xs"
                   color="neutral"
                   variant="soft"
                   icon="i-lucide-plus"
-                  @click="handleQuantityChange(row, getProductQuantity(Number(row.id)) + 1)"
+                  @click="
+                    handleQuantityChange(
+                      row as any,
+                      getProductQuantity(Number((row as any).id)) + 1
+                    )
+                  "
                 />
               </div>
             </template>

@@ -323,13 +323,15 @@ const clearFilters = () => {
       </div>
     </template>
     <!-- Empty state -->
-    <AppEmptyState
+    <BaseEmptyState
       v-else
       title="Không tìm thấy sản phẩm"
       description="Thử thay đổi từ khóa hoặc bộ lọc để tìm sản phẩm phù hợp"
-      cta-text="Đặt hàng nhanh"
-      @action="navigateTo('/quick-order')"
-    />
+    >
+      <template #action>
+        <UButton @click="navigateTo('/quick-order')">Đặt hàng nhanh</UButton>
+      </template>
+    </BaseEmptyState>
     <!-- Pagination -->
     <div v-if="!loading && totalPages > 1" class="mt-8 flex items-center justify-center gap-2">
       <UButton

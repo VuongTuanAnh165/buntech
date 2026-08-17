@@ -99,7 +99,7 @@ onMounted(() => {
           >
             <UIcon
               :name="config.icon"
-              :class="['text- h-10 w-10 sm:h-12 sm:w-12' + config.color + '-500']"
+              :class="['h-10 w-10 sm:h-12 sm:w-12', `text-${config.color}-500`]"
             />
           </div>
         </div>
@@ -120,7 +120,6 @@ onMounted(() => {
         </UButton>
         <UButton
           size="lg"
-          icon="i-lucide-refresh-cw"
           color="neutral"
           variant="outline"
           class="group w-full sm:w-auto"

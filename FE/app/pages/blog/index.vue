@@ -245,7 +245,7 @@ const clearFilters = () => {
       </div>
     </template>
 
-    <AppEmptyState
+    <BaseEmptyState
       v-else
       title="Không tìm thấy bài viết"
       description="Thử thay đổi từ khóa hoặc danh mục để tìm bài viết phù hợp"
