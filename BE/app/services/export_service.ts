@@ -1,4 +1,5 @@
 import { inject } from '@adonisjs/core'
+import { Readable } from 'node:stream'
 import Order from '#models/order'
 import { type DateTime } from 'luxon'
 
@@ -8,7 +9,7 @@ export default class ExportService {
    * Tạo Stream CSV cho danh sách đơn hàng để chống tràn RAM (OOM)
    */
   exportOrdersToCsvStream(filters: { startDate?: DateTime; endDate?: DateTime }) {
-    const { Readable } = require('node:stream')
+
     let currentPage = 1
     const perPage = 1000
     let isFirstChunk = true

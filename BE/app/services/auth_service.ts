@@ -1,4 +1,5 @@
 import { inject } from '@adonisjs/core'
+import app from '@adonisjs/core/services/app'
 import User from '#models/user'
 import RefreshToken from '#models/refresh_token'
 import PasswordReset from '#models/password_reset'
@@ -151,7 +152,7 @@ export default class AuthService {
     return {
       success: true,
       message: 'Mã xác thực đã được gửi',
-      otp: process.env.NODE_ENV !== 'production' ? otp : undefined,
+      otp: app.inProduction ? undefined : otp,
     }
   }
 

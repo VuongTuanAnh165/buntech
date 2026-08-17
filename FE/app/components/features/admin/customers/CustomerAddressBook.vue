@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import AddressFormModal from './AddressFormModal.vue'
 import type { Address } from '~/utils/types'
 import { useUsers } from '~/composables/admin/useUsers'

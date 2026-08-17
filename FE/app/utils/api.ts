@@ -146,8 +146,7 @@ const refreshAccessToken = async (failedToken?: string): Promise<string> => {
 
       const newToken = refreshRes.data?.accessToken
       if (newToken) {
-        const isProd = process.env.NODE_ENV === 'production'
-        useCookie('auth_token', { secure: isProd, sameSite: 'lax' }).value = newToken
+        useCookie('auth_token', { secure: !import.meta.dev, sameSite: 'lax' }).value = newToken
         return newToken
       }
       throw new Error('Làm mới token thất bại')
@@ -208,8 +207,7 @@ const refreshAccessToken = async (failedToken?: string): Promise<string> => {
 
     if (nuxtApp) {
       nuxtApp.runWithContext(() => {
-        const isProd = process.env.NODE_ENV === 'production'
-        const cookieOptions = { secure: isProd, sameSite: 'lax' as const }
+        const cookieOptions = { secure: !import.meta.dev, sameSite: 'lax' as const }
         useCookie('auth_token', cookieOptions).value = null
         useCookie('refresh_token', cookieOptions).value = null
         navigateTo('/login')

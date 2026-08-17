@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { Transaction } from '~/services/transactionService'
 import { ConstantKey } from '~/enums/constantKeys'
 const { constants } = useMasterData()

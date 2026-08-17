@@ -13,10 +13,9 @@ export const useAuth = () => {
     try {
       const res = await authService.login(payload)
       if (res.data) {
-        const isProd = process.env.NODE_ENV === 'production'
         const cookieOptions = {
           maxAge: payload.rememberMe ? 60 * 60 * 24 * 30 : undefined,
-          secure: isProd,
+          secure: !import.meta.dev,
           sameSite: 'lax' as const
         }
 
@@ -39,8 +38,7 @@ export const useAuth = () => {
   }
 
   const logout = () => {
-    const isProd = process.env.NODE_ENV === 'production'
-    const cookieOptions = { secure: isProd, sameSite: 'lax' as const }
+    const cookieOptions = { secure: !import.meta.dev, sameSite: 'lax' as const }
 
     // Xóa Tokens
     useCookie('auth_token', cookieOptions).value = null

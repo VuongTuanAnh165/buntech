@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
 import { refDebounced } from '@vueuse/core'
 import { ConstantKey } from '~/enums/constantKeys'
 import CustomerFormDrawer from '~/components/features/admin/customers/CustomerFormDrawer.vue'

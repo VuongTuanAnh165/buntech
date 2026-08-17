@@ -2,7 +2,6 @@
 import { z } from 'zod'
 import { requiredString } from '~/utils/validation'
 import type { SystemConfig } from '~/utils/types'
-import { reactive, ref, computed, watch } from 'vue'
 
 const props = defineProps<{
   open: boolean

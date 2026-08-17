@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
 import { usePointerSwipe, useResizeObserver } from '@vueuse/core'
 
 const props = defineProps<{

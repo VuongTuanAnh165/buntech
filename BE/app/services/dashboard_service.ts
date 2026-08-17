@@ -139,7 +139,7 @@ export default class DashboardService {
         : DateTime.fromJSDate(new Date(d)).toSQLDate()
 
     let dateCondition = ''
-    const dateBindings: any[] = []
+    const dateBindings: string[] = []
 
     if (filters.startDate) {
       dateCondition += ' AND created_at >= ?'
@@ -151,7 +151,7 @@ export default class DashboardService {
     }
 
     let dateConditionOrders = ''
-    const dateBindingsOrders: any[] = []
+    const dateBindingsOrders: string[] = []
 
     if (filters.startDate) {
       dateConditionOrders += ' AND o.created_at >= ?'
@@ -181,16 +181,16 @@ export default class DashboardService {
         'users.full_name as fullName',
         'users.phone_number as phoneNumber',
         db.raw(
-          `(SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE user_id = users.id AND status = '${OrderStatus.DELIVERED}'${dateCondition}) as totalRevenue`,
-          dateBindings
+          `(SELECT COALESCE(SUM(total_amount), 0) FROM orders WHERE user_id = users.id AND status = ?${dateCondition}) as totalRevenue`,
+          [OrderStatus.DELIVERED, ...dateBindings]
         ),
         db.raw(
-          `(SELECT COUNT(id) FROM orders WHERE user_id = users.id AND status = '${OrderStatus.DELIVERED}'${dateCondition}) as ordersCount`,
-          dateBindings
+          `(SELECT COUNT(id) FROM orders WHERE user_id = users.id AND status = ?${dateCondition}) as ordersCount`,
+          [OrderStatus.DELIVERED, ...dateBindings]
         ),
         db.raw(
-          `(SELECT COALESCE(SUM(oi.quantity), 0) FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.user_id = users.id AND o.status = '${OrderStatus.DELIVERED}'${dateConditionOrders}) as totalQuantity`,
-          dateBindingsOrders
+          `(SELECT COALESCE(SUM(oi.quantity), 0) FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.user_id = users.id AND o.status = ?${dateConditionOrders}) as totalQuantity`,
+          [OrderStatus.DELIVERED, ...dateBindingsOrders]
         )
       )
 

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-
 import { useAuthStore } from '~/stores/auth'
 import { useOfflineSync } from '~/composables/driver/useOfflineSync'
 import { useFCM } from '~/composables/useFCM'
