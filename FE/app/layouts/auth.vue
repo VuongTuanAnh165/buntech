@@ -45,12 +45,7 @@ const { t } = useI18n()
       <!-- Content -->
       <div class="relative z-10 flex w-full flex-col justify-between p-12 text-white xl:p-16">
         <NuxtLink to="/" class="group flex w-fit items-center gap-3">
-          <div
-            class="from-primary-500 to-primary-600 shadow-primary-600/25 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br text-lg font-bold text-white shadow-md transition-transform group-hover:scale-105"
-          >
-            B
-          </div>
-          <span class="text-xl font-bold tracking-tight">BunTech</span>
+          <NuxtImg src="/images/logo.webp" class="h-14 flex-shrink-0 object-cover" loading="lazy" />
         </NuxtLink>
 
         <div class="max-w-md">

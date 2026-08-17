@@ -37,7 +37,7 @@ const handleLogin = handleSubmit(
       defaultRedirect = '/admin'
     } else if (props.role === 'driver' && userRole === 'driver') {
       isValid = true
-      defaultRedirect = '/driver'
+      defaultRedirect = '/driver/profile'
     } else if (props.role === 'retail' && userRole === 'customer' && customerType === 'retail') {
       isValid = true
       defaultRedirect = '/'

@@ -73,12 +73,11 @@ onUnmounted(() => {
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
           <NuxtLink to="/" class="flex items-center gap-2.5">
-            <div
-              class="from-primary-500 to-primary-600 shadow-primary-600/20 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white shadow-sm"
-            >
-              B
-            </div>
-            <span class="text-surface-foreground text-lg font-bold tracking-tight">BunTech</span>
+            <NuxtImg
+              src="/images/logo.webp"
+              class="h-14 flex-shrink-0 object-cover"
+              loading="lazy"
+            />
           </NuxtLink>
 
           <nav class="hidden items-center gap-0.5 md:flex" aria-label="Main navigation">
@@ -195,12 +194,11 @@ onUnmounted(() => {
         <div class="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div class="md:col-span-2">
             <div class="mb-4 flex items-center gap-2.5">
-              <div
-                class="from-primary-500 to-primary-600 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br font-bold text-white"
-              >
-                B
-              </div>
-              <span class="text-lg font-bold tracking-tight text-white">BunTech</span>
+              <NuxtImg
+                src="/images/logo.webp"
+                class="h-14 flex-shrink-0 object-cover"
+                loading="lazy"
+              />
             </div>
             <p class="mb-4 max-w-md text-sm leading-relaxed">{{ t('app.tagline') }}</p>
             <div class="flex items-center gap-3">

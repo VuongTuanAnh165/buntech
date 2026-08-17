@@ -22,15 +22,18 @@ const { sidebarCollapsed, mobileSidebarOpen, toggleSidebar, closeMobile } = useA
     <!-- Logo -->
     <div class="flex h-16 items-center justify-between border-b border-white/[0.05] px-4">
       <NuxtLink to="/admin" class="flex items-center gap-3" @click="closeMobile">
-        <div
-          class="from-primary-500 to-primary-600 shadow-primary-600/25 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-base font-bold text-white shadow-md ring-1 ring-white/10"
-        >
-          B
-        </div>
-        <Transition name="fade">
-          <span v-if="!sidebarCollapsed" class="text-[15px] font-bold tracking-tight text-white"
-            >BunTech</span
-          >
+        <NuxtImg
+          v-if="!sidebarCollapsed"
+          src="/images/logo.webp"
+          class="w-32 flex-shrink-0 object-cover"
+          loading="lazy"
+        />
+        <Transition v-else name="fade">
+          <NuxtImg
+            src="/images/logo_sm.webp"
+            class="w-10 flex-shrink-0 object-cover"
+            loading="lazy"
+          />
         </Transition>
       </NuxtLink>
       <UButton
