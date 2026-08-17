@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Transaction } from '~/utils/types'
+import type { Transaction } from '~/services/transactionService'
 import { ConstantKey } from '~/enums/constantKeys'
 const { constants } = useMasterData()
 const props = defineProps<{
@@ -168,7 +168,7 @@ const paymentTransactions = computed(() =>
               </p>
               <p class="truncate text-xs text-slate-500 dark:text-zinc-400">{{ tx.note }}</p>
               <p class="mt-0.5 text-xs text-slate-400 dark:text-zinc-500">
-                {{ formatDateTime(tx.created_at) }}
+                {{ formatDateTime(tx.createdAt) }}
               </p>
             </div>
             <span

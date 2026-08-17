@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { mockOrders, mockTransactions } from '~/utils/mockData'
-import type { Order, Transaction } from '~/utils/types'
 import { ConstantKey } from '~/enums/constantKeys'
+import { useAdminOrders } from '~/composables/admin/useAdminOrders'
+import { transactionService } from '~/services/transactionService'
 import CustomerAddressBook from '~/components/features/admin/customers/CustomerAddressBook.vue'
 import CustomerFormDrawer from '~/components/features/admin/customers/CustomerFormDrawer.vue'
 import CustomerPricesTab from '~/components/features/admin/customers/CustomerPricesTab.vue'
@@ -18,8 +18,17 @@ const customerId = route.params.id as string
 
 const activeTab = ref('orders')
 
-const orders = ref<Order[]>([])
-const transactions = ref<Transaction[]>([])
+const { fetchOrders } = useAdminOrders()
+
+const { data: ordersData } = useAsyncData(`admin-orders-${customerId}`, () =>
+  fetchOrders({ userId: customerId, limit: 100 })
+)
+const orders = computed(() => ordersData.value?.data?.data || [])
+
+const { data: transactionsData } = useAsyncData(`admin-transactions-${customerId}`, () =>
+  transactionService.getTransactions(1, 100, undefined, Number(customerId))
+)
+const transactions = computed(() => transactionsData.value?.data?.data || [])
 
 const {
   data: customerData,
@@ -57,7 +66,7 @@ const _debtUtilization = computed(() =>
 )
 
 const totalOrders = computed(() => orders.value.length)
-const totalSpent = computed(() => orders.value.reduce((s, o) => s + o.total, 0))
+const totalSpent = computed(() => orders.value.reduce((s, o) => s + Number(o.totalAmount || 0), 0))
 const avgOrderValue = computed(() =>
   totalOrders.value > 0 ? Math.round(totalSpent.value / totalOrders.value) : 0
 )
@@ -122,17 +131,6 @@ const statCards = computed(() => [
     color: 'info' as const
   }
 ])
-
-// Load mocks for features not yet integrated with API
-onMounted(() => {
-  orders.value = mockOrders
-    .filter((o) => o.user_id === customerId)
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-
-  transactions.value = mockTransactions
-    .filter((tx) => tx.user_id === customerId)
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-})
 
 const showCustomerEdit = ref(false)
 </script>

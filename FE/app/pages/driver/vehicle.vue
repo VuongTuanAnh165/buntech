@@ -1,27 +1,22 @@
 <script setup lang="ts">
-import { mockOrders, mockProfiles } from '~/utils/mockData'
-import { ConstantKey } from '~/enums/constantKeys'
-const { constants } = useMasterData()
+import { driverService } from '~/services/driverService'
+
 definePageMeta({ layout: 'driver' })
 useSeoMeta({ title: 'Phương tiện - BunTech Driver' })
 const toast = useToast()
 const loading = ref(true)
-const currentDriver = computed(
-  () =>
-    mockProfiles.find(
-      (p) =>
-        p.role === constants.value?.[ConstantKey.Role]?.DRIVER &&
-        p.status === constants.value?.[ConstantKey.UserStatus]?.ACTIVE
-    ) || mockProfiles[2]
+
+const { data: historyData } = useAsyncData('driver-history-stats', () =>
+  driverService.getHistory({ limit: 100 })
 )
-// Vehicle stats from orders
+
 const vehicleStats = computed(() => {
-  const driverId = currentDriver.value?.id
-  const orders = mockOrders.filter((o) => o.driver_id === driverId)
-  const trips = orders.length
-  const distance = orders.reduce((sum, o) => {
+  const routes = historyData.value?.data?.data || []
+  const trips = routes.length
+  const distance = routes.reduce((sum, r) => {
     let seed = 0
-    for (let i = 0; i < o.id.length; i++) seed = (seed * 31 + o.id.charCodeAt(i)) >>> 0
+    const idStr = String(r.id)
+    for (let i = 0; i < idStr.length; i++) seed = (seed * 31 + idStr.charCodeAt(i)) >>> 0
     return sum + 4 + (seed % 18)
   }, 0)
   return { trips, distance, fuelEfficiency: 42.5, daysActive: 127 }

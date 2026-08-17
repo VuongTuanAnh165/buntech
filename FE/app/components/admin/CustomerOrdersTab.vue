@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Order } from '~/utils/types'
+import type { AdminOrderDTO } from '~/services/adminOrderService'
 defineProps<{
-  orders: Order[]
+  orders: AdminOrderDTO[]
 }>()
 </script>
 <template>
@@ -10,9 +10,9 @@ defineProps<{
       :columns="[
         { accessorKey: 'id', header: 'Mã đơn' },
         { accessorKey: 'status', header: 'Trạng thái' },
-        { accessorKey: 'total', header: 'Tổng tiền', class: 'text-right' },
-        { accessorKey: 'amount_collected', header: 'Đã thu', class: 'text-right' },
-        { accessorKey: 'created_at', header: 'Ngày đặt' }
+        { accessorKey: 'totalAmount', header: 'Tổng tiền', class: 'text-right' },
+        { accessorKey: 'amountCollected', header: 'Đã thu', class: 'text-right' },
+        { accessorKey: 'createdAt', header: 'Ngày đặt' }
       ]"
       :rows="orders as unknown as Record<string, unknown>[]"
       empty-title="Chưa có đơn hàng"
@@ -32,26 +32,26 @@ defineProps<{
       <template #status-cell="{ row }">
         <BaseStatusBadge type="order" :status="row.status as string" />
       </template>
-      <template #total-cell="{ row }">
+      <template #totalAmount-cell="{ row }">
         <span class="text-surface-foreground font-medium tabular-nums">{{
-          formatVND(Number(row.total))
+          formatVND(Number(row.totalAmount))
         }}</span>
       </template>
-      <template #amount_collected-cell="{ row }">
+      <template #amountCollected-cell="{ row }">
         <span
           :class="[
             'tabular-nums',
-            Number(row.amount_collected) > 0
+            Number(row.amountCollected) > 0
               ? 'text-success-600 dark:text-success-400'
               : 'text-slate-400 dark:text-zinc-500'
           ]"
         >
-          {{ formatVND(Number(row.amount_collected)) }}
+          {{ formatVND(Number(row.amountCollected)) }}
         </span>
       </template>
-      <template #created_at-cell="{ row }">
+      <template #createdAt-cell="{ row }">
         <span class="text-slate-500 dark:text-zinc-400">{{
-          formatDate(row.created_at as string)
+          formatDate(row.createdAt as string)
         }}</span>
       </template>
     </BaseDataTable>

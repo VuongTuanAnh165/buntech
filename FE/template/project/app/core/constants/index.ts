@@ -1,9 +1,0 @@
-export const DATE_FORMAT = 'DD/MM/YYYY'
-export const DATETIME_FORMAT = 'DD/MM/YYYY HH:mm'
-export const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
-export const MAX_FILE_SIZE_BLOG = 5 * 1024 * 1024 // 5MB
-export const PHONE_REGEX = /^(0[0-9]{9,10})$/
-export const DEBOUNCE_SEARCH = 300
-export const ROWS_PER_PAGE_OPTIONS = [10, 20, 50]
-export const MAX_PAGINATION_LIMIT = 100
-export const VND_CURRENCY = 'VND'
