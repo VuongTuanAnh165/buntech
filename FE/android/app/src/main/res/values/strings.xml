@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BunTech</string>
+    <string name="title_activity_main">BunTech</string>
+    <string name="package_name">com.buntech.app</string>
+    <string name="custom_url_scheme">com.buntech.app</string>
+</resources>

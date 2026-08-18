@@ -164,11 +164,17 @@ useHead(() => ({
     </nav>
 
     <!-- Error -->
-    <AppErrorState
-      v-if="error"
-      message="Không tìm thấy sản phẩm"
-      @retry="navigateTo('/products')"
-    />
+    <div v-if="error" class="py-8 text-center">
+      <EmptyState
+        title="Lỗi"
+        description="Không tìm thấy sản phẩm"
+        icon="i-lucide-alert-circle"
+        color="error"
+      />
+      <UButton class="mt-4" color="primary" @click="navigateTo('/products')">
+        Quay lại danh sách
+      </UButton>
+    </div>
 
     <!-- Loading -->
     <template v-else-if="loading">
@@ -497,7 +503,7 @@ useHead(() => ({
             >
               <div class="mb-2 flex items-start justify-between">
                 <div class="flex items-center gap-3">
-                  <AppAvatar :name="review.user?.fullName || 'Khách'" size="sm" />
+                  <UAvatar :alt="review.user?.fullName || 'Khách'" size="sm" />
                   <div>
                     <p class="text-surface-foreground font-medium">
                       {{ review.user?.fullName || 'Khách' }}

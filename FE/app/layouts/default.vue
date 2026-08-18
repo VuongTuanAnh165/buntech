@@ -131,8 +131,8 @@ onUnmounted(() => {
                     }
                   "
                 >
-                  <AppAvatar
-                    :name="authStore.user?.fullName"
+                  <UAvatar
+                    :alt="authStore.user?.fullName"
                     :src="authStore.user?.profile?.avatarUrl"
                     size="sm"
                   />

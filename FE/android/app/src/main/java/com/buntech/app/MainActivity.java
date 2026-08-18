@@ -1,0 +1,5 @@
+package com.buntech.app;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {}

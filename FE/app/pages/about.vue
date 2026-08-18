@@ -357,7 +357,7 @@ const toggleFaq = (index: number) => {
             <div
               class="from-primary-100 to-primary-50 dark:from-primary-900/30 dark:to-primary-800/10 ring-primary-100 dark:ring-primary-900/30 mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br ring-1"
             >
-              <AppAvatar :name="member.name" size="lg" />
+              <UAvatar :alt="member.name" size="lg" />
             </div>
             <h3 class="text-surface-foreground mb-0.5 font-semibold">{{ member.name }}</h3>
             <p class="text-primary-600 dark:text-primary-400 mb-2 text-sm font-medium">

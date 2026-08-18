@@ -80,6 +80,13 @@ export default defineNuxtConfig({
     }
   },
 
+  // --- Cấu hình Nitro ---
+  nitro: {
+    prerender: {
+      failOnError: false
+    }
+  },
+
   devtools: { enabled: true },
 
   runtimeConfig: {
