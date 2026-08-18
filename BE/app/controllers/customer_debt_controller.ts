@@ -1,8 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import UserProfile from '#models/user_profile'
-import { DateTime } from 'luxon'
+import { inject } from '@adonisjs/core'
+import CustomerDebtService from '#services/customer_debt_service'
 
+@inject()
 export default class CustomerDebtController {
+  constructor(protected customerDebtService: CustomerDebtService) {}
+
   /**
    * @index
    * @summary Xem công nợ
@@ -11,20 +14,12 @@ export default class CustomerDebtController {
    */
   async index({ response, auth }: HttpContext) {
     const userId = auth.user!.id
-    const profile = await UserProfile.query().where('user_id', userId).first()
-
-    const currentDebt = profile?.currentDebt ? Number(profile.currentDebt) : 0
-    const debtLimit = profile?.debtLimit ? Number(profile.debtLimit) : 0
+    const data = await this.customerDebtService.getDebtInfo(userId)
 
     return response.ok({
       success: true,
       message: 'Lấy thông tin công nợ thành công',
-      data: {
-        currentDebt,
-        debtLimit,
-        currency: 'VND',
-        updatedAt: profile?.updatedAt?.toISO() || DateTime.now().toISO(),
-      },
+      data,
     })
   }
 }

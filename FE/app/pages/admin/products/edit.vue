@@ -35,7 +35,7 @@ const formState = reactive({
   isActive: true
 })
 
-const formErrors = reactive<Record<string, string>>({})
+const { formErrors, formRef, validate } = useZodForm(schema)
 const submitting = ref(false)
 
 const schema = z.object({
@@ -129,22 +129,19 @@ function removeNewGalleryImage(index: number) {
 
 // ─── Save ─────────────────────────────────────────────────
 async function handleSave() {
-  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-  Object.keys(formErrors).forEach((key) => delete formErrors[key as keyof typeof formErrors])
-
-  const parseResult = schema.safeParse({
+  const dataToValidate = {
     ...formState,
     categoryId: Number(formState.categoryId),
     basePrice: Number(formState.basePrice)
-  })
+  }
 
-  if (!parseResult.success) {
-    parseResult.error.issues.forEach((e: import('zod').ZodIssue) => {
-      if (e.path[0]) formErrors[e.path[0].toString()] = e.message
-    })
+  if (!validate(dataToValidate)) {
     toast.add({ title: 'Vui lòng kiểm tra lại thông tin', color: 'warning' })
     return
   }
+
+  const parseResult = schema.safeParse(dataToValidate)
+  if (!parseResult.success) return
 
   submitting.value = true
   try {

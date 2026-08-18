@@ -30,7 +30,7 @@ export default class FileUploadService {
     const results = await Promise.allSettled(uploadPromises)
 
     const successfulUploads: Array<{ url: string; key: string }> = []
-    const errors: any[] = []
+    const errors: Error[] = []
 
     for (const result of results) {
       if (result.status === 'fulfilled') {

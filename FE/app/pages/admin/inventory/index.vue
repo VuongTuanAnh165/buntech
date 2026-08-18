@@ -166,36 +166,7 @@ const state = reactive({
   unit: ''
 })
 
-const formErrors = reactive<Record<string, string>>({})
-const formRef = ref({
-  setErrors: (errors: { path: string; message: string }[]) => {
-    for (const key of Object.keys(formErrors)) {
-      formErrors[key] = ''
-    }
-    errors.forEach((e) => {
-      formErrors[e.path] = e.message
-    })
-  },
-  clearErrors: () => {
-    for (const key of Object.keys(formErrors)) {
-      formErrors[key] = ''
-    }
-  }
-})
-
-const validateForm = () => {
-  formRef.value.clearErrors()
-  const result = formSchema.safeParse(state)
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => ({
-      path: issue.path[0]?.toString() || '',
-      message: issue.message
-    }))
-    formRef.value.setErrors(errors)
-    return false
-  }
-  return true
-}
+const { formErrors, formRef, validate: validateForm } = useZodForm(formSchema)
 
 const { handleSubmit, isSubmitting: formLoading } = useFormSubmit()
 
@@ -220,7 +191,7 @@ const submitData = handleSubmit(
 )
 
 const handleFormSubmit = () => {
-  if (validateForm()) {
+  if (validateForm(state)) {
     submitData(state)
   }
 }

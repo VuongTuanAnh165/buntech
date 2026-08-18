@@ -24,33 +24,7 @@ const schema = z.object({
   note: z.string().optional()
 })
 
-const formErrors = ref<Record<string, string>>({})
-
-const formRef = ref({
-  setErrors: (errors: { path: string; message: string }[]) => {
-    formErrors.value = {}
-    errors.forEach((e) => {
-      formErrors.value[e.path] = e.message
-    })
-  },
-  clearErrors: () => {
-    formErrors.value = {}
-  }
-})
-
-const validateForm = () => {
-  formRef.value.clearErrors()
-  const result = schema.safeParse(state)
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => ({
-      path: issue.path[0]?.toString() || '',
-      message: issue.message
-    }))
-    formRef.value.setErrors(errors)
-    return false
-  }
-  return true
-}
+const { formErrors, formRef, validate: validateForm } = useZodForm(schema)
 
 // ─── Data Fetching ────────────────────────────────────────
 const { data: usersResponse } = useAsyncData('debt-customers', async () => {
@@ -107,7 +81,7 @@ const payDebtAction = handleSubmit(
 )
 
 const handleFormSubmit = () => {
-  if (validateForm()) {
+  if (validateForm(state)) {
     payDebtAction(state)
   }
 }

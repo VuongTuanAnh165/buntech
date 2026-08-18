@@ -31,19 +31,6 @@ const formState = reactive({
   ward: '',
   note: ''
 })
-const formErrors = ref<Record<string, string>>({})
-
-const formRef = ref({
-  setErrors: (errors: { path: string; message: string }[]) => {
-    formErrors.value = {}
-    errors.forEach((e) => {
-      formErrors.value[e.path] = e.message
-    })
-  },
-  clearErrors: () => {
-    formErrors.value = {}
-  }
-})
 
 const quickOrderSchema = z.object({
   name: requiredString('Họ tên').max(100, 'Họ tên không được vượt quá 100 ký tự'),
@@ -53,6 +40,8 @@ const quickOrderSchema = z.object({
   ward: requiredString('Phường/Xã').max(100),
   note: z.string().trim().optional()
 })
+
+const { formErrors, formRef, validate } = useZodForm(quickOrderSchema)
 
 const success = ref(false)
 const successOrderCode = ref('')
@@ -123,7 +112,6 @@ const clearCart = () => {
 }
 
 const validateForm = () => {
-  formRef.value.clearErrors()
   if (website_url.value) {
     return false // Honeypot trap
   }
@@ -131,16 +119,7 @@ const validateForm = () => {
     toast.add({ title: 'Thất bại', description: 'Giỏ hàng trống', color: 'error' })
     return false
   }
-  const result = quickOrderSchema.safeParse(formState)
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => ({
-      path: issue.path[0]?.toString() || '',
-      message: issue.message
-    }))
-    formRef.value.setErrors(errors)
-    return false
-  }
-  return true
+  return validate(formState)
 }
 
 const { handleSubmit, isSubmitting: submitting } = useFormSubmit()

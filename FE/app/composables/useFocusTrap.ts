@@ -1,4 +1,4 @@
-import { ref, onUnmounted, type Ref } from 'vue'
+import type { Ref } from 'vue'
 
 export function useFocusTrap(containerRef: Ref<HTMLElement | null>) {
   const isActive = ref(false)

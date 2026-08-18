@@ -1,6 +1,8 @@
+import { inject } from '@adonisjs/core'
 import drive from '@adonisjs/drive/services/main'
 import logger from '@adonisjs/core/services/logger'
 
+@inject()
 export default class MediaService {
   /**
    * Quét chuỗi HTML để tìm các ảnh Tmp, chuyển chúng sang thư mục Images chính thức,

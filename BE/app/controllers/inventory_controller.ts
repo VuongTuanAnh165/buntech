@@ -6,6 +6,7 @@ import {
   exportInventoryValidator,
   lossReportValidator,
 } from '#validators/inventory_validator'
+import { paginationValidator } from '#validators/pagination'
 
 @inject()
 export default class InventoryController {
@@ -82,8 +83,10 @@ export default class InventoryController {
    * @responseBody 200 - {"success": true, "message": "String", "data": [{ "id": "Number", "type": "String", "quantity": "Number", "rawMaterial": { "id": "Number", "name": "String" } }]}
    */
   async history({ request, response }: HttpContext) {
-    const limit = request.input('limit', 10)
-    const data = await this.inventoryService.getHistory(limit)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
+    const data = await this.inventoryService.getHistory(page, limit)
 
     return response.ok({
       success: true,

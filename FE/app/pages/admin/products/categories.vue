@@ -53,7 +53,7 @@ const formState = reactive({
   description: ''
 })
 
-const formErrors = reactive<Record<string, string>>({})
+const { formErrors, formRef, validate } = useZodForm(schema)
 
 const schema = z.object({
   name: z.string().min(1, 'Tên danh mục không được để trống').max(100, 'Tên không quá 100 ký tự'),
@@ -112,8 +112,7 @@ function openAdd() {
   formState.description = ''
   clearImage()
 
-  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-  Object.keys(formErrors).forEach((k) => delete formErrors[k])
+  formRef.value.clearErrors()
   showModal.value = true
 }
 
@@ -128,21 +127,14 @@ function openEdit(cat: ProductCategory) {
     previewUrl.value = getImageUrl(cat.thumbnailUrl)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-  Object.keys(formErrors).forEach((k) => delete formErrors[k])
+  formRef.value.clearErrors()
   showModal.value = true
 }
 
 async function handleSave() {
-  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-  Object.keys(formErrors).forEach((k) => delete formErrors[k])
+  if (!validate(formState)) return
   const result = schema.safeParse(formState)
-  if (!result.success) {
-    result.error.issues.forEach((e: import('zod').ZodIssue) => {
-      if (e.path[0]) formErrors[e.path[0].toString()] = e.message
-    })
-    return
-  }
+  if (!result.success) return
 
   isSubmitting.value = true
   try {

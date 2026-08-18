@@ -19,33 +19,7 @@ const state = reactive({
 
 type Schema = z.output<typeof resetPasswordSchema>
 
-const formErrors = reactive<Record<string, string>>({})
-
-const formRef = ref({
-  setErrors: (errors: { path: string; message: string }[]) => {
-    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
-    errors.forEach((e) => {
-      formErrors[e.path] = e.message
-    })
-  },
-  clearErrors: () => {
-    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
-  }
-})
-
-const validateForm = () => {
-  formRef.value.clearErrors()
-  const result = resetPasswordSchema.safeParse(state)
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => ({
-      path: issue.path[0]?.toString() || '',
-      message: issue.message
-    }))
-    formRef.value.setErrors(errors)
-    return false
-  }
-  return true
-}
+const { formErrors, formRef, validate: validateForm } = useZodForm(resetPasswordSchema)
 
 const { handleSubmit, isSubmitting: loading } = useFormSubmit()
 const handleResetPassword = handleSubmit(
@@ -68,7 +42,7 @@ const handleResetPassword = handleSubmit(
 )
 
 const handleFormSubmit = () => {
-  if (validateForm()) {
+  if (validateForm(state)) {
     handleResetPassword(state)
   }
 }

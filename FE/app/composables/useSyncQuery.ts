@@ -1,5 +1,4 @@
-import type { ref } from 'vue'
-import { watch } from 'vue'
+import type { Ref } from 'vue'
 
 export function useSyncQuery(params: {
   search?: ReturnType<typeof ref<string>>

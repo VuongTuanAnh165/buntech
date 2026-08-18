@@ -4,24 +4,67 @@ import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import { OrderStatus } from '#enums/order_status'
 
+interface DashboardFilters {
+  startDate?: Date
+  endDate?: Date
+}
+
+interface TopBuyersFilters {
+  startDate?: Date
+  endDate?: Date
+  limit: number
+  sortBy: 'revenue' | 'quantity'
+}
+
+interface AggregateRow {
+  [key: string]: string | number | null
+}
+
+interface OrderStatusRow {
+  status: string
+  $extras: { count: string | number }
+}
+
+interface RevenueChartRow {
+  date: string
+  value: string | number
+  ordersCount: string | number
+}
+
+interface TopProductRow {
+  name: string
+  totalValue: string | number
+}
+
+interface TopBuyerRow {
+  userId: number
+  fullName: string
+  phoneNumber: string
+  totalRevenue: string | number
+  ordersCount: string | number
+  totalQuantity: string | number
+}
+
 @inject()
 export default class DashboardService {
   /**
+   * Parse Date object thành SQL Date string
+   */
+  private parseDate(d: Date): string {
+    return DateTime.fromJSDate(d).toSQLDate() as string
+  }
+
+  /**
    * Lấy dữ liệu tổng quan Dashboard
    */
-  async getOverview(filters: { startDate?: any; endDate?: any }) {
+  async getOverview(filters: DashboardFilters) {
     let orderQuery = Order.query().whereNot('status', OrderStatus.CANCELED)
 
-    const parseDate = (d: any) =>
-      d && typeof d.toSQLDate === 'function'
-        ? d.toSQLDate()
-        : DateTime.fromJSDate(new Date(d)).toSQLDate()
-
     if (filters.startDate) {
-      orderQuery.where('created_at', '>=', parseDate(filters.startDate) as string)
+      orderQuery.where('created_at', '>=', this.parseDate(filters.startDate))
     }
     if (filters.endDate) {
-      orderQuery.where('created_at', '<=', parseDate(filters.endDate) as string)
+      orderQuery.where('created_at', '<=', this.parseDate(filters.endDate))
     }
 
     const today = DateTime.now().toSQLDate() as string
@@ -53,10 +96,10 @@ export default class DashboardService {
       .limit(6)
 
     if (filters.startDate) {
-      topProductsQuery.where('orders.created_at', '>=', parseDate(filters.startDate) as string)
+      topProductsQuery.where('orders.created_at', '>=', this.parseDate(filters.startDate))
     }
     if (filters.endDate) {
-      topProductsQuery.where('orders.created_at', '<=', parseDate(filters.endDate) as string)
+      topProductsQuery.where('orders.created_at', '<=', this.parseDate(filters.endDate))
     }
 
     // Chạy song song 9 query độc lập
@@ -79,16 +122,16 @@ export default class DashboardService {
       topProductsQuery,
     ])
 
-    const revenueResult = results[0][0] as any
-    const totalOrdersObj = results[1][0] as any
-    const orderStatuses = results[2] as any[]
-    const debtResult = results[3][0] as any
-    const revenueChartData = results[4] as any[]
-    const todayRevenueResult = results[5][0] as any
-    const todayOrdersObj = results[6][0] as any
-    const totalCustomersObj = results[7][0] as any
-    const totalProductsObj = results[8][0] as any
-    const topProductsData = results[9] as any[]
+    const revenueResult = results[0][0] as AggregateRow
+    const totalOrdersObj = results[1][0] as AggregateRow & { $extras?: AggregateRow }
+    const orderStatuses = results[2] as OrderStatusRow[]
+    const debtResult = results[3][0] as AggregateRow
+    const revenueChartData = results[4] as RevenueChartRow[]
+    const todayRevenueResult = results[5][0] as AggregateRow
+    const todayOrdersObj = results[6][0] as AggregateRow & { $extras?: AggregateRow }
+    const totalCustomersObj = results[7][0] as AggregateRow & { $extras?: AggregateRow }
+    const totalProductsObj = results[8][0] as AggregateRow & { $extras?: AggregateRow }
+    const topProductsData = results[9] as TopProductRow[]
 
     const totalRevenue = revenueResult?.totalRevenue || 0
     const totalOrders = totalOrdersObj?.$extras?.totalOrders ?? totalOrdersObj?.totalOrders ?? 0
@@ -127,27 +170,17 @@ export default class DashboardService {
   /**
    * Lấy danh sách Top Khách Hàng mua nhiều nhất
    */
-  async getTopBuyers(filters: {
-    startDate?: any
-    endDate?: any
-    limit: number
-    sortBy: 'revenue' | 'quantity'
-  }) {
-    const parseDate = (d: any) =>
-      d && typeof d.toSQLDate === 'function'
-        ? d.toSQLDate()
-        : DateTime.fromJSDate(new Date(d)).toSQLDate()
-
+  async getTopBuyers(filters: TopBuyersFilters) {
     let dateCondition = ''
     const dateBindings: string[] = []
 
     if (filters.startDate) {
       dateCondition += ' AND created_at >= ?'
-      dateBindings.push(parseDate(filters.startDate) as string)
+      dateBindings.push(this.parseDate(filters.startDate))
     }
     if (filters.endDate) {
       dateCondition += ' AND created_at <= ?'
-      dateBindings.push(parseDate(filters.endDate) as string)
+      dateBindings.push(this.parseDate(filters.endDate))
     }
 
     let dateConditionOrders = ''
@@ -155,11 +188,11 @@ export default class DashboardService {
 
     if (filters.startDate) {
       dateConditionOrders += ' AND o.created_at >= ?'
-      dateBindingsOrders.push(parseDate(filters.startDate) as string)
+      dateBindingsOrders.push(this.parseDate(filters.startDate))
     }
     if (filters.endDate) {
       dateConditionOrders += ' AND o.created_at <= ?'
-      dateBindingsOrders.push(parseDate(filters.endDate) as string)
+      dateBindingsOrders.push(this.parseDate(filters.endDate))
     }
 
     const query = db
@@ -170,10 +203,10 @@ export default class DashboardService {
           .whereRaw('orders.user_id = users.id')
           .where('status', OrderStatus.DELIVERED)
         if (filters.startDate) {
-          q.where('created_at', '>=', parseDate(filters.startDate) as string)
+          q.where('created_at', '>=', this.parseDate(filters.startDate))
         }
         if (filters.endDate) {
-          q.where('created_at', '<=', parseDate(filters.endDate) as string)
+          q.where('created_at', '<=', this.parseDate(filters.endDate))
         }
       })
       .select(
@@ -202,7 +235,7 @@ export default class DashboardService {
 
     query.limit(filters.limit)
 
-    const result = await query
+    const result = (await query) as TopBuyerRow[]
 
     return result.map((row) => ({
       userId: row.userId,

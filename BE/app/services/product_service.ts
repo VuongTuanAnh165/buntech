@@ -349,13 +349,12 @@ export default class ProductService {
       }
 
       if (imageOrders && imageOrders.length > 0) {
-        const updatePromises = imageOrders.map((item) =>
-          ProductImage.query({ client: trx })
+        for (const item of imageOrders) {
+          await ProductImage.query({ client: trx })
             .where('id', item.id)
             .where('productId', product.id)
             .update({ displayOrder: item.order })
-        )
-        await Promise.all(updatePromises)
+        }
       }
 
       await trx.commit()

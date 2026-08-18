@@ -162,39 +162,13 @@ const editForm = reactive({
   phone: ''
 })
 
-const formErrors = reactive<Record<string, string>>({})
-
-const formRef = ref({
-  setErrors: (errors: { path: string; message: string }[]) => {
-    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
-    errors.forEach((e) => {
-      formErrors[e.path] = e.message
-    })
-  },
-  clearErrors: () => {
-    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
-  }
-})
+const { formErrors, formRef, validate: validateForm } = useZodForm(updateProfileSchema)
 
 function openEdit() {
   editForm.fullName = user.value?.fullName || ''
   editForm.phone = user.value?.phoneNumber || ''
-  Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
-  showEditModal.value = true
-}
-
-const validateForm = () => {
   formRef.value.clearErrors()
-  const result = updateProfileSchema.safeParse(editForm)
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => ({
-      path: issue.path[0]?.toString() || '',
-      message: issue.message
-    }))
-    formRef.value.setErrors(errors)
-    return false
-  }
-  return true
+  showEditModal.value = true
 }
 
 const { handleSubmit, isSubmitting: saving } = useFormSubmit()
@@ -218,7 +192,7 @@ const saveProfile = handleSubmit(
 )
 
 const handleFormSubmit = () => {
-  if (validateForm()) {
+  if (validateForm(editForm)) {
     saveProfile(editForm)
   }
 }

@@ -280,9 +280,9 @@ export default class AdminOrderService {
         .select('id', 'driver_id', 'route_order', 'status')
         .whereIn('id', orderIds)
 
-      const updatePromises = existingOrders.map((order) => {
+      for (const order of existingOrders) {
         const matchingInput = orders.find((o) => o.orderId === order.id)
-        if (!matchingInput) return Promise.resolve()
+        if (!matchingInput) continue
 
         order.driverId = driverId
         order.routeOrder = matchingInput.routeOrder
@@ -293,9 +293,8 @@ export default class AdminOrderService {
         }
 
         order.useTransaction(trx)
-        return order.save()
-      })
-      await Promise.all(updatePromises)
+        await order.save()
+      }
     })
   }
 }

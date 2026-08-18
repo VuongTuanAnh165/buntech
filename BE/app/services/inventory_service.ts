@@ -4,6 +4,7 @@ import InventoryLog from '#models/inventory_log'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import { InventoryType } from '#enums/inventory_type'
+import { Pagination, getSafeLimit } from '#enums/pagination'
 
 @inject()
 export default class InventoryService {
@@ -131,7 +132,7 @@ export default class InventoryService {
   /**
    * Lấy báo cáo hao hụt (Loss Report)
    */
-  async getLossReport(filters: { startDate?: any; endDate?: any }) {
+  async getLossReport(filters: { startDate?: Date; endDate?: Date }) {
     let exportDailyQuery = db
       .from('inventory_logs')
       .where('type', InventoryType.OUT)
@@ -163,7 +164,14 @@ export default class InventoryService {
     const [exportDaily, productDaily] = await Promise.all([exportDailyQuery, productDailyQuery])
 
     // Merge by date
-    const dailyMap = new Map<string, any>()
+    interface DailyLossEntry {
+      date: string
+      exported: number
+      delivered: number
+      loss: number
+      lossPercentage: number
+    }
+    const dailyMap = new Map<string, DailyLossEntry>()
     let totalMaterialExportedKg = 0
     let totalProductDeliveredKg = 0
 
@@ -229,12 +237,14 @@ export default class InventoryService {
   /**
    * Lấy lịch sử giao dịch kho
    */
-  async getHistory(limit: number = 10) {
+  async getHistory(page: number = 1, limit: number = Pagination.DEFAULT_LIMIT) {
+    const safeLimit = getSafeLimit(limit)
     return InventoryLog.query()
+      .select('id', 'material_id', 'type', 'quantity', 'reference_id', 'date', 'note', 'created_by', 'created_at')
       .preload('rawMaterial', (query) => {
         query.select('id', 'name', 'unit')
       })
       .orderBy('created_at', 'desc')
-      .limit(limit)
+      .paginate(page, safeLimit)
   }
 }

@@ -18,19 +18,6 @@ const perPage = ref(10)
 
 const replyTargetId = ref<number | null>(null)
 const replyState = reactive({ replyText: '' })
-const formErrors = ref<Record<string, string>>({})
-
-const formRef = ref({
-  setErrors: (errors: { path: string; message: string }[]) => {
-    formErrors.value = {}
-    errors.forEach((e) => {
-      formErrors.value[e.path] = e.message
-    })
-  },
-  clearErrors: () => {
-    formErrors.value = {}
-  }
-})
 
 const replySchema = z.object({
   replyText: z
@@ -39,19 +26,7 @@ const replySchema = z.object({
     .max(2000, 'Nội dung phản hồi không được vượt quá 2000 ký tự')
 })
 
-const validateForm = () => {
-  formRef.value.clearErrors()
-  const result = replySchema.safeParse(replyState)
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => ({
-      path: issue.path[0]?.toString() || '',
-      message: issue.message
-    }))
-    formRef.value.setErrors(errors)
-    return false
-  }
-  return true
-}
+const { formErrors, formRef, validate: validateForm } = useZodForm(replySchema)
 
 // ─── Data Fetching ──────────────────────────────────────
 const { data: statsRes, refresh: refreshStats } = useAsyncData('admin-review-stats', () =>
