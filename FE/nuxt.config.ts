@@ -1,5 +1,7 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+const isMobileBuild = process.env.npm_lifecycle_event === 'build:mobile'
+
 export default defineNuxtConfig({
+  ssr: !isMobileBuild,
   compatibilityDate: '2025-07-15',
 
   future: {
@@ -55,7 +57,7 @@ export default defineNuxtConfig({
         'object-src': ["'none'"],
         'script-src-attr': ["'none'"],
         'connect-src': ["'self'", 'https:', 'http:', 'capacitor:', 'ionic:'],
-        'upgrade-insecure-requests': process.env.NODE_ENV === 'production'
+        'upgrade-insecure-requests': process.env.NODE_ENV === 'production' && !isMobileBuild
       },
       xXSSProtection: '1; mode=block',
       xFrameOptions: 'DENY',
