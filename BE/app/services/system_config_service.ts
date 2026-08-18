@@ -1,6 +1,6 @@
 import { inject } from '@adonisjs/core'
 import SystemConfig from '#models/system_config'
-import { Pagination } from '#enums/pagination'
+import { Pagination, getSafeLimit } from '#enums/pagination'
 
 @inject()
 export default class SystemConfigService {
@@ -10,7 +10,7 @@ export default class SystemConfigService {
    * Get paginated list of system configs
    */
   async getConfigs(page: number = 1, limit: number = Pagination.DEFAULT_LIMIT, search?: string) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
+    const safeLimit = getSafeLimit(limit)
     const query = SystemConfig.query()
       .select('key', 'value', 'description', 'created_at')
       .orderBy('created_at', 'desc')

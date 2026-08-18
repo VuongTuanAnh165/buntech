@@ -4,6 +4,8 @@ import DriverOrderService from '#services/driver_order_service'
 import { deliverOrderValidator } from '#validators/driver_order_validator'
 import emitter from '@adonisjs/core/services/emitter'
 
+import { paginationValidator } from '#validators/pagination'
+import { Pagination } from '#enums/pagination'
 import { formatPagination } from '#utils/pagination'
 import AdminOrderService from '#services/admin_order_service'
 import { OrderStatus } from '#enums/order_status'
@@ -47,11 +49,15 @@ export default class DriverOrdersController {
    * @responseBody 200 - <PaginatedOrderListResponse>
    */
   async history({ request, response, auth }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
     const driverId = auth.user!.id
 
-    const orders = await this.adminOrderService.getOrders(page, limit, {
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const orders = await this.adminOrderService.getOrders(pageNum, limitNum, {
       driverId,
       status: OrderStatus.DELIVERED,
     })

@@ -4,7 +4,7 @@ import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import { OrderSource } from '#enums/order_source'
 import { OrderStatus } from '#enums/order_status'
-import { Pagination } from '#enums/pagination'
+import { Pagination, getSafeLimit } from '#enums/pagination'
 import { inject } from '@adonisjs/core'
 import { Exception } from '@adonisjs/core/exceptions'
 import OrderCalculatorService from '#services/order_calculator_service'
@@ -85,7 +85,7 @@ export default class AdminOrderService {
   ) {
     const query = this._buildQuery(filters)
 
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
+    const safeLimit = getSafeLimit(limit)
     return query.paginate(page, safeLimit)
   }
 
@@ -137,7 +137,9 @@ export default class AdminOrderService {
       )
       .preload('user', (q) => q.select('id', 'full_name', 'phone_number'))
       .preload('driver', (q) => q.select('id', 'full_name', 'phone_number'))
-      .preload('shippingAddress')
+      .preload('shippingAddress', (q) =>
+        q.select('id', 'user_id', 'province', 'ward', 'address_line', 'is_default')
+      )
       .preload('items', (q) => {
         q.select('id', 'order_id', 'product_id', 'quantity', 'unit_price').preload(
           'product',

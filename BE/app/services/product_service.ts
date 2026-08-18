@@ -2,7 +2,7 @@ import Product from '#models/product'
 import ProductImage from '#models/product_image'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
-import { Pagination } from '#enums/pagination'
+import { getSafeLimit } from '#enums/pagination'
 import { type createProductValidator, type updateProductValidator } from '#validators/product'
 import db from '@adonisjs/lucid/services/db'
 import logger from '@adonisjs/core/services/logger'
@@ -77,7 +77,7 @@ export default class ProductService {
     limit: number = 10,
     filters?: { search?: string; status?: string; categoryId?: number }
   ) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const safeLimit = getSafeLimit(limit)
     const query = Product.query()
       .select(
         'id',
@@ -118,7 +118,7 @@ export default class ProductService {
     limit: number = 10,
     filters?: { categoryId?: number; search?: string; sortBy?: string }
   ) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const safeLimit = getSafeLimit(limit)
     const query = Product.query()
       .select(
         'id',
@@ -385,7 +385,7 @@ export default class ProductService {
     limit: number = 10,
     filters?: { categoryId?: number; search?: string }
   ) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const safeLimit = getSafeLimit(limit)
     const query = Product.query()
       .select(
         'products.id',

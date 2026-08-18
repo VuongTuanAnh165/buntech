@@ -1,6 +1,6 @@
 import { inject } from '@adonisjs/core'
 import RawMaterial from '#models/raw_material'
-import { Pagination } from '#enums/pagination'
+import { Pagination, getSafeLimit } from '#enums/pagination'
 
 @inject()
 export default class RawMaterialService {
@@ -20,7 +20,7 @@ export default class RawMaterialService {
       query.whereILike('name', `%${search}%`)
     }
 
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
+    const safeLimit = getSafeLimit(limit)
     return query.paginate(page, safeLimit)
   }
 

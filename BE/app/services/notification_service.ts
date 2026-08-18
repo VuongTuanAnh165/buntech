@@ -1,5 +1,5 @@
 import Notification from '#models/notification'
-import { Pagination } from '#enums/pagination'
+import { Pagination, getSafeLimit } from '#enums/pagination'
 import { inject } from '@adonisjs/core'
 
 @inject()
@@ -22,7 +22,7 @@ export default class NotificationService {
       query.where('is_read', false)
     }
 
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
+    const safeLimit = getSafeLimit(limit)
     return query.paginate(page, safeLimit)
   }
 

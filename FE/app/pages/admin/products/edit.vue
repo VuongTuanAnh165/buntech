@@ -35,9 +35,6 @@ const formState = reactive({
   isActive: true
 })
 
-const { formErrors, formRef, validate } = useZodForm(schema)
-const submitting = ref(false)
-
 const schema = z.object({
   name: z.string().min(1, 'Vui lòng nhập tên sản phẩm').max(191, 'Tối đa 191 ký tự'),
   categoryId: z.number().min(1, 'Danh mục không hợp lệ'),
@@ -47,6 +44,9 @@ const schema = z.object({
   content: z.string().optional().or(z.literal('')),
   isActive: z.boolean()
 })
+
+const { formErrors, formRef: _formRef, validate } = useZodForm(schema)
+const submitting = ref(false)
 
 // ─── Media State ─────────────────────────────────────────
 // Thumbnail

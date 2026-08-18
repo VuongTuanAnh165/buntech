@@ -7,6 +7,8 @@ import {
   changePasswordValidator,
   updateUserProfileValidator,
 } from '#validators/user_validator'
+import { paginationValidator } from '#validators/pagination'
+import { Pagination } from '#enums/pagination'
 import { formatPagination } from '#utils/pagination'
 
 @inject()
@@ -23,12 +25,16 @@ export default class UsersController {
    * @responseBody 200 - <PaginatedUserAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
     const role = request.input('role')
     const search = request.input('search')
 
-    const users = await this.userService.getUsers(page, limit, role, search)
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const users = await this.userService.getUsers(pageNum, limitNum, role, search)
 
     return response.ok({
       success: true,

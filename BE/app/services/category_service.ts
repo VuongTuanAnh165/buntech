@@ -1,7 +1,7 @@
 import Category from '#models/category'
 import type { Infer } from '@vinejs/vine/types'
 import { type createCategoryValidator, type updateCategoryValidator } from '#validators/category'
-import { Pagination } from '#enums/pagination'
+import { getSafeLimit } from '#enums/pagination'
 import FileUploadService from '#services/file_upload_service'
 import { inject } from '@adonisjs/core'
 import logger from '@adonisjs/core/services/logger'
@@ -17,7 +17,7 @@ export default class CategoryService {
    * Lấy danh sách phân trang (Cho Admin)
    */
   async paginate(page: number = 1, limit: number = 10) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const safeLimit = getSafeLimit(limit)
     return await Category.query()
       .select('id', 'name', 'slug', 'thumbnailUrl', 'createdAt', 'updatedAt')
       .paginate(page, safeLimit)

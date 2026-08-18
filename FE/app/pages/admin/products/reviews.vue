@@ -139,7 +139,7 @@ const submitReplyAction = handleSubmit(
 )
 
 const handleFormSubmit = async () => {
-  if (validateForm()) {
+  if (validateForm(replyState)) {
     await submitReplyAction(replyState)
   }
 }

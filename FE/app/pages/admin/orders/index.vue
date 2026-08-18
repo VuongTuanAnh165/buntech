@@ -9,6 +9,7 @@ import OrderListTable from '~/components/features/admin/orders/OrderListTable.vu
 import OrderKpiCards from '~/components/features/admin/orders/OrderKpiCards.vue'
 import OrderBatchAssignModal from '~/components/features/admin/orders/OrderBatchAssignModal.vue'
 import { useAdminSSE } from '~/composables/admin/useSSE'
+import { refDebounced } from '@vueuse/core'
 
 const { constants } = useMasterData()
 const toast = useToast()
@@ -24,14 +25,7 @@ const drivers = ref<UserDTO[]>([])
 
 // Filters
 const search = ref('')
-const searchDebounce = ref('')
-let searchTimeout: ReturnType<typeof setTimeout> | null = null
-watch(search, (val) => {
-  if (searchTimeout) clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    searchDebounce.value = val
-  }, 500)
-})
+const searchDebounce = refDebounced(search, 500)
 
 const statusFilter = ref<'ALL' | string>('ALL')
 const startDate = ref('')

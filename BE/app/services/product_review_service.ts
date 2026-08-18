@@ -4,7 +4,7 @@ import Product from '#models/product'
 import OrderItem from '#models/order_item'
 import db from '@adonisjs/lucid/services/db'
 import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
-import { Pagination } from '#enums/pagination'
+import { getSafeLimit } from '#enums/pagination'
 import type { Infer } from '@vinejs/vine/types'
 import {
   type createProductReviewValidator,
@@ -28,7 +28,7 @@ export default class ProductReviewService {
    * Client: Get approved reviews for a product
    */
   async clientList(productId: number, page: number = 1, limit: number = 10) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const safeLimit = getSafeLimit(limit)
 
     return await ProductReview.query()
       .where('productId', productId)
@@ -60,7 +60,7 @@ export default class ProductReviewService {
    * Admin: Get all reviews
    */
   async adminList(page: number = 1, limit: number = 10, status?: string) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const safeLimit = getSafeLimit(limit)
 
     const query = ProductReview.query()
       .select(

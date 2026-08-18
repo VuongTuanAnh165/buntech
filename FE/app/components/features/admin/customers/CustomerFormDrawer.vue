@@ -55,7 +55,7 @@ const state = reactive({
   role: ''
 })
 
-const formErrors = reactive<Record<string, string>>({})
+const { formErrors, formRef, validate: validateForm } = useZodForm(schema)
 
 watch(
   () => props.open,
@@ -72,36 +72,10 @@ watch(
         state.fullName = ''
         state.role = roleOptions.value[0]?.value || ''
       }
-      Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
+      formRef.value.clearErrors()
     }
   }
 )
-
-const formRef = ref({
-  setErrors: (errors: { path: string; message: string }[]) => {
-    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
-    errors.forEach((e) => {
-      formErrors[e.path] = e.message
-    })
-  },
-  clearErrors: () => {
-    Object.keys(formErrors).forEach((key) => (formErrors[key] = ''))
-  }
-})
-
-const validateForm = () => {
-  formRef.value.clearErrors()
-  const result = schema.value.safeParse(state)
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => ({
-      path: issue.path[0]?.toString() || '',
-      message: issue.message
-    }))
-    formRef.value.setErrors(errors)
-    return false
-  }
-  return true
-}
 
 const { isSubmitting, handleSubmit } = useFormSubmit()
 
@@ -141,7 +115,7 @@ const handleFormSubmit = () => {
     state.role = (state.role as { value: string }).value
   }
 
-  if (validateForm()) {
+  if (validateForm(state)) {
     onSubmit(state)
   }
 }

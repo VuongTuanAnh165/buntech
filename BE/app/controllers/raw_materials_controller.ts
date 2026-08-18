@@ -5,6 +5,8 @@ import {
   createRawMaterialValidator,
   updateRawMaterialValidator,
 } from '#validators/raw_material_validator'
+import { paginationValidator } from '#validators/pagination'
+import { Pagination } from '#enums/pagination'
 import { formatPagination } from '#utils/pagination'
 
 @inject()
@@ -21,11 +23,15 @@ export default class RawMaterialsController {
    * @responseBody 200 - <PaginatedRawMaterialListResponse>
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
     const search = request.input('search')
 
-    const rawMaterials = await this.rawMaterialService.getRawMaterials(page, limit, search)
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const rawMaterials = await this.rawMaterialService.getRawMaterials(pageNum, limitNum, search)
 
     return response.ok({
       success: true,

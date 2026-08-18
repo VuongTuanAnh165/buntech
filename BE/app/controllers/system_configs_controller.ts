@@ -5,6 +5,8 @@ import {
   createSystemConfigValidator,
   updateSystemConfigValidator,
 } from '#validators/system_config_validator'
+import { paginationValidator } from '#validators/pagination'
+import { Pagination } from '#enums/pagination'
 import { formatPagination } from '#utils/pagination'
 
 @inject()
@@ -20,10 +22,15 @@ export default class SystemConfigsController {
    * @responseBody 200 - <PaginatedSystemConfigListResponse>
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 100)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
     const search = request.input('search')
-    const configs = await this.systemConfigService.getConfigs(page, limit, search)
+
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const configs = await this.systemConfigService.getConfigs(pageNum, limitNum, search)
 
     return response.ok({
       success: true,

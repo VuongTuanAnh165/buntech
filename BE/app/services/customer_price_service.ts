@@ -2,7 +2,7 @@ import { inject } from '@adonisjs/core'
 import CustomerPrice from '#models/customer_price'
 import Product from '#models/product'
 import db from '@adonisjs/lucid/services/db'
-import { Pagination } from '#enums/pagination'
+import { Pagination, getSafeLimit } from '#enums/pagination'
 
 @inject()
 export default class CustomerPriceService {
@@ -10,7 +10,7 @@ export default class CustomerPriceService {
    * Get all custom prices for a specific user
    */
   async getUserPrices(userId: number, page: number = 1, limit: number = Pagination.DEFAULT_LIMIT) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const safeLimit = getSafeLimit(limit)
     return CustomerPrice.query()
       .select('id', 'userId', 'productId', 'customPrice', 'createdAt')
       .where('userId', userId)

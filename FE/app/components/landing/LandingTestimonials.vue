@@ -3,9 +3,7 @@ import { productReviewService } from '~/services/productReviewService'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 
-const { data } = await useAsyncData('featured-reviews', () =>
-  productReviewService.getFeaturedReviews()
-)
+const { data } = useAsyncData('featured-reviews', () => productReviewService.getFeaturedReviews())
 const apiReviews = computed(() => data.value?.data || [])
 
 const defaultTestimonials = [

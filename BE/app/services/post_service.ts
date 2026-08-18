@@ -1,7 +1,7 @@
 import Post from '#models/post'
 import { DateTime } from 'luxon'
 import type { Infer } from '@vinejs/vine/types'
-import { Pagination } from '#enums/pagination'
+import { getSafeLimit } from '#enums/pagination'
 import { type createPostValidator, type updatePostValidator } from '#validators/post'
 import FileUploadService from '#services/file_upload_service'
 import MediaService from '#services/media_service'
@@ -26,7 +26,7 @@ export default class PostService {
   ) {}
 
   async getList(page: number = 1, limit: number = 10, options?: GetPostListOptions) {
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT)
+    const safeLimit = getSafeLimit(limit)
     const query = Post.query()
       .select(
         'id',

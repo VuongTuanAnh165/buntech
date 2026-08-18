@@ -1,5 +1,3 @@
-import type { Ref } from 'vue'
-
 export function useSyncQuery(params: {
   search?: ReturnType<typeof ref<string>>
   sortBy?: ReturnType<typeof ref<string>>

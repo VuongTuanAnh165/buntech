@@ -7,6 +7,8 @@ import {
   batchAssignDriverValidator,
 } from '#validators/admin_order_validator'
 import emitter from '@adonisjs/core/services/emitter'
+import { paginationValidator } from '#validators/pagination'
+import { Pagination } from '#enums/pagination'
 import { formatPagination } from '#utils/pagination'
 import ExcelJS from 'exceljs'
 import { PassThrough } from 'node:stream'
@@ -30,8 +32,9 @@ export default class AdminOrdersController {
    * @responseBody 200 - <PaginatedOrderAdminListResponse>
    */
   async index({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
     const status = request.input('status')
     const userId = request.input('userId')
     const driverId = request.input('driverId')
@@ -39,7 +42,10 @@ export default class AdminOrdersController {
     const startDate = request.input('startDate')
     const endDate = request.input('endDate')
 
-    const orders = await this.adminOrderService.getOrders(page, limit, {
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const orders = await this.adminOrderService.getOrders(pageNum, limitNum, {
       status,
       userId,
       driverId,

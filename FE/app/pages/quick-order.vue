@@ -46,14 +46,11 @@ const { formErrors, formRef, validate } = useZodForm(quickOrderSchema)
 const success = ref(false)
 const successOrderCode = ref('')
 
-const { data: categoriesRes } = await useAsyncData('clientCategories', () =>
-  productService.getClientCategories()
-)
+const [{ data: categoriesRes }, { data: productsRes, pending: loading }] = await Promise.all([
+  useAsyncData('clientCategories', () => productService.getClientCategories()),
+  useAsyncData('clientProducts', () => productService.getClientProducts({ limit: 100 }))
+])
 const categories = computed(() => categoriesRes.value?.data || [])
-
-const { data: productsRes, pending: loading } = await useAsyncData('clientProducts', () =>
-  productService.getClientProducts({ limit: 100 })
-)
 const products = computed(() => productsRes.value?.data?.data || [])
 
 const availableProducts = computed(() => {

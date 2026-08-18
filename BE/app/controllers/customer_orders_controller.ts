@@ -3,6 +3,8 @@ import { inject } from '@adonisjs/core'
 import AdminOrderService from '#services/admin_order_service'
 import { createCustomerOrderValidator } from '#validators/customer_order_validator'
 import emitter from '@adonisjs/core/services/emitter'
+import { paginationValidator } from '#validators/pagination'
+import { Pagination } from '#enums/pagination'
 import { formatPagination } from '#utils/pagination'
 import CustomerPolicy from '#policies/customer_policy'
 
@@ -20,12 +22,16 @@ export default class CustomerOrdersController {
    * @responseBody 200 - <PaginatedOrderListResponse>
    */
   async index({ request, response, auth }: HttpContext) {
-    const page = request.input('page', 1)
-    const limit = request.input('limit', 20)
+    const { page, limit } = await request.validateUsing(paginationValidator, {
+      data: request.qs(),
+    })
     const status = request.input('status')
     const userId = auth.user!.id
 
-    const orders = await this.adminOrderService.getOrders(page, limit, {
+    const pageNum = page || Pagination.DEFAULT_PAGE
+    const limitNum = limit || Pagination.DEFAULT_LIMIT
+
+    const orders = await this.adminOrderService.getOrders(pageNum, limitNum, {
       status,
       userId,
     })

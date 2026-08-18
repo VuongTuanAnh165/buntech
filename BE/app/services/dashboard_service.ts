@@ -5,13 +5,13 @@ import { DateTime } from 'luxon'
 import { OrderStatus } from '#enums/order_status'
 
 interface DashboardFilters {
-  startDate?: Date
-  endDate?: Date
+  startDate?: DateTime
+  endDate?: DateTime
 }
 
 interface TopBuyersFilters {
-  startDate?: Date
-  endDate?: Date
+  startDate?: DateTime
+  endDate?: DateTime
   limit: number
   sortBy: 'revenue' | 'quantity'
 }
@@ -50,8 +50,8 @@ export default class DashboardService {
   /**
    * Parse Date object thành SQL Date string
    */
-  private parseDate(d: Date): string {
-    return DateTime.fromJSDate(d).toSQLDate() as string
+  private parseDate(d: DateTime): string {
+    return d.toSQLDate() as string
   }
 
   /**
@@ -123,8 +123,8 @@ export default class DashboardService {
     ])
 
     const revenueResult = results[0][0] as AggregateRow
-    const totalOrdersObj = results[1][0] as AggregateRow & { $extras?: AggregateRow }
-    const orderStatuses = results[2] as OrderStatusRow[]
+    const totalOrdersObj = results[1][0] as unknown as AggregateRow & { $extras?: AggregateRow }
+    const orderStatuses = results[2] as unknown as OrderStatusRow[]
     const debtResult = results[3][0] as AggregateRow
     const revenueChartData = results[4] as RevenueChartRow[]
     const todayRevenueResult = results[5][0] as AggregateRow

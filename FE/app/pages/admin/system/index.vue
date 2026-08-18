@@ -2,6 +2,7 @@
 import type { SystemConfig } from '~/utils/types'
 import { useSystemConfigs } from '~/composables/admin/useSystemConfigs'
 import SystemConfigFormDrawer from '~/components/features/admin/system/SystemConfigFormDrawer.vue'
+import { refDebounced } from '@vueuse/core'
 
 const { confirm } = useConfirmDialog()
 const { fetchConfigs, createConfig, updateConfig, deleteConfig } = useSystemConfigs()
@@ -15,15 +16,10 @@ const search = ref('')
 const page = ref(1)
 const limit = ref(10)
 const total = ref(0)
-const debouncedSearch = ref('')
-const searchTimeoutId = ref<ReturnType<typeof setTimeout>>()
+const debouncedSearch = refDebounced(search, 300)
 
-watch(search, (val) => {
-  clearTimeout(searchTimeoutId.value)
-  searchTimeoutId.value = setTimeout(() => {
-    debouncedSearch.value = val
-    page.value = 1
-  }, 300)
+watch(debouncedSearch, () => {
+  page.value = 1
 })
 
 const columns = [
@@ -64,10 +60,6 @@ watchEffect(() => {
 async function loadData() {
   await refresh()
 }
-
-onUnmounted(() => {
-  if (searchTimeoutId.value) clearTimeout(searchTimeoutId.value)
-})
 
 // ─── CRUD ────────────────────────────────────────────────────────
 const showDrawer = ref(false)

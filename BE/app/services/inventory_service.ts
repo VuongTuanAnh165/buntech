@@ -132,7 +132,7 @@ export default class InventoryService {
   /**
    * Lấy báo cáo hao hụt (Loss Report)
    */
-  async getLossReport(filters: { startDate?: Date; endDate?: Date }) {
+  async getLossReport(filters: { startDate?: DateTime; endDate?: DateTime }) {
     let exportDailyQuery = db
       .from('inventory_logs')
       .where('type', InventoryType.OUT)
@@ -153,12 +153,12 @@ export default class InventoryService {
       .orderBy('date', 'asc')
 
     if (filters.startDate) {
-      exportDailyQuery.where('created_at', '>=', filters.startDate)
-      productDailyQuery.where('orders.created_at', '>=', filters.startDate)
+      exportDailyQuery.where('created_at', '>=', filters.startDate.toSQLDate()!)
+      productDailyQuery.where('orders.created_at', '>=', filters.startDate.toSQLDate()!)
     }
     if (filters.endDate) {
-      exportDailyQuery.where('created_at', '<=', filters.endDate)
-      productDailyQuery.where('orders.created_at', '<=', filters.endDate)
+      exportDailyQuery.where('created_at', '<=', filters.endDate.toSQLDate()!)
+      productDailyQuery.where('orders.created_at', '<=', filters.endDate.toSQLDate()!)
     }
 
     const [exportDaily, productDaily] = await Promise.all([exportDailyQuery, productDailyQuery])
@@ -240,7 +240,17 @@ export default class InventoryService {
   async getHistory(page: number = 1, limit: number = Pagination.DEFAULT_LIMIT) {
     const safeLimit = getSafeLimit(limit)
     return InventoryLog.query()
-      .select('id', 'material_id', 'type', 'quantity', 'reference_id', 'date', 'note', 'created_by', 'created_at')
+      .select(
+        'id',
+        'material_id',
+        'type',
+        'quantity',
+        'reference_id',
+        'date',
+        'note',
+        'created_by',
+        'created_at'
+      )
       .preload('rawMaterial', (query) => {
         query.select('id', 'name', 'unit')
       })

@@ -53,12 +53,12 @@ const formState = reactive({
   description: ''
 })
 
-const { formErrors, formRef, validate } = useZodForm(schema)
-
 const schema = z.object({
   name: z.string().min(1, 'Tên danh mục không được để trống').max(100, 'Tên không quá 100 ký tự'),
   description: z.string().optional()
 })
+
+const { formErrors, formRef, validate } = useZodForm(schema)
 
 // Thumbnail
 const selectedFile = ref<File | null>(null)

@@ -3,7 +3,7 @@ import UserProfile from '#models/user_profile'
 import db from '@adonisjs/lucid/services/db'
 import { inject } from '@adonisjs/core'
 import FileUploadService from '#services/file_upload_service'
-import { Pagination } from '#enums/pagination'
+import { Pagination, getSafeLimit } from '#enums/pagination'
 import { CustomerType } from '#enums/customer_type'
 
 @inject()
@@ -35,7 +35,7 @@ export default class UserService {
       })
     }
 
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
+    const safeLimit = getSafeLimit(limit)
     return query.paginate(page, safeLimit)
   }
 

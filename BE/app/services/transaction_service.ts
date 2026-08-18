@@ -3,7 +3,7 @@ import Transaction from '#models/transaction'
 import UserProfile from '#models/user_profile'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
-import { Pagination } from '#enums/pagination'
+import { Pagination, getSafeLimit } from '#enums/pagination'
 import { TransactionType } from '#enums/transaction_type'
 
 @inject()
@@ -49,7 +49,7 @@ export default class TransactionService {
       })
     }
 
-    const safeLimit = Math.min(limit, Pagination.MAX_LIMIT || 100)
+    const safeLimit = getSafeLimit(limit)
     return query.paginate(page, safeLimit)
   }
 
