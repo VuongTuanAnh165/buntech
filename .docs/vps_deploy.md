@@ -11,7 +11,17 @@ Quy trình này chia làm 2 giai đoạn chính:
 
 ## Giai đoạn 1: Thiết lập Máy chủ (VPS)
 
-Sau khi thuê VPS, bạn sẽ có địa chỉ IP và mật khẩu của người dùng `root`. Hãy mở Terminal (trên Mac/Linux) hoặc PowerShell (trên Windows) và kết nối vào VPS:
+### 💡 Tư vấn Cấu hình VPS Cần Thuê
+Vì dự án BúnTech chạy đồng thời nhiều dịch vụ (Node.js cho Frontend Nuxt SSR, Node.js cho Backend AdonisJS, Database MySQL, Cache Redis, Web Server Nginx, và tiến trình chạy Build khi deploy), cấu hình VPS của bạn không nên quá thấp để tránh bị treo máy:
+
+- **Cấu hình tối thiểu (Minimum)**: `2 Core CPU` và `2GB RAM` (Vừa đủ chạy, nhưng lúc chạy lệnh `npm run build` cho Frontend có thể bị vọt RAM lên cao).
+- **Cấu hình khuyến nghị (Recommended)**: `2 Core CPU` và `4GB RAM` (Chạy mượt mà, hệ thống ổn định, giá thuê chỉ rơi vào khoảng 150.000đ - 200.000đ/tháng tại Việt Nam như Vietnix, BizflyCloud... hoặc 120.000đ/tháng nếu dùng nhà cung cấp nước ngoài như Hetzner, Contabo).
+- **Dung lượng ổ cứng**: Tối thiểu `30GB SSD`.
+- **Hệ điều hành (OS)**: Bắt buộc chọn **`Ubuntu 22.04 LTS`** hoặc **`Ubuntu 24.04 LTS`** (Bản dành cho Server, không có giao diện).
+
+---
+
+Sau khi thuê VPS, nhà cung cấp sẽ gửi cho bạn một địa chỉ IP công cộng (Public IP) và mật khẩu của tài khoản quản trị viên `root`. Hãy mở Terminal (trên Mac/Linux) hoặc Command Prompt / PowerShell (trên Windows) và kết nối vào VPS bằng lệnh:
 
 ```bash
 ssh root@<IP_CỦA_VPS>
