@@ -20,7 +20,6 @@ export const adminNavigationItems: NavigationMenuItem[][] = [
     {
       label: 'Sản phẩm',
       icon: 'i-lucide-package',
-      to: '/admin/products',
       children: [
         { label: 'Danh sách SP', to: '/admin/products' },
         { label: 'Danh mục', to: '/admin/products/categories' },
@@ -37,18 +36,14 @@ export const adminNavigationItems: NavigationMenuItem[][] = [
     {
       label: 'Kho / Nguyên liệu',
       icon: 'i-lucide-warehouse',
-      to: '/admin/inventory',
       children: [
         { label: 'Tồn kho', to: '/admin/inventory' },
-        { label: 'Nhập kho', to: '/admin/inventory/import' },
-        { label: 'Xuất kho', to: '/admin/inventory/export' },
         { label: 'Báo cáo hao hụt', to: '/admin/inventory/loss-report' }
       ]
     },
     {
       label: 'Blog',
       icon: 'i-lucide-file-text',
-      to: '/admin/blog',
       children: [
         { label: 'Bài viết', to: '/admin/blog' },
         { label: 'Danh mục', to: '/admin/blog/categories' }

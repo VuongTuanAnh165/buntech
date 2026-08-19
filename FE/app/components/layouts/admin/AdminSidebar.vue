@@ -8,6 +8,46 @@
 import { adminNavigationItems } from '~/utils/navigation'
 
 const { sidebarCollapsed, mobileSidebarOpen, toggleSidebar, closeMobile } = useAdminLayout()
+const route = useRoute()
+
+// Tự động mở menu con và active đúng menu khi ở các trang thêm/sửa
+const navItems = computed(() => {
+  return adminNavigationItems.map((group) => {
+    return group.map((item) => {
+      if (item.children) {
+        let activeChildTo = ''
+        const matchingChildren = item.children.filter((child) => {
+          const toPath = child.to as string
+          return route.path === toPath || route.path.startsWith(`${toPath}/`)
+        })
+        if (matchingChildren.length > 0) {
+          matchingChildren.sort((a, b) => (b.to as string).length - (a.to as string).length)
+          activeChildTo = matchingChildren[0].to as string
+        }
+
+        const mappedChildren = item.children.map((child) => ({
+          ...child,
+          active: child.to === activeChildTo
+        }))
+
+        return {
+          ...item,
+          children: mappedChildren,
+          defaultOpen: !!activeChildTo
+        }
+      } else if (item.to) {
+        const toPath = item.to as string
+        const isActive =
+          route.path === toPath || (toPath !== '/admin' && route.path.startsWith(`${toPath}/`))
+        return {
+          ...item,
+          active: isActive
+        }
+      }
+      return item
+    })
+  })
+})
 </script>
 
 <template>
@@ -49,8 +89,9 @@ const { sidebarCollapsed, mobileSidebarOpen, toggleSidebar, closeMobile } = useA
     <!-- Nav -->
     <nav class="flex-1 scrollbar-thin overflow-y-auto px-3 py-4">
       <UNavigationMenu
+        :key="route.path.split('/')[2] || 'dashboard'"
         orientation="vertical"
-        :items="adminNavigationItems"
+        :items="navItems"
         :collapsed="sidebarCollapsed"
         class="w-full"
       />
