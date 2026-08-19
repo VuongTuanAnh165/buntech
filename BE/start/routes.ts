@@ -107,6 +107,12 @@ router
       ])
       .use(middleware.auth())
 
+    // Public Customers (Distribution Map)
+    router.get('/public/customers', [
+      () => import('#controllers/public_customers_controller'),
+      'index',
+    ])
+
     // Quick Order
     router
       .post('/orders/quick', [() => import('#controllers/public_orders_controller'), 'quickOrder'])

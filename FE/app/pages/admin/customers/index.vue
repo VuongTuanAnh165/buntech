@@ -217,7 +217,11 @@ const handleDelete = async (row: UserDTO) => {
                 v-if="(row as UserDTO).phoneNumber"
                 class="text-surface-foreground flex items-center gap-1.5 tabular-nums"
               >
-                <span class="i-lucide-phone h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                <UIcon
+                  name="i-lucide-phone"
+                  class="h-3.5 w-3.5 text-slate-400"
+                  aria-hidden="true"
+                />
                 {{ (row as UserDTO).phoneNumber }}
               </span>
               <span v-else class="text-slate-400 dark:text-zinc-500">—</span>
@@ -257,7 +261,7 @@ const handleDelete = async (row: UserDTO) => {
             </template>
             <template #createdAt-cell="{ row }">
               <span class="flex items-center gap-1.5 text-slate-500 dark:text-zinc-400">
-                <span class="i-lucide-calendar-days h-3.5 w-3.5" aria-hidden="true" />
+                <UIcon name="i-lucide-calendar-days" class="h-3.5 w-3.5" aria-hidden="true" />
                 {{ formatDate((row as UserDTO).createdAt || new Date()) }}
               </span>
             </template>

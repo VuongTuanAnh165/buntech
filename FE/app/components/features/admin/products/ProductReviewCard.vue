@@ -44,8 +44,9 @@ const authorName = computed(() => {
           loading="lazy"
         />
         <div v-else class="flex h-full w-full items-center justify-center">
-          <span
-            class="i-lucide-message-square h-5 w-5 text-slate-300 dark:text-zinc-600"
+          <UIcon
+            name="i-lucide-message-square"
+            class="h-5 w-5 text-slate-300 dark:text-zinc-600"
             aria-hidden="true"
           />
         </div>
@@ -98,7 +99,7 @@ const authorName = computed(() => {
         >
           <div class="mb-1 flex items-center justify-between">
             <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400">
-              <span class="i-lucide-message-circle h-3.5 w-3.5" aria-hidden="true" />
+              <UIcon name="i-lucide-message-circle" class="h-3.5 w-3.5" aria-hidden="true" />
               <span class="font-medium"
                 >Phản hồi từ {{ props.review.replier?.fullName || 'BunTech' }}:</span
               >
@@ -117,7 +118,7 @@ const authorName = computed(() => {
           <span
             class="flex items-center gap-1 text-xs text-slate-400 tabular-nums dark:text-zinc-500"
           >
-            <span class="i-lucide-clock h-3 w-3" aria-hidden="true" />
+            <UIcon name="i-lucide-clock" class="h-3 w-3" aria-hidden="true" />
             {{ formatDate(props.review.createdAt) }}
           </span>
 
@@ -129,7 +130,7 @@ const authorName = computed(() => {
               class="text-success-600 dark:text-success-400 hover:bg-success-50 dark:hover:bg-success-900/20 flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
               @click="emit('approve', props.review, true)"
             >
-              <span class="i-lucide-check h-3.5 w-3.5" aria-hidden="true" /> Duyệt
+              <UIcon name="i-lucide-check" class="h-3.5 w-3.5" aria-hidden="true" /> Duyệt
             </UButton>
             <UButton
               v-else
@@ -138,7 +139,7 @@ const authorName = computed(() => {
               class="text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/20 flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
               @click="emit('approve', props.review, false)"
             >
-              <span class="i-lucide-x h-3.5 w-3.5" aria-hidden="true" /> Bỏ duyệt
+              <UIcon name="i-lucide-x" class="h-3.5 w-3.5" aria-hidden="true" /> Bỏ duyệt
             </UButton>
 
             <UButton
@@ -147,7 +148,7 @@ const authorName = computed(() => {
               class="text-secondary-600 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-900/20 flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
               @click="emit('reply', props.review)"
             >
-              <span class="i-lucide-message-square-text h-3.5 w-3.5" aria-hidden="true" />
+              <UIcon name="i-lucide-message-square-text" class="h-3.5 w-3.5" aria-hidden="true" />
               {{ props.review.replyContent ? 'Sửa phản hồi' : 'Phản hồi' }}
             </UButton>
 
@@ -157,7 +158,7 @@ const authorName = computed(() => {
               class="text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/20 flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
               @click="emit('delete', props.review)"
             >
-              <span class="i-lucide-trash-2 h-3.5 w-3.5" aria-hidden="true" /> Xóa
+              <UIcon name="i-lucide-trash-2" class="h-3.5 w-3.5" aria-hidden="true" /> Xóa
             </UButton>
           </div>
         </div>

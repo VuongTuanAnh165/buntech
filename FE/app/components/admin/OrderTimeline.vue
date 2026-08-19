@@ -67,7 +67,7 @@ const getStepDate = (index: number) => {
           <div
             class="bg-error-100 text-error-600 dark:bg-error-900/30 dark:text-error-400 z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white shadow-sm sm:h-10 sm:w-10 dark:border-zinc-900"
           >
-            <span class="i-lucide-x h-4 w-4 sm:h-5 sm:w-5" />
+            <UIcon name="i-lucide-x" class="h-4 w-4 sm:h-5 sm:w-5" />
           </div>
 
           <div class="ml-4 flex flex-col pt-1">

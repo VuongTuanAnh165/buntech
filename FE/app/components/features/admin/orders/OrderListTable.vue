@@ -74,7 +74,7 @@ function toggleSelectOrder(id: number, checked: boolean) {
             v-if="row.driver"
             class="flex items-center gap-1 truncate text-xs text-slate-500 dark:text-zinc-400"
           >
-            <span class="i-lucide-truck h-3 w-3" /> {{ row.driver?.fullName }}
+            <UIcon name="i-lucide-truck" class="h-3 w-3" /> {{ row.driver?.fullName }}
           </p>
         </div>
       </div>

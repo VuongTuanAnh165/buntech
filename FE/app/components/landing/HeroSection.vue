@@ -16,7 +16,7 @@ const heroImage =
         <div
           class="animate-fade-in mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur-md"
         >
-          <span class="i-lucide-sparkles h-4 w-4" aria-hidden="true" />
+          <UIcon name="i-lucide-sparkles" class="h-4 w-4" aria-hidden="true" />
           Xưởng bún truyền thống từ năm 1960
         </div>
         <h1
@@ -40,8 +40,9 @@ const heroImage =
           <NuxtLink to="/quick-order" class="block">
             <UButton color="primary" variant="solid" size="lg" class="group w-full sm:w-auto">
               Đặt hàng nhanh
-              <span
-                class="i-lucide-arrow-right h-5 w-5 transition-transform group-hover:translate-x-1"
+              <UIcon
+                name="i-lucide-arrow-right"
+                class="h-5 w-5 transition-transform group-hover:translate-x-1"
                 aria-hidden="true"
               />
             </UButton>

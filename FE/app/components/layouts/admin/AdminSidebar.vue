@@ -22,7 +22,7 @@ const navItems = computed(() => {
         })
         if (matchingChildren.length > 0) {
           matchingChildren.sort((a, b) => (b.to as string).length - (a.to as string).length)
-          activeChildTo = matchingChildren[0].to as string
+          activeChildTo = matchingChildren[0]?.to as string
         }
 
         const mappedChildren = item.children.map((child) => ({

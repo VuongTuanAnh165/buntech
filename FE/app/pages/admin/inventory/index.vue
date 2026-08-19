@@ -174,10 +174,8 @@ const submitData = handleSubmit(
   async (data: { name: string; unit: string }) => {
     if (isEditing.value && editId.value) {
       await rawMaterialService.updateRawMaterial(editId.value, data)
-      toast.add({ title: 'Cập nhật thành công', color: 'success' })
     } else {
       await rawMaterialService.createRawMaterial(data)
-      toast.add({ title: 'Thêm nguyên liệu thành công', color: 'success' })
     }
   },
   {
@@ -321,12 +319,10 @@ async function handleDelete(item: any) {
   if (confirmed) {
     try {
       await rawMaterialService.deleteRawMaterial(item.id)
-      toast.add({ title: `Đã xóa ${item.name}`, color: 'success' })
       refreshMaterials()
       refreshSummary()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      toast.add({ title: 'Có lỗi xảy ra', description: err.message, color: 'error' })
+    } catch {
+      // Handled globally
     }
   }
 }

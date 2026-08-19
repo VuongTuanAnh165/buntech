@@ -6,6 +6,7 @@ export interface UserProfileDTO {
   currentDebt: string | number
   zaloUserId: string | null
   customerType: string | null
+  isPublic?: boolean
 }
 
 export interface UserDTO {

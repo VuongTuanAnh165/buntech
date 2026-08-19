@@ -36,7 +36,14 @@ const route = useRoute()
         </NuxtLink>
       </nav>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2">
+        <UButton
+          to="/quick-order"
+          icon="i-lucide-shopping-cart"
+          variant="ghost"
+          color="neutral"
+          aria-label="Đặt hàng nhanh"
+        />
         <UColorModeButton />
         <NuxtLink
           to="/auth/customer/login"

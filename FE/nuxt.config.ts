@@ -130,5 +130,12 @@ export default defineNuxtConfig({
           '/': { swr: 3600 }, // Cache trang chủ 1 tiếng trên server
           '/gioi-thieu': { static: true }
         }
-      : {}
+      : {},
+
+  // --- Custom Vite Config for Leaflet ---
+  vite: {
+    optimizeDeps: {
+      include: ['leaflet', '@vue-leaflet/vue-leaflet']
+    }
+  }
 })

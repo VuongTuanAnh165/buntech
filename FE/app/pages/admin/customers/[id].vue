@@ -10,7 +10,7 @@ import { useUsers } from '~/composables/admin/useUsers'
 
 const { constants } = useMasterData()
 const route = useRoute()
-const { getUser, fetchAddresses } = useUsers()
+const { getUser, fetchAddresses, updateProfile } = useUsers()
 
 definePageMeta({ layout: 'admin' })
 
@@ -133,6 +133,34 @@ const statCards = computed(() => [
 ])
 
 const showCustomerEdit = ref(false)
+
+const isPublic = ref(customer.value?.profile?.isPublic ?? false)
+
+watch(
+  () => customer.value?.profile?.isPublic,
+  (newVal) => {
+    isPublic.value = newVal ?? false
+  }
+)
+
+const isTogglingPublic = ref(false)
+const handleTogglePublic = async (value: boolean) => {
+  isTogglingPublic.value = true
+  try {
+    isPublic.value = value // Optimistic UI update
+
+    await updateProfile(customerId, { isPublic: value })
+
+    // Sync backing data to avoid reverting if another part of the page refreshes
+    if (customerData.value?.data?.profile) {
+      customerData.value.data.profile.isPublic = value
+    }
+  } catch {
+    // Error handled globally by ApiClient
+  } finally {
+    isTogglingPublic.value = false
+  }
+}
 </script>
 
 <template>
@@ -205,7 +233,7 @@ const showCustomerEdit = ref(false)
             </div>
             <div class="mt-1.5 flex flex-wrap items-center gap-3">
               <span class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-zinc-400">
-                <span class="i-lucide-phone h-3.5 w-3.5" aria-hidden="true" />
+                <UIcon name="i-lucide-phone" class="h-3.5 w-3.5" aria-hidden="true" />
                 {{ customer.phoneNumber || 'Chưa có SĐT' }}
               </span>
               <span class="text-slate-300 dark:text-zinc-600">·</span>
@@ -232,14 +260,29 @@ const showCustomerEdit = ref(false)
                       : 'Khách hàng'
                 }}
               </UBadge>
+              <UBadge v-if="isPublic" color="info" variant="soft" icon="i-lucide-map-pin">
+                Hiển thị công khai
+              </UBadge>
             </div>
           </div>
-          <div class="flex flex-shrink-0 flex-col items-end gap-2">
+          <div class="flex flex-shrink-0 flex-col items-end gap-3">
             <div class="text-right">
               <p class="text-xs text-slate-500 dark:text-zinc-400">Hạn mức công nợ</p>
               <p class="text-surface-foreground text-xl font-bold tabular-nums">
                 {{ formatVND(debtLimit) }}
               </p>
+            </div>
+            <div
+              v-if="customer.role === 'customer' || customer.role === 'CUSTOMER'"
+              class="flex items-center gap-2"
+            >
+              <span class="text-xs text-slate-500 dark:text-zinc-400">Bản đồ công khai</span>
+              <USwitch
+                :model-value="isPublic"
+                :loading="isTogglingPublic"
+                size="sm"
+                @update:model-value="handleTogglePublic"
+              />
             </div>
           </div>
         </div>

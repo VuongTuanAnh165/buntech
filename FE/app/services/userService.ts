@@ -21,6 +21,7 @@ export type UpdateProfilePayload = {
   storeName?: string
   zaloUserId?: string
   avatarUrl?: string
+  isPublic?: boolean
 }
 
 export type CreateAddressPayload = {

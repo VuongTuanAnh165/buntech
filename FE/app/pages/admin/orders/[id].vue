@@ -189,13 +189,9 @@ async function assignDriver(payload: {
   try {
     await batchAssignDriver(payload)
     showAssignDriver.value = false
-    const toast = useToast()
-    toast.add({ title: 'Gán tài xế thành công', color: 'success' })
     refresh()
-  } catch (error) {
-    const err = error as Error
-    const toast = useToast()
-    toast.add({ title: 'Có lỗi xảy ra', description: err.message, color: 'error' })
+  } catch {
+    // Handled globally
   }
 }
 

@@ -39,5 +39,6 @@ export const updateUserProfileValidator = vine.compile(
     storeName: vine.string().trim().maxLength(191).optional(),
     zaloUserId: vine.string().trim().maxLength(191).optional(),
     avatarUrl: vine.string().trim().optional(),
+    isPublic: vine.boolean().optional(),
   })
 )

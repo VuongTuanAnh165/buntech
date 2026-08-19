@@ -41,7 +41,7 @@ const handleLogout = () => {
 const bottomNavItems = computed(() => [
   { label: t('nav.home'), to: '/', icon: Home },
   { label: t('nav.products'), to: '/products', icon: Package },
-  { label: t('customer.quickOrder'), to: '/quick-order', icon: ShoppingCart },
+  { label: 'Hệ thống Phân phối', to: '/distribution', icon: MapPin },
   { label: t('nav.news'), to: '/blog', icon: FileText },
   { label: t('nav.about'), to: '/about', icon: User }
 ])
@@ -93,6 +93,15 @@ onUnmounted(() => {
           </nav>
 
           <div class="flex items-center gap-1.5">
+            <UButton
+              to="/quick-order"
+              variant="ghost"
+              color="neutral"
+              class="text-surface-foreground hover:bg-surface-hover flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 transition-colors"
+              aria-label="Giỏ hàng"
+            >
+              <ShoppingCart class="h-5 w-5" aria-hidden="true" />
+            </UButton>
             <UButton
               variant="ghost"
               color="neutral"
@@ -236,9 +245,9 @@ onUnmounted(() => {
                 }}</NuxtLink>
               </li>
               <li>
-                <NuxtLink to="/quick-order" class="transition-colors hover:text-white">{{
-                  t('customer.quickOrder')
-                }}</NuxtLink>
+                <NuxtLink to="/distribution" class="transition-colors hover:text-white">
+                  Hệ thống Phân phối
+                </NuxtLink>
               </li>
               <li>
                 <NuxtLink to="/about" class="transition-colors hover:text-white">{{

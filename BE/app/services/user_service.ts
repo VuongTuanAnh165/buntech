@@ -5,6 +5,9 @@ import { inject } from '@adonisjs/core'
 import FileUploadService from '#services/file_upload_service'
 import { Pagination, getSafeLimit } from '#enums/pagination'
 import { CustomerType } from '#enums/customer_type'
+import { Role } from '#enums/role'
+import { OrderStatus } from '#enums/order_status'
+import { DateTime } from 'luxon'
 
 @inject()
 export default class UserService {
@@ -40,6 +43,40 @@ export default class UserService {
   }
 
   /**
+   * Get public customers for the distribution map page.
+   * Aggregates monthly order volume and last order date for gamification tiers.
+   */
+  async getPublicCustomers() {
+    const startOfMonth = DateTime.now().startOf('month').toSQL()
+
+    const users = await User.query()
+      .select('id', 'full_name', 'phone_number')
+      .where('role', Role.CUSTOMER)
+      .whereHas('profile', (q) => {
+        q.where('is_public', true)
+      })
+      .preload('profile', (q) => {
+        q.select('user_id', 'store_name', 'avatar_url')
+      })
+      .preload('addresses', (q) => {
+        q.select('id', 'user_id', 'province', 'ward', 'address_line', 'latitude', 'longitude')
+      })
+      .withAggregate('orders', (q) => {
+        q.sum('total_amount')
+          .where('status', OrderStatus.DELIVERED)
+          .andWhereRaw('created_at >= ?', [startOfMonth!])
+          .as('monthly_volume')
+      })
+      .withAggregate('orders', (q) => {
+        q.max('created_at').as('last_order_date')
+      })
+      .orderBy('monthly_volume', 'desc')
+      .limit(100)
+
+    return users
+  }
+
+  /**
    * Get single user by ID
    */
   async getUser(id: number) {
@@ -53,7 +90,8 @@ export default class UserService {
           'store_name',
           'debt_limit',
           'current_debt',
-          'zalo_user_id'
+          'zalo_user_id',
+          'is_public'
         )
       })
       .firstOrFail()
@@ -108,7 +146,7 @@ export default class UserService {
 
     if (data.customerType) {
       const profile = await UserProfile.query()
-        .select('id', 'customer_type')
+        .select('user_id', 'customer_type')
         .where('user_id', user.id)
         .firstOrFail()
       profile.customerType = data.customerType
@@ -148,18 +186,19 @@ export default class UserService {
       storeName?: string
       zaloUserId?: string
       avatarUrl?: string
+      isPublic?: boolean
     }
   ) {
     const profile = await UserProfile.query()
       .select(
-        'id',
         'user_id',
         'avatar_url',
         'store_name',
         'debt_limit',
         'current_debt',
         'zalo_user_id',
-        'customer_type'
+        'customer_type',
+        'is_public'
       )
       .where('user_id', userId)
       .firstOrFail()

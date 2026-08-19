@@ -102,7 +102,8 @@ const kpiCards = computed(() => {
           <span
             class="text-success-600 dark:text-success-400 flex items-center gap-0.5 text-xs font-medium"
           >
-            <span class="i-lucide-trending-up h-3 w-3" aria-hidden="true" /> {{ card.trend }}
+            <UIcon name="i-lucide-trending-up" class="h-3 w-3" aria-hidden="true" />
+            {{ card.trend }}
           </span>
         </div>
         <p class="mb-1 text-[13px] font-medium text-slate-500 dark:text-zinc-400">

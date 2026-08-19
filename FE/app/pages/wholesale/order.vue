@@ -134,15 +134,9 @@ const submitOrder = async () => {
     }
 
     await customerService.createOrder(payload)
-    toast.add({ title: 'Thành công', description: 'Đã đặt hàng thành công!', color: 'success' })
     navigateTo('/wholesale/orders')
-  } catch (error: unknown) {
-    const err = error as { response?: { _data?: { message?: string } } }
-    toast.add({
-      title: 'Lỗi',
-      description: err.response?._data?.message || 'Không thể tạo đơn hàng',
-      color: 'error'
-    })
+  } catch {
+    // Error handled globally
   } finally {
     isSubmitting.value = false
   }

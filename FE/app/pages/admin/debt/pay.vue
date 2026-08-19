@@ -7,7 +7,6 @@ import { z } from 'zod'
 
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Thu nợ - BunTech Admin' })
-const toast = useToast()
 
 // ─── State ────────────────────────────────────────────────
 const state = reactive({
@@ -63,19 +62,10 @@ const payDebtAction = handleSubmit(
   {
     formRef,
     onSuccess: () => {
-      toast.add({
-        title: 'Thu nợ thành công',
-        description: `Đã ghi nhận ${formatVND(state.amount)} từ khách hàng`,
-        color: 'success'
-      })
       navigateTo('/admin/debt')
     },
-    onError: (err: unknown) => {
-      toast.add({
-        title: 'Thất bại',
-        description: err instanceof Error ? err.message : String(err),
-        color: 'error'
-      })
+    onError: () => {
+      // Handled globally
     }
   }
 )
