@@ -79,10 +79,11 @@ const shareTwitter = () => {
   }
 }
 
-useHead(() => ({
-  title: post.value ? `${post.value.metaTitle || post.value.title} - BunTech` : 'Tin tức - BunTech',
-  meta: [{ name: 'description', content: post.value?.metaDescription || post.value?.excerpt || '' }]
-}))
+useSeoMeta({
+  title: () =>
+    post.value ? `${post.value.metaTitle || post.value.title} - BunTech` : 'Tin tức - BunTech',
+  description: () => post.value?.metaDescription || post.value?.excerpt || ''
+})
 </script>
 
 <template>

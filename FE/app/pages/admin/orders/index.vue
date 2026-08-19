@@ -9,7 +9,6 @@ import OrderListTable from '~/components/features/admin/orders/OrderListTable.vu
 import OrderKpiCards from '~/components/features/admin/orders/OrderKpiCards.vue'
 import OrderBatchAssignModal from '~/components/features/admin/orders/OrderBatchAssignModal.vue'
 import { useAdminSSE } from '~/composables/admin/useSSE'
-import { refDebounced } from '@vueuse/core'
 
 const { constants } = useMasterData()
 const toast = useToast()

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Search, X } from 'lucide-vue-next'
+import { X } from 'lucide-vue-next'
 import { blogService } from '~/services/blogService'
 import type { BlogPost, BlogCategory } from '~/utils/types'
 import { normalizePaginationResponse } from '~/utils/api'
@@ -86,18 +86,11 @@ const clearFilters = () => {
 
     <!-- Search -->
     <div class="mb-6 flex flex-wrap items-center gap-3">
-      <div class="relative max-w-md min-w-[200px] flex-1">
-        <Search
-          class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-zinc-500"
-          aria-hidden="true"
-        />
-        <UInput
-          v-model="search"
-          type="text"
-          placeholder="Tìm kiếm bài viết (trong trang hiện tại)..."
-          class="border-surface-border bg-surface text-surface-foreground focus:border-primary-400 focus:ring-primary-500/10 min-h-[44px] w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm placeholder-gray-400 transition-all focus:ring-4 focus:outline-none dark:placeholder-zinc-500"
-        />
-      </div>
+      <BaseSearchInput
+        v-model="search"
+        placeholder="Tìm kiếm bài viết (trong trang hiện tại)..."
+        class="max-w-md min-w-[200px] flex-1"
+      />
       <UButton
         v-if="search || selectedCategory"
         variant="ghost"

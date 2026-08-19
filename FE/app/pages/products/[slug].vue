@@ -128,9 +128,9 @@ const quickOrder = () => {
   navigateTo('/quick-order')
 }
 
-useHead(() => ({
-  title: product.value ? `${product.value.name} - BunTech` : 'Sản phẩm - BunTech'
-}))
+useSeoMeta({
+  title: () => (product.value ? `${product.value.name} - BunTech` : 'Sản phẩm - BunTech')
+})
 </script>
 
 <template>

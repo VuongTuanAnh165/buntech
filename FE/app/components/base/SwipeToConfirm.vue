@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { usePointerSwipe, useResizeObserver } from '@vueuse/core'
-
 const props = defineProps<{
   text?: string
   loading?: boolean

@@ -2,7 +2,6 @@
 import type { SystemConfig } from '~/utils/types'
 import { useSystemConfigs } from '~/composables/admin/useSystemConfigs'
 import SystemConfigFormDrawer from '~/components/features/admin/system/SystemConfigFormDrawer.vue'
-import { refDebounced } from '@vueuse/core'
 
 const { confirm } = useConfirmDialog()
 const { fetchConfigs, createConfig, updateConfig, deleteConfig } = useSystemConfigs()

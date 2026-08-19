@@ -139,7 +139,7 @@ async function handleSave() {
       <div class="card animate-fade-in-up p-5">
         <div class="mb-4 flex items-center gap-4">
           <div class="max-w-sm flex-1">
-            <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm kiếm danh mục..." />
+            <BaseSearchInput v-model="search" placeholder="Tìm kiếm danh mục..." />
           </div>
         </div>
         <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">

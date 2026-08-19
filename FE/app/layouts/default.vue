@@ -133,7 +133,7 @@ onUnmounted(() => {
                 >
                   <UAvatar
                     :alt="authStore.user?.fullName"
-                    :src="authStore.user?.profile?.avatarUrl"
+                    :src="authStore.user?.profile?.avatarUrl || undefined"
                     size="sm"
                   />
                 </UButton>

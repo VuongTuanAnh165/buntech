@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { z } from 'zod'
-import { Plus, Trash2, Minus, CheckCircle2, Package, Search, ShoppingCart } from 'lucide-vue-next'
+import { Plus, Trash2, Minus, CheckCircle2, Package, ShoppingCart } from 'lucide-vue-next'
 import { productService } from '~/services/productService'
 import { publicOrderService } from '~/services/publicOrderService'
 import { phoneSchema, requiredString } from '~/utils/validation'
@@ -241,17 +241,8 @@ const resetForm = () => {
         <div class="space-y-4 lg:col-span-2">
           <div class="card p-4">
             <!-- Search -->
-            <div class="relative mb-4">
-              <Search
-                class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-zinc-500"
-                aria-hidden="true"
-              />
-              <UInput
-                v-model="search"
-                type="text"
-                placeholder="Tìm sản phẩm..."
-                class="border-surface-border bg-surface text-surface-foreground focus:border-primary-400 focus:ring-primary-500/10 min-h-[44px] w-full rounded-lg border py-2.5 pr-4 pl-10 text-sm placeholder-gray-400 transition-all focus:ring-4 focus:outline-none dark:placeholder-zinc-500"
-              />
+            <div class="mb-4">
+              <BaseSearchInput v-model="search" placeholder="Tìm sản phẩm..." class="w-full" />
             </div>
 
             <!-- Category pills -->

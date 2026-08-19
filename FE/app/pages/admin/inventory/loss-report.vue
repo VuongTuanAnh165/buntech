@@ -239,7 +239,7 @@ watch(search, () => {
       <div class="card stagger-item p-5" style="animation-delay: 360ms">
         <div class="mb-4 flex items-center gap-3">
           <div class="max-w-sm flex-1">
-            <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm kiếm theo ngày..." />
+            <BaseSearchInput v-model="search" placeholder="Tìm kiếm theo ngày..." />
           </div>
           <UButton color="neutral" variant="outline" icon="i-lucide-download">
             Xuất báo cáo

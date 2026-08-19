@@ -2,7 +2,6 @@
 import { customerService } from '~/services/customerService'
 import { formatCurrency } from '~/utils/format'
 import type { AdminProduct, Address } from '~/utils/types'
-import { refDebounced } from '@vueuse/core'
 
 useSeoMeta({ title: 'Tạo đơn hàng sỉ - BunTech' })
 definePageMeta({ layout: 'default' })
@@ -186,12 +185,10 @@ const columns = [
           <template #header>
             <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <h2 class="text-lg font-semibold">Danh sách sản phẩm</h2>
-              <UInput
+              <BaseSearchInput
                 v-model="search"
-                icon="i-lucide-search"
                 placeholder="Tìm kiếm sản phẩm..."
                 class="w-full sm:w-64"
-                clearable
               />
             </div>
           </template>

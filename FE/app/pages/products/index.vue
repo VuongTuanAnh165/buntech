@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Grid2x2, LayoutGrid, Package, X, Search, ChevronDown, ChevronRight } from 'lucide-vue-next'
+import { Grid2x2, LayoutGrid, Package, X, ChevronRight } from 'lucide-vue-next'
 import { generateSeoSlug } from '~/utils/idEncoder'
 import { productService } from '~/services/productService'
 
@@ -92,33 +92,18 @@ const clearFilters = () => {
     <!-- Search & Sort Bar -->
     <div class="card mb-6 p-4">
       <div class="flex flex-wrap items-center gap-3">
-        <div class="relative max-w-md min-w-[200px] flex-1">
-          <Search
-            class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-zinc-500"
-            aria-hidden="true"
-          />
-          <UInput
-            v-model="search"
-            type="text"
-            placeholder="Tìm kiếm sản phẩm..."
-            class="form-input min-h-[44px] pr-4 pl-10"
-          />
-        </div>
-        <div class="relative">
-          <select
-            v-model="sortBy"
-            class="border-surface-border bg-surface text-surface-foreground focus:border-primary-500 focus:ring-primary-500/15 min-h-[44px] cursor-pointer appearance-none rounded-lg border py-2.5 pr-10 pl-3.5 text-sm font-medium transition-all focus:ring-2 focus:outline-none"
-            aria-label="Sắp xếp"
-          >
-            <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">
-              {{ opt.label }}
-            </option>
-          </select>
-          <ChevronDown
-            class="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-zinc-500"
-            aria-hidden="true"
-          />
-        </div>
+        <BaseSearchInput
+          v-model="search"
+          placeholder="Tìm kiếm sản phẩm..."
+          class="max-w-md min-w-[200px] flex-1"
+        />
+        <USelect
+          v-model="sortBy"
+          :items="sortOptions"
+          value-key="value"
+          label-key="label"
+          class="w-full sm:!w-48"
+        />
         <UButton
           v-if="hasActiveFilters"
           variant="ghost"

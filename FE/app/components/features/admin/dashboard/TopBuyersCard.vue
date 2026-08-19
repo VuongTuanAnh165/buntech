@@ -43,28 +43,32 @@ const handleSortChange = (val: 'revenue' | 'quantity') => {
           <UIcon name="i-lucide-star" class="text-warning-400 h-3.5 w-3.5" />
         </div>
         <div class="flex items-center rounded-lg bg-slate-100 p-0.5 dark:bg-zinc-800">
-          <button
+          <UButton
+            variant="ghost"
+            color="neutral"
             class="rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors"
             :class="
               sortBy === 'revenue'
-                ? 'bg-white text-slate-800 shadow-sm dark:bg-zinc-700 dark:text-white'
-                : 'text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                ? 'bg-white text-slate-800 shadow-sm hover:bg-white dark:bg-zinc-700 dark:text-white dark:hover:bg-zinc-700'
+                : 'text-slate-500 hover:bg-transparent hover:text-slate-700 dark:text-zinc-400 dark:hover:bg-transparent dark:hover:text-zinc-300'
             "
             @click="handleSortChange('revenue')"
           >
             Doanh thu
-          </button>
-          <button
+          </UButton>
+          <UButton
+            variant="ghost"
+            color="neutral"
             class="rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors"
             :class="
               sortBy === 'quantity'
-                ? 'bg-white text-slate-800 shadow-sm dark:bg-zinc-700 dark:text-white'
-                : 'text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                ? 'bg-white text-slate-800 shadow-sm hover:bg-white dark:bg-zinc-700 dark:text-white dark:hover:bg-zinc-700'
+                : 'text-slate-500 hover:bg-transparent hover:text-slate-700 dark:text-zinc-400 dark:hover:bg-transparent dark:hover:text-zinc-300'
             "
             @click="handleSortChange('quantity')"
           >
             Sản lượng
-          </button>
+          </UButton>
         </div>
       </div>
     </template>

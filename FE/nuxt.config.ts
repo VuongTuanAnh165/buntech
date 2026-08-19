@@ -87,6 +87,21 @@ export default defineNuxtConfig({
     }
   },
 
+  // --- Cấu hình Icon (fix: failed to load icon warnings) ---
+  icon: {
+    clientBundle: {
+      scan: true,
+      includeCustomCollections: true,
+      icons: [
+        'lucide:quote',
+        'lucide:search-x',
+        'lucide:home',
+        'lucide:refresh-cw',
+        'heroicons:star-solid'
+      ]
+    }
+  },
+
   devtools: { enabled: true },
 
   runtimeConfig: {
