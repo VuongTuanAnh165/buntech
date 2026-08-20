@@ -66,11 +66,11 @@ export default class extends BaseSeeder {
         : DateTime.now().minus({ days: 10 })
       await user.related('orders').create({
         totalAmount: orderVolume.toString(),
-        status: 'completed',
+        status: 'delivered',
         createdAt: orderDate,
         updatedAt: orderDate,
         deliveryDate: orderDate,
-        source: 'zalo', // Enum hợp lệ tùy schema
+        source: 'zalo_app', // Enum hợp lệ tùy schema
       } as any)
     }
   }
