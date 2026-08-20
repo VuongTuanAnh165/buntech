@@ -40,10 +40,10 @@ const { options, isOpen, handleConfirm, handleCancel } = useConfirmDialog()
         <!-- Actions -->
         <div class="mt-6 flex items-center justify-end gap-3">
           <UButton color="neutral" variant="outline" @click="handleCancel">
-            {{ options.cancelLabel || 'Hủy' }}
+            {{ options.cancelLabel || $t('common_cancel') }}
           </UButton>
           <UButton :color="options.color === 'error' ? 'error' : 'primary'" @click="handleConfirm">
-            {{ options.confirmLabel || 'Xác nhận' }}
+            {{ options.confirmLabel || $t('confirm') }}
           </UButton>
         </div>
       </div>

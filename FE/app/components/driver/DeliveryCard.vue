@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ConstantKey } from '~/enums/constantKeys'
 import type { Order } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 const props = defineProps<{
@@ -17,15 +18,17 @@ const statusColor = computed(() => {
   return 'error'
 })
 const statusLabel = computed(() => {
-  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING) return 'Chờ giao'
+  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.PENDING)
+    return t('driver_deliv_status_pending')
   if (
     props.order.status === constants.value?.[ConstantKey.OrderStatus]?.IN_PROGRESS ||
     props.order.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERING
   )
-    return 'Đang giao'
+    return t('status_order_delivering')
   if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED)
-    return 'Hoàn thành'
-  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED) return 'Đã hủy'
+    return t('driver_deliv_status_done')
+  if (props.order.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED)
+    return t('status_order_cancelled')
   return props.order.status
 })
 </script>
@@ -46,7 +49,7 @@ const statusLabel = computed(() => {
           </div>
           <div>
             <h3 class="line-clamp-1 font-semibold text-neutral-900 dark:text-white">
-              {{ order.user?.full_name || order.guest_info?.name || 'Khách hàng' }}
+              {{ order.user?.full_name || order.guest_info?.name || $t('common_customer') }}
             </h3>
             <p class="font-mono text-xs text-neutral-500">{{ order.id }}</p>
           </div>
@@ -72,9 +75,9 @@ const statusLabel = computed(() => {
     <!-- Bottom section -->
     <div class="flex items-center justify-between bg-neutral-50 px-4 py-3 dark:bg-zinc-800/50">
       <div class="flex flex-col">
-        <span class="text-[10px] font-medium tracking-wider text-neutral-500 uppercase"
-          >Cần thu</span
-        >
+        <span class="text-[10px] font-medium tracking-wider text-neutral-500 uppercase">{{
+          $t('driver_deliv_collect')
+        }}</span>
         <span class="text-primary-600 dark:text-primary-400 font-bold tabular-nums">
           {{ formatVND(Number(order.total)) }}
         </span>

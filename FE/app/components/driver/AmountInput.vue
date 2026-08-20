@@ -47,7 +47,7 @@ function handleInput(e: Event) {
 <template>
   <div class="relative">
     <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center">
-      <span class="font-medium text-neutral-500">đ</span>
+      <span class="font-medium text-neutral-500">{{ $t('common_currency_symbol') }}</span>
     </div>
     <UInput
       type="text"

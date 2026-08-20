@@ -6,7 +6,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  placeholder: 'Tìm kiếm...',
+  placeholder: undefined,
   debounceMs: 300
 })
 
@@ -43,7 +43,7 @@ onUnmounted(() => {
 <template>
   <UInput
     :model-value="localValue"
-    :placeholder="props.placeholder"
+    :placeholder="props.placeholder || $t('search')"
     trailing-icon="i-lucide-search"
     class="w-full sm:max-w-xs"
     @update:model-value="handleInput"
@@ -55,7 +55,7 @@ onUnmounted(() => {
         color="neutral"
         variant="link"
         size="xs"
-        aria-label="Xóa tìm kiếm"
+        :aria-label="$t('clear_search')"
         @click="clearSearch"
       />
     </template>

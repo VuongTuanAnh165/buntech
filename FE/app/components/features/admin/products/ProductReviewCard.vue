@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ProductReview } from '~/utils/types'
 import { formatDate } from '~/utils/format'
+import { t } from '~/utils/i18n'
 
 const props = defineProps<{
   review: ProductReview
@@ -21,11 +22,11 @@ function productImage(review: ProductReview): string | null {
 }
 
 function productName(review: ProductReview): string {
-  return review.product?.name || 'Sản phẩm không xác định'
+  return review.product?.name || t('admin_reviews_card_unknown_product')
 }
 
 const authorName = computed(() => {
-  return props.review.user?.fullName || 'Khách'
+  return props.review.user?.fullName || t('public_product_guest')
 })
 </script>
 
@@ -64,7 +65,7 @@ const authorName = computed(() => {
                 variant="subtle"
                 size="sm"
                 class="ml-2"
-                >Đã mua</UBadge
+                >{{ $t('admin_reviews_card_purchased') }}</UBadge
               >
             </p>
             <p class="truncate text-xs text-slate-500 dark:text-zinc-400">
@@ -89,7 +90,7 @@ const authorName = computed(() => {
 
         <!-- Content -->
         <p class="mb-3 text-sm leading-relaxed text-slate-700 dark:text-zinc-200">
-          {{ props.review.content || 'Không có bình luận' }}
+          {{ props.review.content || $t('admin_reviews_card_no_comment') }}
         </p>
 
         <!-- Reply -->
@@ -100,9 +101,11 @@ const authorName = computed(() => {
           <div class="mb-1 flex items-center justify-between">
             <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400">
               <UIcon name="i-lucide-message-circle" class="h-3.5 w-3.5" aria-hidden="true" />
-              <span class="font-medium"
-                >Phản hồi từ {{ props.review.replier?.fullName || 'BunTech' }}:</span
-              >
+              <span class="font-medium">{{
+                $t('admin_reviews_card_reply_from', {
+                  name: props.review.replier?.fullName || 'BunTech'
+                })
+              }}</span>
             </div>
           </div>
           <p class="text-sm text-slate-700 dark:text-zinc-200">{{ props.review.replyContent }}</p>
@@ -112,7 +115,9 @@ const authorName = computed(() => {
         <div class="flex flex-wrap items-center gap-2 pt-1">
           <UBadge :color="props.review.isApproved ? 'success' : 'warning'" variant="subtle">
             <template #leading><span class="h-1.5 w-1.5 rounded-full bg-current" /></template>
-            {{ props.review.isApproved ? 'Đã duyệt' : 'Chờ duyệt' }}
+            {{
+              props.review.isApproved ? $t('admin_reviews_tab_approved') : $t('status_user_pending')
+            }}
           </UBadge>
 
           <span
@@ -130,7 +135,8 @@ const authorName = computed(() => {
               class="text-success-600 dark:text-success-400 hover:bg-success-50 dark:hover:bg-success-900/20 flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
               @click="emit('approve', props.review, true)"
             >
-              <UIcon name="i-lucide-check" class="h-3.5 w-3.5" aria-hidden="true" /> Duyệt
+              <UIcon name="i-lucide-check" class="h-3.5 w-3.5" aria-hidden="true" />
+              {{ $t('admin_reviews_card_btn_approve') }}
             </UButton>
             <UButton
               v-else
@@ -139,7 +145,8 @@ const authorName = computed(() => {
               class="text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/20 flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
               @click="emit('approve', props.review, false)"
             >
-              <UIcon name="i-lucide-x" class="h-3.5 w-3.5" aria-hidden="true" /> Bỏ duyệt
+              <UIcon name="i-lucide-x" class="h-3.5 w-3.5" aria-hidden="true" />
+              {{ $t('admin_reviews_card_btn_unapprove') }}
             </UButton>
 
             <UButton
@@ -149,7 +156,11 @@ const authorName = computed(() => {
               @click="emit('reply', props.review)"
             >
               <UIcon name="i-lucide-message-square-text" class="h-3.5 w-3.5" aria-hidden="true" />
-              {{ props.review.replyContent ? 'Sửa phản hồi' : 'Phản hồi' }}
+              {{
+                props.review.replyContent
+                  ? $t('admin_reviews_card_btn_edit_reply')
+                  : $t('admin_reviews_card_btn_reply')
+              }}
             </UButton>
 
             <UButton
@@ -158,7 +169,8 @@ const authorName = computed(() => {
               class="text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/20 flex min-h-[36px] items-center gap-1 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
               @click="emit('delete', props.review)"
             >
-              <UIcon name="i-lucide-trash-2" class="h-3.5 w-3.5" aria-hidden="true" /> Xóa
+              <UIcon name="i-lucide-trash-2" class="h-3.5 w-3.5" aria-hidden="true" />
+              {{ $t('delete') }}
             </UButton>
           </div>
         </div>

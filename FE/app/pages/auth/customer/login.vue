@@ -1,13 +1,15 @@
 <script setup lang="ts">
-useSeoMeta({ title: 'Đăng nhập - BunTech' })
+import { t } from '~/utils/i18n'
+
+useSeoMeta({ title: t('auth_login_seo_customer') })
 definePageMeta({ layout: 'auth' })
 </script>
 
 <template>
   <AuthLoginForm
     role="retail"
-    title="Khách hàng"
-    subtitle="Đăng nhập để đặt bún tươi"
+    :title="$t('common_customer')"
+    :subtitle="$t('auth_login_sub_customer')"
     icon="user"
   />
 </template>

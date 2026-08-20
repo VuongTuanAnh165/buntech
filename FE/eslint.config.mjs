@@ -2,7 +2,7 @@ import withNuxt from './.nuxt/eslint.config.mjs'
 
 export default withNuxt(
   {
-    ignores: ['.agents/**', 'all_*.txt', 'template/**', 'android/**', 'ios/**']
+    ignores: ['.agents/**', 'all_*.txt', 'template/**', 'android/**', 'ios/**', 'public/**']
   },
   {
     rules: {

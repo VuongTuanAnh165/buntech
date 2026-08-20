@@ -5,8 +5,9 @@ import LandingProductShowcase from '~/components/landing/LandingProductShowcase.
 import LandingFeatureGrid from '~/components/landing/LandingFeatureGrid.vue'
 import LandingTestimonials from '~/components/landing/LandingTestimonials.vue'
 import LandingCTASection from '~/components/landing/LandingCTASection.vue'
+import { t } from '~/utils/i18n'
 
-useSeoMeta({ title: 'BunTech - Xưởng bún gia đình truyền thống 3 đời' })
+useSeoMeta({ title: t('public_landing_seo_title') })
 definePageMeta({ layout: 'default' })
 </script>
 

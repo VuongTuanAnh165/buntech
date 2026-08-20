@@ -54,14 +54,17 @@ const remaining = computed(() => Math.max(0, total.value - amountCollected.value
 
 const paymentState = computed(() => {
   if (amountCollected.value >= total.value && total.value > 0)
-    return { label: 'Đã thanh toán đủ', color: 'success' as const }
-  if (amountCollected.value > 0) return { label: 'Thanh toán một phần', color: 'warning' as const }
-  return { label: 'Chưa thanh toán', color: 'error' as const }
+    return { label: t('admin_order_detail_payment_full'), color: 'success' as const }
+  if (amountCollected.value > 0)
+    return { label: t('admin_order_detail_payment_partial'), color: 'warning' as const }
+  return { label: t('wholesale_order_detail_unpaid'), color: 'error' as const }
 })
 
 const customer = computed(() => order.value?.user)
-const customerName = computed(() => customer.value?.fullName || 'Khách lẻ')
-const customerPhone = computed(() => customer.value?.phoneNumber || '—')
+const customerName = computed(() => customer.value?.fullName || t('admin_order_batch_retail'))
+const customerPhone = computed(
+  () => customer.value?.phoneNumber || t('admin_order_detail_no_phone')
+)
 const shippingAddress = computed(() => {
   if (!order.value?.shippingAddress) return '—'
   const parts = []
@@ -72,7 +75,7 @@ const shippingAddress = computed(() => {
 })
 const driver = computed(() => order.value?.driver)
 const driverName = computed(() => driver.value?.fullName)
-const orderNotes = computed(() => order.value?.note || 'Không có ghi chú cho đơn hàng này.')
+const orderNotes = computed(() => order.value?.note || t('admin_order_detail_no_note'))
 
 const availableDrivers = ref<UserDTO[]>([])
 onMounted(async () => {
@@ -103,7 +106,7 @@ watch(
       {
         status: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
         at: created,
-        note: 'Đơn hàng được tạo'
+        note: t('admin_order_detail_history_created')
       }
     ]
     if (
@@ -113,7 +116,7 @@ watch(
       base.push({
         status: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
         at: addHours(created, 2),
-        note: 'Bắt đầu chuẩn bị hàng'
+        note: t('admin_order_detail_history_processing')
       })
     }
     if (
@@ -125,21 +128,21 @@ watch(
       base.push({
         status: constants.value?.[ConstantKey.OrderStatus]?.DELIVERING as string,
         at: addHours(created, 4),
-        note: 'Đã giao cho tài xế'
+        note: t('admin_order_detail_history_delivering')
       })
     }
     if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED) {
       base.push({
         status: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
         at: addHours(created, 8),
-        note: 'Khách đã nhận hàng'
+        note: t('admin_order_detail_history_delivered')
       })
     }
     if (order.value.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED) {
       base.push({
         status: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string,
         at: addHours(created, 1),
-        note: 'Đơn hàng bị hủy'
+        note: t('admin_order_detail_history_cancelled')
       })
     }
     orderHistory.value = base
@@ -155,13 +158,35 @@ function addHours(iso: string, h: number): string {
 
 const deliveryTimeline = computed(() => {
   if (isCancelled.value) {
-    return [{ label: 'Đã hủy', desc: 'Đơn hàng bị hủy', done: true }]
+    return [
+      {
+        label: t('status_order_cancelled'),
+        desc: t('admin_order_detail_history_cancelled'),
+        done: true
+      }
+    ]
   }
   return [
-    { label: 'Tiếp nhận', desc: 'Đã ghi nhận đơn', done: currentStatusIndex.value >= 0 },
-    { label: 'Chuẩn bị', desc: 'Đóng gói sản phẩm', done: currentStatusIndex.value >= 1 },
-    { label: 'Vận chuyển', desc: 'Đang trên đường giao', done: currentStatusIndex.value >= 2 },
-    { label: 'Giao thành công', desc: 'Khách đã nhận', done: currentStatusIndex.value >= 3 }
+    {
+      label: t('admin_order_detail_timeline_receive'),
+      desc: t('admin_order_detail_timeline_receive_desc'),
+      done: currentStatusIndex.value >= 0
+    },
+    {
+      label: t('admin_order_detail_timeline_pack'),
+      desc: t('admin_order_detail_timeline_pack_desc'),
+      done: currentStatusIndex.value >= 1
+    },
+    {
+      label: t('admin_order_detail_timeline_ship'),
+      desc: t('admin_order_detail_timeline_ship_desc'),
+      done: currentStatusIndex.value >= 2
+    },
+    {
+      label: t('admin_order_detail_timeline_done'),
+      desc: t('admin_order_detail_timeline_done_desc'),
+      done: currentStatusIndex.value >= 3
+    }
   ]
 })
 
@@ -204,17 +229,17 @@ function printOrder() {
   if (import.meta.client) window.print()
 }
 
-useSeoMeta({ title: () => `Đơn hàng #${String(orderId).slice(0, 8)} - BunTech Admin` })
+useSeoMeta({ title: () => t('admin_order_detail_seo_title', { id: String(orderId).slice(0, 8) }) })
 
 function loadOrder() {
   refresh()
 } // for retry button
 
-const breadcrumbItems = [
-  { label: 'Admin', to: '/admin' },
-  { label: 'Đơn hàng', to: '/admin/orders' },
+const breadcrumbItems = computed(() => [
+  { label: t('admin_order_detail_breadcrumb_admin'), to: '/admin' },
+  { label: t('nav_orders'), to: '/admin/orders' },
   { label: `#${String(orderId).slice(0, 8)}` }
-]
+])
 </script>
 
 <template>
@@ -232,13 +257,13 @@ const breadcrumbItems = [
         }
       "
     >
-      Quay lại
+      {{ $t('admin_blog_cat_btn_back') }}
     </UButton>
 
     <BaseEmptyState
       v-if="error"
-      title="Lỗi tải dữ liệu"
-      description="Không thể tải thông tin đơn hàng."
+      :title="$t('admin_customers_err_title')"
+      :description="$t('admin_order_detail_err_desc')"
       @retry="loadOrder"
     />
 
@@ -275,7 +300,7 @@ const breadcrumbItems = [
               </UBadge>
             </div>
             <h1 class="text-surface-foreground mb-1 text-2xl font-bold tracking-tight">
-              Đơn hàng #{{ String(orderId).slice(-6) }}
+              {{ $t('admin_order_detail_title', { id: String(orderId).slice(-6) }) }}
             </h1>
             <div
               class="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-zinc-400"
@@ -285,15 +310,17 @@ const breadcrumbItems = [
                 {{ formatDateTime(order.createdAt) }}</span
               >
               <span class="flex items-center gap-1.5"
-                ><UIcon name="i-lucide-shopping-bag" class="h-4 w-4" /> {{ items.length }} sản
-                phẩm</span
+                ><UIcon name="i-lucide-shopping-bag" class="h-4 w-4" />
+                {{ $t('admin_dash_n_products', { count: items.length }) }}</span
               >
             </div>
           </div>
 
           <div class="flex flex-col items-start gap-3 lg:items-end">
             <div class="lg:text-right">
-              <p class="text-xs text-slate-500 dark:text-zinc-400">Tổng tiền</p>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">
+                {{ $t('wholesale_col_total') }}
+              </p>
               <p class="text-primary-600 dark:text-primary-400 text-3xl font-bold tabular-nums">
                 {{ formatVND(total) }}
               </p>
@@ -306,7 +333,7 @@ const breadcrumbItems = [
                 icon="i-lucide-copy"
                 @click="copyOrder"
               >
-                Sao chép
+                {{ $t('admin_order_list_btn_copy') }}
               </UButton>
               <UButton
                 size="sm"
@@ -315,7 +342,7 @@ const breadcrumbItems = [
                 icon="i-lucide-printer"
                 @click="printOrder"
               >
-                In
+                {{ $t('admin_order_detail_btn_print') }}
               </UButton>
               <UDropdownMenu
                 :items="[
@@ -332,7 +359,7 @@ const breadcrumbItems = [
                   icon="i-lucide-refresh-cw"
                   trailing-icon="i-lucide-chevron-down"
                 >
-                  Đổi trạng thái
+                  {{ $t('admin_order_detail_btn_change_status') }}
                 </UButton>
               </UDropdownMenu>
             </div>
@@ -355,17 +382,23 @@ const breadcrumbItems = [
                   class="text-primary-600 dark:text-primary-400 h-4 w-4"
                 />
               </div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Sản phẩm trong đơn</h2>
+              <h2 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('admin_order_detail_products_title') }}
+              </h2>
             </div>
 
             <template v-if="items.length">
               <div
                 class="border-surface-border mb-1 hidden grid-cols-12 gap-3 border-b px-3 pb-2 text-xs font-medium text-slate-500 sm:grid dark:text-zinc-400"
               >
-                <div class="col-span-6">Tên sản phẩm</div>
-                <div class="col-span-2 text-right">Đơn giá</div>
-                <div class="col-span-2 text-right">Số lượng</div>
-                <div class="col-span-2 text-right">Thành tiền</div>
+                <div class="col-span-6">{{ $t('admin_prod_form_name') }}</div>
+                <div class="col-span-2 text-right">
+                  {{ $t('wholesale_order_detail_col_price') }}
+                </div>
+                <div class="col-span-2 text-right">{{ $t('admin_inventory_col_qty') }}</div>
+                <div class="col-span-2 text-right">
+                  {{ $t('wholesale_order_detail_col_total') }}
+                </div>
               </div>
 
               <div
@@ -416,7 +449,9 @@ const breadcrumbItems = [
               <div
                 class="border-surface-border mt-3 flex items-center justify-between border-t pt-3"
               >
-                <span class="text-surface-foreground text-sm font-semibold">Tổng cộng</span>
+                <span class="text-surface-foreground text-sm font-semibold">{{
+                  $t('wholesale_col_total')
+                }}</span>
                 <span
                   class="text-primary-600 dark:text-primary-400 text-xl font-bold tabular-nums"
                   >{{ formatVND(total) }}</span
@@ -425,8 +460,8 @@ const breadcrumbItems = [
             </template>
             <BaseEmptyState
               v-else
-              title="Không có sản phẩm"
-              description="Đơn hàng này chưa có sản phẩm nào"
+              :title="$t('admin_order_detail_products_empty_title')"
+              :description="$t('admin_order_detail_products_empty_desc')"
             />
           </div>
 
@@ -441,7 +476,9 @@ const breadcrumbItems = [
                   class="text-warning-600 dark:text-warning-400 h-4 w-4"
                 />
               </div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Ghi chú đơn hàng</h2>
+              <h2 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('wholesale_order_note_label') }}
+              </h2>
             </div>
             <div class="bg-surface-hover rounded-lg p-4">
               <p class="text-sm leading-relaxed text-slate-600 dark:text-zinc-300">
@@ -458,7 +495,9 @@ const breadcrumbItems = [
               >
                 <UIcon name="i-lucide-truck" class="text-info-600 dark:text-info-400 h-4 w-4" />
               </div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Tiến trình đơn hàng</h2>
+              <h2 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('admin_order_detail_timeline_title') }}
+              </h2>
             </div>
 
             <div v-if="!isCancelled" class="relative mb-2 flex items-center justify-between">
@@ -514,10 +553,10 @@ const breadcrumbItems = [
               </div>
               <div>
                 <p class="text-error-700 dark:text-error-300 text-sm font-semibold">
-                  Đơn hàng đã bị hủy
+                  {{ $t('admin_order_detail_timeline_cancelled_msg') }}
                 </p>
                 <p class="text-error-600 dark:text-error-400 text-xs">
-                  Quy trình giao hàng đã dừng lại
+                  {{ $t('admin_order_detail_timeline_cancelled_sub') }}
                 </p>
               </div>
             </div>
@@ -534,7 +573,9 @@ const breadcrumbItems = [
                   class="text-secondary-600 dark:text-secondary-400 h-4 w-4"
                 />
               </div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Lịch sử thay đổi</h2>
+              <h2 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('admin_order_detail_history_title') }}
+              </h2>
             </div>
             <ol class="relative space-y-0">
               <li
@@ -597,7 +638,9 @@ const breadcrumbItems = [
                   class="text-success-600 dark:text-success-400 h-4 w-4"
                 />
               </div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Khách hàng</h2>
+              <h2 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('common_customer') }}
+              </h2>
             </div>
             <div class="mb-4 flex items-center gap-3">
               <UAvatar :alt="customerName" size="lg" :src="customer?.avatarUrl || undefined" />
@@ -610,9 +653,11 @@ const breadcrumbItems = [
                   :to="`/admin/customers/${order.userId}`"
                   class="text-primary-600 dark:text-primary-400 text-xs hover:underline"
                 >
-                  Xem hồ sơ khách
+                  {{ $t('admin_order_detail_customer_profile') }}
                 </NuxtLink>
-                <span v-else class="text-xs text-slate-400 dark:text-zinc-500">Khách lẻ</span>
+                <span v-else class="text-xs text-slate-400 dark:text-zinc-500">{{
+                  $t('admin_order_batch_retail')
+                }}</span>
               </div>
             </div>
             <dl class="space-y-3 text-sm">
@@ -643,28 +688,33 @@ const breadcrumbItems = [
                   class="text-primary-600 dark:text-primary-400 h-4 w-4"
                 />
               </div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Thanh toán</h2>
+              <h2 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('wholesale_qa_payment') }}
+              </h2>
             </div>
             <div class="mb-4 flex items-center justify-between">
-              <span class="text-xs text-slate-500 dark:text-zinc-400">Trạng thái</span>
+              <span class="text-xs text-slate-500 dark:text-zinc-400">{{ $t('status') }}</span>
               <UBadge :color="paymentState.color" variant="subtle">{{ paymentState.label }}</UBadge>
             </div>
             <dl class="space-y-2.5 text-sm">
               <div class="flex items-center justify-between">
-                <dt class="text-slate-500 dark:text-zinc-400">Tổng tiền</dt>
+                <dt class="text-slate-500 dark:text-zinc-400">{{ $t('wholesale_col_total') }}</dt>
                 <dd class="text-surface-foreground font-medium tabular-nums">
                   {{ formatVND(total) }}
                 </dd>
               </div>
               <div class="flex items-center justify-between">
-                <dt class="text-slate-500 dark:text-zinc-400">Đã thu</dt>
+                <dt class="text-slate-500 dark:text-zinc-400">
+                  {{ $t('driver_history_stat_collected') }}
+                </dt>
                 <dd class="text-success-600 dark:text-success-400 font-medium tabular-nums">
                   {{ formatVND(amountCollected) }}
                 </dd>
               </div>
               <div class="border-surface-border flex items-center justify-between border-t pt-2.5">
                 <dt class="flex items-center gap-1.5 text-slate-500 dark:text-zinc-400">
-                  <UIcon name="i-lucide-credit-card" class="h-3.5 w-3.5" /> Còn nợ
+                  <UIcon name="i-lucide-credit-card" class="h-3.5 w-3.5" />
+                  {{ $t('admin_order_create_remain') }}
                 </dt>
                 <dd
                   :class="[
@@ -687,7 +737,9 @@ const breadcrumbItems = [
                 >
                   <UIcon name="i-lucide-truck" class="text-info-600 dark:text-info-400 h-4 w-4" />
                 </div>
-                <h2 class="text-surface-foreground text-sm font-semibold">Giao hàng</h2>
+                <h2 class="text-surface-foreground text-sm font-semibold">
+                  {{ $t('nav_delivery') }}
+                </h2>
               </div>
               <UButton
                 v-if="!driverName"
@@ -700,7 +752,8 @@ const breadcrumbItems = [
                   }
                 "
               >
-                <UIcon name="i-lucide-user-check" class="h-3.5 w-3.5" /> Gán tài xế
+                <UIcon name="i-lucide-user-check" class="h-3.5 w-3.5" />
+                {{ $t('admin_order_detail_delivery_btn_assign') }}
               </UButton>
             </div>
 
@@ -711,19 +764,23 @@ const breadcrumbItems = [
               <UAvatar :alt="driverName" size="md" :src="driver?.avatarUrl || undefined" />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-medium">{{ driverName }}</p>
-                <p class="text-xs text-slate-500 dark:text-zinc-400">Tài xế giao hàng</p>
+                <p class="text-xs text-slate-500 dark:text-zinc-400">
+                  {{ $t('auth_login_title_driver') }}
+                </p>
               </div>
             </div>
             <div
               v-else
               class="border-surface-border mb-4 flex items-center gap-2 border-b pb-4 text-sm text-slate-400 dark:text-zinc-500"
             >
-              <UIcon name="i-lucide-alert-circle" class="h-4 w-4" /> Chưa gán tài xế
+              <UIcon name="i-lucide-alert-circle" class="h-4 w-4" />
+              {{ $t('admin_order_detail_delivery_no_driver') }}
             </div>
 
             <div class="mb-4">
               <p class="mb-1.5 flex items-center gap-1.5 text-xs text-slate-500 dark:text-zinc-400">
-                <UIcon name="i-lucide-map-pin" class="h-3.5 w-3.5" /> Địa chỉ giao hàng
+                <UIcon name="i-lucide-map-pin" class="h-3.5 w-3.5" />
+                {{ $t('admin_order_create_address') }}
               </p>
               <p class="text-sm text-slate-600 dark:text-zinc-300">{{ shippingAddress }}</p>
             </div>
@@ -767,8 +824,8 @@ const breadcrumbItems = [
 
     <BaseEmptyState
       v-else
-      title="Không tìm thấy đơn hàng"
-      description="Đơn hàng không tồn tại hoặc đã bị xoá"
+      :title="$t('admin_order_list_empty_title')"
+      :description="$t('admin_order_detail_not_found_desc')"
     />
 
     <OrderBatchAssignModal

@@ -8,11 +8,12 @@ import { useUsers } from '~/composables/admin/useUsers'
 
 import OrderProductPicker from '~/components/features/admin/orders/create/OrderProductPicker.vue'
 import OrderCart from '~/components/features/admin/orders/create/OrderCart.vue'
+import { t } from '~/utils/i18n'
 
 const toast = useToast()
 const route = useRoute()
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Tạo đơn hàng - BunTech Admin' })
+useSeoMeta({ title: t('admin_order_create_seo_title') })
 const { fetchUsers, fetchAddresses } = useUsers()
 const { createOrder, getOrder } = useAdminOrders()
 const loading = ref(true)
@@ -65,12 +66,15 @@ const filteredProducts = computed(() => {
     .slice(0, 24)
 })
 const customerOptions = computed(() =>
-  customers.value.map((c) => ({ value: c.id, label: `${c.fullName} — ${c.phoneNumber || 'SĐT'}` }))
+  customers.value.map((c) => ({
+    value: c.id,
+    label: `${c.fullName} — ${c.phoneNumber || t('admin_order_create_customer_ph')}`
+  }))
 )
 const addressOptions = computed(() =>
   customerAddresses.value.map((a) => ({
     value: a.id,
-    label: `${a.addressLine || a.street}, ${a.ward}, ${a.district}, ${a.province || a.city}${a.isDefault ? ' (Mặc định)' : ''}`
+    label: `${a.addressLine || a.street}, ${a.ward}, ${a.district}, ${a.province || a.city}${a.isDefault ? ` (${t('admin_address_col_default')})` : ''}`
   }))
 )
 const _selectedAddress = computed(() =>
@@ -85,7 +89,10 @@ async function searchCustomers(q: string) {
     fetched.forEach((f) => {
       if (!customers.value.some((c) => c.id === f.id)) customers.value.push(f)
     })
-    return fetched.map((c) => ({ value: c.id, label: `${c.fullName} — ${c.phoneNumber || 'SĐT'}` }))
+    return fetched.map((c) => ({
+      value: c.id,
+      label: `${c.fullName} — ${c.phoneNumber || t('admin_order_create_customer_ph')}`
+    }))
   } finally {
     loadingCustomers.value = false
   }
@@ -152,10 +159,10 @@ async function loadInitData() {
             }
           }
 
-          toast.add({ title: 'Đã tải dữ liệu đơn hàng cũ', color: 'success' })
+          toast.add({ title: t('admin_order_create_toast_old_ok'), color: 'success' })
         }
       } catch {
-        toast.add({ title: 'Không thể tải đơn hàng cũ', color: 'error' })
+        toast.add({ title: t('admin_order_create_toast_old_err'), color: 'error' })
       }
     }
   } finally {
@@ -239,20 +246,22 @@ function setQuantity(index: number, quantity: number) {
 }
 async function submitOrder() {
   if (!orderItems.value.length) {
-    toast.add({ title: 'Vui lòng chọn ít nhất một sản phẩm', color: 'error' })
+    toast.add({ title: t('admin_order_create_toast_err_product'), color: 'error' })
     return
   }
   if (!selectedCustomerId.value) {
-    toast.add({ title: 'Vui lòng chọn khách hàng', color: 'error' })
+    toast.add({ title: t('admin_debt_pay_err_user'), color: 'error' })
     return
   }
   if (!selectedAddressId.value) {
-    toast.add({ title: 'Vui lòng chọn địa chỉ giao hàng', color: 'error' })
+    toast.add({ title: t('wholesale_order_err_no_address'), color: 'error' })
     return
   }
   if (exceedsDebtLimit.value) {
     toast.add({
-      title: `Cảnh báo: Đơn hàng vượt hạn mức công nợ của ${selectedCustomer.value?.fullName || ''}`,
+      title: t('admin_order_create_toast_err_limit', {
+        name: selectedCustomer.value?.fullName || ''
+      }),
       color: 'error'
     })
     return
@@ -296,14 +305,14 @@ onMounted(loadInitData)
 <template>
   <div>
     <BasePageHeader
-      title="Tạo đơn hàng mới"
-      description="Chọn khách hàng, thêm sản phẩm và xác nhận đơn"
-      :breadcrumbs="[{ label: 'Tạo đơn' }]"
+      :title="$t('admin_order_create_title')"
+      :description="$t('admin_order_create_desc')"
+      :breadcrumbs="[{ label: $t('admin_orders_btn_create') }]"
     >
       <template #actions>
-        <UButton color="neutral" variant="outline" icon="i-lucide-arrow-left" to="/admin/orders"
-          >Quay lại</UButton
-        >
+        <UButton color="neutral" variant="outline" icon="i-lucide-arrow-left" to="/admin/orders">{{
+          $t('admin_blog_cat_btn_back')
+        }}</UButton>
       </template>
     </BasePageHeader>
     <div
@@ -315,18 +324,20 @@ onMounted(loadInitData)
       >
         <UIcon name="i-lucide-check-circle-2" class="text-success-600 h-8 w-8" />
       </div>
-      <h2 class="text-surface-foreground mb-1 text-xl font-bold">Đơn hàng đã tạo thành công</h2>
-      <p class="mb-1 text-sm text-slate-500">Mã đơn hàng</p>
+      <h2 class="text-surface-foreground mb-1 text-xl font-bold">
+        {{ $t('admin_order_create_success_title') }}
+      </h2>
+      <p class="mb-1 text-sm text-slate-500">{{ $t('admin_order_create_success_id') }}</p>
       <p class="text-primary-600 mb-5 font-mono text-lg font-semibold">
         #{{ String(createdOrderId).slice(0, 8) }}
       </p>
       <div class="flex justify-center gap-3">
-        <UButton :to="`/admin/orders/${createdOrderId}`" icon="i-lucide-package"
-          >Xem đơn hàng</UButton
-        >
-        <UButton color="neutral" variant="outline" icon="i-lucide-plus" @click="resetForm"
-          >Tạo đơn khác</UButton
-        >
+        <UButton :to="`/admin/orders/${createdOrderId}`" icon="i-lucide-package">{{
+          $t('admin_order_create_btn_view')
+        }}</UButton>
+        <UButton color="neutral" variant="outline" icon="i-lucide-plus" @click="resetForm">{{
+          $t('admin_order_create_btn_create_other')
+        }}</UButton>
       </div>
     </div>
     <div v-else class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -350,7 +361,9 @@ onMounted(loadInitData)
               <div class="bg-success-50 flex h-7 w-7 items-center justify-center rounded-lg">
                 <UIcon name="i-lucide-user" class="text-success-600 h-4 w-4" />
               </div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Khách hàng</h2>
+              <h2 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('common_customer') }}
+              </h2>
             </div>
             <USelectMenu
               v-model="selectedCustomerId"
@@ -358,7 +371,7 @@ onMounted(loadInitData)
               :items="customerOptions"
               value-key="value"
               label-key="label"
-              placeholder="Tìm theo tên hoặc SĐT..."
+              :placeholder="$t('admin_order_create_customer_search_ph')"
               class="w-full"
               @update:model-value="onCustomerChange"
             />
@@ -366,7 +379,7 @@ onMounted(loadInitData)
               <div
                 class="rounded-lg border border-slate-100 bg-slate-50 p-2 dark:border-zinc-700 dark:bg-zinc-800/50"
               >
-                <p class="mb-0.5 text-xs text-slate-500 dark:text-zinc-400">Công nợ</p>
+                <p class="mb-0.5 text-xs text-slate-500 dark:text-zinc-400">{{ $t('nav_debt') }}</p>
                 <p
                   :class="[
                     'text-sm font-semibold',
@@ -381,7 +394,9 @@ onMounted(loadInitData)
               <div
                 class="rounded-lg border border-slate-100 bg-slate-50 p-2 dark:border-zinc-700 dark:bg-zinc-800/50"
               >
-                <p class="mb-0.5 text-xs text-slate-500 dark:text-zinc-400">Bảng giá riêng</p>
+                <p class="mb-0.5 text-xs text-slate-500 dark:text-zinc-400">
+                  {{ $t('admin_customer_detail_tab_price') }}
+                </p>
                 <p class="text-primary-600 dark:text-primary-400 text-sm font-semibold">
                   {{ customPrices.size }} SP
                 </p>
@@ -401,9 +416,11 @@ onMounted(loadInitData)
           </div>
 
           <div class="border-surface-border border-t pt-4">
-            <h2 class="text-surface-foreground mb-4 text-sm font-semibold">Tóm tắt đơn hàng</h2>
+            <h2 class="text-surface-foreground mb-4 text-sm font-semibold">
+              {{ $t('admin_order_create_summary') }}
+            </h2>
             <div v-if="selectedCustomerId" class="mb-4">
-              <UFormField label="Địa chỉ giao hàng">
+              <UFormField :label="$t('admin_order_create_address')">
                 <USelectMenu
                   v-if="addressOptions.length"
                   v-model="selectedAddressId"
@@ -416,17 +433,17 @@ onMounted(loadInitData)
                   v-else
                   class="rounded-lg border border-slate-100 bg-slate-50 p-2 text-xs text-slate-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-500"
                 >
-                  Khách hàng chưa có địa chỉ
+                  {{ $t('admin_order_create_no_address') }}
                 </p>
               </UFormField>
             </div>
             <div class="space-y-3 text-sm">
               <div class="flex items-center justify-between">
-                <span class="text-slate-500">Tạm tính</span
+                <span class="text-slate-500">{{ $t('admin_order_cart_subtotal') }}</span
                 ><span class="font-medium">{{ formatVND(subtotal) }}</span>
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-500">Phí giao hàng</span>
+                <span class="text-slate-500">{{ $t('admin_order_create_fee') }}</span>
                 <UInput
                   :model-value="deliveryFeeInput"
                   size="md"
@@ -437,7 +454,9 @@ onMounted(loadInitData)
                 />
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-500 dark:text-zinc-400">Tiền thu</span>
+                <span class="text-slate-500 dark:text-zinc-400">{{
+                  $t('admin_order_create_collected')
+                }}</span>
                 <UInput
                   :model-value="amountCollectedInput"
                   size="md"
@@ -448,14 +467,16 @@ onMounted(loadInitData)
                 />
               </div>
               <div class="flex items-center justify-between">
-                <span class="text-slate-500">Còn nợ</span>
+                <span class="text-slate-500">{{ $t('admin_order_create_remain') }}</span>
                 <span
                   :class="['font-medium', debtAmount > 0 ? 'text-error-600' : 'text-success-600']"
                   >{{ formatVND(debtAmount) }}</span
                 >
               </div>
               <div class="border-surface-border flex items-center justify-between border-t pt-3">
-                <span class="text-surface-foreground font-semibold">Tổng cộng</span>
+                <span class="text-surface-foreground font-semibold">{{
+                  $t('quick_order_cart_total')
+                }}</span>
                 <span class="text-primary-600 text-xl font-bold">{{ formatVND(total) }}</span>
               </div>
             </div>
@@ -468,16 +489,20 @@ onMounted(loadInitData)
                 class="text-error-600 mt-0.5 h-5 w-5 shrink-0"
               />
               <p class="text-error-700 text-xs">
-                Đơn hàng vượt hạn mức công nợ của {{ selectedCustomer?.fullName }} (còn
-                {{ formatVND(debtLimit - customerDebt) }})
+                {{
+                  $t('admin_order_create_limit_warn', {
+                    name: selectedCustomer?.fullName || '',
+                    remain: formatVND(debtLimit - customerDebt)
+                  })
+                }}
               </p>
             </div>
             <div class="mt-4">
-              <UFormField label="Ghi chú">
+              <UFormField :label="$t('admin_debt_pay_note')">
                 <UTextarea
                   v-model="note"
                   :rows="2"
-                  placeholder="Ghi chú cho đơn..."
+                  :placeholder="$t('admin_order_create_note_ph')"
                   class="w-full"
                 />
               </UFormField>
@@ -491,7 +516,7 @@ onMounted(loadInitData)
               icon="i-lucide-plus"
               @click="submitOrder"
             >
-              Tạo đơn hàng
+              {{ $t('admin_order_create_btn_submit') }}
             </UButton>
           </div>
         </div>

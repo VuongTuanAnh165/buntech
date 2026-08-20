@@ -1,16 +1,21 @@
 import { ConstantKey } from '~/enums/constantKeys'
 import type { MasterDataConstants } from '~/types/masterData'
 import { unref, type MaybeRef } from 'vue'
+import { t } from '~/utils/i18n'
 
 /** Human-readable labels for each order status */
 export const getOrderStatusLabel = (
   constants: MaybeRef<MasterDataConstants | null | undefined>
 ) => ({
-  [unref(constants)?.[ConstantKey.OrderStatus]?.PENDING || 'PENDING']: 'Chờ xử lý',
-  [unref(constants)?.[ConstantKey.OrderStatus]?.PROCESSING || 'PROCESSING']: 'Đang chuẩn bị',
-  [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERING || 'DELIVERING']: 'Đang giao',
-  [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERED || 'DELIVERED']: 'Đã giao',
-  [unref(constants)?.[ConstantKey.OrderStatus]?.CANCELLED || 'CANCELLED']: 'Đã hủy'
+  [unref(constants)?.[ConstantKey.OrderStatus]?.PENDING || 'PENDING']: t('status_order_pending'),
+  [unref(constants)?.[ConstantKey.OrderStatus]?.PROCESSING || 'PROCESSING']:
+    t('order_status_processing'),
+  [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERING || 'DELIVERING']:
+    t('status_order_delivering'),
+  [unref(constants)?.[ConstantKey.OrderStatus]?.DELIVERED || 'DELIVERED']:
+    t('status_order_delivered'),
+  [unref(constants)?.[ConstantKey.OrderStatus]?.CANCELLED || 'CANCELLED']:
+    t('status_order_cancelled')
 })
 
 /** Nuxt UI color tokens for each order status */

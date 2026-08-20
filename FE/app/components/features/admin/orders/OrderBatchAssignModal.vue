@@ -80,17 +80,22 @@ function handleAssign() {
 </script>
 
 <template>
-  <UModal v-model:open="isOpen" title="Điều phối đơn hàng" :ui="{ content: 'sm:max-w-xl' }">
+  <UModal
+    v-model:open="isOpen"
+    :title="$t('admin_order_batch_title')"
+    :ui="{ content: 'sm:max-w-xl' }"
+  >
     <template #body>
       <div class="space-y-4">
         <div
           class="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 flex items-center gap-2 rounded-lg border p-3"
         >
           <div class="i-lucide-truck text-primary-600 dark:text-primary-400 h-5 w-5" />
-          <p class="text-primary-700 dark:text-primary-300 text-sm">
-            Đã chọn <strong class="font-bold">{{ localOrders.length }}</strong> đơn hàng để điều
-            phối
-          </p>
+          <!-- eslint-disable-next-line vue/no-v-html -->
+          <p
+            class="text-primary-700 dark:text-primary-300 text-sm"
+            v-html="$t('admin_order_batch_selected_desc', { count: localOrders.length })"
+          />
         </div>
 
         <div
@@ -100,7 +105,7 @@ function handleAssign() {
           <div
             class="bg-surface-elevated border-surface-border text-muted border-b px-3 py-2 text-xs font-semibold"
           >
-            THỨ TỰ GIAO HÀNG
+            {{ $t('admin_order_batch_order') }}
           </div>
           <div class="max-h-60 overflow-y-auto">
             <div
@@ -137,11 +142,11 @@ function handleAssign() {
                 <div class="flex items-center gap-2">
                   <span class="text-foreground text-sm font-semibold">#{{ order.id }}</span>
                   <span class="text-foreground truncate text-sm">{{
-                    order.user?.fullName || 'Khách lẻ'
+                    order.user?.fullName || $t('admin_order_batch_retail')
                   }}</span>
                 </div>
                 <div class="text-muted truncate text-xs">
-                  {{ order.shippingAddress?.addressLine || 'Không có địa chỉ' }}
+                  {{ order.shippingAddress?.addressLine || $t('admin_order_batch_no_address') }}
                 </div>
               </div>
               <div class="shrink-0 text-right">
@@ -154,13 +159,13 @@ function handleAssign() {
           </div>
         </div>
 
-        <UFormField label="Chọn tài xế" required>
+        <UFormField :label="$t('admin_order_batch_select_driver')" required>
           <USelectMenu
             v-model="batchDriverId"
             :items="drivers.map((d) => ({ value: d.id, label: d.fullName }))"
             value-key="value"
             label-key="label"
-            placeholder="Chọn tài xế giao hàng"
+            :placeholder="$t('admin_order_batch_ph_driver')"
             class="w-full"
           />
         </UFormField>
@@ -177,14 +182,14 @@ function handleAssign() {
             }
           "
         >
-          Hủy
+          {{ $t('common_cancel') }}
         </UButton>
         <UButton
           :loading="batchAssigning"
           :disabled="!batchDriverId || localOrders.length === 0"
           @click="handleAssign"
         >
-          Điều phối ngay
+          {{ $t('admin_order_batch_btn_assign') }}
         </UButton>
       </div>
     </template>

@@ -2,10 +2,12 @@
 import { customerService } from '~/services/customerService'
 import { getOrderStatusColor, getOrderStatusLabel } from '~/utils/orderStatus'
 
+import { t } from '~/utils/i18n'
+
 const { constants } = useMasterData()
 const authStore = useAuthStore()
 
-useSeoMeta({ title: 'Khách hàng - BunTech' })
+useSeoMeta({ title: t('wholesale_seo_title') })
 definePageMeta({ layout: 'default' })
 
 const { data: dashboardData, pending: loading } = useAsyncData(
@@ -34,12 +36,27 @@ const creditLimit = computed(() => overview.value?.debtLimit || 1)
 const debtPercentage = computed(() => Math.min(100, (totalDebt.value / creditLimit.value) * 100))
 const totalOrders30Days = computed(() => overview.value?.totalOrders30Days || 0)
 
-const quickActions = [
-  { icon: 'i-lucide-shopping-bag', label: 'Đặt hàng', to: '/wholesale/order', color: 'primary' },
-  { icon: 'i-lucide-file-text', label: 'Lịch sử đơn', to: '/wholesale/orders', color: 'secondary' },
-  { icon: 'i-lucide-credit-card', label: 'Thanh toán', to: '/wholesale', color: 'success' },
-  { icon: 'i-lucide-store', label: 'Sản phẩm', to: '/', color: 'warning' }
-]
+const quickActions = computed(() => [
+  {
+    icon: 'i-lucide-shopping-bag',
+    label: t('wholesale_qa_order'),
+    to: '/wholesale/order',
+    color: 'primary'
+  },
+  {
+    icon: 'i-lucide-file-text',
+    label: t('wholesale_qa_history'),
+    to: '/wholesale/orders',
+    color: 'secondary'
+  },
+  {
+    icon: 'i-lucide-credit-card',
+    label: t('wholesale_qa_payment'),
+    to: '/wholesale',
+    color: 'success'
+  },
+  { icon: 'i-lucide-store', label: t('nav_products'), to: '/', color: 'warning' }
+])
 
 const colorMap: Record<string, string> = {
   primary:
@@ -52,12 +69,12 @@ const colorMap: Record<string, string> = {
     'text-warning-600 dark:text-warning-400 bg-warning-50 dark:bg-warning-900/20 ring-warning-100 dark:ring-warning-900/30'
 }
 
-const tableColumns = [
-  { accessorKey: 'id', header: 'Mã đơn' },
-  { accessorKey: 'createdAt', header: 'Ngày đặt' },
-  { accessorKey: 'status', header: 'Trạng thái' },
-  { accessorKey: 'totalAmount', header: 'Tổng tiền' }
-]
+const tableColumns = computed(() => [
+  { accessorKey: 'id', header: t('wholesale_col_id') },
+  { accessorKey: 'createdAt', header: t('wholesale_col_date') },
+  { accessorKey: 'status', header: t('status') },
+  { accessorKey: 'totalAmount', header: t('wholesale_col_total') }
+])
 </script>
 <template>
   <div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -74,20 +91,24 @@ const tableColumns = [
         <div>
           <div class="flex flex-wrap items-center gap-2">
             <h1 class="text-surface-foreground text-xl font-bold tracking-tight sm:text-2xl">
-              {{ customerProfile?.fullName || 'Khách Sỉ' }}
+              {{ customerProfile?.fullName || $t('wholesale_role_label') }}
             </h1>
-            <UBadge color="primary" variant="subtle">Khách sỉ</UBadge>
+            <UBadge color="primary" variant="subtle">{{ $t('wholesale_role_label') }}</UBadge>
           </div>
           <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">
-            Xin chào, {{ customerProfile?.fullName?.split(' ').pop() || 'Bạn' }} 👋
+            {{
+              $t('wholesale_welcome', {
+                name: customerProfile?.fullName?.split(' ').pop() || $t('wholesale_default_user')
+              })
+            }}
           </p>
           <p class="mt-0.5 text-xs text-slate-400 dark:text-zinc-500">
-            {{ customerProfile?.phoneNumber || 'Chưa có SĐT' }}
+            {{ customerProfile?.phoneNumber || $t('wholesale_no_phone') }}
           </p>
         </div>
       </div>
       <UButton to="/wholesale/order" size="lg" icon="i-lucide-plus" class="group">
-        Đặt hàng
+        {{ $t('wholesale_qa_order') }}
         <template #trailing>
           <UIcon
             name="i-lucide-arrow-up-right"
@@ -111,14 +132,16 @@ const tableColumns = [
           >
             <UIcon name="i-lucide-wallet" class="text-primary-600 dark:text-primary-400 h-5 w-5" />
           </div>
-          <h2 class="text-surface-foreground text-sm font-semibold">Tổng chi tiêu</h2>
+          <h2 class="text-surface-foreground text-sm font-semibold">
+            {{ $t('wholesale_kpi_total_spent') }}
+          </h2>
         </div>
         <p class="text-primary-600 dark:text-primary-400 relative text-2xl font-bold tabular-nums">
           {{ formatVND(totalSpent) }}
         </p>
         <p class="relative mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-zinc-400">
-          <UIcon name="i-lucide-trending-up" class="text-success-500 h-3.5 w-3.5" /> Từ trước đến
-          nay
+          <UIcon name="i-lucide-trending-up" class="text-success-500 h-3.5 w-3.5" />
+          {{ $t('wholesale_kpi_all_time') }}
         </p>
       </div>
       <div
@@ -131,16 +154,20 @@ const tableColumns = [
           >
             <UIcon name="i-lucide-credit-card" class="text-error-600 dark:text-error-400 h-5 w-5" />
           </div>
-          <h2 class="text-surface-foreground text-sm font-semibold">Công nợ hiện tại</h2>
+          <h2 class="text-surface-foreground text-sm font-semibold">
+            {{ $t('admin_customer_debt_cur') }}
+          </h2>
         </div>
         <p class="text-error-600 dark:text-error-400 relative text-2xl font-bold tabular-nums">
           {{ formatVND(totalDebt) }}
         </p>
         <div class="relative mt-2">
           <div class="mb-1 flex justify-between text-[10px] text-slate-500 dark:text-zinc-400">
-            <span
-              >Hạn mức: {{ creditLimit === 1 ? 'Chưa thiết lập' : formatVND(creditLimit) }}</span
-            >
+            <span>{{
+              creditLimit === 1
+                ? $t('wholesale_kpi_debt_limit_empty')
+                : $t('wholesale_kpi_debt_limit', { limit: formatVND(creditLimit) })
+            }}</span>
             <span>{{ Math.round(debtPercentage) }}%</span>
           </div>
           <UProgress :value="debtPercentage" color="error" size="sm" />
@@ -156,15 +183,19 @@ const tableColumns = [
           >
             <UIcon name="i-lucide-package" class="text-info-600 dark:text-info-400 h-5 w-5" />
           </div>
-          <h2 class="text-surface-foreground text-sm font-semibold">Đơn hàng</h2>
+          <h2 class="text-surface-foreground text-sm font-semibold">{{ $t('nav_orders') }}</h2>
         </div>
         <div class="relative flex items-end gap-2">
           <p class="text-surface-foreground text-2xl font-bold tabular-nums">
             {{ totalOrders30Days }}
           </p>
-          <p class="mb-1 text-sm text-slate-500 dark:text-zinc-400">đơn đã đặt</p>
+          <p class="mb-1 text-sm text-slate-500 dark:text-zinc-400">
+            {{ $t('wholesale_kpi_orders_unit') }}
+          </p>
         </div>
-        <p class="relative mt-1 text-xs text-slate-500 dark:text-zinc-400">Trong 30 ngày qua</p>
+        <p class="relative mt-1 text-xs text-slate-500 dark:text-zinc-400">
+          {{ $t('wholesale_kpi_orders_30days') }}
+        </p>
       </div>
     </div>
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -173,7 +204,9 @@ const tableColumns = [
           class="animate-fade-in-up mb-4 flex items-center justify-between"
           style="animation-delay: 160ms"
         >
-          <h2 class="text-surface-foreground text-lg font-bold">Đơn hàng gần đây</h2>
+          <h2 class="text-surface-foreground text-lg font-bold">
+            {{ $t('wholesale_recent_orders') }}
+          </h2>
           <UButton
             variant="ghost"
             color="neutral"
@@ -181,7 +214,7 @@ const tableColumns = [
             trailing-icon="i-lucide-chevron-right"
             size="sm"
           >
-            Xem tất cả
+            {{ $t('wholesale_view_all') }}
           </UButton>
         </div>
         <div class="card animate-fade-in-up overflow-hidden p-0" style="animation-delay: 200ms">
@@ -189,8 +222,8 @@ const tableColumns = [
             :rows="recentOrders"
             :columns="tableColumns"
             :loading="loading"
-            empty-title="Chưa có đơn hàng"
-            empty-description="Bạn chưa đặt đơn hàng nào."
+            :empty-title="$t('wholesale_empty_orders_title')"
+            :empty-description="$t('wholesale_empty_orders_desc')"
             empty-icon="i-lucide-package-open"
             class="w-full"
             :ui="{ th: 'bg-surface-muted' }"
@@ -225,7 +258,7 @@ const tableColumns = [
           class="text-surface-foreground animate-fade-in-up mb-4 text-lg font-bold"
           style="animation-delay: 160ms"
         >
-          Thao tác nhanh
+          {{ $t('wholesale_quick_actions') }}
         </h2>
         <div class="animate-fade-in-up grid grid-cols-2 gap-3" style="animation-delay: 200ms">
           <NuxtLink

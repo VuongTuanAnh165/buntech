@@ -4,6 +4,7 @@ import { requiredString } from '~/utils/validation'
 import { ConstantKey } from '~/enums/constantKeys'
 import type { UserDTO } from '~/utils/types'
 import { useUsers } from '~/composables/admin/useUsers'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 const { createUser, updateUser } = useUsers()
@@ -27,9 +28,12 @@ const isOpen = computed({
 const isEdit = computed(() => !!props.user)
 
 const roleOptions = computed(() => [
-  { label: 'Khách hàng', value: constants.value?.[ConstantKey.Role]?.CUSTOMER || 'customer' },
-  { label: 'Tài xế', value: constants.value?.[ConstantKey.Role]?.DRIVER || 'driver' },
-  { label: 'Quản trị viên', value: constants.value?.[ConstantKey.Role]?.ADMIN || 'admin' }
+  {
+    label: t('common_customer'),
+    value: constants.value?.[ConstantKey.Role]?.CUSTOMER || 'customer'
+  },
+  { label: t('admin_role_driver'), value: constants.value?.[ConstantKey.Role]?.DRIVER || 'driver' },
+  { label: t('admin_role_admin'), value: constants.value?.[ConstantKey.Role]?.ADMIN || 'admin' }
 ])
 
 const schema = computed(() => {
@@ -38,13 +42,16 @@ const schema = computed(() => {
       ? z.string().optional()
       : z
           .string()
-          .regex(/^[0-9]{10,11}$/, 'Số điện thoại không hợp lệ')
-          .min(1, 'Số điện thoại không được để trống'),
+          .regex(/^[0-9]{10,11}$/, t('admin_customer_form_phone_err_invalid'))
+          .min(1, t('val_phone_req')),
     password: isEdit.value
       ? z.string().optional()
-      : z.string().min(6, 'Mật khẩu phải từ 6 ký tự trở lên'),
-    fullName: requiredString('Họ tên').max(100, 'Họ tên quá dài'),
-    role: requiredString('Vai trò')
+      : z.string().min(6, t('admin_customer_form_pw_err')),
+    fullName: requiredString(t('quick_order_val_name')).max(
+      100,
+      t('admin_customer_form_name_err_max')
+    ),
+    role: requiredString(t('admin_profile_info_role'))
   })
 })
 
@@ -122,37 +129,45 @@ const handleFormSubmit = () => {
 </script>
 
 <template>
-  <USlideover v-model:open="isOpen" :title="isEdit ? 'Cập nhật Khách hàng' : 'Thêm mới Khách hàng'">
+  <USlideover
+    v-model:open="isOpen"
+    :title="isEdit ? $t('admin_customer_form_title_edit') : $t('admin_customer_form_title_add')"
+  >
     <template #body>
       <form id="customer-form" class="space-y-4" @submit.prevent="handleFormSubmit">
         <UFormField
           v-if="!isEdit"
-          label="Số điện thoại"
+          :label="$t('auth_login_phone')"
           name="phoneNumber"
           :error="formErrors.phoneNumber"
         >
-          <UInput v-model="state.phoneNumber" placeholder="Nhập số điện thoại" />
+          <UInput v-model="state.phoneNumber" :placeholder="$t('admin_customer_form_phone_ph')" />
         </UFormField>
 
-        <UFormField v-if="!isEdit" label="Mật khẩu" name="password" :error="formErrors.password">
+        <UFormField
+          v-if="!isEdit"
+          :label="$t('val_password')"
+          name="password"
+          :error="formErrors.password"
+        >
           <UInput
             v-model="state.password"
             type="password"
-            placeholder="Nhập mật khẩu (từ 6 ký tự)"
+            :placeholder="$t('admin_customer_form_pw_ph')"
           />
         </UFormField>
 
-        <UFormField label="Họ tên" name="fullName" :error="formErrors.fullName">
-          <UInput v-model="state.fullName" placeholder="VD: Nguyễn Văn A" />
+        <UFormField :label="$t('val_fullname')" name="fullName" :error="formErrors.fullName">
+          <UInput v-model="state.fullName" :placeholder="$t('admin_customer_form_name_ph')" />
         </UFormField>
 
-        <UFormField label="Vai trò" name="role" :error="formErrors.role">
+        <UFormField :label="$t('admin_profile_info_role')" name="role" :error="formErrors.role">
           <USelectMenu
             v-model="state.role"
             :items="roleOptions"
             value-key="value"
             label-key="label"
-            placeholder="Chọn vai trò"
+            :placeholder="$t('admin_customer_form_role_ph')"
           />
         </UFormField>
       </form>
@@ -168,7 +183,7 @@ const handleFormSubmit = () => {
               isOpen = false
             }
           "
-          >Hủy</UButton
+          >{{ $t('common_cancel') }}</UButton
         >
         <UButton
           type="submit"
@@ -176,7 +191,7 @@ const handleFormSubmit = () => {
           color="primary"
           :loading="isSubmitting || loading"
         >
-          {{ isEdit ? 'Lưu thay đổi' : 'Thêm mới' }}
+          {{ isEdit ? $t('admin_profile_btn_save') : $t('common_add_new') }}
         </UButton>
       </div>
     </template>

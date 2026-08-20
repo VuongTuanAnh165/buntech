@@ -16,29 +16,27 @@ const heroImage = '/images/banner_1.webp'
           class="animate-fade-in mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur-md"
         >
           <UIcon name="i-lucide-sparkles" class="h-4 w-4" aria-hidden="true" />
-          Xưởng bún truyền thống từ năm 1960
+          {{ $t('public_landing_hero_badge') }}
         </div>
+        <!-- eslint-disable vue/no-v-html -->
         <h1
           class="animate-fade-in-up mb-6 text-4xl leading-[1.1] font-bold tracking-tight text-white sm:text-5xl lg:text-6xl"
           style="letter-spacing: -0.02em"
-        >
-          Bún tươi thủ công BunTech<br class="hidden sm:block" />
-          — Truyền 3 đời
-        </h1>
+          v-html="$t('public_landing_hero_title')"
+        />
         <p
           class="animate-fade-in-up mb-8 max-w-xl text-lg leading-relaxed text-slate-200 sm:text-xl"
           style="animation-delay: 100ms"
-        >
-          Bún tươi 100% gạo nguyên chất, không chất bảo quản.<br />sản xuất mỗi sáng theo bí truyền
-          gia đình. Giao hàng tận nơi trong 2 giờ, đặt hàng dễ dàng qua app.
-        </p>
+          v-html="$t('public_landing_hero_desc')"
+        />
+        <!-- eslint-enable vue/no-v-html -->
         <div
           class="animate-fade-in-up flex flex-col gap-3 sm:flex-row"
           style="animation-delay: 200ms"
         >
           <NuxtLink to="/quick-order" class="block">
             <UButton color="primary" variant="solid" size="lg" class="group w-full sm:w-auto">
-              Đặt hàng nhanh
+              {{ $t('quick_order_title') }}
               <UIcon
                 name="i-lucide-arrow-right"
                 class="h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -53,7 +51,7 @@ const heroImage = '/images/banner_1.webp'
               size="lg"
               class="w-full !border-white/30 !bg-white/10 !text-white hover:!bg-white/20 sm:w-auto"
             >
-              Xem sản phẩm
+              {{ $t('public_landing_hero_btn_products') }}
             </UButton>
           </NuxtLink>
         </div>
@@ -63,16 +61,24 @@ const heroImage = '/images/banner_1.webp'
           style="animation-delay: 300ms"
         >
           <div>
-            <div class="text-2xl font-bold text-white sm:text-3xl">1000+ kg</div>
-            <div class="mt-0.5 text-sm text-slate-400">Sản xuất mỗi ngày</div>
+            <div class="text-2xl font-bold text-white sm:text-3xl">
+              {{ $t('public_about_stat_4_val') }}
+            </div>
+            <div class="mt-0.5 text-sm text-slate-400">{{ $t('public_about_stat_4_lbl') }}</div>
           </div>
           <div>
-            <div class="text-2xl font-bold text-white sm:text-3xl">60+ năm</div>
-            <div class="mt-0.5 text-sm text-slate-400">Kinh nghiệm</div>
+            <div class="text-2xl font-bold text-white sm:text-3xl">
+              {{ $t('public_about_stat_1_val') }}
+            </div>
+            <div class="mt-0.5 text-sm text-slate-400">
+              {{ $t('public_landing_hero_stat_2_lbl') }}
+            </div>
           </div>
           <div>
-            <div class="text-2xl font-bold text-white sm:text-3xl">50+</div>
-            <div class="mt-0.5 text-sm text-slate-400">Đại lý phục vụ</div>
+            <div class="text-2xl font-bold text-white sm:text-3xl">
+              {{ $t('public_about_stat_2_val') }}
+            </div>
+            <div class="mt-0.5 text-sm text-slate-400">{{ $t('public_about_stat_2_lbl') }}</div>
           </div>
         </div>
       </div>

@@ -4,9 +4,10 @@ import { userService } from '~/services/userService'
 import type { UserDTO } from '~/utils/types'
 
 import { z } from 'zod'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Thu nợ - BunTech Admin' })
+useSeoMeta({ title: t('admin_debt_pay_seo_title') })
 
 // ─── State ────────────────────────────────────────────────
 const state = reactive({
@@ -17,8 +18,10 @@ const state = reactive({
 })
 
 const schema = z.object({
-  userId: z.number({ message: 'Vui lòng chọn khách hàng' }),
-  amount: z.number({ message: 'Vui lòng nhập số tiền' }).min(1000, 'Số tiền tối thiểu 1.000đ'),
+  userId: z.number({ message: t('admin_debt_pay_err_user') }),
+  amount: z
+    .number({ message: t('admin_debt_pay_err_amount_req') })
+    .min(1000, t('admin_debt_pay_err_amount_min')),
   paymentMethod: z.string(),
   note: z.string().optional()
 })
@@ -79,17 +82,18 @@ const handleFormSubmit = () => {
 <template>
   <form @submit.prevent="handleFormSubmit">
     <BasePageHeader
-      title="Thu nợ"
-      description="Ghi nhận khách trả nợ"
+      :title="$t('admin_debt_pay_title')"
+      :description="$t('admin_debt_pay_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Tài chính', to: '/admin/debt' },
-        { label: 'Thu nợ' }
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('admin_debt_title'), to: '/admin/debt' },
+        { label: $t('admin_debt_pay_title') }
       ]"
     >
       <template #actions>
         <UButton variant="outline" color="neutral" to="/admin/debt">
-          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" /> Quay lại
+          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" />
+          {{ $t('admin_blog_cat_btn_back') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -102,20 +106,27 @@ const handleFormSubmit = () => {
             <UIcon name="i-lucide-wallet" class="text-primary-600 dark:text-primary-400 h-5 w-5" />
           </div>
           <div>
-            <h2 class="text-surface-foreground text-lg font-semibold">Ghi nhận thanh toán</h2>
+            <h2 class="text-surface-foreground text-lg font-semibold">
+              {{ $t('admin_debt_pay_card_title') }}
+            </h2>
             <p class="text-sm text-slate-500 dark:text-zinc-400">
-              Chọn khách hàng và nhập số tiền trả nợ
+              {{ $t('admin_debt_pay_card_desc') }}
             </p>
           </div>
         </div>
         <div class="space-y-5">
           <!-- Customer select -->
-          <UFormField label="Khách hàng" name="userId" :error="formErrors.userId" required>
+          <UFormField
+            :label="$t('common_customer')"
+            name="userId"
+            :error="formErrors.userId"
+            required
+          >
             <USelectMenu
               v-model="state.userId"
               :items="debtCustomers"
               value-key="value"
-              placeholder="Chọn khách hàng..."
+              :placeholder="$t('admin_debt_pay_customer_ph')"
               searchable
               class="w-full"
             />
@@ -137,7 +148,7 @@ const handleFormSubmit = () => {
                     <p class="text-surface-foreground text-sm font-medium">
                       {{ selectedCustomer.label.split(' — ')[0] }}
                     </p>
-                    <p class="text-xs text-slate-500">Hạn mức nợ</p>
+                    <p class="text-xs text-slate-500">{{ $t('admin_debt_pay_limit') }}</p>
                   </div>
                 </div>
                 <p class="text-error-600 dark:text-error-400 text-lg font-bold tabular-nums">
@@ -147,11 +158,16 @@ const handleFormSubmit = () => {
             </div>
           </Transition>
           <!-- Amount -->
-          <UFormField label="Số tiền thanh toán" name="amount" :error="formErrors.amount" required>
+          <UFormField
+            :label="$t('admin_debt_pay_amount')"
+            name="amount"
+            :error="formErrors.amount"
+            required
+          >
             <UInput
               v-model="state.amount"
               type="number"
-              placeholder="Nhập số tiền..."
+              :placeholder="$t('admin_debt_pay_amount_ph')"
               icon="i-lucide-banknote"
               :ui="{ base: 'tabular-nums' }"
             />
@@ -165,7 +181,7 @@ const handleFormSubmit = () => {
           </UFormField>
           <!-- Payment Method -->
           <UFormField
-            label="Phương thức thanh toán"
+            :label="$t('admin_debt_pay_method')"
             name="paymentMethod"
             :error="formErrors.paymentMethod"
             required
@@ -173,21 +189,17 @@ const handleFormSubmit = () => {
             <USelectMenu
               v-model="state.paymentMethod"
               :items="[
-                { label: 'Tiền mặt', value: 'CASH' },
-                { label: 'Chuyển khoản', value: 'BANK_TRANSFER' }
+                { label: $t('admin_debt_pay_method_cash'), value: 'CASH' },
+                { label: $t('admin_debt_pay_method_bank'), value: 'BANK_TRANSFER' }
               ]"
               value-key="value"
-              placeholder="Chọn phương thức..."
+              :placeholder="$t('admin_debt_pay_method_ph')"
               class="w-full"
             />
           </UFormField>
           <!-- Note -->
-          <UFormField label="Ghi chú" name="note" :error="formErrors.note">
-            <UTextarea
-              v-model="state.note"
-              placeholder="Ghi chú thanh toán (không bắt buộc)..."
-              :rows="3"
-            />
+          <UFormField :label="$t('admin_debt_pay_note')" name="note" :error="formErrors.note">
+            <UTextarea v-model="state.note" :placeholder="$t('admin_debt_pay_note_ph')" :rows="3" />
           </UFormField>
           <!-- Actions -->
           <div class="flex items-center gap-3 pt-2">
@@ -198,9 +210,12 @@ const handleFormSubmit = () => {
               :loading="isSubmitting"
               class="flex-1 justify-center"
             >
-              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> Xác nhận thu nợ
+              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" />
+              {{ $t('admin_debt_pay_btn_submit') }}
             </UButton>
-            <UButton variant="outline" color="neutral" size="lg" to="/admin/debt"> Hủy </UButton>
+            <UButton variant="outline" color="neutral" size="lg" to="/admin/debt">
+              {{ $t('common_cancel') }}
+            </UButton>
           </div>
         </div>
       </div>

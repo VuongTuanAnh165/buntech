@@ -4,6 +4,7 @@ import { useDriverRoutes } from '~/composables/driver/useDriverRoutes'
 import { useDriverDeliver } from '~/composables/driver/useDriverDeliver'
 import { useIdempotencyKey } from '~/composables/useIdempotencyKey'
 import type { DriverRouteDTO } from '~/services/driverService'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 const { driverRoutes, refresh: refreshRoutes } = useDriverRoutes()
@@ -24,7 +25,7 @@ const amountInput = ref('')
 const order = computed(
   () => driverRoutes.value.find((o: DriverRouteDTO) => o.id === orderId.value) || null
 )
-useSeoMeta({ title: `Chi tiết đơn giao - BunTech Driver` })
+useSeoMeta({ title: t('driver_delivery_detail_seo') })
 
 const orderItems = computed(() => order.value?.items || [])
 const remaining = computed(() => {
@@ -49,25 +50,25 @@ const statusGradient = computed(() => {
   return 'from-slate-700 to-slate-800'
 })
 
-const statusLabel: Record<string, string> = {
-  DELIVERING: 'Đang giao hàng',
-  PROCESSING: 'Đang xử lý',
-  PENDING: 'Chờ giao',
-  DELIVERED: 'Đã giao',
-  CANCELLED: 'Đã hủy'
-}
+const statusLabel = computed<Record<string, string>>(() => ({
+  DELIVERING: t('status_order_delivering'),
+  PROCESSING: t('status_order_processing'),
+  PENDING: t('driver_deliv_status_pending'),
+  DELIVERED: t('status_order_delivered'),
+  CANCELLED: t('status_order_cancelled')
+}))
 
 function callCustomer() {
   const phone = order.value?.user?.phoneNumber || order.value?.shippingAddress?.phoneNumber
   if (phone) {
-    toast.add({ title: `Đang gọi ${phone}`, color: 'success' })
+    toast.add({ title: t('driver_delivery_detail_call_success', { phone }), color: 'success' })
   } else {
-    toast.add({ title: 'Không có số điện thoại', color: 'error' })
+    toast.add({ title: t('driver_delivery_detail_call_err'), color: 'error' })
   }
 }
 
 function navigateToAddress() {
-  toast.add({ title: 'Mở bản đồ điều hướng...', color: 'success' })
+  toast.add({ title: t('driver_delivery_detail_map_msg'), color: 'success' })
 }
 
 function openCollectModal() {
@@ -127,7 +128,7 @@ onMounted(() => {
         }
       "
     >
-      <UIcon name="i-lucide-arrow-left" class="h-4 w-4" /> Quay lại
+      <UIcon name="i-lucide-arrow-left" class="h-4 w-4" /> {{ $t('admin_blog_cat_btn_back') }}
     </UButton>
 
     <!-- Loading -->
@@ -141,8 +142,8 @@ onMounted(() => {
     <!-- Order not found -->
     <BaseEmptyState
       v-else-if="!order"
-      title="Không tìm thấy đơn hàng"
-      description="Đơn hàng không tồn tại hoặc đã bị xóa."
+      :title="$t('admin_order_list_empty_title')"
+      :description="$t('driver_delivery_detail_err_desc')"
     />
 
     <!-- Delivered success state -->
@@ -157,13 +158,13 @@ onMounted(() => {
           />
         </div>
         <h2 class="mb-2 text-xl font-bold text-neutral-900 dark:text-white">
-          Giao hàng thành công!
+          {{ $t('driver_delivery_detail_success_title') }}
         </h2>
         <p class="mb-4 text-sm text-slate-500 dark:text-zinc-400">
-          Đơn #{{ order.id }} đã được xác nhận giao thành công.
+          {{ $t('driver_delivery_detail_success_desc', { id: order.id }) }}
         </p>
         <p class="text-sm text-slate-400 dark:text-zinc-500">
-          Đang chuyển về danh sách tuyến giao...
+          {{ $t('driver_delivery_detail_success_redirect') }}
         </p>
       </div>
     </template>
@@ -199,7 +200,7 @@ onMounted(() => {
             </div>
             <div class="flex items-center gap-1.5">
               <UIcon name="i-lucide-truck" class="h-4 w-4" />
-              <span>{{ orderItems.length }} sản phẩm</span>
+              <span>{{ $t('admin_dash_n_products', { count: orderItems.length }) }}</span>
             </div>
           </div>
         </div>
@@ -209,16 +210,24 @@ onMounted(() => {
       <div class="card mb-4 p-5">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
           <UIcon name="i-lucide-user" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-          Thông tin khách hàng
+          {{ $t('driver_delivery_detail_customer_title') }}
         </h2>
         <div class="mb-4 flex items-center gap-3">
-          <UAvatar :alt="order.user?.fullName || 'Khách'" size="md" />
+          <UAvatar :alt="order.user?.fullName || $t('driver_history_guest')" size="md" />
           <div class="min-w-0 flex-1">
             <p class="font-semibold text-neutral-900 dark:text-white">
-              {{ order.user?.fullName || order.shippingAddress?.recipientName || 'Khách vãng lai' }}
+              {{
+                order.user?.fullName ||
+                order.shippingAddress?.recipientName ||
+                $t('driver_history_guest')
+              }}
             </p>
             <p class="text-sm text-slate-500 tabular-nums dark:text-zinc-400">
-              {{ order.user?.phoneNumber || order.shippingAddress?.phoneNumber || 'Chưa có SĐT' }}
+              {{
+                order.user?.phoneNumber ||
+                order.shippingAddress?.phoneNumber ||
+                $t('wholesale_no_phone')
+              }}
             </p>
           </div>
           <UButton
@@ -234,7 +243,7 @@ onMounted(() => {
           <UIcon name="i-lucide-star" class="fill-warning-400 text-warning-400 h-3.5 w-3.5" />
           <span class="text-warning-600 dark:text-warning-400 font-medium">4.8</span>
           <span class="text-slate-300 dark:text-zinc-600">·</span>
-          <span>Khách hàng thân thiết</span>
+          <span>{{ $t('driver_delivery_detail_customer_loyal') }}</span>
         </div>
       </div>
 
@@ -243,7 +252,7 @@ onMounted(() => {
         <div class="mb-3 flex items-center justify-between">
           <h2 class="flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
             <UIcon name="i-lucide-map-pin" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-            Địa chỉ giao hàng
+            {{ $t('admin_order_create_address') }}
           </h2>
           <UButton
             variant="ghost"
@@ -252,7 +261,7 @@ onMounted(() => {
             @click="navigateToAddress"
           >
             <UIcon name="i-lucide-navigation" class="h-3.5 w-3.5" />
-            Chỉ đường
+            {{ $t('driver_delivery_detail_address_btn') }}
           </UButton>
         </div>
         <div class="flex items-start gap-3">
@@ -285,7 +294,7 @@ onMounted(() => {
       <div class="card mb-4 p-5">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
           <UIcon name="i-lucide-package" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-          Danh sách sản phẩm
+          {{ $t('driver_delivery_detail_items_title') }}
         </h2>
         <div class="space-y-3">
           <div
@@ -303,7 +312,7 @@ onMounted(() => {
             </div>
             <div class="min-w-0 flex-1">
               <p class="text-sm font-medium text-neutral-900 dark:text-white">
-                {{ item.product?.name || 'Sản phẩm' }}
+                {{ item.product?.name || $t('nav_products') }}
               </p>
               <p class="text-xs text-slate-500 dark:text-zinc-400">x{{ item.quantity }}</p>
             </div>
@@ -315,17 +324,21 @@ onMounted(() => {
       <div class="card mb-4 p-5">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
           <UIcon name="i-lucide-wallet" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-          Thanh toán
+          {{ $t('wholesale_qa_payment') }}
         </h2>
         <div class="space-y-3">
           <div class="flex items-center justify-between text-sm">
-            <span class="text-slate-500 dark:text-zinc-400">Tổng giá trị đơn</span>
+            <span class="text-slate-500 dark:text-zinc-400">{{
+              $t('driver_delivery_detail_payment_total')
+            }}</span>
             <span class="font-semibold text-neutral-900 tabular-nums dark:text-white">{{
               formatVND(Number(order.totalAmount) || 0)
             }}</span>
           </div>
           <div class="flex items-center justify-between text-sm">
-            <span class="text-slate-500 dark:text-zinc-400">Đã thu</span>
+            <span class="text-slate-500 dark:text-zinc-400">{{
+              $t('driver_history_stat_collected')
+            }}</span>
             <span class="text-success-600 dark:text-success-400 font-semibold tabular-nums">{{
               formatVND(Number(order.amountCollected) || 0)
             }}</span>
@@ -333,7 +346,9 @@ onMounted(() => {
           <div
             class="flex items-center justify-between border-t border-neutral-100 pt-3 text-sm dark:border-neutral-800"
           >
-            <span class="font-medium text-neutral-900 dark:text-white">Còn phải thu</span>
+            <span class="font-medium text-neutral-900 dark:text-white">{{
+              $t('driver_delivery_detail_payment_remain')
+            }}</span>
             <span class="text-error-600 dark:text-error-400 text-lg font-bold tabular-nums">{{
               formatVND(remaining)
             }}</span>
@@ -345,11 +360,11 @@ onMounted(() => {
       <div class="grid grid-cols-1 gap-3 pb-4">
         <UButton v-if="remaining > 0" variant="outline" size="lg" block @click="openCollectModal">
           <UIcon name="i-lucide-wallet" class="mr-1 h-4 w-4" />
-          Thu tiền
+          {{ $t('driver_delivery_detail_btn_collect') }}
         </UButton>
         <BaseSwipeToConfirm
           :loading="isSubmitting"
-          text="Vuốt để xác nhận giao"
+          :text="$t('driver_delivery_detail_swipe_deliver')"
           @confirmed="confirmDelivery"
         />
       </div>
@@ -359,38 +374,42 @@ onMounted(() => {
     <UModal v-model:open="showCollectModal">
       <template #content>
         <div class="space-y-4 p-6">
-          <h3 class="text-lg font-bold text-neutral-900 dark:text-white">Thu tiền từ khách</h3>
+          <h3 class="text-lg font-bold text-neutral-900 dark:text-white">
+            {{ $t('driver_delivery_detail_modal_title') }}
+          </h3>
           <div>
-            <label class="mb-1 block text-sm font-medium text-slate-500 dark:text-zinc-400"
-              >Số tiền cần thu</label
-            >
+            <label class="mb-1 block text-sm font-medium text-slate-500 dark:text-zinc-400">{{
+              $t('driver_delivery_detail_modal_label1')
+            }}</label>
             <p class="text-primary-600 dark:text-primary-400 mb-3 text-2xl font-bold tabular-nums">
               {{ formatVND(remaining) }}
             </p>
           </div>
           <div>
-            <label class="mb-1 block text-sm font-medium text-slate-500 dark:text-zinc-400"
-              >Số tiền khách đưa</label
-            >
+            <label class="mb-1 block text-sm font-medium text-slate-500 dark:text-zinc-400">{{
+              $t('driver_delivery_detail_modal_label2')
+            }}</label>
             <UInput
               v-model="amountInput"
               type="text"
               inputmode="numeric"
-              placeholder="Nhập số tiền"
+              :placeholder="$t('driver_delivery_detail_modal_ph')"
               size="lg"
             />
           </div>
           <div
             class="flex items-center justify-between rounded-xl bg-neutral-50 p-3 dark:bg-zinc-800/50"
           >
-            <span class="text-sm text-slate-500 dark:text-zinc-400">Tiền thối lại</span>
+            <span class="text-sm text-slate-500 dark:text-zinc-400">{{
+              $t('driver_delivery_detail_modal_change')
+            }}</span>
             <span class="font-semibold text-neutral-900 tabular-nums dark:text-white">{{
               formatVND(Math.max(0, Number(amountInput) - remaining))
             }}</span>
           </div>
           <BaseSwipeToConfirm
             :loading="isSubmitting"
-            text="Vuốt để chốt đơn"
+            :text="$t('driver_delivery_detail_swipe_confirm')"
             @confirmed="confirmDelivery"
           />
         </div>

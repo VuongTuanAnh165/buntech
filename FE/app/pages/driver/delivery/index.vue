@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import { t } from '~/utils/i18n'
 import { ConstantKey } from '~/enums/constantKeys'
 import type { DriverRouteDTO } from '~/services/driverService'
 import { useDriverRoutes } from '~/composables/driver/useDriverRoutes'
 
 const { constants } = useMasterData()
 const { driverRoutes, loading, refresh: refreshRoutes } = useDriverRoutes()
-
 definePageMeta({ layout: 'driver' })
-useSeoMeta({ title: 'Tuyến giao hàng - BunTech Driver' })
+useSeoMeta({ title: t('driver_delivery_seo_title') })
 const toast = useToast()
 const refreshing = ref(false)
 const isOnline = ref(true)
@@ -71,18 +71,18 @@ function distanceFor(orderId: number): string {
   return `${km.toFixed(1)} km`
 }
 
-const statusLabel: Record<string, string> = {
-  DELIVERING: 'Đang giao',
-  PROCESSING: 'Đang xử lý',
-  PENDING: 'Chờ giao',
-  DELIVERED: 'Đã giao',
-  CANCELLED: 'Đã hủy'
-}
+const statusLabel = computed<Record<string, string>>(() => ({
+  DELIVERING: t('status_order_delivering'),
+  PROCESSING: t('status_order_processing'),
+  PENDING: t('driver_deliv_status_pending'),
+  DELIVERED: t('status_order_delivered'),
+  CANCELLED: t('status_order_cancelled')
+}))
 
 function toggleOnline() {
   isOnline.value = !isOnline.value
   toast.add({
-    title: isOnline.value ? 'Bạn đã trực tuyến' : 'Bạn đã ngoại tuyến',
+    title: isOnline.value ? t('driver_delivery_msg_online') : t('driver_delivery_msg_offline'),
     color: 'success'
   })
 }
@@ -91,7 +91,7 @@ async function refresh() {
   refreshing.value = true
   await refreshRoutes()
   refreshing.value = false
-  toast.add({ title: 'Đã làm mới danh sách', color: 'success' })
+  toast.add({ title: t('driver_delivery_msg_refresh'), color: 'success' })
 }
 </script>
 <template>
@@ -115,10 +115,14 @@ async function refresh() {
           </div>
           <div>
             <p class="text-sm font-semibold">
-              {{ isOnline ? 'Đang trực tuyến' : 'Đang ngoại tuyến' }}
+              {{
+                isOnline ? $t('driver_delivery_online_title') : $t('driver_delivery_offline_title')
+              }}
             </p>
             <p class="text-xs text-white/80">
-              {{ isOnline ? 'Sẵn sàng nhận đơn giao hàng' : 'Tạm dừng nhận đơn' }}
+              {{
+                isOnline ? $t('driver_delivery_online_desc') : $t('driver_delivery_offline_desc')
+              }}
             </p>
           </div>
         </div>
@@ -126,7 +130,9 @@ async function refresh() {
           variant="ghost"
           color="neutral"
           class="relative h-7 min-h-[28px] w-12 min-w-[44px] rounded-full bg-white/25 backdrop-blur transition-all"
-          :aria-label="isOnline ? 'Tắt trực tuyến' : 'Bật trực tuyến'"
+          :aria-label="
+            isOnline ? $t('driver_delivery_btn_offline') : $t('driver_delivery_btn_online')
+          "
           @click="toggleOnline"
         >
           <span
@@ -142,7 +148,7 @@ async function refresh() {
     <div class="mb-4 flex items-center justify-between">
       <div>
         <h1 class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
-          Tuyến giao hôm nay
+          {{ $t('driver_delivery_title') }}
         </h1>
         <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">
           {{ formatDate(new Date().toISOString()) }}
@@ -168,9 +174,13 @@ async function refresh() {
         <div class="mb-4 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <UIcon name="i-lucide-wallet" class="text-primary-400 h-5 w-5" />
-            <span class="text-sm font-medium text-slate-300">Cần thu hôm nay</span>
+            <span class="text-sm font-medium text-slate-300">{{
+              $t('driver_delivery_stat_to_collect')
+            }}</span>
           </div>
-          <UBadge color="primary" variant="solid" size="xs">{{ stats.pending }} đang giao</UBadge>
+          <UBadge color="primary" variant="solid" size="xs">{{
+            $t('driver_delivery_stat_delivering', { count: stats.pending })
+          }}</UBadge>
         </div>
         <p class="mb-4 text-3xl font-bold tracking-tight tabular-nums">
           {{ formatVND(stats.totalToCollect) }}
@@ -179,21 +189,21 @@ async function refresh() {
           <div>
             <div class="mb-1 flex items-center gap-1.5">
               <UIcon name="i-lucide-check-circle-2" class="text-success-400 h-3.5 w-3.5" />
-              <span class="text-xs text-slate-400">Đã giao</span>
+              <span class="text-xs text-slate-400">{{ $t('status_order_delivered') }}</span>
             </div>
             <p class="text-lg font-bold tabular-nums">{{ stats.completed }}</p>
           </div>
           <div>
             <div class="mb-1 flex items-center gap-1.5">
               <UIcon name="i-lucide-truck" class="text-primary-400 h-3.5 w-3.5" />
-              <span class="text-xs text-slate-400">Đang giao</span>
+              <span class="text-xs text-slate-400">{{ $t('status_order_delivering') }}</span>
             </div>
             <p class="text-primary-400 text-lg font-bold tabular-nums">{{ stats.pending }}</p>
           </div>
           <div>
             <div class="mb-1 flex items-center gap-1.5">
               <UIcon name="i-lucide-package" class="text-warning-400 h-3.5 w-3.5" />
-              <span class="text-xs text-slate-400">Tổng tuyến</span>
+              <span class="text-xs text-slate-400">{{ $t('driver_delivery_stat_total') }}</span>
             </div>
             <p class="text-lg font-bold tabular-nums">{{ driverRoutes.length }}</p>
           </div>
@@ -207,17 +217,17 @@ async function refresh() {
       >
         <UButton
           v-for="tab in [
-            { accessorKey: 'all', header: 'Tất cả', count: driverRoutes.length },
+            { accessorKey: 'all', header: t('admin_debt_type_all'), count: driverRoutes.length },
             {
               accessorKey: 'shipping',
-              header: 'Đang giao',
+              header: t('status_order_delivering'),
               count: driverRoutes.filter(
                 (o: DriverRouteDTO) => o.status === constants?.[ConstantKey.OrderStatus]?.DELIVERING
               ).length
             },
             {
               accessorKey: 'pending',
-              header: 'Chưa giao',
+              header: t('driver_delivery_tab_pending'),
               count: driverRoutes.filter(
                 (o: DriverRouteDTO) =>
                   o.status === constants?.[ConstantKey.OrderStatus]?.PROCESSING ||
@@ -226,7 +236,7 @@ async function refresh() {
             },
             {
               accessorKey: 'delivered',
-              header: 'Đã giao',
+              header: t('status_order_delivered'),
               count: driverRoutes.filter(
                 (o: DriverRouteDTO) => o.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
               ).length
@@ -320,7 +330,7 @@ async function refresh() {
             <div>
               <p class="font-mono text-xs text-slate-400 dark:text-zinc-500">#{{ order.id }}</p>
               <p class="font-semibold text-neutral-900 dark:text-white">
-                {{ order.user?.fullName || 'Khách vãng lai' }}
+                {{ order.user?.fullName || $t('driver_history_guest') }}
               </p>
             </div>
           </div>
@@ -369,7 +379,7 @@ async function refresh() {
             <div
               class="text-primary-600 dark:text-primary-400 flex items-center gap-1 text-sm font-medium"
             >
-              <span>Chi tiết</span>
+              <span>{{ $t('driver_delivery_btn_detail') }}</span>
               <UIcon name="i-lucide-chevron-right" class="h-4 w-4" />
             </div>
           </div>
@@ -379,11 +389,11 @@ async function refresh() {
     <!-- Empty -->
     <BaseEmptyState
       v-else
-      title="Không có tuyến giao nào"
+      :title="$t('driver_delivery_empty_title')"
       :description="
         activeTab === 'all'
-          ? 'Không có đơn hàng nào cần giao hôm nay.'
-          : 'Không có đơn hàng nào phù hợp với bộ lọc đã chọn.'
+          ? $t('driver_delivery_empty_desc_all')
+          : $t('driver_delivery_empty_desc_filter')
       "
     />
   </div>

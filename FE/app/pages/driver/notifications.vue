@@ -3,9 +3,11 @@ import { ConstantKey } from '~/enums/constantKeys'
 import { useDriverNotifications } from '~/composables/driver/useDriverNotifications'
 import type { DriverNotification } from '~/composables/driver/useDriverNotifications'
 
+import { t } from '~/utils/i18n'
+
 const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
-useSeoMeta({ title: 'Thông báo - BunTech Driver' })
+useSeoMeta({ title: t('driver_notification_seo_title') })
 
 type FilterTab = 'all' | 'unread' | 'read'
 const filterTab = ref<FilterTab>('all')
@@ -84,7 +86,7 @@ onMounted(() => {
         <h1
           class="flex items-center gap-2 text-xl font-bold tracking-tight text-neutral-900 dark:text-white"
         >
-          Thông báo
+          {{ $t('driver_notifications') }}
           <span
             v-if="unreadCount"
             class="bg-error-500 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold text-white tabular-nums"
@@ -92,7 +94,7 @@ onMounted(() => {
           >
         </h1>
         <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">
-          {{ unreadCount }} thông báo chưa đọc
+          {{ $t('driver_notification_unread_count', { count: unreadCount }) }}
         </p>
       </div>
       <UButton
@@ -103,7 +105,7 @@ onMounted(() => {
         class="text-primary-600 dark:text-primary-400"
         @click="markAllAsRead"
       >
-        Đánh dấu tất cả đã đọc
+        {{ $t('driver_notification_btn_read_all') }}
       </UButton>
     </div>
     <!-- Filter tabs -->
@@ -113,9 +115,17 @@ onMounted(() => {
       >
         <UButton
           v-for="tab in [
-            { accessorKey: 'all', header: 'Tất cả', count: notifications.length },
-            { accessorKey: 'unread', header: 'Chưa đọc', count: unreadCount },
-            { accessorKey: 'read', header: 'Đã đọc', count: notifications.length - unreadCount }
+            { accessorKey: 'all', header: t('admin_debt_type_all'), count: notifications.length },
+            {
+              accessorKey: 'unread',
+              header: t('driver_notification_tab_unread'),
+              count: unreadCount
+            },
+            {
+              accessorKey: 'read',
+              header: t('driver_notification_tab_read'),
+              count: notifications.length - unreadCount
+            }
           ]"
           :key="tab.accessorKey"
           variant="ghost"
@@ -213,18 +223,22 @@ onMounted(() => {
           :loading="loading"
           @click="loadData(meta.currentPage + 1)"
         >
-          Tải thêm
+          {{ $t('driver_notification_btn_load_more') }}
         </UButton>
       </div>
     </template>
     <!-- Empty -->
     <BaseEmptyState
       v-else
-      :title="filterTab === 'unread' ? 'Không có thông báo chưa đọc' : 'Không có thông báo'"
+      :title="
+        filterTab === 'unread'
+          ? $t('driver_notification_empty_title_unread')
+          : $t('driver_notification_empty_title_all')
+      "
       :description="
         filterTab === 'unread'
-          ? 'Bạn đã đọc hết tất cả thông báo rồi!'
-          : 'Khi có thông báo mới, nó sẽ hiển thị tại đây.'
+          ? $t('driver_notification_empty_desc_unread')
+          : $t('driver_notification_empty_desc_all')
       "
     />
   </div>

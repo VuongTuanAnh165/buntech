@@ -4,6 +4,7 @@
   Reason: Extracted to keep admin/change-password.vue under 400 lines
 -->
 <script setup lang="ts">
+import { t } from '~/utils/i18n'
 defineProps<{
   passwordHistory: {
     id: string
@@ -15,38 +16,38 @@ defineProps<{
 }>()
 
 // Security tips
-const securityTips = [
+const securityTips = computed(() => [
   {
     icon: 'i-lucide-check-circle-2',
-    text: 'Sử dụng mật khẩu dài ít nhất 8 ký tự',
+    text: t('admin_change_pw_tip_1'),
     color: 'success' as const
   },
   {
     icon: 'i-lucide-check-circle-2',
-    text: 'Kết hợp chữ hoa, chữ thường, số và ký tự đặc biệt',
+    text: t('admin_change_pw_tip_2'),
     color: 'success' as const
   },
   {
     icon: 'i-lucide-check-circle-2',
-    text: 'Không dùng thông tin cá nhân (tên, SĐT, ngày sinh)',
+    text: t('admin_change_pw_tip_3'),
     color: 'success' as const
   },
   {
     icon: 'i-lucide-alert-triangle',
-    text: 'Không trùng với mật khẩu của tài khoản khác',
+    text: t('admin_change_pw_tip_4'),
     color: 'warning' as const
   },
   {
     icon: 'i-lucide-alert-triangle',
-    text: 'Đổi mật khẩu định kỳ mỗi 3-6 tháng',
+    text: t('admin_change_pw_tip_5'),
     color: 'warning' as const
   },
   {
     icon: 'i-lucide-shield-alert',
-    text: 'Không chia sẻ mật khẩu cho bất kỳ ai',
+    text: t('admin_change_pw_tip_6'),
     color: 'error' as const
   }
-]
+])
 
 const tipColorMap: Record<string, string> = {
   success: 'text-success-600 dark:text-success-400',
@@ -57,20 +58,22 @@ const tipColorMap: Record<string, string> = {
 const twoFAEnabled = ref(false)
 const accountSecurity = computed(() => [
   {
-    label: 'Xác thực 2 bước',
-    value: twoFAEnabled.value ? 'Đã bật' : 'Chưa bật',
+    label: t('admin_profile_sec_2fa'),
+    value: twoFAEnabled.value
+      ? t('admin_change_pw_status_2fa_on')
+      : t('admin_change_pw_status_2fa_off'),
     color: twoFAEnabled.value ? ('success' as const) : ('warning' as const),
     icon: 'i-lucide-smartphone'
   },
   {
-    label: 'Mật khẩu lần cuối',
-    value: '7 ngày trước',
+    label: t('admin_change_pw_status_pw'),
+    value: t('admin_change_pw_status_pw_val'),
     color: 'info' as const,
     icon: 'i-lucide-key-round'
   },
   {
-    label: 'Phiên hoạt động',
-    value: '2 thiết bị',
+    label: t('admin_profile_sec_sessions'),
+    value: t('admin_change_pw_status_session_val'),
     color: 'primary' as const,
     icon: 'i-lucide-monitor'
   }
@@ -120,7 +123,9 @@ const securityBadgeColor: Record<string, 'success' | 'warning' | 'info' | 'prima
         >
           <UIcon name="i-lucide-lightbulb" class="text-accent-600 dark:text-accent-400 h-4 w-4" />
         </div>
-        <h3 class="text-surface-foreground text-sm font-semibold">Mẹo bảo mật</h3>
+        <h3 class="text-surface-foreground text-sm font-semibold">
+          {{ $t('admin_change_pw_tip_title') }}
+        </h3>
       </div>
       <ul class="space-y-2.5">
         <li v-for="tip in securityTips" :key="tip.text" class="flex items-start gap-2.5">
@@ -143,7 +148,9 @@ const securityBadgeColor: Record<string, 'success' | 'warning' | 'info' | 'prima
         >
           <UIcon name="i-lucide-clock" class="text-info-600 dark:text-info-400 h-4 w-4" />
         </div>
-        <h3 class="text-surface-foreground text-sm font-semibold">Lịch sử đổi mật khẩu</h3>
+        <h3 class="text-surface-foreground text-sm font-semibold">
+          {{ $t('admin_change_pw_hist_title') }}
+        </h3>
       </div>
       <ol class="relative">
         <div
@@ -176,9 +183,9 @@ const securityBadgeColor: Record<string, 'success' | 'warning' | 'info' | 'prima
           <div class="min-w-0 flex-1 pt-1">
             <div class="flex items-center gap-2">
               <p class="text-surface-foreground text-sm font-medium">{{ entry.label }}</p>
-              <UBadge v-if="entry.current" color="success" size="sm" variant="soft"
-                >Hiện tại</UBadge
-              >
+              <UBadge v-if="entry.current" color="success" size="sm" variant="soft">{{
+                $t('admin_change_pw_hist_current')
+              }}</UBadge>
             </div>
             <p class="mt-0.5 text-xs text-slate-500 dark:text-zinc-400">{{ entry.note }}</p>
             <p class="mt-0.5 text-xs text-slate-400 tabular-nums dark:text-zinc-500">
@@ -206,7 +213,9 @@ const securityBadgeColor: Record<string, 'success' | 'warning' | 'info' | 'prima
             class="text-success-600 dark:text-success-400 h-4 w-4"
           />
         </div>
-        <h3 class="text-surface-foreground text-sm font-semibold">Tình trạng bảo mật</h3>
+        <h3 class="text-surface-foreground text-sm font-semibold">
+          {{ $t('admin_change_pw_status_title') }}
+        </h3>
       </div>
       <div class="space-y-2.5">
         <div
@@ -242,11 +251,15 @@ const securityBadgeColor: Record<string, 'success' | 'warning' | 'info' | 'prima
             class="text-primary-600 dark:text-primary-400 mt-0.5 h-4 w-4 flex-shrink-0"
           />
           <div>
-            <p class="text-primary-700 dark:text-primary-300 text-xs font-medium">Điểm bảo mật</p>
+            <p class="text-primary-700 dark:text-primary-300 text-xs font-medium">
+              {{ $t('admin_change_pw_score_title') }}
+            </p>
             <p class="mt-0.5 text-xs text-slate-600 dark:text-zinc-300">
-              Tài khoản của bạn đạt mức
-              <span class="text-success-600 dark:text-success-400 font-semibold">Tốt</span>. Bật xác
-              thực 2 bước để đạt mức Xuất sắc.
+              {{ $t('admin_change_pw_score_desc') }}
+              <span class="text-success-600 dark:text-success-400 font-semibold">{{
+                $t('admin_change_pw_score_good')
+              }}</span
+              >{{ $t('admin_change_pw_score_hint') }}
             </p>
           </div>
         </div>

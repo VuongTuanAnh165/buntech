@@ -84,7 +84,7 @@ const tierLabels: Record<string, string> = {
               rel="noopener noreferrer"
               class="bg-primary-500 dark:bg-primary-700 hover:bg-primary-600 dark:hover:bg-primary-800 mt-1 inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-white! transition-colors"
             >
-              📍 Chỉ đường ngay
+              {{ $t('public_customer_directions') }}
             </a>
           </div>
         </LPopup>

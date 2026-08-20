@@ -7,6 +7,7 @@
 import { ConstantKey } from '~/enums/constantKeys'
 import type { AdminOrderDTO } from '~/services/adminOrderService'
 import { getOrderStatusColor, getOrderStatusLabel } from '~/utils/orderStatus'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 
@@ -21,13 +22,13 @@ const emit = defineEmits<{
 
 const columns = [
   { accessorKey: 'select', header: '' },
-  { accessorKey: 'id', header: 'Mã đơn' },
-  { accessorKey: 'user', header: 'Khách hàng' },
-  { accessorKey: 'status', header: 'Trạng thái' },
-  { accessorKey: 'total', header: 'Tổng tiền' },
-  { accessorKey: 'amount_collected', header: 'Đã thu' },
-  { accessorKey: 'created_at', header: 'Ngày tạo' },
-  { accessorKey: 'actions', header: 'Thao tác' }
+  { accessorKey: 'id', header: t('wholesale_col_id') },
+  { accessorKey: 'user', header: t('common_customer') },
+  { accessorKey: 'status', header: t('status') },
+  { accessorKey: 'total', header: t('wholesale_col_total') },
+  { accessorKey: 'amount_collected', header: t('driver_history_stat_collected') },
+  { accessorKey: 'created_at', header: t('created_at') },
+  { accessorKey: 'actions', header: t('actions') }
 ]
 
 function toggleSelectOrder(id: number, checked: boolean) {
@@ -39,8 +40,8 @@ function toggleSelectOrder(id: number, checked: boolean) {
   <BaseDataTable
     :columns="columns"
     :rows="orders"
-    empty-title="Không tìm thấy đơn hàng"
-    empty-description="Thử đổi bộ lọc hoặc tạo đơn hàng mới."
+    :empty-title="$t('admin_order_list_empty_title')"
+    :empty-description="$t('admin_order_list_empty_desc')"
     empty-icon="i-lucide-shopping-bag"
   >
     <template #select-cell="{ row }">
@@ -62,13 +63,13 @@ function toggleSelectOrder(id: number, checked: boolean) {
     <template #user-cell="{ row }">
       <div class="flex min-w-0 items-center gap-2">
         <UAvatar
-          :alt="row.user?.fullName || 'Khách vãng lai'"
+          :alt="row.user?.fullName || $t('driver_history_guest')"
           :src="row.user?.avatarUrl ?? undefined"
           size="sm"
         />
         <div class="min-w-0">
           <p class="text-surface-foreground max-w-[180px] truncate text-sm">
-            {{ row.user?.fullName || 'Khách vãng lai' }}
+            {{ row.user?.fullName || $t('driver_history_guest') }}
           </p>
           <p
             v-if="row.driver"
@@ -115,7 +116,7 @@ function toggleSelectOrder(id: number, checked: boolean) {
           :to="`/admin/orders/create?copyFrom=${row.id}`"
           icon="i-lucide-copy"
         >
-          Sao chép
+          {{ $t('admin_order_list_btn_copy') }}
         </UButton>
         <UButton
           color="neutral"
@@ -124,7 +125,7 @@ function toggleSelectOrder(id: number, checked: boolean) {
           :to="`/admin/orders/${row.id}`"
           icon="i-lucide-eye"
         >
-          Xem
+          {{ $t('admin_order_list_btn_view') }}
         </UButton>
       </div>
     </template>

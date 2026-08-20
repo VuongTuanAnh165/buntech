@@ -16,17 +16,17 @@ const blogPosts = computed(() => blogPostsRes.value?.data?.data || [])
         <div class="mb-8 flex items-end justify-between">
           <div>
             <h2 class="text-surface-foreground text-2xl font-bold sm:text-3xl">
-              Tin tức & Mẹo hay
+              {{ $t('public_blog_title') }}
             </h2>
             <p class="mt-1 text-sm text-slate-500 dark:text-zinc-400">
-              Cập nhật kiến thức về bún và ẩm thực Việt
+              {{ $t('public_landing_cta_blog_subtitle') }}
             </p>
           </div>
           <NuxtLink
             to="/blog"
             class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 group hidden min-h-[44px] items-center gap-1 px-2 text-sm font-medium transition-colors sm:flex"
           >
-            Xem tất cả
+            {{ $t('wholesale_view_all') }}
             <span
               class="i-lucide-chevron-right h-4 w-4 transition-transform group-hover:translate-x-0.5"
               aria-hidden="true"
@@ -80,11 +80,10 @@ const blogPosts = computed(() => blogPostsRes.value?.data?.data || [])
         />
         <div class="relative">
           <h2 class="mb-4 text-2xl font-bold text-white sm:text-3xl">
-            Sẵn sàng đặt hàng bún tươi?
+            {{ $t('public_landing_cta_order_title') }}
           </h2>
           <p class="mx-auto mb-8 max-w-xl text-white/80">
-            Đặt hàng online trong 30 giây, giao hàng tận nơi trong 2 giờ. Bún tươi mỗi ngày, từ
-            xưởng đến bàn ăn của bạn.
+            {{ $t('public_landing_cta_order_subtitle') }}
           </p>
           <NuxtLink to="/quick-order">
             <UButton
@@ -93,7 +92,7 @@ const blogPosts = computed(() => blogPostsRes.value?.data?.data || [])
               size="lg"
               class="!text-primary-600 group !bg-white hover:!bg-white/90"
             >
-              Đặt hàng ngay
+              {{ $t('public_about_cta_btn_order') }}
               <span
                 class="i-lucide-arrow-right h-5 w-5 transition-transform group-hover:translate-x-1"
                 aria-hidden="true"

@@ -1,61 +1,62 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { t } from '~/utils/i18n'
 
 export const adminNavigationItems: NavigationMenuItem[][] = [
   [
     {
-      label: 'Tổng quan',
+      label: t('nav_overview'),
       icon: 'i-lucide-house',
       to: '/admin'
     },
     {
-      label: 'Khách hàng',
+      label: t('common_customer'),
       icon: 'i-lucide-users',
       to: '/admin/customers'
     },
     {
-      label: 'Đơn hàng',
+      label: t('nav_orders'),
       icon: 'i-lucide-shopping-cart',
       to: '/admin/orders'
     },
     {
-      label: 'Sản phẩm',
+      label: t('nav_products'),
       icon: 'i-lucide-package',
       children: [
-        { label: 'Danh sách SP', to: '/admin/products' },
-        { label: 'Danh mục', to: '/admin/products/categories' },
-        { label: 'Đánh giá', to: '/admin/products/reviews' }
+        { label: t('nav_product_list'), to: '/admin/products' },
+        { label: t('nav_categories'), to: '/admin/products/categories' },
+        { label: t('nav_reviews'), to: '/admin/products/reviews' }
       ]
     },
     {
-      label: 'Công nợ',
+      label: t('nav_debt'),
       icon: 'i-lucide-wallet',
       to: '/admin/debt'
     }
   ],
   [
     {
-      label: 'Kho / Nguyên liệu',
+      label: t('nav_inventory_raw'),
       icon: 'i-lucide-box',
       children: [
-        { label: 'Tồn kho', to: '/admin/inventory' },
-        { label: 'Báo cáo hao hụt', to: '/admin/inventory/loss-report' }
+        { label: t('nav_inventory'), to: '/admin/inventory' },
+        { label: t('nav_loss_report'), to: '/admin/inventory/loss-report' }
       ]
     },
     {
-      label: 'Blog',
+      label: t('nav_blog'),
       icon: 'i-lucide-file-text',
       children: [
-        { label: 'Bài viết', to: '/admin/blog' },
-        { label: 'Danh mục', to: '/admin/blog/categories' }
+        { label: t('nav_blog_posts'), to: '/admin/blog' },
+        { label: t('nav_categories'), to: '/admin/blog/categories' }
       ]
     },
     {
-      label: 'Thống kê',
+      label: t('nav_statistics'),
       icon: 'i-lucide-pie-chart',
       to: '/admin/statistics'
     },
     {
-      label: 'Cấu hình hệ thống',
+      label: t('nav_system_config'),
       icon: 'i-lucide-settings',
       to: '/admin/system'
     }
@@ -64,35 +65,35 @@ export const adminNavigationItems: NavigationMenuItem[][] = [
 
 export const driverNavigationItems: NavigationMenuItem[] = [
   {
-    label: 'Giao hàng',
+    label: t('nav_delivery'),
     icon: 'i-lucide-truck',
     to: '/driver/delivery'
   },
   {
-    label: 'Lịch sử',
+    label: t('driver_history'),
     icon: 'i-lucide-history',
     to: '/driver/history'
   },
   {
-    label: 'Thông báo',
+    label: t('driver_notifications'),
     icon: 'i-lucide-bell',
     to: '/driver/notifications'
   },
   {
-    label: 'Phương tiện',
+    label: t('driver_vehicle'),
     icon: 'i-lucide-car',
     to: '/driver/vehicle'
   },
   {
-    label: 'Tài khoản',
+    label: t('profile'),
     icon: 'i-lucide-user',
     to: '/driver/profile'
   }
 ]
 
 export const publicNavigationItems: NavigationMenuItem[] = [
-  { label: 'Trang chủ', to: '/' },
-  { label: 'Sản phẩm', to: '/products' },
-  { label: 'Hệ thống phân phối', to: '/distribution' },
-  { label: 'Bảng giá', to: '/wholesale' }
+  { label: t('nav_home'), to: '/' },
+  { label: t('nav_products'), to: '/products' },
+  { label: t('nav_distribution'), to: '/distribution' },
+  { label: t('nav_wholesale'), to: '/wholesale' }
 ]

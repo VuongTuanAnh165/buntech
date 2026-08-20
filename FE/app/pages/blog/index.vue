@@ -4,8 +4,9 @@ import { blogService } from '~/services/blogService'
 import type { BlogPost, BlogCategory } from '~/utils/types'
 import { normalizePaginationResponse } from '~/utils/api'
 import { extractIdFromSlug, generateSeoSlug } from '~/utils/idEncoder'
+import { t } from '~/utils/i18n'
 
-useSeoMeta({ title: 'Tin tức - BunTech' })
+useSeoMeta({ title: t('public_blog_seo_title') })
 definePageMeta({ layout: 'default' })
 
 const search = ref('')
@@ -70,25 +71,27 @@ const clearFilters = () => {
           <NuxtLink
             to="/"
             class="hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-zinc-400"
-            >Trang chủ</NuxtLink
+            >{{ $t('nav_home') }}</NuxtLink
           >
         </li>
         <li class="text-gray-300 dark:text-zinc-600" aria-hidden="true">/</li>
-        <li aria-current="page" class="text-surface-foreground font-medium">Tin tức</li>
+        <li aria-current="page" class="text-surface-foreground font-medium">
+          {{ $t('nav_news') }}
+        </li>
       </ol>
     </nav>
     <h1 class="text-surface-foreground mb-2 text-2xl font-bold tracking-tight sm:text-3xl">
-      Tin tức & Mẹo hay
+      {{ $t('public_blog_title') }}
     </h1>
     <p class="mb-8 text-sm text-gray-500 dark:text-zinc-400">
-      Cập nhật kiến thức về bún, ẩm thực và mẹo kinh doanh
+      {{ $t('public_blog_subtitle') }}
     </p>
 
     <!-- Search -->
     <div class="mb-6 flex flex-wrap items-center gap-3">
       <BaseSearchInput
         v-model="search"
-        placeholder="Tìm kiếm bài viết (trong trang hiện tại)..."
+        :placeholder="$t('public_blog_search_ph')"
         class="max-w-md min-w-[200px] flex-1"
       />
       <UButton
@@ -100,7 +103,7 @@ const clearFilters = () => {
         @click="clearFilters"
       >
         <X class="h-4 w-4" aria-hidden="true" />
-        Xóa lọc
+        {{ $t('public_blog_btn_clear') }}
       </UButton>
     </div>
 
@@ -122,7 +125,7 @@ const clearFilters = () => {
           }
         "
       >
-        Tất cả
+        {{ $t('admin_debt_type_all') }}
       </UButton>
       <UButton
         v-for="cat in categories"
@@ -200,7 +203,7 @@ const clearFilters = () => {
             }
           "
         >
-          Trước
+          {{ $t('public_blog_btn_prev') }}
         </UButton>
         <UButton
           v-for="page in totalPages"
@@ -233,15 +236,15 @@ const clearFilters = () => {
             }
           "
         >
-          Sau
+          {{ $t('public_blog_btn_next') }}
         </UButton>
       </div>
     </template>
 
     <BaseEmptyState
       v-else
-      title="Không tìm thấy bài viết"
-      description="Thử thay đổi từ khóa hoặc danh mục để tìm bài viết phù hợp"
+      :title="$t('admin_blog_empty_title')"
+      :description="$t('public_blog_not_found_desc')"
     />
   </div>
 </template>

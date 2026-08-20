@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ConstantKey } from '~/enums/constantKeys'
+import { t } from '~/utils/i18n'
 const { constants } = useMasterData()
 interface Props {
   currentStatus: string
@@ -10,22 +11,22 @@ const props = defineProps<Props>()
 const timelineSteps = computed(() => [
   {
     value: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
-    label: 'Chờ xử lý',
+    label: t('status_order_pending'),
     icon: 'i-lucide-clock'
   },
   {
     value: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
-    label: 'Đang xử lý',
+    label: t('status_order_processing'),
     icon: 'i-lucide-package'
   },
   {
     value: constants.value?.[ConstantKey.OrderStatus]?.DELIVERING as string,
-    label: 'Đang giao',
+    label: t('status_order_delivering'),
     icon: 'i-lucide-truck'
   },
   {
     value: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
-    label: 'Đã giao',
+    label: t('status_order_delivered'),
     icon: 'i-lucide-check-circle'
   }
 ])
@@ -71,9 +72,9 @@ const getStepDate = (index: number) => {
           </div>
 
           <div class="ml-4 flex flex-col pt-1">
-            <span class="text-error-600 dark:text-error-400 text-sm font-semibold sm:text-base"
-              >Đã hủy</span
-            >
+            <span class="text-error-600 dark:text-error-400 text-sm font-semibold sm:text-base">{{
+              $t('status_order_cancelled')
+            }}</span>
             <span class="mt-1 text-xs text-gray-500 sm:text-sm">{{
               formatDateTime(props.createdAt)
             }}</span>

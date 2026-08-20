@@ -4,9 +4,10 @@ import { productService } from '~/services/productService'
 import type { ProductCategory } from '~/utils/types'
 import { slugify } from '~/utils/string'
 import { normalizePaginationResponse } from '~/utils/api'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Danh mục Sản phẩm - BunTech Admin' })
+useSeoMeta({ title: t('admin_categories_seo_title') })
 const toast = useToast()
 
 // ─── State ────────────────────────────────────────────────
@@ -35,11 +36,11 @@ const filteredCategories = computed(() => {
 })
 
 const columns = [
-  { accessorKey: 'thumbnail', header: 'Ảnh' },
-  { accessorKey: 'name', header: 'Tên danh mục' },
-  { accessorKey: 'slug', header: 'Đường dẫn (Slug)' },
-  { accessorKey: 'description', header: 'Mô tả' },
-  { accessorKey: 'actions', header: 'Hành động' }
+  { accessorKey: 'thumbnail', header: t('admin_categories_col_thumb') },
+  { accessorKey: 'name', header: t('admin_blog_cat_form_name') },
+  { accessorKey: 'slug', header: t('admin_categories_col_slug') },
+  { accessorKey: 'description', header: t('admin_prod_form_desc') },
+  { accessorKey: 'actions', header: t('actions') }
 ]
 
 // ─── Form State ───────────────────────────────────────────
@@ -54,7 +55,10 @@ const formState = reactive({
 })
 
 const schema = z.object({
-  name: z.string().min(1, 'Tên danh mục không được để trống').max(100, 'Tên không quá 100 ký tự'),
+  name: z
+    .string()
+    .min(1, t('admin_blog_cat_form_name_req'))
+    .max(100, t('admin_categories_form_name_max')),
   description: z.string().optional()
 })
 
@@ -76,12 +80,12 @@ function handleFileChange(event: Event) {
   if (!file) return
 
   if (file.size > 2 * 1024 * 1024) {
-    toast.add({ title: 'Ảnh không được vượt quá 2MB', color: 'warning' })
+    toast.add({ title: t('admin_categories_file_size_err'), color: 'warning' })
     return
   }
   const validExts = ['image/jpeg', 'image/png', 'image/webp']
   if (!validExts.includes(file.type)) {
-    toast.add({ title: 'Chỉ hỗ trợ ảnh JPG, PNG, WebP', color: 'warning' })
+    toast.add({ title: t('image_type_limit'), color: 'warning' })
     return
   }
 
@@ -96,7 +100,7 @@ function clearImage() {
 }
 
 async function handleDelete(id: number) {
-  if (!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return
+  if (!confirm(t('admin_blog_cat_del_confirm'))) return
   try {
     await productService.deleteCategory(id)
     await refresh()
@@ -170,20 +174,20 @@ async function handleSave() {
 <template>
   <div class="mx-auto max-w-6xl">
     <BasePageHeader
-      title="Danh mục Sản phẩm"
-      description="Quản lý phân loại sản phẩm, hỗ trợ SEO và tìm kiếm dễ dàng."
+      :title="$t('admin_categories_title')"
+      :description="$t('admin_categories_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Sản phẩm', to: '/admin/products' },
-        { label: 'Danh mục' }
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('nav_products'), to: '/admin/products' },
+        { label: $t('nav_categories') }
       ]"
     >
       <template #actions>
         <UButton variant="outline" color="neutral" to="/admin/products">
-          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" /> Sản phẩm
+          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" /> {{ $t('nav_products') }}
         </UButton>
         <UButton @click="openAdd">
-          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm danh mục
+          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> {{ $t('admin_categories_add') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -195,7 +199,10 @@ async function handleSave() {
       <div class="card animate-fade-in-up p-5">
         <div class="mb-4 flex items-center gap-4">
           <div class="max-w-sm flex-1">
-            <BaseSearchInput v-model="search" placeholder="Lọc danh mục theo tên..." />
+            <BaseSearchInput
+              v-model="search"
+              :placeholder="$t('admin_categories_filter_placeholder')"
+            />
           </div>
         </div>
 
@@ -203,8 +210,8 @@ async function handleSave() {
           <BaseDataTable
             :columns="columns"
             :rows="filteredCategories"
-            empty-title="Không tìm thấy danh mục"
-            empty-description="Thử đổi bộ lọc hoặc thêm danh mục mới."
+            :empty-title="$t('admin_blog_cat_empty_title')"
+            :empty-description="$t('admin_categories_empty_desc')"
             empty-icon="i-lucide-folder"
           >
             <template #thumbnail-cell="{ row }">
@@ -266,16 +273,21 @@ async function handleSave() {
       <!-- Add/Edit Modal -->
       <UModal
         v-model:open="showModal"
-        :title="isEditing ? 'Sửa danh mục' : 'Thêm danh mục mới'"
+        :title="
+          isEditing ? $t('admin_categories_modal_edit_title') : $t('admin_blog_cat_modal_add')
+        "
         :ui="{ content: 'sm:max-w-xl' }"
       >
         <template #body>
           <form id="categoryForm" class="space-y-4" @submit.prevent="handleSave">
-            <UFormField label="Tên danh mục" :error="formErrors.name" required>
-              <UInput v-model="formState.name" placeholder="VD: Bún Tươi, Phở Khô..." />
+            <UFormField :label="$t('admin_blog_cat_form_name')" :error="formErrors.name" required>
+              <UInput
+                v-model="formState.name"
+                :placeholder="$t('admin_categories_form_name_placeholder')"
+              />
             </UFormField>
 
-            <UFormField label="Đường dẫn (Slug)">
+            <UFormField :label="$t('admin_categories_form_slug')">
               <div class="flex items-center gap-2">
                 <span class="text-sm text-slate-400">/</span>
                 <UInput
@@ -286,18 +298,20 @@ async function handleSave() {
                 />
               </div>
               <template #hint>
-                <span class="text-xs text-slate-500">Tự tạo từ tên danh mục. VD: bun-tuoi</span>
+                <span class="text-xs text-slate-500">{{
+                  $t('admin_categories_form_slug_hint')
+                }}</span>
               </template>
             </UFormField>
 
-            <UFormField label="Mô tả" :error="formErrors.description">
+            <UFormField :label="$t('admin_prod_form_desc')" :error="formErrors.description">
               <UTextarea
                 v-model="formState.description"
-                placeholder="Mô tả ngắn gọn về danh mục..."
+                :placeholder="$t('admin_categories_form_desc_placeholder')"
               />
             </UFormField>
 
-            <UFormField label="Ảnh đại diện (Thumbnail)">
+            <UFormField :label="$t('admin_categories_form_thumb')">
               <input
                 ref="fileInputRef"
                 type="file"
@@ -313,9 +327,9 @@ async function handleSave() {
               >
                 <UIcon name="i-lucide-image-plus" class="mb-2 h-8 w-8 text-slate-400" />
                 <p class="text-surface-foreground text-center text-sm font-medium">
-                  Click để chọn ảnh
+                  {{ $t('admin_blog_edit_file_click') }}
                 </p>
-                <p class="mt-1 text-xs text-slate-500">JPG, PNG, WebP (Max 2MB)</p>
+                <p class="mt-1 text-xs text-slate-500">{{ $t('admin_categories_file_hint') }}</p>
               </div>
 
               <div
@@ -326,9 +340,11 @@ async function handleSave() {
                 <div
                   class="absolute inset-0 flex items-center justify-center gap-2 bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
                 >
-                  <UButton color="neutral" size="sm" @click="triggerFileSelect">Đổi ảnh</UButton>
+                  <UButton color="neutral" size="sm" @click="triggerFileSelect">{{
+                    $t('admin_categories_btn_change_img')
+                  }}</UButton>
                   <UButton
-                    aria-label="Xóa ảnh"
+                    :aria-label="$t('aria_del_img')"
                     color="error"
                     size="sm"
                     icon="i-lucide-trash-2"
@@ -341,9 +357,11 @@ async function handleSave() {
         </template>
         <template #footer>
           <div class="flex justify-end gap-3">
-            <UButton variant="outline" color="neutral" @click="showModal = false">Hủy</UButton>
+            <UButton variant="outline" color="neutral" @click="showModal = false">{{
+              $t('common_cancel')
+            }}</UButton>
             <UButton type="submit" form="categoryForm" :loading="isSubmitting">
-              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> Lưu
+              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> {{ $t('save') }}
             </UButton>
           </div>
         </template>

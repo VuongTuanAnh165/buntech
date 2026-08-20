@@ -3,8 +3,9 @@ import { ConstantKey } from '~/enums/constantKeys'
 import CustomerFormDrawer from '~/components/features/admin/customers/CustomerFormDrawer.vue'
 import { useUsers } from '~/composables/admin/useUsers'
 import type { UserDTO } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
-useSeoMeta({ title: 'Khách hàng - BunTech Admin' })
+useSeoMeta({ title: t('admin_customers_seo_title') })
 definePageMeta({ layout: 'admin' })
 
 const { constants } = useMasterData()
@@ -26,10 +27,13 @@ useSyncQuery({
 const debouncedSearch = refDebounced(search, 300)
 
 const roleOptions = computed(() => [
-  { label: 'Tất cả vai trò', value: 'ALL' },
-  { label: 'Khách hàng', value: constants.value?.[ConstantKey.Role]?.CUSTOMER || 'CUSTOMER' },
-  { label: 'Tài xế', value: constants.value?.[ConstantKey.Role]?.DRIVER || 'DRIVER' },
-  { label: 'Quản trị viên', value: constants.value?.[ConstantKey.Role]?.ADMIN || 'ADMIN' }
+  { label: t('admin_customers_role_all'), value: 'ALL' },
+  {
+    label: t('common_customer'),
+    value: constants.value?.[ConstantKey.Role]?.CUSTOMER || 'CUSTOMER'
+  },
+  { label: t('admin_role_driver'), value: constants.value?.[ConstantKey.Role]?.DRIVER || 'DRIVER' },
+  { label: t('admin_role_admin'), value: constants.value?.[ConstantKey.Role]?.ADMIN || 'ADMIN' }
 ])
 
 const fetchParams = computed(() => {
@@ -60,17 +64,17 @@ watch(
 )
 
 const kpiCards = computed(() => {
-  const t = total.value
+  const totalVal = total.value
   return [
     {
-      title: 'Tổng người dùng',
-      value: t,
+      title: t('admin_customers_kpi_total'),
+      value: totalVal,
       icon: 'i-lucide-users',
       color: 'primary' as const,
       trend: { value: 0, isPositive: true }
     },
     {
-      title: 'Khách hàng',
+      title: t('common_customer'),
       value: usersList.value.filter(
         (u: UserDTO) => u.role === (constants.value?.[ConstantKey.Role]?.CUSTOMER || 'CUSTOMER')
       ).length,
@@ -79,7 +83,7 @@ const kpiCards = computed(() => {
       trend: { value: 0, isPositive: true }
     },
     {
-      title: 'Nhân sự',
+      title: t('admin_customers_kpi_staff'),
       value: usersList.value.filter(
         (u: UserDTO) =>
           u.role === (constants.value?.[ConstantKey.Role]?.DRIVER || 'DRIVER') ||
@@ -93,12 +97,12 @@ const kpiCards = computed(() => {
 })
 
 const columns = [
-  { accessorKey: 'fullName', header: 'Khách hàng' },
-  { accessorKey: 'phoneNumber', header: 'Điện thoại' },
-  { accessorKey: 'role', header: 'Vai trò' },
-  { accessorKey: 'debtLimit', header: 'Hạn mức nợ' },
-  { accessorKey: 'createdAt', header: 'Ngày tạo' },
-  { accessorKey: 'actions', header: 'Thao tác' }
+  { accessorKey: 'fullName', header: t('common_customer') },
+  { accessorKey: 'phoneNumber', header: t('aria_phone') },
+  { accessorKey: 'role', header: t('admin_profile_info_role') },
+  { accessorKey: 'debtLimit', header: t('admin_debt_pay_limit') },
+  { accessorKey: 'createdAt', header: t('created_at') },
+  { accessorKey: 'actions', header: t('actions') }
 ]
 
 // Drawer logic
@@ -117,16 +121,16 @@ const openEdit = (row: UserDTO) => {
 
 const handleDelete = async (row: UserDTO) => {
   const confirmed = await confirm({
-    title: 'Xóa khách hàng',
-    description: `Bạn có chắc muốn xóa "${row.fullName}"? Hành động này không thể hoàn tác.`,
-    confirmLabel: 'Xóa',
+    title: t('admin_customers_del_title'),
+    description: t('admin_customers_del_desc', { name: row.fullName }),
+    confirmLabel: t('delete'),
     color: 'error'
   })
 
   if (confirmed) {
     try {
       await deleteUser(row.id)
-      toast.add({ title: 'Xóa thành công', color: 'success' })
+      toast.add({ title: t('admin_customers_del_success'), color: 'success' })
       refresh()
     } catch {
       // API error intercepted globally
@@ -137,23 +141,22 @@ const handleDelete = async (row: UserDTO) => {
 
 <template>
   <div class="space-y-6">
-    <BasePageHeader
-      title="Khách hàng & Người dùng"
-      subtitle="Quản lý thông tin khách hàng, tài xế và các người dùng khác"
-    >
+    <BasePageHeader :title="$t('admin_customers_title')" :subtitle="$t('admin_customers_desc')">
       <template #action>
-        <UButton icon="i-lucide-plus" color="primary" @click="openAdd">Thêm mới</UButton>
+        <UButton icon="i-lucide-plus" color="primary" @click="openAdd">{{
+          $t('common_add_new')
+        }}</UButton>
       </template>
     </BasePageHeader>
 
     <BaseEmptyState
       v-if="error"
       icon="i-lucide-alert-circle"
-      title="Lỗi tải dữ liệu"
-      description="Không thể tải danh sách người dùng."
+      :title="$t('admin_customers_err_title')"
+      :description="$t('admin_customers_err_desc')"
     >
       <template #action>
-        <UButton color="primary" @click="refresh()">Thử lại</UButton>
+        <UButton color="primary" @click="refresh()">{{ $t('error_btn_retry') }}</UButton>
       </template>
     </BaseEmptyState>
 
@@ -164,7 +167,7 @@ const handleDelete = async (row: UserDTO) => {
         <div class="mb-6 flex flex-col gap-4 sm:flex-row">
           <BaseSearchInput
             v-model="search"
-            placeholder="Tìm theo tên hoặc số điện thoại..."
+            :placeholder="$t('admin_customers_search')"
             class="sm:w-80"
           />
           <USelectMenu
@@ -185,8 +188,8 @@ const handleDelete = async (row: UserDTO) => {
             :columns="columns"
             :rows="usersList as any[]"
             :loading="loading"
-            empty-title="Không tìm thấy người dùng"
-            empty-description="Thử đổi bộ lọc hoặc thêm mới."
+            :empty-title="$t('admin_customers_empty_title')"
+            :empty-description="$t('admin_customers_empty_desc')"
           >
             <template #fullName-cell="{ row }">
               <div
@@ -271,7 +274,7 @@ const handleDelete = async (row: UserDTO) => {
                   icon="i-lucide-eye"
                   color="neutral"
                   variant="ghost"
-                  aria-label="Xem chi tiết"
+                  :aria-label="$t('actions')"
                   @click.stop="
                     () => {
                       navigateTo(`/admin/customers/${(row as UserDTO).id}`)
@@ -282,7 +285,7 @@ const handleDelete = async (row: UserDTO) => {
                   icon="i-lucide-pencil"
                   color="neutral"
                   variant="ghost"
-                  aria-label="Chỉnh sửa"
+                  :aria-label="$t('actions')"
                   @click.stop="
                     () => {
                       openEdit(row as UserDTO)
@@ -293,7 +296,7 @@ const handleDelete = async (row: UserDTO) => {
                   icon="i-lucide-trash-2"
                   color="error"
                   variant="ghost"
-                  aria-label="Xóa"
+                  :aria-label="$t('actions')"
                   @click.stop="
                     () => {
                       handleDelete(row as UserDTO)
@@ -314,7 +317,9 @@ const handleDelete = async (row: UserDTO) => {
                     / {{ total }}
                   </span>
                   <USelectMenu v-model="limit" :items="[10, 20, 50]" class="w-32">
-                    <template #default>{{ limit }} / trang</template>
+                    <template #default>{{
+                      $t('admin_customers_pagination_per_page', { limit })
+                    }}</template>
                   </USelectMenu>
                 </div>
                 <UPagination v-model:page="page" :total="total" :items-per-page="limit" :max="5" />

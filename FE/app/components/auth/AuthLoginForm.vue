@@ -3,6 +3,7 @@ import type { z } from 'zod'
 import { ArrowRight, ShieldCheck, Truck, User } from 'lucide-vue-next'
 import { useAuthStore } from '~/stores/auth'
 import { useFormSubmit } from '~/composables/useFormSubmit'
+import { t } from '~/utils/i18n'
 
 import { loginSchema } from '~/utils/validation'
 
@@ -58,7 +59,7 @@ const handleLogin = handleSubmit(
     }
 
     if (!isValid) {
-      toast.add({ title: 'Bạn không có quyền truy cập vào trang này', color: 'error' })
+      toast.add({ title: t('auth_login_no_permission'), color: 'error' })
       await authStore.logout()
       return
     }
@@ -107,7 +108,7 @@ const handleFormSubmit = async (event: { data: Schema }) => {
         class="mb-2 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white"
         style="letter-spacing: -0.02em"
       >
-        Chào mừng trở lại
+        {{ $t('auth_login_welcome') }}
       </h2>
       <p class="text-sm leading-relaxed text-slate-500 dark:text-zinc-400">{{ subtitle }}</p>
     </div>
@@ -120,7 +121,7 @@ const handleFormSubmit = async (event: { data: Schema }) => {
       class="relative z-10 space-y-5"
       @submit="handleFormSubmit"
     >
-      <UFormField label="Số điện thoại" name="phoneNumber">
+      <UFormField :label="$t('auth_login_phone')" name="phoneNumber">
         <UInput
           v-model="state.phoneNumber"
           type="tel"
@@ -131,7 +132,7 @@ const handleFormSubmit = async (event: { data: Schema }) => {
         />
       </UFormField>
 
-      <UFormField label="Mật khẩu" name="password">
+      <UFormField :label="$t('val_password')" name="password">
         <UInput
           v-model="state.password"
           type="password"
@@ -147,7 +148,7 @@ const handleFormSubmit = async (event: { data: Schema }) => {
           :to="`/auth/${props.role}/forgot-password`"
           class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 text-sm font-semibold transition-all hover:underline"
         >
-          Quên mật khẩu?
+          {{ $t('auth_login_forgot_pw') }}
         </NuxtLink>
       </div>
 
@@ -161,7 +162,7 @@ const handleFormSubmit = async (event: { data: Schema }) => {
           variant="solid"
           class="group from-primary-600 to-primary-500 shadow-primary-500/25 hover:shadow-primary-500/40 mt-6 flex w-full items-center justify-center rounded-xl bg-gradient-to-r font-bold shadow-lg transition-all hover:scale-[1.02]"
         >
-          Đăng nhập
+          {{ $t('login') }}
           <ArrowRight
             v-if="!loading"
             class="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"
@@ -180,7 +181,7 @@ const handleFormSubmit = async (event: { data: Schema }) => {
         <span
           class="bg-white/80 px-4 text-xs font-medium tracking-wider text-slate-400 uppercase backdrop-blur-sm dark:bg-zinc-900/80 dark:text-zinc-500"
         >
-          hoặc đăng nhập với
+          {{ $t('auth_login_or') }}
         </span>
       </div>
     </div>
@@ -195,7 +196,7 @@ const handleFormSubmit = async (event: { data: Schema }) => {
         block
         class="rounded-xl !text-sm font-medium transition-all hover:bg-slate-100 dark:hover:bg-zinc-800"
       >
-        Tài xế giao hàng
+        {{ $t('auth_login_title_driver') }}
       </UButton>
       <UButton
         v-if="role !== 'admin'"
@@ -205,7 +206,7 @@ const handleFormSubmit = async (event: { data: Schema }) => {
         block
         class="rounded-xl !text-sm font-medium transition-all hover:bg-slate-100 dark:hover:bg-zinc-800"
       >
-        Admin Portal
+        {{ $t('auth_login_title_admin') }}
       </UButton>
       <UButton
         v-if="role !== 'retail' && role !== 'wholesale'"
@@ -215,12 +216,12 @@ const handleFormSubmit = async (event: { data: Schema }) => {
         block
         class="rounded-xl !text-sm font-medium transition-all hover:bg-slate-100 dark:hover:bg-zinc-800"
       >
-        Khách hàng
+        {{ $t('common_customer') }}
       </UButton>
     </div>
 
     <p class="mt-8 text-center text-xs font-medium text-slate-400 dark:text-zinc-500">
-      Cần hỗ trợ? Liên hệ
+      {{ $t('auth_login_support') }}
       <a
         href="mailto:support@buntech.vn"
         class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-bold transition-colors"

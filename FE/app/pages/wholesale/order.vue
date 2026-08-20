@@ -2,8 +2,9 @@
 import { customerService } from '~/services/customerService'
 import { formatCurrency } from '~/utils/format'
 import type { AdminProduct, Address } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
-useSeoMeta({ title: 'Tạo đơn hàng sỉ - BunTech' })
+useSeoMeta({ title: t('wholesale_order_seo_title') })
 definePageMeta({ layout: 'default' })
 
 const toast = useToast()
@@ -113,11 +114,19 @@ const getProductQuantity = (productId: number) => {
 
 const submitOrder = async () => {
   if (!shippingAddressId.value) {
-    toast.add({ title: 'Lỗi', description: 'Vui lòng chọn địa chỉ giao hàng', color: 'error' })
+    toast.add({
+      title: t('wholesale_msg_error'),
+      description: t('wholesale_order_err_no_address'),
+      color: 'error'
+    })
     return
   }
   if (selectedItemsList.value.length === 0) {
-    toast.add({ title: 'Lỗi', description: 'Vui lòng chọn ít nhất 1 sản phẩm', color: 'error' })
+    toast.add({
+      title: t('wholesale_msg_error'),
+      description: t('wholesale_order_err_no_items'),
+      color: 'error'
+    })
     return
   }
 
@@ -143,11 +152,11 @@ const submitOrder = async () => {
 }
 
 // Columns for table
-const columns = [
-  { accessorKey: 'product', header: 'Sản phẩm' },
-  { accessorKey: 'price', header: 'Đơn giá sỉ' },
-  { accessorKey: 'quantity', header: 'Số lượng đặt' }
-]
+const columns = computed(() => [
+  { accessorKey: 'product', header: t('nav_products') },
+  { accessorKey: 'price', header: t('wholesale_order_col_price') },
+  { accessorKey: 'quantity', header: t('wholesale_order_col_qty') }
+])
 </script>
 
 <template>
@@ -163,13 +172,15 @@ const columns = [
           />
         </div>
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Tạo đơn hàng sỉ</h1>
-          <p class="mt-1 text-sm text-gray-500">Chọn sản phẩm và số lượng để lên đơn nhanh chóng</p>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+            {{ $t('wholesale_order_title') }}
+          </h1>
+          <p class="mt-1 text-sm text-gray-500">{{ $t('wholesale_order_subtitle') }}</p>
         </div>
       </div>
-      <UButton to="/wholesale/orders" color="neutral" variant="ghost" icon="i-lucide-arrow-left"
-        >Quay lại lịch sử</UButton
-      >
+      <UButton to="/wholesale/orders" color="neutral" variant="ghost" icon="i-lucide-arrow-left">{{
+        $t('wholesale_order_btn_back')
+      }}</UButton>
     </div>
 
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
@@ -178,10 +189,10 @@ const columns = [
         <UCard>
           <template #header>
             <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-              <h2 class="text-lg font-semibold">Danh sách sản phẩm</h2>
+              <h2 class="text-lg font-semibold">{{ $t('driver_delivery_detail_items_title') }}</h2>
               <BaseSearchInput
                 v-model="search"
-                placeholder="Tìm kiếm sản phẩm..."
+                :placeholder="$t('public_products_search_ph')"
                 class="w-full sm:w-64"
               />
             </div>
@@ -200,7 +211,9 @@ const columns = [
                   <div class="line-clamp-1 font-medium text-gray-900 dark:text-white">
                     {{ (row as any).name }}
                   </div>
-                  <div class="text-xs text-gray-500">Mã: {{ (row as any).slug }}</div>
+                  <div class="text-xs text-gray-500">
+                    {{ $t('wholesale_order_product_code') }}: {{ (row as any).slug }}
+                  </div>
                 </div>
               </div>
             </template>
@@ -214,9 +227,12 @@ const columns = [
                   v-if="(row as any).hasCustomPrice"
                   class="text-success-600 mt-0.5 flex items-center gap-1 text-xs"
                 >
-                  <UIcon name="i-lucide-check-circle-2" class="h-3 w-3" /> Giá sỉ riêng
+                  <UIcon name="i-lucide-check-circle-2" class="h-3 w-3" />
+                  {{ $t('wholesale_order_custom_price') }}
                 </div>
-                <div v-else class="mt-0.5 text-xs text-gray-400">Giá niêm yết</div>
+                <div v-else class="mt-0.5 text-xs text-gray-400">
+                  {{ $t('wholesale_order_listed_price') }}
+                </div>
               </div>
             </template>
 
@@ -270,48 +286,49 @@ const columns = [
           <template #header>
             <h2 class="flex items-center gap-2 text-lg font-semibold">
               <UIcon name="i-lucide-receipt" class="h-5 w-5 text-gray-500" />
-              Thông tin đơn hàng
+              {{ $t('wholesale_order_summary_title') }}
             </h2>
           </template>
 
           <div class="space-y-4">
-            <UFormField label="Địa chỉ giao hàng" required>
+            <UFormField :label="$t('admin_order_create_address')" required>
               <USelectMenu
                 v-model="shippingAddressId"
                 :items="addressOptions"
                 value-key="value"
                 label-key="label"
-                placeholder="Chọn địa chỉ"
+                :placeholder="$t('wholesale_order_address_ph')"
                 :loading="loadingAddresses"
                 class="w-full"
               >
                 <template #empty>
-                  <div class="p-2 text-sm text-gray-500">Bạn chưa có địa chỉ nào.</div>
+                  <div class="p-2 text-sm text-gray-500">
+                    {{ $t('wholesale_order_address_empty') }}
+                  </div>
                 </template>
               </USelectMenu>
             </UFormField>
 
-            <UFormField label="Ngày giao mong muốn (Tùy chọn)">
+            <UFormField :label="$t('wholesale_order_date_label')">
               <UInput v-model="deliveryDate" type="date" class="w-full" />
             </UFormField>
 
-            <UFormField label="Ghi chú đơn hàng">
-              <UTextarea
-                v-model="note"
-                placeholder="Ví dụ: Giao trong giờ hành chính..."
-                :rows="3"
-              />
+            <UFormField :label="$t('wholesale_order_note_label')">
+              <UTextarea v-model="note" :placeholder="$t('wholesale_order_note_ph')" :rows="3" />
             </UFormField>
 
             <UDivider class="my-4" />
 
             <div>
               <div class="mb-2 flex items-center justify-between">
-                <span class="text-gray-500">Tổng số món:</span>
-                <span class="font-medium">{{ selectedItemsList.length }} món</span>
+                <span class="text-gray-500">{{ $t('wholesale_order_summary_items_count') }}</span>
+                <span class="font-medium"
+                  >{{ selectedItemsList.length }}
+                  {{ $t('wholesale_order_summary_items_unit') }}</span
+                >
               </div>
               <div class="mb-2 flex items-center justify-between">
-                <span class="text-gray-500">Tổng số lượng:</span>
+                <span class="text-gray-500">{{ $t('wholesale_order_summary_total_qty') }}</span>
                 <span class="font-medium">{{
                   selectedItemsList.reduce((acc, item) => acc + item.quantity, 0)
                 }}</span>
@@ -319,7 +336,9 @@ const columns = [
               <div
                 class="mt-4 flex items-center justify-between rounded-lg bg-gray-50 p-4 text-lg dark:bg-gray-800"
               >
-                <span class="font-semibold text-gray-900 dark:text-white">Tổng cộng:</span>
+                <span class="font-semibold text-gray-900 dark:text-white">{{
+                  $t('wholesale_order_summary_total_price')
+                }}</span>
                 <span class="text-primary-600 dark:text-primary-400 text-xl font-bold">{{
                   formatCurrency(totalAmount)
                 }}</span>
@@ -336,7 +355,7 @@ const columns = [
               :disabled="selectedItemsList.length === 0 || !shippingAddressId"
               @click="submitOrder"
             >
-              Xác nhận đặt hàng
+              {{ $t('wholesale_order_btn_submit') }}
             </UButton>
           </div>
         </UCard>

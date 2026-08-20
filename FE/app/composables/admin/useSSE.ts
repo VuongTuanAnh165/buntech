@@ -1,5 +1,3 @@
-
-
 export const useAdminSSE = () => {
   const config = useRuntimeConfig()
   const token = useCookie('auth_token')

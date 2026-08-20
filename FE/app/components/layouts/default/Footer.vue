@@ -12,7 +12,7 @@
             </div>
             <span class="text-xl font-bold tracking-tight text-white">BunTech</span>
           </div>
-          <p class="text-sm">Hệ thống chuyển đổi số toàn diện cho xưởng bún gia đình</p>
+          <p class="text-sm">{{ $t('footer_slogan') }}</p>
           <div class="flex gap-4 pt-2">
             <UButton
               icon="i-simple-icons-facebook"
@@ -35,44 +35,46 @@
           </div>
         </div>
         <div>
-          <h3 class="mb-4 font-semibold text-white">Sản phẩm</h3>
+          <h3 class="mb-4 font-semibold text-white">{{ $t('nav_products') }}</h3>
           <ul class="space-y-2 text-sm">
             <li>
-              <NuxtLink to="/products" class="transition-colors hover:text-white"
-                >Sản phẩm</NuxtLink
-              >
+              <NuxtLink to="/products" class="transition-colors hover:text-white">{{
+                $t('nav_products')
+              }}</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/quick-order" class="transition-colors hover:text-white"
-                >Đặt hàng nhanh</NuxtLink
-              >
+              <NuxtLink to="/quick-order" class="transition-colors hover:text-white">{{
+                $t('quick_order_title')
+              }}</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/gioi-thieu" class="transition-colors hover:text-white"
-                >Giới thiệu</NuxtLink
-              >
+              <NuxtLink to="/gioi-thieu" class="transition-colors hover:text-white">{{
+                $t('nav_about')
+              }}</NuxtLink>
             </li>
           </ul>
         </div>
         <div>
-          <h3 class="mb-4 font-semibold text-white">Giới thiệu</h3>
+          <h3 class="mb-4 font-semibold text-white">{{ $t('nav_about') }}</h3>
           <ul class="space-y-2 text-sm">
             <li>
-              <NuxtLink to="/blog" class="transition-colors hover:text-white">Tin tức</NuxtLink>
+              <NuxtLink to="/blog" class="transition-colors hover:text-white">{{
+                $t('nav_news')
+              }}</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/auth/driver/login" class="transition-colors hover:text-white"
-                >App Tài xế</NuxtLink
-              >
+              <NuxtLink to="/auth/driver/login" class="transition-colors hover:text-white">{{
+                $t('footer_app_driver')
+              }}</NuxtLink>
             </li>
             <li class="mt-4 flex items-center gap-2">
-              <UIcon name="i-lucide-map-pin" class="h-4 w-4" /> 123 Nguyễn Trãi, Thanh Xuân, Hà Nội
+              <UIcon name="i-lucide-map-pin" class="h-4 w-4" /> {{ $t('footer_address') }}
             </li>
           </ul>
         </div>
       </div>
       <div class="mt-8 border-t border-neutral-800 pt-8 text-center text-sm">
-        © 2026 BunTech. Hệ thống chuyển đổi số toàn diện cho xưởng bún gia đình
+        {{ $t('footer_copyright') }}
       </div>
     </div>
   </footer>

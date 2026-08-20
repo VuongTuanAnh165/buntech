@@ -1,13 +1,15 @@
 <script setup lang="ts">
-useSeoMeta({ title: 'Tài xế - BunTech' })
+import { t } from '~/utils/i18n'
+
+useSeoMeta({ title: t('auth_login_seo_driver') })
 definePageMeta({ layout: 'auth' })
 </script>
 
 <template>
   <AuthLoginForm
     role="driver"
-    title="Tài xế giao hàng"
-    subtitle="Đăng nhập để nhận đơn hàng"
+    :title="$t('auth_login_title_driver')"
+    :subtitle="$t('auth_login_sub_driver')"
     icon="truck"
   />
 </template>

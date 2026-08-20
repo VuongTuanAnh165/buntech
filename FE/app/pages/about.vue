@@ -14,118 +14,119 @@ import {
   Factory,
   ShieldCheck
 } from 'lucide-vue-next'
+import { t } from '~/utils/i18n'
 
-useSeoMeta({ title: 'Về chúng tôi - BunTech' })
+useSeoMeta({ title: t('public_about_seo_title') })
 definePageMeta({ layout: 'default' })
 
 const heroImage = '/images/banner_1.webp'
 
-const stats = [
-  { value: '60+ năm', label: 'Kinh nghiệm truyền thống', icon: Award },
-  { value: '50+', label: 'Đại lý phục vụ', icon: Users },
-  { value: '100%', label: 'Gạo tự nhiên', icon: Leaf },
-  { value: '1000+ kg', label: 'Sản xuất mỗi ngày', icon: Factory }
-]
+const stats = computed(() => [
+  { value: t('public_about_stat_1_val'), label: t('public_about_stat_1_lbl'), icon: Award },
+  { value: t('public_about_stat_2_val'), label: t('public_about_stat_2_lbl'), icon: Users },
+  { value: t('public_about_stat_3_val'), label: t('public_about_stat_3_lbl'), icon: Leaf },
+  { value: t('public_about_stat_4_val'), label: t('public_about_stat_4_lbl'), icon: Factory }
+])
 
-const values = [
+const values = computed(() => [
   {
     icon: Leaf,
-    title: 'Nguyên liệu tự nhiên',
-    desc: '100% gạo tự nhiên tuyển chọn, không chất bảo quản, không hàn the. An toàn cho sức khỏe gia đình bạn.'
+    title: t('public_about_val_1_title'),
+    desc: t('public_about_val_1_desc')
   },
   {
     icon: Heart,
-    title: 'Tận tâm phục vụ',
-    desc: 'Khách hàng là người thân. Chúng tôi chăm chút từng bọc bún như chính bún nhà mình ăn.'
+    title: t('public_about_val_2_title'),
+    desc: t('public_about_val_2_desc')
   },
   {
     icon: Truck,
-    title: 'Giao hàng nhanh chóng',
-    desc: 'Nội thành 2 giờ, ngoại thành 4 giờ. Bún tươi nóng nguyên bọc, giao tận nơi.'
+    title: t('public_about_val_3_title'),
+    desc: t('public_about_val_3_desc')
   },
   {
     icon: ShieldCheck,
-    title: 'Chất lượng đảm bảo',
-    desc: 'Đạt tiêu chuẩn VSATTP, quy trình khép kín từ gạo đến thành phẩm. Đổi trả nếu không hài lòng.'
+    title: t('public_about_val_4_title'),
+    desc: t('public_about_val_4_desc')
   }
-]
+])
 
-const milestones = [
+const milestones = computed(() => [
   {
-    year: '1960',
-    title: 'Khởi đầu',
-    text: 'Bà nội bắt đầu làm bún gia đình tại xưởng nhỏ ở quê nhà, bán cho hàng xóm và chợ phiên.'
+    year: t('public_about_ms_1_year'),
+    title: t('public_about_ms_1_title'),
+    text: t('public_about_ms_1_text')
   },
   {
-    year: '1990',
-    title: 'Mở rộng',
-    text: 'Bố mẹ tiếp quản, mở rộng quy mô sản xuất. Bún BunTech bắt đầu cung cấp cho các quán ăn, tiệm bún trong khu vực.'
+    year: t('public_about_ms_2_year'),
+    title: t('public_about_ms_2_title'),
+    text: t('public_about_ms_2_text')
   },
   {
-    year: '2010',
-    title: 'Phát triển',
-    text: 'Đầu tư máy móc hiện đại, đạt tiêu chuẩn VSATTP. Phục vụ hơn 50 đại lý, sản lượng 500kg/ngày.'
+    year: t('public_about_ms_3_year'),
+    title: t('public_about_ms_3_title'),
+    text: t('public_about_ms_3_text')
   },
   {
-    year: '2024',
-    title: 'Chuyển đổi số',
-    text: 'Ra mắt app BunTech — đặt hàng online, theo dõi đơn hàng và công nợ realtime. Sản lượng 1000+ kg/ngày.'
+    year: t('public_about_ms_4_year'),
+    title: t('public_about_ms_4_title'),
+    text: t('public_about_ms_4_text')
   }
-]
+])
 
-const team = [
+const team = computed(() => [
   {
-    name: 'Nguyễn Thị Bích',
-    role: 'CEO - Thuyền trưởng',
-    bio: 'Đời thứ 3, kế thừa bí truyền gia đình. Tốt nghiệp ĐH Kinh tế, dẫn dắt BunTech chuyển đổi số.',
+    name: t('public_about_team_1_name'),
+    role: t('public_about_team_1_role'),
+    bio: t('public_about_team_1_bio'),
     avatar: ''
   },
   {
-    name: 'Trần Văn Hùng',
-    role: 'Giám đốc sản xuất',
-    bio: '20 năm kinh nghiệm làm bún. Đảm bảo chất lượng từng mẻ bún từ khâu chọn gạo đến thành phẩm.',
+    name: t('public_about_team_2_name'),
+    role: t('public_about_team_2_role'),
+    bio: t('public_about_team_2_bio'),
     avatar: ''
   },
   {
-    name: 'Lê Thị Mai',
-    role: 'Giám đốc kinh doanh',
-    bio: 'Quản lý mạng lưới 50+ đại lý. Xây dựng chính sách giá sỉ linh hoạt cho từng khách hàng.',
+    name: t('public_about_team_3_name'),
+    role: t('public_about_team_3_role'),
+    bio: t('public_about_team_3_bio'),
     avatar: ''
   },
   {
-    name: 'Phạm Văn Nam',
-    role: 'Giám đốc công nghệ',
-    bio: 'Dẫn dắt chuyển đổi số BunTech. Xây dựng app đặt hàng và hệ thống quản lý đơn hàng.',
+    name: t('public_about_team_4_name'),
+    role: t('public_about_team_4_role'),
+    bio: t('public_about_team_4_bio'),
     avatar: ''
   }
-]
+])
 
-const faqs = [
+const faqs = computed(() => [
   {
-    q: 'Bún BunTech có sử dụng hàn the không?',
-    a: 'Tuyệt đối không. Bún BunTech được làm từ 100% gạo tự nhiên, sản xuất theo quy trình truyền thống 3 đời. Chúng tôi cam kết không sử dụng hàn the hay bất kỳ chất bảo quản nào.'
+    q: t('public_about_faq_1_q'),
+    a: t('public_about_faq_1_a')
   },
   {
-    q: 'Bún tươi để được bao lâu?',
-    a: 'Bún tươi BunTech nên dùng trong ngày, tốt nhất trong vòng 24 giờ kể từ lúc sản xuất. Nếu bảo quản tủ lạnh có thể để 2-3 ngày, nhưng khuyến cáo dùng tươi để đảm bảo hương vị tốt nhất.'
+    q: t('public_about_faq_2_q'),
+    a: t('public_about_faq_2_a')
   },
   {
-    q: 'Làm thế nào để đặt hàng?',
-    a: 'Bạn có thể đặt hàng qua app BunTech (nhanh nhất), gọi điện thoại trực tiếp, hoặc đến đại lý gần nhất. Đặt qua app sẽ được giao hàng tận nơi trong 2 giờ tại khu vực nội thành.'
+    q: t('public_about_faq_3_q'),
+    a: t('public_about_faq_3_a')
   },
   {
-    q: 'BunTech có giao hàng tận nơi không?',
-    a: 'Có. Chúng tôi giao hàng tận nơi tại TP.HCM và các khu vực lân cận. Nội thành giao trong 2 giờ, ngoại thành trong 4 giờ. Đơn hàng sỉ được giao miễn phí.'
+    q: t('public_about_faq_4_q'),
+    a: t('public_about_faq_4_a')
   },
   {
-    q: 'Chính sách giá sỉ như thế nào?',
-    a: 'BunTech có chính sách giá sỉ linh hoạt tùy theo số lượng và tần suất đặt hàng. Đơn hàng sỉ được giảm 10% so với giá lẻ. Liên hệ hotline để được tư vấn chính sách giá tốt nhất.'
+    q: t('public_about_faq_5_q'),
+    a: t('public_about_faq_5_a')
   },
   {
-    q: 'Nếu bún không đạt chất lượng có đổi trả không?',
-    a: 'Có. BunTech cam kết đổi trả 100% nếu bún không đạt chất lượng (biến chất, mùi lạ, hư hỏng). Vui lòng liên hệ hotline trong vòng 2 giờ sau khi nhận hàng để được hỗ trợ.'
+    q: t('public_about_faq_6_q'),
+    a: t('public_about_faq_6_a')
   }
-]
+])
 
 const openFaq = ref(-1)
 
@@ -160,19 +161,18 @@ const toggleFaq = (index: number) => {
           class="animate-fade-in mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur-md"
         >
           <Sparkles class="h-4 w-4" aria-hidden="true" />
-          Xưởng bún truyền thống từ 1960
+          {{ $t('public_about_hero_badge') }}
         </div>
         <h1
           class="animate-fade-in-up mb-5 text-3xl leading-tight font-bold tracking-tight text-white sm:text-5xl lg:text-6xl"
         >
-          Hành trình 3 đời làm bún
+          {{ $t('public_about_hero_title') }}
         </h1>
         <p
           class="animate-fade-in-up mx-auto max-w-2xl text-lg leading-relaxed text-gray-200 sm:text-xl"
           style="animation-delay: 100ms"
         >
-          Từ xưởng bún gia đình nhỏ năm 1960 đến thương hiệu bún tươi hàng đầu — BunTech vẫn giữ
-          trọn tinh hoa bí truyền 3 đời.
+          {{ $t('public_about_hero_desc') }}
         </p>
       </div>
     </section>
@@ -210,7 +210,7 @@ const toggleFaq = (index: number) => {
           <div class="aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
             <NuxtImg
               src="/images/banner_2.webp"
-              alt="Xưởng bún BunTech"
+              :alt="$t('public_about_image_alt')"
               class="h-full w-full object-cover"
               loading="lazy"
             />
@@ -229,30 +229,25 @@ const toggleFaq = (index: number) => {
             class="text-primary-600 dark:text-primary-400 mb-4 inline-flex items-center gap-2 text-sm font-medium"
           >
             <Target class="h-4 w-4" aria-hidden="true" />
-            Sứ mệnh của chúng tôi
+            {{ $t('public_about_story_mission') }}
           </div>
           <h2 class="text-surface-foreground mb-4 text-2xl font-bold tracking-tight sm:text-3xl">
-            Bún tươi mỗi sáng — từ gia đình đến gia đình
+            {{ $t('public_about_story_title') }}
           </h2>
           <p class="mb-4 leading-relaxed text-gray-600 dark:text-zinc-300">
-            Năm 1960, bà nội chúng tôi bắt đầu làm bún tại một xưởng nhỏ trong hẻm. Bún làm tay,
-            từng sợi mộc mạc, bán cho hàng xóm và chợ phiên. Khách quen gọi là "bún bà Tư" — ngon,
-            sạch, rẻ.
+            {{ $t('public_about_story_p1') }}
           </p>
           <p class="mb-6 leading-relaxed text-gray-600 dark:text-zinc-300">
-            Ba đời tiếp nối, bí truyền gia đình vẫn giữ nguyên. Nhưng cách làm bún thì ngày càng
-            hiện đại — máy móc sạch sẽ, quy trình khép kín, đạt chuẩn VSATTP. Bún BunTech nay phục
-            vụ hơn 50 đại lý, sản xuất 1000+ kg mỗi ngày, nhưng tinh hoa vẫn là tinh hoa.
+            {{ $t('public_about_story_p2') }}
           </p>
           <div
             class="text-primary-600 dark:text-primary-400 inline-flex items-center gap-2 text-sm font-medium"
           >
             <Eye class="h-4 w-4" aria-hidden="true" />
-            Tầm nhìn
+            {{ $t('public_about_story_vision_lbl') }}
           </div>
           <p class="mt-2 leading-relaxed text-gray-600 dark:text-zinc-300">
-            Trở thành thương hiệu bún tươi số 1 Việt Nam — giữ gìn truyền thống, ứng dụng công nghệ,
-            phục vụ cộng đồng.
+            {{ $t('public_about_story_vision_desc') }}
           </p>
         </div>
       </div>
@@ -263,10 +258,10 @@ const toggleFaq = (index: number) => {
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mb-12 text-center">
           <h2 class="text-surface-foreground mb-2 text-2xl font-bold sm:text-3xl">
-            Giá trị cốt lõi
+            {{ $t('public_about_values_title') }}
           </h2>
           <p class="text-sm text-gray-500 dark:text-zinc-400">
-            Những nguyên tắc chúng tôi giữ suốt 60+ năm
+            {{ $t('public_about_values_subtitle') }}
           </p>
         </div>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -297,7 +292,7 @@ const toggleFaq = (index: number) => {
       <h2
         class="text-surface-foreground mb-12 text-center text-2xl font-bold tracking-tight sm:text-3xl"
       >
-        Cột mốc phát triển
+        {{ $t('public_about_ms_title') }}
       </h2>
       <div class="relative">
         <div
@@ -340,10 +335,10 @@ const toggleFaq = (index: number) => {
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mb-12 text-center">
           <h2 class="text-surface-foreground mb-2 text-2xl font-bold sm:text-3xl">
-            Đội ngũ BunTech
+            {{ $t('public_about_team_title') }}
           </h2>
           <p class="text-sm text-gray-500 dark:text-zinc-400">
-            Những người tâm huyết giữ gìn truyền thống 3 đời
+            {{ $t('public_about_team_subtitle') }}
           </p>
         </div>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -373,7 +368,7 @@ const toggleFaq = (index: number) => {
       <h2
         class="text-surface-foreground mb-8 text-center text-2xl font-bold tracking-tight sm:text-3xl"
       >
-        Câu hỏi thường gặp
+        {{ $t('public_about_faq_title') }}
       </h2>
       <div class="space-y-3">
         <div v-for="(faq, i) in faqs" :key="i" class="card overflow-hidden">
@@ -419,11 +414,10 @@ const toggleFaq = (index: number) => {
         />
         <div class="relative">
           <h2 class="mb-4 text-2xl font-bold text-white sm:text-3xl">
-            Trải nghiệm bún tươi BunTech
+            {{ $t('public_about_cta_title') }}
           </h2>
           <p class="mx-auto mb-8 max-w-xl text-white/80">
-            Đặt hàng online trong 30 giây, giao hàng tận nơi trong 2 giờ. Bún tươi mỗi sáng, từ
-            xưởng đến bàn ăn của bạn.
+            {{ $t('public_about_cta_desc') }}
           </p>
           <div class="flex flex-col justify-center gap-3 sm:flex-row">
             <NuxtLink to="/quick-order">
@@ -432,7 +426,7 @@ const toggleFaq = (index: number) => {
                 size="lg"
                 class="!text-primary-600 group !bg-white hover:!bg-white/90"
               >
-                Đặt hàng ngay
+                {{ $t('public_about_cta_btn_order') }}
                 <ChevronRight
                   class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
                   aria-hidden="true"
@@ -446,13 +440,13 @@ const toggleFaq = (index: number) => {
                 class="!border-white/30 !bg-white/10 !text-white hover:!bg-white/20"
               >
                 <Phone class="h-4 w-4" aria-hidden="true" />
-                Gọi hotline
+                {{ $t('public_about_cta_btn_call') }}
               </UButton>
             </a>
           </div>
           <div class="mt-6 flex items-center justify-center gap-2 text-sm text-white/60">
             <MapPin class="h-4 w-4" aria-hidden="true" />
-            123 Lê Lợi, Q.1, TP.HCM
+            {{ $t('public_about_cta_address') }}
           </div>
         </div>
       </div>

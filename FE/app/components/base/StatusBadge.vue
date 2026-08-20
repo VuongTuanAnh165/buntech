@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '~/utils/i18n'
 interface Props {
   status: string
   type?: 'order' | 'user' | 'product' | 'blog'
@@ -13,37 +14,37 @@ type BadgeColor = 'primary' | 'success' | 'warning' | 'error' | 'info' | 'neutra
 const statusConfig = computed<{ label: string; color: BadgeColor }>(() => {
   if (props.type === 'order') {
     const map: Record<string, { label: string; color: BadgeColor }> = {
-      PENDING: { label: 'Chờ xử lý', color: 'warning' },
-      PROCESSING: { label: 'Đang xử lý', color: 'info' },
-      DELIVERING: { label: 'Đang giao', color: 'primary' },
-      DELIVERED: { label: 'Đã giao', color: 'success' },
-      CANCELLED: { label: 'Đã hủy', color: 'error' }
+      PENDING: { label: t('status_order_pending'), color: 'warning' },
+      PROCESSING: { label: t('status_order_processing'), color: 'info' },
+      DELIVERING: { label: t('status_order_delivering'), color: 'primary' },
+      DELIVERED: { label: t('status_order_delivered'), color: 'success' },
+      CANCELLED: { label: t('status_order_cancelled'), color: 'error' }
     }
     return map[props.status] ?? { label: props.status, color: 'neutral' }
   }
 
   if (props.type === 'user') {
     const map: Record<string, { label: string; color: BadgeColor }> = {
-      ACTIVE: { label: 'Hoạt động', color: 'success' },
-      INACTIVE: { label: 'Ngừng HĐ', color: 'error' },
-      PENDING: { label: 'Chờ duyệt', color: 'warning' }
+      ACTIVE: { label: t('status_user_active'), color: 'success' },
+      INACTIVE: { label: t('status_user_inactive'), color: 'error' },
+      PENDING: { label: t('status_user_pending'), color: 'warning' }
     }
     return map[props.status] ?? { label: props.status, color: 'neutral' }
   }
 
   if (props.type === 'product') {
     const map: Record<string, { label: string; color: BadgeColor }> = {
-      ACTIVE: { label: 'Đang bán', color: 'success' },
-      INACTIVE: { label: 'Ngừng bán', color: 'error' },
-      OUT_OF_STOCK: { label: 'Hết hàng', color: 'warning' }
+      ACTIVE: { label: t('status_product_active'), color: 'success' },
+      INACTIVE: { label: t('status_product_inactive'), color: 'error' },
+      OUT_OF_STOCK: { label: t('status_product_out_of_stock'), color: 'warning' }
     }
     return map[props.status] ?? { label: props.status, color: 'neutral' }
   }
 
   if (props.type === 'blog') {
     const map: Record<string, { label: string; color: BadgeColor }> = {
-      DRAFT: { label: 'Nháp', color: 'neutral' },
-      PUBLISHED: { label: 'Đã xuất bản', color: 'success' }
+      DRAFT: { label: t('status_blog_draft'), color: 'neutral' },
+      PUBLISHED: { label: t('status_blog_published'), color: 'success' }
     }
     return map[props.status] ?? { label: props.status, color: 'neutral' }
   }

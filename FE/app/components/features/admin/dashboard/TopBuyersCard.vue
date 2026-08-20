@@ -38,7 +38,7 @@ const handleSortChange = (val: 'revenue' | 'quantity') => {
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-2">
           <h2 class="text-surface-foreground text-sm font-semibold tracking-tight">
-            Khách hàng hàng đầu
+            {{ $t('admin_dash_top_buyers') }}
           </h2>
           <UIcon name="i-lucide-star" class="text-warning-400 h-3.5 w-3.5" />
         </div>
@@ -54,7 +54,7 @@ const handleSortChange = (val: 'revenue' | 'quantity') => {
             "
             @click="handleSortChange('revenue')"
           >
-            Doanh thu
+            {{ $t('admin_dash_revenue') }}
           </UButton>
           <UButton
             variant="ghost"
@@ -67,7 +67,7 @@ const handleSortChange = (val: 'revenue' | 'quantity') => {
             "
             @click="handleSortChange('quantity')"
           >
-            Sản lượng
+            {{ $t('admin_dash_quantity') }}
           </UButton>
         </div>
       </div>
@@ -110,15 +110,15 @@ const handleSortChange = (val: 'revenue' | 'quantity') => {
             </p>
             <p class="text-xs text-slate-500 tabular-nums dark:text-zinc-400">
               <span v-if="sortBy === 'revenue'">{{ formatVND(buyer.totalRevenue) }}</span>
-              <span v-else>{{ buyer.totalQuantity }} sản phẩm</span>
+              <span v-else>{{ $t('admin_dash_n_products', { count: buyer.totalQuantity }) }}</span>
             </p>
           </div>
         </div>
       </div>
       <BaseEmptyState
         v-if="topBuyers && topBuyers.length === 0"
-        title="Trống"
-        description="Chưa có dữ liệu"
+        :title="$t('common_empty_title')"
+        :description="$t('common_empty_desc')"
       />
     </template>
   </UCard>

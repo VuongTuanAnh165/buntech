@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ProductImage } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
 const props = defineProps<{
   existingImages: ProductImage[]
@@ -28,7 +29,7 @@ function handleGalleryChange(event: Event) {
 
   for (const file of files) {
     if (file.size > 2 * 1024 * 1024) {
-      toast.add({ title: 'Một số ảnh vượt quá 2MB đã bị bỏ qua', color: 'warning' })
+      toast.add({ title: t('admin_product_gallery_err_size'), color: 'warning' })
       continue
     }
     validFiles.push(file)
@@ -45,9 +46,12 @@ function handleGalleryChange(event: Event) {
 <template>
   <div class="card p-6">
     <div class="mb-4 flex items-center justify-between">
-      <h2 class="text-surface-foreground text-lg font-semibold">Thư viện ảnh</h2>
+      <h2 class="text-surface-foreground text-lg font-semibold">
+        {{ $t('admin_product_gallery_title') }}
+      </h2>
       <UButton size="sm" color="neutral" variant="outline" @click="triggerGallerySelect">
-        <UIcon name="i-lucide-upload" class="mr-1 h-4 w-4" /> Thêm ảnh
+        <UIcon name="i-lucide-upload" class="mr-1 h-4 w-4" />
+        {{ $t('admin_product_gallery_btn_add') }}
       </UButton>
       <input
         ref="galleryInputRef"
@@ -86,12 +90,14 @@ function handleGalleryChange(event: Event) {
         class="group border-surface-border relative aspect-square overflow-hidden rounded-xl border border-dashed"
       >
         <img :src="preview" class="h-full w-full object-cover opacity-80" />
-        <UBadge color="warning" class="absolute top-2 left-2" size="sm">Mới</UBadge>
+        <UBadge color="warning" class="absolute top-2 left-2" size="sm">{{
+          $t('admin_product_gallery_badge_new')
+        }}</UBadge>
         <div
           class="absolute inset-0 flex items-center justify-center bg-slate-900/50 opacity-0 transition-opacity group-hover:opacity-100"
         >
           <UButton
-            aria-label="Xóa ảnh này"
+            :aria-label="$t('aria_del_this_img')"
             color="error"
             size="sm"
             icon="i-lucide-x"
@@ -104,7 +110,7 @@ function handleGalleryChange(event: Event) {
         v-if="props.existingImages.length === 0 && props.galleryPreviews.length === 0"
         class="border-surface-border col-span-full rounded-xl border-2 border-dashed py-8 text-center text-slate-500"
       >
-        Chưa có ảnh nào. Click "Thêm ảnh" để tải lên.
+        {{ $t('admin_product_gallery_empty') }}
       </div>
     </div>
   </div>

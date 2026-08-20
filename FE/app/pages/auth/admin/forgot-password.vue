@@ -4,9 +4,9 @@ import { forgotPasswordSchema } from '~/utils/validation'
 import { authService } from '~/services/authService'
 import type { z } from 'zod'
 
-const { t } = useI18n()
+import { t } from '~/utils/i18n'
 
-useSeoMeta({ title: 'Quên mật khẩu - BunTech Admin' })
+useSeoMeta({ title: t('auth_forgot_seo') })
 definePageMeta({ layout: 'auth' })
 
 const sent = ref(false)
@@ -60,12 +60,12 @@ const handleFormSubmit = () => {
         class="bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium"
       >
         <Phone class="h-4 w-4" aria-hidden="true" />
-        {{ t('auth.forgotPassword') }}
+        {{ t('auth_forgot_title') }}
       </div>
       <h2 class="text-surface-foreground mb-2 text-2xl font-bold tracking-tight">
-        {{ t('auth.forgotPasswordTitle') }}
+        {{ t('auth_forgot_title') }}
       </h2>
-      <p class="text-sm text-gray-500 dark:text-zinc-400">{{ t('auth.forgotPasswordSubtitle') }}</p>
+      <p class="text-sm text-gray-500 dark:text-zinc-400">{{ t('auth_forgot_subtitle') }}</p>
     </div>
 
     <!-- Success state -->
@@ -77,19 +77,23 @@ const handleFormSubmit = () => {
           <MailCheck class="text-success-600 dark:text-success-400 h-8 w-8" aria-hidden="true" />
         </div>
         <h3 class="text-surface-foreground mb-2 text-lg font-semibold">
-          {{ t('auth.checkYourEmail') }}
+          {{ t('auth_forgot_check_email') }}
         </h3>
         <p class="mx-auto mb-6 max-w-xs text-sm text-gray-500 dark:text-zinc-400">
-          Vui lòng kiểm tra điện thoại của bạn, chúng tôi đã gửi mã xác thực (OTP) qua tin nhắn.
+          {{ t('auth_forgot_check_email_desc') }}
         </p>
         <UButton variant="outline" class="w-full" to="/auth/admin/reset-password">
-          Chuyển đến trang Đặt lại mật khẩu
+          {{ t('auth_forgot_btn_reset') }}
         </UButton>
       </div>
 
       <!-- Form -->
       <form v-else key="form" class="space-y-5" @submit.prevent="handleFormSubmit">
-        <UFormField label="Số điện thoại" name="phoneNumber" :error="formErrors.phoneNumber">
+        <UFormField
+          :label="t('auth_login_phone')"
+          name="phoneNumber"
+          :error="formErrors.phoneNumber"
+        >
           <UInput
             v-model="state.phoneNumber"
             type="tel"
@@ -100,17 +104,17 @@ const handleFormSubmit = () => {
         </UFormField>
 
         <UButton type="submit" :loading="loading" class="!mt-8 w-full" size="lg">
-          Lấy mã xác thực (OTP)
+          {{ t('auth_forgot_btn_get_otp') }}
         </UButton>
       </form>
     </Transition>
 
     <p class="mt-8 text-center text-xs text-gray-400 dark:text-zinc-500">
-      {{ t('auth.rememberPassword') || 'Nhớ mật khẩu?' }}
+      {{ t('auth_forgot_remember') }}
       <NuxtLink
         to="/auth/admin/login"
         class="text-primary-600 dark:text-primary-400 font-medium hover:underline"
-        >{{ t('auth.loginTitle') }}</NuxtLink
+        >{{ t('login') }}</NuxtLink
       >
     </p>
   </div>

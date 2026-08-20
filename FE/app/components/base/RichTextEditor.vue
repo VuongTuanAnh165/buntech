@@ -15,6 +15,7 @@ import Highlight from '@tiptap/extension-highlight'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import { uploadService } from '~/services/uploadService'
+import { t } from '~/utils/i18n'
 
 const modelValue = defineModel<string>({ default: '' })
 
@@ -98,12 +99,12 @@ const handleImageUpload = async (event: Event) => {
 async function uploadAndInsertImage(file: File) {
   // Validate file
   if (file.size > 5 * 1024 * 1024) {
-    toast.add({ title: 'Ảnh không được vượt quá 5MB', color: 'warning' })
+    toast.add({ title: t('image_size_limit'), color: 'warning' })
     return
   }
   const validExts = ['image/jpeg', 'image/png', 'image/webp']
   if (!validExts.includes(file.type)) {
-    toast.add({ title: 'Chỉ hỗ trợ ảnh JPG, PNG, WebP', color: 'warning' })
+    toast.add({ title: t('image_type_limit'), color: 'warning' })
     return
   }
 
@@ -114,8 +115,8 @@ async function uploadAndInsertImage(file: File) {
     }
   } catch (error) {
     toast.add({
-      title: 'Lỗi tải ảnh',
-      description: (error as Error).message || 'Có lỗi xảy ra',
+      title: t('image_upload_error'),
+      description: (error as Error).message || t('error_occurred'),
       color: 'error'
     })
   }
@@ -125,7 +126,7 @@ async function uploadAndInsertImage(file: File) {
 function setLink() {
   if (!editor.value) return
   const previousUrl = editor.value.getAttributes('link').href
-  const url = window.prompt('Nhập đường dẫn:', previousUrl)
+  const url = window.prompt(t('prompt_link'), previousUrl)
 
   // cancelled
   if (url === null) {

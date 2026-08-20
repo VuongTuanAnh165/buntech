@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { inventoryService } from '~/services/inventoryService'
 
+import { t } from '~/utils/i18n'
+
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Báo cáo hao hụt - BunTech Admin' })
+useSeoMeta({ title: t('admin_inventory_loss_seo') })
 
 // ─── State ────────────────────────────────────────────────
 const search = ref('')
@@ -10,11 +12,11 @@ const selectedRange = ref('30')
 const page = ref(1)
 const perPage = ref(10)
 
-const rangeOptions = [
-  { label: '7 ngày qua', value: '7' },
-  { label: '30 ngày qua', value: '30' },
-  { label: '90 ngày qua', value: '90' }
-]
+const rangeOptions = computed(() => [
+  { label: t('admin_inventory_loss_range_7'), value: '7' },
+  { label: t('admin_inventory_loss_range_30'), value: '30' },
+  { label: t('admin_inventory_loss_range_90'), value: '90' }
+])
 
 const rangeDays = computed(() => Number(selectedRange.value))
 
@@ -49,24 +51,29 @@ const lossRate = computed(() => lossData.value?.lossPercentage || 0)
 
 const kpiStats = computed(() => [
   {
-    title: 'Tổng nguyên liệu xuất (kg)',
+    title: t('admin_inventory_loss_kpi_export'),
     value: formatNumber(lossData.value?.totalMaterialExportedKg || 0),
     icon: 'i-lucide-arrow-up-from-line',
     color: 'primary' as const
   },
   {
-    title: 'Tổng lượng hao hụt (kg)',
+    title: t('admin_inventory_loss_kpi_loss'),
     value: formatNumber(totalQuantityLost.value),
     icon: 'i-lucide-package-minus',
     color: 'warning' as const
   },
   {
-    title: 'Tỷ lệ hao hụt',
+    title: t('admin_inventory_loss_kpi_rate'),
     value: `${lossRate.value}%`,
     icon: 'i-lucide-percent',
     color: lossRate.value > 5 ? ('error' as const) : ('success' as const)
   },
-  { title: 'Mục tiêu ngành', value: '< 5%', icon: 'i-lucide-target', color: 'info' as const }
+  {
+    title: t('admin_inventory_loss_kpi_target'),
+    value: '< 5%',
+    icon: 'i-lucide-target',
+    color: 'info' as const
+  }
 ])
 
 // ─── Chart Data ─────────────────────────────
@@ -99,13 +106,13 @@ const pagedList = computed(() => {
   return filteredList.value.slice(start, start + perPage.value)
 })
 
-const columns = [
-  { accessorKey: 'date', header: 'Ngày' },
-  { accessorKey: 'exported', header: 'Tổng lượng xuất (kg)' },
-  { accessorKey: 'delivered', header: 'Tổng lượng bán (kg)' },
-  { accessorKey: 'loss', header: 'Hao hụt (kg)' },
-  { accessorKey: 'lossPercentage', header: 'Tỷ lệ hao hụt (%)' }
-]
+const columns = computed(() => [
+  { accessorKey: 'date', header: t('admin_inventory_loss_col_date') },
+  { accessorKey: 'exported', header: t('admin_inventory_loss_col_export') },
+  { accessorKey: 'delivered', header: t('admin_inventory_loss_col_deliver') },
+  { accessorKey: 'loss', header: t('admin_inventory_loss_col_loss') },
+  { accessorKey: 'lossPercentage', header: t('admin_inventory_loss_col_loss_rate') }
+])
 
 watch(search, () => {
   page.value = 1
@@ -114,12 +121,12 @@ watch(search, () => {
 <template>
   <div>
     <BasePageHeader
-      title="Báo cáo hao hụt"
-      description="Phân tích và theo dõi nguyên liệu thất thoát"
+      :title="$t('admin_inventory_loss_title')"
+      :description="$t('admin_inventory_loss_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Kho', to: '/admin/inventory' },
-        { label: 'Báo cáo hao hụt' }
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('nav_inventory_raw'), to: '/admin/inventory' },
+        { label: $t('admin_inventory_loss_title') }
       ]"
     >
       <template #actions>
@@ -139,7 +146,7 @@ watch(search, () => {
           <div class="mb-4 flex items-center justify-between">
             <h3 class="text-surface-foreground flex items-center gap-2 text-sm font-semibold">
               <UIcon name="i-lucide-bar-chart-2" class="text-error-500 h-4 w-4" />
-              Biểu đồ hao hụt ({{ rangeDays }} ngày)
+              {{ $t('admin_inventory_loss_chart_title', { days: rangeDays }) }}
             </h3>
           </div>
           <div class="flex h-48 items-end gap-2 overflow-x-auto pb-4">
@@ -176,7 +183,7 @@ watch(search, () => {
           <div class="mb-4 flex items-center justify-between">
             <h3 class="text-surface-foreground flex items-center gap-2 text-sm font-semibold">
               <UIcon name="i-lucide-sparkles" class="text-primary-500 h-4 w-4" />
-              Gợi ý từ hệ thống
+              {{ $t('admin_inventory_loss_ai_title') }}
             </h3>
           </div>
           <div class="space-y-3">
@@ -190,11 +197,10 @@ watch(search, () => {
               />
               <div>
                 <p class="text-error-800 dark:text-error-300 text-sm font-semibold">
-                  Tỷ lệ hao hụt cao
+                  {{ $t('admin_inventory_loss_ai_high_title') }}
                 </p>
                 <p class="text-error-600 dark:text-error-400 mt-1 text-xs">
-                  Hao hụt {{ lossRate }}% vượt mức tiêu chuẩn ngành (5%). Cần rà soát quy trình bảo
-                  quản.
+                  {{ $t('admin_inventory_loss_ai_high_desc', { rate: lossRate }) }}
                 </p>
               </div>
             </div>
@@ -208,10 +214,10 @@ watch(search, () => {
               />
               <div>
                 <p class="text-success-800 dark:text-success-300 text-sm font-semibold">
-                  Tỷ lệ hao hụt ổn định
+                  {{ $t('admin_inventory_loss_ai_ok_title') }}
                 </p>
                 <p class="text-success-600 dark:text-success-400 mt-1 text-xs">
-                  Hao hụt {{ lossRate }}% nằm trong mức an toàn của ngành sản xuất bún.
+                  {{ $t('admin_inventory_loss_ai_ok_desc', { rate: lossRate }) }}
                 </p>
               </div>
             </div>
@@ -225,10 +231,10 @@ watch(search, () => {
               />
               <div>
                 <p class="text-primary-800 dark:text-primary-300 text-sm font-semibold">
-                  Gạo tẻ thường có tỷ lệ hao hụt cao
+                  {{ $t('admin_inventory_loss_ai_tip_title') }}
                 </p>
                 <p class="text-primary-600 dark:text-primary-400 mt-1 text-xs">
-                  Thường xuyên kiểm tra lại bồn ngâm gạo có thể giảm thiểu tỷ lệ thất thoát.
+                  {{ $t('admin_inventory_loss_ai_tip_desc') }}
                 </p>
               </div>
             </div>
@@ -239,18 +245,18 @@ watch(search, () => {
       <div class="card stagger-item p-5" style="animation-delay: 360ms">
         <div class="mb-4 flex items-center gap-3">
           <div class="max-w-sm flex-1">
-            <BaseSearchInput v-model="search" placeholder="Tìm kiếm theo ngày..." />
+            <BaseSearchInput v-model="search" :placeholder="$t('admin_inventory_loss_search_ph')" />
           </div>
           <UButton color="neutral" variant="outline" icon="i-lucide-download">
-            Xuất báo cáo
+            {{ $t('admin_inventory_loss_btn_export') }}
           </UButton>
         </div>
         <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">
           <BaseDataTable
             :columns="columns"
             :rows="pagedList"
-            empty-title="Chưa có báo cáo hao hụt"
-            empty-description="Không tìm thấy dữ liệu báo cáo."
+            :empty-title="$t('admin_inventory_loss_empty_title')"
+            :empty-description="$t('admin_inventory_loss_empty_desc')"
             empty-icon="i-lucide-clipboard-list"
           >
             <template #date-cell="{ row }">

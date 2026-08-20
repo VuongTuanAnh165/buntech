@@ -2,9 +2,10 @@
 import { blogService } from '~/services/blogService'
 import type { BlogPost } from '~/utils/types'
 import { normalizePaginationResponse } from '~/utils/api'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Quản lý Blog - BunTech Admin' })
+useSeoMeta({ title: t('admin_blog_seo_title') })
 
 // ─── State ────────────────────────────────────────────────
 const search = ref('')
@@ -17,7 +18,7 @@ const categoryFilter = ref<number | string>('ALL')
 const { data: catData } = useAsyncData('admin-categories', () => blogService.getAdminCategories())
 const categoryOptions = computed(() => {
   const options = catData.value?.data?.map((c) => ({ label: c.name, value: c.id })) || []
-  return [{ label: 'Tất cả danh mục', value: 'ALL' }, ...options]
+  return [{ label: t('admin_blog_all_cats'), value: 'ALL' }, ...options]
 })
 
 const {
@@ -52,28 +53,28 @@ const totalViews = computed(() => posts.value.reduce((s, p) => s + (p.views || 0
 
 const kpiStats = computed(() => [
   {
-    title: 'Tổng bài viết',
+    title: t('admin_blog_kpi_total'),
     value: totalPosts.value,
     icon: 'i-lucide-file-text',
     color: 'primary' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Đã xuất bản (trang này)',
+    title: t('status_blog_published'),
     value: publishedPosts.value,
     icon: 'i-lucide-check-circle-2',
     color: 'success' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Bản nháp (trang này)',
+    title: t('admin_blog_kpi_draft'),
     value: draftPosts.value,
     icon: 'i-lucide-file-edit',
     color: 'warning' as const,
     trend: { value: 0, isPositive: false }
   },
   {
-    title: 'Lượt xem (trang này)',
+    title: t('admin_blog_kpi_views'),
     value: new Intl.NumberFormat('vi-VN').format(totalViews.value),
     icon: 'i-lucide-eye',
     color: 'info' as const,
@@ -85,16 +86,16 @@ const kpiStats = computed(() => [
 const featuredPosts = computed(() => posts.value.slice(0, 3))
 
 const columns = [
-  { accessorKey: 'title', header: 'Bài viết' },
-  { accessorKey: 'category', header: 'Danh mục' },
-  { accessorKey: 'author', header: 'Tác giả' },
-  { accessorKey: 'status', header: 'Trạng thái' },
-  { accessorKey: 'date', header: 'Ngày xuất bản' },
-  { accessorKey: 'actions', header: 'Hành động' }
+  { accessorKey: 'title', header: t('nav_blog_posts') },
+  { accessorKey: 'category', header: t('nav_categories') },
+  { accessorKey: 'author', header: t('admin_blog_col_author') },
+  { accessorKey: 'status', header: t('status') },
+  { accessorKey: 'date', header: t('admin_blog_col_date') },
+  { accessorKey: 'actions', header: t('actions') }
 ]
 
 async function handleDelete(id: number) {
-  if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) return
+  if (!confirm(t('admin_blog_del_confirm'))) return
   await blogService.deletePost(id)
   refresh()
 }
@@ -103,19 +104,19 @@ async function handleDelete(id: number) {
 <template>
   <div>
     <BasePageHeader
-      title="Blog"
-      description="Quản lý và xuất bản bài viết cho website"
+      :title="$t('nav_blog_posts')"
+      :description="$t('admin_blog_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Blog' }
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('nav_blog_posts') }
       ]"
     >
       <template #actions>
         <UButton variant="outline" color="neutral" to="/admin/blog/categories">
-          <UIcon name="i-lucide-layers" class="mr-1 h-4 w-4" /> Danh mục
+          <UIcon name="i-lucide-layers" class="mr-1 h-4 w-4" /> {{ $t('nav_categories') }}
         </UButton>
         <UButton to="/admin/blog/edit">
-          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Viết bài mới
+          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> {{ $t('admin_blog_btn_add') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -132,7 +133,7 @@ async function handleDelete(id: number) {
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-surface-foreground flex items-center gap-2 text-sm font-semibold">
             <UIcon name="i-lucide-trending-up" class="text-primary-500 h-4 w-4" />
-            Bài viết nổi bật (Trang hiện tại)
+            {{ $t('admin_blog_featured_title') }}
           </h3>
         </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -155,7 +156,7 @@ async function handleDelete(id: number) {
             />
             <div class="absolute inset-0 flex flex-col justify-end p-5">
               <UBadge color="primary" class="mb-2 w-fit">{{
-                post.category?.name || 'Tin tức'
+                post.category?.name || $t('admin_blog_default_cat')
               }}</UBadge>
               <h4
                 class="group-hover:text-primary-300 mb-2 line-clamp-2 text-lg leading-tight font-semibold text-white transition-colors"
@@ -176,7 +177,7 @@ async function handleDelete(id: number) {
       <div class="card stagger-item p-5" style="animation-delay: 500ms">
         <div class="mb-4 flex items-center justify-between gap-4">
           <div class="max-w-sm flex-1">
-            <BaseSearchInput v-model="search" placeholder="Lọc bài viết theo tiêu đề..." />
+            <BaseSearchInput v-model="search" :placeholder="$t('admin_blog_filter_placeholder')" />
           </div>
           <div class="flex items-center gap-2">
             <USelectMenu
@@ -189,9 +190,9 @@ async function handleDelete(id: number) {
             <USelectMenu
               v-model="statusFilter"
               :items="[
-                { label: 'Tất cả trạng thái', value: 'ALL' },
-                { label: 'Đã xuất bản', value: 'PUBLISHED' },
-                { label: 'Bản nháp', value: 'DRAFT' }
+                { label: $t('admin_blog_status_all'), value: 'ALL' },
+                { label: $t('status_blog_published'), value: 'PUBLISHED' },
+                { label: $t('admin_blog_kpi_draft'), value: 'DRAFT' }
               ]"
               value-key="value"
               label-key="label"
@@ -203,8 +204,8 @@ async function handleDelete(id: number) {
           <BaseDataTable
             :columns="columns"
             :rows="filteredPosts"
-            empty-title="Không tìm thấy bài viết"
-            empty-description="Thử đổi bộ lọc hoặc thêm bài viết mới."
+            :empty-title="$t('admin_blog_empty_title')"
+            :empty-description="$t('admin_blog_empty_desc')"
             empty-icon="i-lucide-file-text"
           >
             <template #title-cell="{ row }">
@@ -230,7 +231,7 @@ async function handleDelete(id: number) {
             </template>
             <template #category-cell="{ row }">
               <UBadge color="primary" variant="subtle" size="sm">
-                {{ row.category?.name || 'Chưa phân loại' }}
+                {{ row.category?.name || $t('admin_blog_default_cat') }}
               </UBadge>
             </template>
             <template #author-cell="{ row }">
@@ -248,14 +249,18 @@ async function handleDelete(id: number) {
                     class="h-1.5 w-1.5 rounded-full"
                     :class="row.isPublished ? 'bg-success-500' : 'bg-warning-500'"
                   />
-                  {{ row.isPublished ? 'Đã xuất bản' : 'Bản nháp' }}
+                  {{ row.isPublished ? $t('status_blog_published') : $t('admin_blog_kpi_draft') }}
                 </span>
               </UBadge>
             </template>
             <template #date-cell="{ row }">
               <span class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-zinc-400">
                 <UIcon name="i-lucide-clock" class="h-3.5 w-3.5" />
-                {{ row.isPublished && row.publishedAt ? formatDate(row.publishedAt) : 'Chưa XB' }}
+                {{
+                  row.isPublished && row.publishedAt
+                    ? formatDate(row.publishedAt)
+                    : $t('admin_blog_unpublished')
+                }}
               </span>
             </template>
             <template #actions-cell="{ row }">

@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ConstantKey } from '~/enums/constantKeys'
 import type { AdminOrderDTO } from '~/services/adminOrderService'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 
@@ -27,28 +28,28 @@ const kpiStats = computed(() => {
   ).length
   return [
     {
-      title: 'Tổng đơn hàng',
+      title: t('admin_order_kpi_total'),
       value: list.length,
       icon: 'i-lucide-shopping-bag',
       color: 'primary' as const,
       trend: { value: 15, isPositive: true }
     },
     {
-      title: 'Chờ xử lý',
+      title: t('status_order_pending'),
       value: pending,
       icon: 'i-lucide-clock',
       color: 'warning' as const,
       trend: { value: 3, isPositive: true }
     },
     {
-      title: 'Đang giao',
+      title: t('status_order_delivering'),
       value: shipping,
       icon: 'i-lucide-truck',
       color: 'info' as const,
       trend: { value: 7, isPositive: true }
     },
     {
-      title: 'Đã giao',
+      title: t('status_order_delivered'),
       value: delivered,
       icon: 'i-lucide-package-check',
       color: 'success' as const,
@@ -83,7 +84,7 @@ const totalRevenue = computed(() =>
         </div>
         <div>
           <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">
-            Tổng doanh thu (đã giao)
+            {{ $t('admin_order_kpi_revenue') }}
           </p>
           <p class="text-success-600 dark:text-success-400 text-lg font-bold tabular-nums">
             {{ formatVND(totalRevenue) }}
@@ -101,7 +102,7 @@ const totalRevenue = computed(() =>
           class="flex hidden items-center gap-1 text-xs text-slate-500 sm:flex dark:text-zinc-400"
         >
           <div class="i-lucide-radio h-3.5 w-3.5" />
-          Cập nhật theo thời gian thực
+          {{ $t('admin_order_kpi_realtime') }}
         </span>
       </div>
     </div>

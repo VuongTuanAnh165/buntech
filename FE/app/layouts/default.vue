@@ -15,7 +15,7 @@ import {
   Mail,
   MapPin
 } from 'lucide-vue-next'
-const { t } = useI18n()
+import { t } from '~/utils/i18n'
 const authStore = useAuthStore()
 const userMenuOpen = ref(false)
 const userMenuRef = ref<HTMLElement | null>(null)
@@ -39,11 +39,11 @@ const handleLogout = () => {
 }
 
 const bottomNavItems = computed(() => [
-  { label: t('nav.home'), to: '/', icon: Home },
-  { label: t('nav.products'), to: '/products', icon: Package },
-  { label: 'Hệ thống Phân phối', to: '/distribution', icon: MapPin },
-  { label: t('nav.news'), to: '/blog', icon: FileText },
-  { label: t('nav.about'), to: '/about', icon: User }
+  { label: t('nav_home'), to: '/', icon: Home },
+  { label: t('nav_products'), to: '/products', icon: Package },
+  { label: t('nav_distribution'), to: '/distribution', icon: MapPin },
+  { label: t('nav_news'), to: '/blog', icon: FileText },
+  { label: t('nav_about'), to: '/about', icon: User }
 ])
 
 const onOutsideClick = (e: MouseEvent) => {
@@ -98,7 +98,7 @@ onUnmounted(() => {
               variant="ghost"
               color="neutral"
               class="text-surface-foreground hover:bg-surface-hover flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 transition-colors"
-              aria-label="Giỏ hàng"
+              :aria-label="$t('aria_cart')"
             >
               <ShoppingCart class="h-5 w-5" aria-hidden="true" />
             </UButton>
@@ -106,7 +106,9 @@ onUnmounted(() => {
               variant="ghost"
               color="neutral"
               class="text-surface-foreground hover:bg-surface-hover flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 transition-colors"
-              :aria-label="colorMode.value === 'dark' ? 'Bật chế độ sáng' : 'Bật chế độ tối'"
+              :aria-label="
+                colorMode.value === 'dark' ? $t('aria_theme_light') : $t('aria_theme_dark')
+              "
               @click="toggleDark"
             >
               <Sun v-if="colorMode.value === 'dark'" class="h-5 w-5" aria-hidden="true" />
@@ -117,14 +119,14 @@ onUnmounted(() => {
                 v-if="authStore.role === 'CUSTOMER'"
                 to="/portal"
                 class="text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 hidden min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200 sm:inline-flex"
-                >{{ t('nav.myOrders') }}</NuxtLink
+                >{{ $t('nav_my_orders') }}</NuxtLink
               >
               <NuxtLink
                 v-else-if="authStore.role === 'ADMIN'"
                 to="/admin"
                 class="text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 hidden min-h-[44px] items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-all duration-200 sm:inline-flex"
               >
-                <LayoutDashboard class="h-4 w-4" aria-hidden="true" /> {{ t('nav.dashboard') }}
+                <LayoutDashboard class="h-4 w-4" aria-hidden="true" /> {{ $t('nav_dashboard') }}
               </NuxtLink>
               <div ref="userMenuRef" class="relative">
                 <UButton
@@ -166,7 +168,7 @@ onUnmounted(() => {
                       @click="userMenuOpen = false"
                     >
                       <User class="h-4 w-4 text-gray-400 dark:text-zinc-500" aria-hidden="true" />
-                      {{ t('nav.myOrders') }}
+                      {{ $t('nav_my_orders') }}
                     </NuxtLink>
                     <UButton
                       variant="ghost"
@@ -175,7 +177,7 @@ onUnmounted(() => {
                       class="text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex min-h-[44px] w-full items-center gap-2.5 px-4 py-2.5 text-sm transition-colors"
                       @click="handleLogout"
                     >
-                      <LogOut class="h-4 w-4" aria-hidden="true" /> {{ t('nav.logout') }}
+                      <LogOut class="h-4 w-4" aria-hidden="true" /> {{ $t('logout') }}
                     </UButton>
                   </div>
                 </Transition>
@@ -186,7 +188,7 @@ onUnmounted(() => {
                 to="/auth/customer/login"
                 class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 flex min-h-[44px] items-center rounded-lg px-3.5 py-2.5 text-sm font-medium transition-all duration-200"
               >
-                {{ t('customer.customerLogin') }}
+                {{ $t('login') }}
               </NuxtLink>
             </template>
           </div>
@@ -209,7 +211,7 @@ onUnmounted(() => {
                 loading="lazy"
               />
             </div>
-            <p class="mb-4 max-w-md text-sm leading-relaxed">{{ t('app.tagline') }}</p>
+            <p class="mb-4 max-w-md text-sm leading-relaxed">{{ $t('app_tagline') }}</p>
             <div class="flex items-center gap-3">
               <a
                 href="https://facebook.com"
@@ -223,7 +225,7 @@ onUnmounted(() => {
               <a
                 href="tel:+84901234567"
                 class="hover:bg-primary-600 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all duration-200 hover:scale-105 hover:text-white"
-                aria-label="Điện thoại"
+                :aria-label="$t('aria_phone')"
               >
                 <Phone class="h-4 w-4" aria-hidden="true" />
               </a>
@@ -237,47 +239,50 @@ onUnmounted(() => {
             </div>
           </div>
           <div>
-            <h4 class="mb-3 text-sm font-semibold text-white">{{ t('nav.products') }}</h4>
+            <h4 class="mb-3 text-sm font-semibold text-white">{{ $t('nav_products') }}</h4>
             <ul class="space-y-2 text-sm">
               <li>
                 <NuxtLink to="/products" class="transition-colors hover:text-white">{{
-                  t('nav.products')
+                  $t('nav_products')
                 }}</NuxtLink>
               </li>
               <li>
-                <NuxtLink to="/distribution" class="transition-colors hover:text-white">
-                  Hệ thống Phân phối
+                <NuxtLink
+                  to="/distribution"
+                  class="hover:text-primary-600 dark:hover:text-primary-400 text-sm transition-colors"
+                >
+                  {{ $t('nav_distribution') }}
                 </NuxtLink>
               </li>
               <li>
                 <NuxtLink to="/about" class="transition-colors hover:text-white">{{
-                  t('nav.about')
+                  $t('nav_about')
                 }}</NuxtLink>
               </li>
             </ul>
           </div>
           <div>
-            <h4 class="mb-3 text-sm font-semibold text-white">{{ t('nav.about') }}</h4>
+            <h4 class="mb-3 text-sm font-semibold text-white">{{ $t('nav_about') }}</h4>
             <ul class="space-y-2 text-sm">
               <li>
                 <NuxtLink to="/blog" class="transition-colors hover:text-white">{{
-                  t('nav.news')
+                  $t('nav_news')
                 }}</NuxtLink>
               </li>
               <li>
                 <NuxtLink to="/auth/driver/login" class="transition-colors hover:text-white">{{
-                  t('nav.driverApp')
+                  $t('nav_driver_app')
                 }}</NuxtLink>
               </li>
             </ul>
-            <div class="mt-4 flex items-start gap-2 text-xs text-slate-500">
-              <MapPin class="mt-0.5 h-3.5 w-3.5 flex-shrink-0" aria-hidden="true" />
-              <span>123 Nguyễn Trãi, Thanh Xuân, Hà Nội</span>
+            <div class="mt-4 flex items-start gap-3">
+              <MapPin class="text-primary-600 dark:text-primary-400 mt-0.5 h-5 w-5 shrink-0" />
+              <span>{{ $t('footer_address') }}</span>
             </div>
           </div>
         </div>
         <div class="mt-8 border-t border-white/10 pt-8 text-center text-sm text-slate-500">
-          &copy; {{ new Date().getFullYear() }} BunTech. {{ t('app.tagline') }}
+          &copy; {{ new Date().getFullYear() }} BunTech. {{ $t('app_tagline') }}
         </div>
       </div>
     </footer>
@@ -286,11 +291,10 @@ onUnmounted(() => {
     <Transition name="scroll-top">
       <UButton
         v-if="showScrollTop"
-        variant="ghost"
-        color="neutral"
-        type="button"
-        class="bg-primary-600 shadow-primary-600/30 hover:bg-primary-700 fixed right-4 bottom-20 z-40 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-lg transition-all duration-200 active:scale-90 md:bottom-6"
-        aria-label="Lên đầu trang"
+        variant="soft"
+        :aria-label="$t('aria_back_to_top')"
+        class="shadow-primary-500/20 hover:bg-primary-600 fixed right-6 bottom-24 z-50 rounded-full p-3 shadow-lg transition-all duration-300 md:bottom-6"
+        :class="[showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0']"
         @click="scrollToTop"
       >
         <ArrowUp class="h-5 w-5" aria-hidden="true" />

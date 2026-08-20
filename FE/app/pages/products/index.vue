@@ -2,8 +2,9 @@
 import { Grid2x2, LayoutGrid, Package, X, ChevronRight } from 'lucide-vue-next'
 import { generateSeoSlug } from '~/utils/idEncoder'
 import { productService } from '~/services/productService'
+import { t } from '~/utils/i18n'
 
-useSeoMeta({ title: 'Sản phẩm - BunTech' })
+useSeoMeta({ title: t('public_products_seo_title') })
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
@@ -20,10 +21,10 @@ const viewMode = ref<'grid' | 'list'>('grid')
 const currentPage = ref(Number(route.query.page) || 1)
 const perPage = 12
 const sortOptions = [
-  { value: 'latest', label: 'Mới nhất' },
-  { value: 'price-asc', label: 'Giá thấp → cao' },
-  { value: 'price-desc', label: 'Giá cao → thấp' },
-  { value: 'name', label: 'Tên A → Z' }
+  { value: 'latest', label: t('public_products_sort_latest') },
+  { value: 'price-asc', label: t('public_products_sort_price_asc') },
+  { value: 'price-desc', label: t('public_products_sort_price_desc') },
+  { value: 'name', label: t('public_products_sort_name_asc') }
 ]
 
 const { data: catRes } = useAsyncData('product-categories', () =>
@@ -75,18 +76,20 @@ const clearFilters = () => {
             <NuxtLink
               to="/"
               class="hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-zinc-400"
-              >Trang chủ</NuxtLink
+              >{{ $t('nav_home') }}</NuxtLink
             >
           </li>
           <li class="text-gray-300 dark:text-zinc-600" aria-hidden="true">/</li>
-          <li aria-current="page" class="text-surface-foreground font-medium">Sản phẩm</li>
+          <li aria-current="page" class="text-surface-foreground font-medium">
+            {{ $t('nav_products') }}
+          </li>
         </ol>
       </nav>
       <h1 class="text-surface-foreground mb-2 text-2xl font-bold tracking-tight sm:text-3xl">
-        Tất cả sản phẩm
+        {{ $t('public_products_title') }}
       </h1>
       <p class="text-sm text-gray-500 dark:text-zinc-400">
-        Bún tươi thủ công, giao hàng tận nơi trong 2 giờ
+        {{ $t('public_products_subtitle') }}
       </p>
     </div>
     <!-- Search & Sort Bar -->
@@ -94,7 +97,7 @@ const clearFilters = () => {
       <div class="flex flex-wrap items-center gap-3">
         <BaseSearchInput
           v-model="search"
-          placeholder="Tìm kiếm sản phẩm..."
+          :placeholder="$t('public_products_search_ph')"
           class="max-w-md min-w-[200px] flex-1"
         />
         <USelect
@@ -113,7 +116,7 @@ const clearFilters = () => {
           @click="clearFilters"
         >
           <X class="h-4 w-4" aria-hidden="true" />
-          Xóa lọc
+          {{ $t('public_blog_btn_clear') }}
         </UButton>
         <div class="bg-surface-hover ml-auto hidden items-center gap-1 rounded-lg p-1 sm:flex">
           <UButton
@@ -126,7 +129,7 @@ const clearFilters = () => {
                 ? 'bg-surface text-primary-600 dark:text-primary-400 shadow-sm'
                 : 'text-gray-400 dark:text-zinc-500'
             ]"
-            :aria-label="'Hiển thị dạng lưới'"
+            :aria-label="$t('public_products_view_grid')"
             :aria-pressed="viewMode === 'grid'"
             @click="
               () => {
@@ -146,7 +149,7 @@ const clearFilters = () => {
                 ? 'bg-surface text-primary-600 dark:text-primary-400 shadow-sm'
                 : 'text-gray-400 dark:text-zinc-500'
             ]"
-            :aria-label="'Hiển thị dạng danh sách'"
+            :aria-label="$t('public_products_view_list')"
             :aria-pressed="viewMode === 'list'"
             @click="
               () => {
@@ -177,7 +180,7 @@ const clearFilters = () => {
           }
         "
       >
-        Tất cả
+        {{ $t('admin_debt_type_all') }}
       </UButton>
       <UButton
         v-for="cat in categories"
@@ -203,7 +206,11 @@ const clearFilters = () => {
     <!-- Results count -->
     <div class="mb-4 flex items-center justify-between">
       <p class="text-sm text-gray-500 dark:text-zinc-400">
-        {{ loading ? 'Đang tải...' : `${totalItems} sản phẩm` }}
+        {{
+          loading
+            ? $t('public_products_loading')
+            : $t('admin_dash_n_products', { count: totalItems })
+        }}
       </p>
     </div>
     <!-- Loading skeleton -->
@@ -244,7 +251,7 @@ const clearFilters = () => {
             {{ product.name }}
           </h3>
           <p class="mb-2 text-xs text-gray-400 dark:text-zinc-500">
-            {{ product.category?.name || 'Chưa phân loại' }}
+            {{ product.category?.name || $t('admin_blog_default_cat') }}
           </p>
           <div class="flex items-center justify-between">
             <p class="text-primary-600 dark:text-primary-400 text-sm font-semibold sm:text-base">
@@ -254,7 +261,7 @@ const clearFilters = () => {
           </div>
           <div class="mt-3">
             <UButton size="sm" variant="outline" class="group/btn w-full">
-              Đặt hàng
+              {{ $t('wholesale_qa_order') }}
               <ChevronRight
                 class="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5"
                 aria-hidden="true"
@@ -295,7 +302,7 @@ const clearFilters = () => {
               {{ product.name }}
             </h3>
             <p class="mb-1 line-clamp-1 text-sm text-gray-500 dark:text-zinc-400">
-              {{ product.shortDescription || 'Mô tả đang cập nhật' }}
+              {{ product.shortDescription || $t('public_products_desc_empty') }}
             </p>
             <div class="flex flex-wrap items-center gap-2">
               <p class="text-primary-600 dark:text-primary-400 text-lg font-bold">
@@ -310,11 +317,11 @@ const clearFilters = () => {
     <!-- Empty state -->
     <BaseEmptyState
       v-else
-      title="Không tìm thấy sản phẩm"
-      description="Thử thay đổi từ khóa hoặc bộ lọc để tìm sản phẩm phù hợp"
+      :title="$t('admin_order_picker_empty')"
+      :description="$t('public_products_not_found_desc')"
     >
       <template #action>
-        <UButton @click="navigateTo('/quick-order')">Đặt hàng nhanh</UButton>
+        <UButton @click="navigateTo('/quick-order')">{{ $t('quick_order_title') }}</UButton>
       </template>
     </BaseEmptyState>
     <!-- Pagination -->
@@ -331,7 +338,7 @@ const clearFilters = () => {
           }
         "
       >
-        Trước
+        {{ $t('public_blog_btn_prev') }}
       </UButton>
       <UButton
         v-for="page in totalPages"
@@ -364,7 +371,7 @@ const clearFilters = () => {
           }
         "
       >
-        Sau
+        {{ $t('public_blog_btn_next') }}
       </UButton>
     </div>
   </div>

@@ -20,10 +20,10 @@ const categories = computed(() => catRes.value?.data || [])
     <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
       <div class="mb-10 text-center">
         <h2 class="text-surface-foreground mb-2 text-2xl font-bold sm:text-3xl">
-          Danh mục sản phẩm
+          {{ $t('public_landing_prod_cat_title') }}
         </h2>
         <p class="text-sm text-slate-500 dark:text-zinc-400">
-          Khám phá đa dạng các loại bún tươi BunTech
+          {{ $t('public_landing_prod_cat_subtitle') }}
         </p>
       </div>
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
@@ -47,7 +47,9 @@ const categories = computed(() => catRes.value?.data || [])
           >
             {{ cat.name }}
           </h3>
-          <p class="mt-1 text-xs text-slate-400 dark:text-zinc-500">Khám phá ngay</p>
+          <p class="mt-1 text-xs text-slate-400 dark:text-zinc-500">
+            {{ $t('public_landing_prod_cat_btn') }}
+          </p>
         </NuxtLink>
       </div>
     </section>
@@ -56,16 +58,18 @@ const categories = computed(() => catRes.value?.data || [])
     <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div class="mb-8 flex items-end justify-between">
         <div>
-          <h2 class="text-surface-foreground text-2xl font-bold sm:text-3xl">Sản phẩm nổi bật</h2>
+          <h2 class="text-surface-foreground text-2xl font-bold sm:text-3xl">
+            {{ $t('public_landing_prod_feat_title') }}
+          </h2>
           <p class="mt-1 text-sm text-slate-500 dark:text-zinc-400">
-            Bún tươi mới sản xuất, đặt hàng giao ngay
+            {{ $t('public_landing_prod_feat_subtitle') }}
           </p>
         </div>
         <NuxtLink
           to="/products"
           class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 group hidden min-h-[44px] items-center gap-1 px-2 text-sm font-medium transition-colors sm:flex"
         >
-          Xem tất cả
+          {{ $t('wholesale_view_all') }}
           <span
             class="i-lucide-chevron-right h-4 w-4 transition-transform group-hover:translate-x-0.5"
             aria-hidden="true"
@@ -109,7 +113,7 @@ const categories = computed(() => catRes.value?.data || [])
             {{ product.name }}
           </h3>
           <p class="mb-2 text-xs text-slate-400 dark:text-zinc-500">
-            {{ product.category?.name || 'Chưa phân loại' }}
+            {{ product.category?.name || $t('admin_blog_default_cat') }}
           </p>
           <div class="flex items-center justify-between">
             <p class="text-primary-600 dark:text-primary-400 text-sm font-semibold sm:text-base">
@@ -121,7 +125,9 @@ const categories = computed(() => catRes.value?.data || [])
       </div>
       <div class="mt-6 sm:hidden">
         <NuxtLink to="/products">
-          <UButton color="neutral" variant="outline" block>Xem tất cả sản phẩm</UButton>
+          <UButton color="neutral" variant="outline" block>{{
+            $t('public_landing_prod_btn_all_mobile')
+          }}</UButton>
         </NuxtLink>
       </div>
     </section>

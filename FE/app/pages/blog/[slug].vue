@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ArrowLeft, Clock, Facebook, Twitter } from 'lucide-vue-next'
+import { ArrowLeft, Calendar, Clock, Facebook, Link2, Tag, Twitter, User } from 'lucide-vue-next'
 import DOMPurify from 'dompurify'
 import { blogService } from '~/services/blogService'
 import { extractIdFromSlug } from '~/utils/idEncoder'
 import { normalizePaginationResponse } from '~/utils/api'
 import type { BlogPost } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
 const toast = useToast()
 const route = useRoute()
@@ -39,7 +40,7 @@ const relatedPosts = computed<BlogPost[]>(() => {
   return allRelated.filter((p: BlogPost) => p.id !== postId).slice(0, 3)
 })
 
-const blogCategoryName = computed(() => post.value?.category?.name || 'Tin tức')
+const blogCategoryName = computed(() => post.value?.category?.name || t('nav_news'))
 
 const readingTime = computed(() => {
   if (!post.value?.content) return 1
@@ -57,7 +58,7 @@ const sanitizedContent = computed(() => {
 const sharePost = () => {
   if (import.meta.client) {
     navigator.clipboard.writeText(window.location.href)
-    toast.add({ title: 'Đã sao chép liên kết', color: 'success' })
+    toast.add({ title: t('public_blog_detail_msg_copied'), color: 'success' })
   }
 }
 
@@ -81,7 +82,9 @@ const shareTwitter = () => {
 
 useSeoMeta({
   title: () =>
-    post.value ? `${post.value.metaTitle || post.value.title} - BunTech` : 'Tin tức - BunTech',
+    post.value
+      ? `${post.value.metaTitle || post.value.title} - BunTech`
+      : t('public_blog_seo_title'),
   description: () => post.value?.metaDescription || post.value?.excerpt || ''
 })
 </script>
@@ -94,10 +97,14 @@ useSeoMeta({
       class="hover:text-surface-foreground mb-6 -ml-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-md px-2 text-sm text-gray-500 transition-colors dark:text-zinc-400"
     >
       <ArrowLeft class="h-4 w-4" aria-hidden="true" />
-      Quay lại
+      {{ $t('admin_blog_cat_btn_back') }}
     </NuxtLink>
 
-    <BaseEmptyState v-if="error" title="Lỗi" description="Không tìm thấy bài viết" />
+    <BaseEmptyState
+      v-if="error"
+      :title="$t('wholesale_msg_error')"
+      :description="$t('admin_blog_empty_title')"
+    />
 
     <template v-else-if="loading">
       <USkeleton class="mb-4 h-8" />
@@ -116,10 +123,12 @@ useSeoMeta({
           {{ formatDate(post.publishedAt || post.createdAt) }}
         </span>
         <span class="inline-flex items-center gap-1">
-          <User class="h-3.5 w-3.5" aria-hidden="true" /> Tác giả ({{ post.authorId }})
+          <User class="h-3.5 w-3.5" aria-hidden="true" />
+          {{ $t('public_blog_detail_author', { id: post.authorId }) }}
         </span>
         <span class="inline-flex items-center gap-1">
-          <Clock class="h-3.5 w-3.5" aria-hidden="true" /> {{ readingTime }} phút đọc
+          <Clock class="h-3.5 w-3.5" aria-hidden="true" />
+          {{ $t('public_blog_detail_reading_time', { time: readingTime }) }}
         </span>
       </div>
 
@@ -153,15 +162,15 @@ useSeoMeta({
           </span>
         </div>
         <div class="flex items-center gap-1">
-          <span class="mr-1 hidden text-xs text-gray-400 sm:inline dark:text-zinc-500"
-            >Chia sẻ:</span
-          >
+          <span class="mr-1 hidden text-xs text-gray-400 sm:inline dark:text-zinc-500">{{
+            $t('public_blog_detail_share_label')
+          }}</span>
           <UButton
             variant="ghost"
             color="neutral"
             type="button"
             class="hover:text-primary-600 dark:hover:text-primary-400 dark:hover:bg-primary-900/20 flex h-9 min-h-[36px] w-9 min-w-[36px] items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-blue-50 dark:text-zinc-500"
-            aria-label="Chia sẻ Facebook"
+            :aria-label="$t('public_blog_detail_share_fb')"
             @click="shareFacebook"
           >
             <Facebook class="h-4 w-4" aria-hidden="true" />
@@ -171,7 +180,7 @@ useSeoMeta({
             color="neutral"
             type="button"
             class="flex h-9 min-h-[36px] w-9 min-w-[36px] items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-sky-50 hover:text-sky-500 dark:text-zinc-500 dark:hover:bg-sky-900/20 dark:hover:text-sky-400"
-            aria-label="Chia sẻ Twitter"
+            :aria-label="$t('public_blog_detail_share_tw')"
             @click="shareTwitter"
           >
             <Twitter class="h-4 w-4" aria-hidden="true" />
@@ -181,7 +190,7 @@ useSeoMeta({
             color="neutral"
             type="button"
             class="hover:text-primary-600 dark:hover:text-primary-400 hover:bg-surface-hover flex h-9 min-h-[36px] w-9 min-w-[36px] items-center justify-center rounded-lg text-gray-400 transition-all dark:text-zinc-500"
-            aria-label="Sao chép link"
+            :aria-label="$t('public_blog_detail_share_link')"
             @click="sharePost"
           >
             <Link2 class="h-4 w-4" aria-hidden="true" />
@@ -204,19 +213,22 @@ useSeoMeta({
         <UAvatar alt="T" size="lg" />
         <div class="flex-1">
           <div class="mb-1 flex items-center gap-2">
-            <p class="text-surface-foreground font-semibold">Tác giả (ID: {{ post.authorId }})</p>
-            <UBadge color="primary" size="sm">Tác giả</UBadge>
+            <p class="text-surface-foreground font-semibold">
+              {{ $t('public_blog_detail_author_id', { id: post.authorId }) }}
+            </p>
+            <UBadge color="primary" size="sm">{{ $t('admin_blog_col_author') }}</UBadge>
           </div>
           <p class="text-sm leading-relaxed text-gray-500 dark:text-zinc-400">
-            Tác giả tại BunTech với nhiều năm kinh nghiệm trong ngành thực phẩm và ẩm thực Việt. Đam
-            mê chia sẻ kiến thức về bún truyền thống và văn hóa ẩm thực.
+            {{ $t('public_blog_detail_author_desc') }}
           </p>
         </div>
       </div>
 
       <!-- Related Posts -->
       <div v-if="relatedPosts.length" class="mt-12">
-        <h2 class="text-surface-foreground mb-6 text-xl font-bold">Bài viết liên quan</h2>
+        <h2 class="text-surface-foreground mb-6 text-xl font-bold">
+          {{ $t('public_blog_detail_related') }}
+        </h2>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <DomainBlogPostCard v-for="(rp, i) in relatedPosts" :key="rp.id" :post="rp" :index="i" />
         </div>

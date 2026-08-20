@@ -31,8 +31,10 @@ const emit = defineEmits<{
         <UIcon name="i-lucide-shopping-cart" class="text-info-600 h-4 w-4" />
       </div>
       <div>
-        <h2 class="text-surface-foreground text-sm font-semibold">Giỏ hàng</h2>
-        <p class="text-xs text-slate-500">{{ items.length }} sản phẩm</p>
+        <h2 class="text-surface-foreground text-sm font-semibold">{{ $t('aria_cart') }}</h2>
+        <p class="text-xs text-slate-500">
+          {{ $t('admin_dash_n_products', { count: items.length }) }}
+        </p>
       </div>
     </div>
     <template v-if="items.length">
@@ -67,14 +69,14 @@ const emit = defineEmits<{
               v-if="customPrices.has(String(item.productId))"
               class="text-primary-600 text-[10px] font-medium"
             >
-              (Giá riêng)
+              {{ $t('admin_order_cart_custom_price') }}
             </p>
           </div>
           <div class="flex flex-shrink-0 items-center gap-1">
             <UButton
               variant="ghost"
               color="neutral"
-              aria-label="Giảm"
+              :aria-label="$t('admin_order_cart_btn_dec')"
               class="bg-surface-hover hover:bg-surface-border text-surface-foreground flex h-8 min-h-[36px] w-8 min-w-[36px] items-center justify-center rounded-md transition-colors"
               @click="emit('updateQuantity', i, -1)"
             >
@@ -87,7 +89,7 @@ const emit = defineEmits<{
             <UButton
               variant="ghost"
               color="neutral"
-              aria-label="Tăng"
+              :aria-label="$t('admin_order_cart_btn_inc')"
               class="bg-surface-hover hover:bg-surface-border text-surface-foreground flex h-8 min-h-[36px] w-8 min-w-[36px] items-center justify-center rounded-md transition-colors"
               @click="emit('updateQuantity', i, 1)"
             >
@@ -99,7 +101,7 @@ const emit = defineEmits<{
             variant="ghost"
             color="neutral"
             class="hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex h-8 min-h-[36px] w-8 min-w-[36px] flex-shrink-0 items-center justify-center rounded-md text-gray-400 transition-colors"
-            aria-label="Xóa"
+            :aria-label="$t('delete')"
             @click="emit('remove', i)"
           >
             <UIcon name="i-lucide-trash-2" class="h-3.5 w-3.5" aria-hidden="true" />
@@ -107,7 +109,9 @@ const emit = defineEmits<{
         </div>
       </TransitionGroup>
       <div class="border-surface-border mt-4 flex items-center justify-between border-t pt-4">
-        <span class="text-surface-foreground text-sm font-semibold">Tạm tính</span>
+        <span class="text-surface-foreground text-sm font-semibold">{{
+          $t('admin_order_cart_subtotal')
+        }}</span>
         <span class="text-surface-foreground text-lg font-bold">{{ formatVND(subtotal) }}</span>
       </div>
     </template>
@@ -117,7 +121,7 @@ const emit = defineEmits<{
       >
         <UIcon name="i-lucide-shopping-cart" class="h-6 w-6 text-slate-300" />
       </div>
-      <p class="text-surface-foreground text-sm font-medium">Giỏ hàng trống</p>
+      <p class="text-surface-foreground text-sm font-medium">{{ $t('admin_order_cart_empty') }}</p>
     </div>
   </div>
 </template>

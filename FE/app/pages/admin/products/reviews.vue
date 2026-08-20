@@ -5,10 +5,11 @@ import { normalizePaginationResponse } from '~/utils/api'
 import ProductReviewCard from '~/components/features/admin/products/ProductReviewCard.vue'
 
 import { z } from 'zod'
+import { t } from '~/utils/i18n'
 
 const confirmDialog = useConfirmDialog()
 
-useSeoMeta({ title: `Đánh giá sản phẩm - BunTech Admin` })
+useSeoMeta({ title: t('admin_reviews_seo_title') })
 definePageMeta({ layout: 'admin' })
 
 // ─── State ──────────────────────────────────────────────
@@ -22,8 +23,8 @@ const replyState = reactive({ replyText: '' })
 const replySchema = z.object({
   replyText: z
     .string()
-    .min(1, 'Vui lòng nhập nội dung phản hồi')
-    .max(2000, 'Nội dung phản hồi không được vượt quá 2000 ký tự')
+    .min(1, t('admin_reviews_form_reply_req'))
+    .max(2000, t('admin_reviews_form_reply_max'))
 })
 
 const { formErrors, formRef, validate: validateForm } = useZodForm(replySchema)
@@ -56,19 +57,19 @@ const stats = computed(() => statsRes.value?.data)
 // ─── Stats & Filters ────────────────────────────────────
 const displayStats = computed(() => [
   {
-    title: 'Tổng đánh giá',
+    title: t('admin_reviews_kpi_total'),
     value: stats.value?.total || 0,
     icon: 'i-lucide-message-square',
     color: 'primary' as const
   },
   {
-    title: 'Điểm trung bình',
+    title: t('admin_reviews_kpi_avg'),
     value: `${stats.value?.averageRating || 0}★`,
     icon: 'i-lucide-star',
     color: 'info' as const
   },
   {
-    title: 'Chờ duyệt',
+    title: t('status_user_pending'),
     value: stats.value?.pending || 0,
     icon: 'i-lucide-clock',
     color: 'warning' as const
@@ -76,9 +77,17 @@ const displayStats = computed(() => [
 ])
 
 const filterTabs = computed(() => [
-  { accessorKey: 'pending' as const, header: 'Chờ duyệt', count: stats.value?.pending || 0 },
-  { accessorKey: 'approved' as const, header: 'Đã duyệt', count: stats.value?.approved || 0 },
-  { accessorKey: 'all' as const, header: 'Tất cả', count: stats.value?.total || 0 }
+  {
+    accessorKey: 'pending' as const,
+    header: t('status_user_pending'),
+    count: stats.value?.pending || 0
+  },
+  {
+    accessorKey: 'approved' as const,
+    header: t('admin_reviews_tab_approved'),
+    count: stats.value?.approved || 0
+  },
+  { accessorKey: 'all' as const, header: t('admin_debt_type_all'), count: stats.value?.total || 0 }
 ])
 
 // ─── Actions ────────────────────────────────────────────
@@ -94,9 +103,9 @@ async function toggleApprove(review: ProductReview, approve: boolean) {
 
 async function deleteReview(review: ProductReview) {
   const isConfirmed = await confirmDialog.confirm({
-    title: 'Xóa đánh giá',
-    description: 'Bạn có chắc chắn muốn xóa đánh giá này? Hành động này không thể hoàn tác.',
-    confirmLabel: 'Xóa',
+    title: t('admin_reviews_del_title'),
+    description: t('admin_reviews_del_desc'),
+    confirmLabel: t('delete'),
     color: 'error'
   })
   if (!isConfirmed) return
@@ -147,10 +156,7 @@ const handleFormSubmit = async () => {
 
 <template>
   <div>
-    <BasePageHeader
-      title="Đánh giá sản phẩm"
-      description="Duyệt và phản hồi đánh giá từ khách hàng"
-    />
+    <BasePageHeader :title="$t('admin_reviews_title')" :description="$t('admin_reviews_desc')" />
 
     <!-- Stats -->
     <div class="mb-6">
@@ -232,7 +238,13 @@ const handleFormSubmit = async () => {
       <!-- Pagination -->
       <div v-if="meta.lastPage > 1" class="mt-6 flex items-center justify-between">
         <p class="text-sm text-slate-500 dark:text-zinc-400">
-          Hiển thị {{ meta.from }} đến {{ meta.to }} trong {{ meta.total }} đánh giá
+          {{
+            $t('admin_reviews_pagination', {
+              from: meta.from || 0,
+              to: meta.to || 0,
+              total: meta.total
+            })
+          }}
         </p>
         <UPagination v-model:page="page" :items-per-page="perPage" :total="meta.total" />
       </div>
@@ -240,11 +252,15 @@ const handleFormSubmit = async () => {
 
     <BaseEmptyState
       v-else
-      :title="filterStatus === 'pending' ? 'Không có đánh giá chờ duyệt' : 'Chưa có đánh giá nào'"
+      :title="
+        filterStatus === 'pending'
+          ? $t('admin_reviews_empty_pending_title')
+          : $t('admin_reviews_empty_title')
+      "
       :description="
         filterStatus === 'pending'
-          ? 'Tất cả đánh giá đã được duyệt.'
-          : 'Đánh giá từ khách hàng sẽ hiển thị tại đây.'
+          ? $t('admin_reviews_empty_pending_desc')
+          : $t('admin_reviews_empty_desc')
       "
       icon="i-lucide-message-square"
     />
@@ -252,15 +268,19 @@ const handleFormSubmit = async () => {
     <!-- Reply Modal -->
     <UModal
       :open="!!replyTargetId"
-      title="Phản hồi đánh giá"
+      :title="$t('admin_reviews_modal_reply_title')"
       @update:open="!$event && cancelReply()"
     >
       <template #body>
         <form id="reply-form" class="space-y-4" @submit.prevent="handleFormSubmit">
-          <UFormField label="Nội dung phản hồi" name="replyText" :error="formErrors.replyText">
+          <UFormField
+            :label="$t('admin_reviews_form_reply')"
+            name="replyText"
+            :error="formErrors.replyText"
+          >
             <UTextarea
               v-model="replyState.replyText"
-              placeholder="Nhập phản hồi cho khách hàng..."
+              :placeholder="$t('admin_reviews_form_reply_placeholder')"
               autofocus
               :rows="4"
               class="w-full"
@@ -270,7 +290,9 @@ const handleFormSubmit = async () => {
       </template>
       <template #footer>
         <div class="flex w-full justify-end gap-3">
-          <UButton color="neutral" variant="ghost" @click="cancelReply">Hủy</UButton>
+          <UButton color="neutral" variant="ghost" @click="cancelReply">{{
+            $t('common_cancel')
+          }}</UButton>
           <UButton
             type="submit"
             form="reply-form"
@@ -278,7 +300,7 @@ const handleFormSubmit = async () => {
             color="primary"
             icon="i-lucide-send"
           >
-            Gửi phản hồi
+            {{ $t('admin_reviews_btn_send') }}
           </UButton>
         </div>
       </template>

@@ -2,16 +2,19 @@
 import { z } from 'zod'
 import { blogService } from '~/services/blogService'
 import { slugify } from '~/utils/string'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Viết bài - BunTech Admin' })
+useSeoMeta({ title: t('admin_blog_edit_seo_title') })
 
 const route = useRoute()
 const toast = useToast()
 
 const isEditing = computed(() => !!route.query.id)
 const postId = computed(() => Number(route.query.id))
-const pageTitle = computed(() => (isEditing.value ? 'Chỉnh sửa bài viết' : 'Viết bài mới'))
+const pageTitle = computed(() =>
+  isEditing.value ? t('admin_blog_edit_title_edit') : t('admin_blog_edit_title_add')
+)
 
 // ─── Data fetching ─────────────────────────────────────────
 const { data: catData } = useAsyncData('admin-categories', () => blogService.getAdminCategories())
@@ -32,10 +35,13 @@ const formErrors = reactive<Record<string, string>>({})
 const submitting = ref(false)
 
 const schema = z.object({
-  title: z.string().min(1, 'Vui lòng nhập tiêu đề').max(191, 'Tối đa 191 ký tự'),
-  blogCategoryId: z.number().min(1, 'Danh mục không hợp lệ'),
+  title: z
+    .string()
+    .min(1, t('admin_blog_edit_form_title_req'))
+    .max(191, t('admin_blog_edit_form_title_max')),
+  blogCategoryId: z.number().min(1, t('admin_blog_edit_form_cat_invalid')),
   excerpt: z.string().optional().or(z.literal('')),
-  content: z.string().min(1, 'Vui lòng nhập nội dung'),
+  content: z.string().min(1, t('admin_blog_edit_form_content_req')),
   isPublished: z.boolean()
 })
 
@@ -60,7 +66,7 @@ onMounted(async () => {
         }
       }
     } catch {
-      toast.add({ title: 'Lỗi tải bài viết', color: 'error' })
+      toast.add({ title: t('admin_blog_edit_load_err'), color: 'error' })
       navigateTo('/admin/blog')
     }
   }
@@ -78,12 +84,12 @@ function handleFileChange(event: Event) {
 
   // Validate file
   if (file.size > 5 * 1024 * 1024) {
-    toast.add({ title: 'Ảnh không được vượt quá 5MB', color: 'warning' })
+    toast.add({ title: t('admin_blog_edit_file_size_err'), color: 'warning' })
     return
   }
   const validExts = ['image/jpeg', 'image/png', 'image/webp']
   if (!validExts.includes(file.type)) {
-    toast.add({ title: 'Chỉ hỗ trợ ảnh JPG, PNG, WebP', color: 'warning' })
+    toast.add({ title: t('admin_blog_edit_file_type_err'), color: 'warning' })
     return
   }
 
@@ -112,7 +118,7 @@ async function handleSave(publish: boolean) {
     parseResult.error.issues.forEach((e: import('zod').ZodIssue) => {
       if (e.path[0]) formErrors[e.path[0].toString()] = e.message
     })
-    toast.add({ title: 'Vui lòng kiểm tra lại thông tin', color: 'warning' })
+    toast.add({ title: t('admin_blog_edit_form_invalid'), color: 'warning' })
     return
   }
 
@@ -162,20 +168,23 @@ async function handleSave(publish: boolean) {
   <div class="mx-auto max-w-5xl">
     <BasePageHeader
       :title="pageTitle"
-      description="Biên tập và xuất bản nội dung blog"
+      :description="$t('admin_blog_edit_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Blog', to: '/admin/blog' },
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('nav_blog_posts'), to: '/admin/blog' },
         { label: pageTitle }
       ]"
     >
       <template #actions>
-        <UButton variant="outline" color="neutral" to="/admin/blog"> Hủy </UButton>
+        <UButton variant="outline" color="neutral" to="/admin/blog">
+          {{ $t('common_cancel') }}
+        </UButton>
         <UButton variant="outline" color="primary" :loading="submitting" @click="handleSave(false)">
-          <UIcon name="i-lucide-save" class="mr-1 h-4 w-4" /> Lưu nháp
+          <UIcon name="i-lucide-save" class="mr-1 h-4 w-4" /> {{ $t('admin_blog_edit_btn_draft') }}
         </UButton>
         <UButton type="button" :loading="submitting" @click="handleSave(true)">
-          <UIcon name="i-lucide-send" class="mr-1 h-4 w-4" /> Xuất bản
+          <UIcon name="i-lucide-send" class="mr-1 h-4 w-4" />
+          {{ $t('admin_blog_edit_btn_publish') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -188,22 +197,36 @@ async function handleSave(publish: boolean) {
       <!-- Main Content Area -->
       <div class="space-y-6 lg:col-span-2">
         <div class="card p-6">
-          <h2 class="text-surface-foreground mb-4 text-lg font-semibold">Nội dung bài viết</h2>
+          <h2 class="text-surface-foreground mb-4 text-lg font-semibold">
+            {{ $t('admin_blog_edit_form_content_title') }}
+          </h2>
 
           <div class="space-y-4">
-            <UFormField label="Tiêu đề" :error="formErrors.title" required>
-              <UInput v-model="formState.title" placeholder="Nhập tiêu đề bài viết..." size="lg" />
+            <UFormField
+              :label="$t('admin_blog_edit_form_title')"
+              :error="formErrors.title"
+              required
+            >
+              <UInput
+                v-model="formState.title"
+                :placeholder="$t('admin_blog_edit_form_title_ph')"
+                size="lg"
+              />
             </UFormField>
 
-            <UFormField label="Tóm tắt (Excerpt)" :error="formErrors.excerpt">
+            <UFormField :label="$t('admin_blog_edit_form_excerpt')" :error="formErrors.excerpt">
               <UTextarea
                 v-model="formState.excerpt"
-                placeholder="Đoạn văn ngắn giới thiệu nội dung..."
+                :placeholder="$t('admin_blog_edit_form_excerpt_ph')"
                 :rows="3"
               />
             </UFormField>
 
-            <UFormField label="Nội dung" :error="formErrors.content" required>
+            <UFormField
+              :label="$t('admin_blog_edit_form_content')"
+              :error="formErrors.content"
+              required
+            >
               <BaseRichTextEditor v-model="formState.content" />
             </UFormField>
           </div>
@@ -213,15 +236,17 @@ async function handleSave(publish: boolean) {
       <!-- Sidebar -->
       <div class="space-y-6">
         <div class="card p-6">
-          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">Thông tin xuất bản</h2>
+          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">
+            {{ $t('admin_blog_edit_form_publish_info') }}
+          </h2>
 
           <div class="space-y-4">
-            <UFormField label="Danh mục" :error="formErrors.blogCategoryId" required>
+            <UFormField :label="$t('nav_categories')" :error="formErrors.blogCategoryId" required>
               <USelectMenu
                 v-model="formState.blogCategoryId as any"
                 :items="categoryOptions"
                 value-key="value"
-                placeholder="Chọn danh mục..."
+                :placeholder="$t('admin_prod_form_cat_ph')"
                 class="w-full"
               />
             </UFormField>
@@ -229,7 +254,9 @@ async function handleSave(publish: boolean) {
         </div>
 
         <div class="card p-6">
-          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">Ảnh bìa (Thumbnail)</h2>
+          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">
+            {{ $t('admin_blog_edit_form_cover') }}
+          </h2>
 
           <input
             ref="fileInputRef"
@@ -245,8 +272,10 @@ async function handleSave(publish: boolean) {
             @click="triggerFileSelect"
           >
             <UIcon name="i-lucide-image-plus" class="mb-2 h-8 w-8 text-slate-400" />
-            <p class="text-surface-foreground text-center text-sm font-medium">Click để chọn ảnh</p>
-            <p class="mt-1 text-xs text-slate-500">JPG, PNG, WebP (Max 5MB)</p>
+            <p class="text-surface-foreground text-center text-sm font-medium">
+              {{ $t('admin_blog_edit_file_click') }}
+            </p>
+            <p class="mt-1 text-xs text-slate-500">{{ $t('admin_blog_edit_file_hint') }}</p>
           </div>
 
           <div
@@ -258,13 +287,14 @@ async function handleSave(publish: boolean) {
               class="absolute inset-0 flex items-center justify-center gap-2 bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
             >
               <UButton color="neutral" variant="solid" size="sm" @click="triggerFileSelect">
-                Đổi ảnh
+                {{ $t('admin_categories_btn_change_img') }}
               </UButton>
               <UButton
                 color="error"
                 variant="solid"
                 size="sm"
                 icon="i-lucide-trash-2"
+                :aria-label="$t('aria_del_img')"
                 @click="clearImage"
               />
             </div>

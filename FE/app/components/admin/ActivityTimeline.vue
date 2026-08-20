@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { t } from '~/utils/i18n'
 defineProps<{
   activities: {
     id: string
@@ -47,9 +48,9 @@ const activityColorMap = {
 function relativeTime(iso: string) {
   const d = new Date(iso)
   const diff = Date.now() - d.getTime()
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} phút trước`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} giờ trước`
-  return `${Math.floor(diff / 86400000)} ngày trước`
+  if (diff < 3600000) return t('admin_profile_time_min', { min: Math.floor(diff / 60000) })
+  if (diff < 86400000) return t('admin_profile_time_hour', { hour: Math.floor(diff / 3600000) })
+  return t('admin_profile_time_day', { day: Math.floor(diff / 86400000) })
 }
 </script>
 
@@ -64,11 +65,15 @@ function relativeTime(iso: string) {
             <UIcon name="i-lucide-activity" class="text-accent-600 dark:text-accent-400 h-4 w-4" />
           </div>
           <div>
-            <h3 class="text-surface-foreground text-sm font-semibold">Lịch sử hoạt động</h3>
-            <p class="text-xs text-slate-500 dark:text-zinc-400">6 hoạt động gần nhất</p>
+            <h3 class="text-surface-foreground text-sm font-semibold">
+              {{ $t('admin_profile_act_history') }}
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-zinc-400">
+              {{ $t('admin_profile_act_recent') }}
+            </p>
           </div>
         </div>
-        <UBadge color="neutral" variant="soft">30 ngày</UBadge>
+        <UBadge color="neutral" variant="soft">{{ $t('admin_profile_act_days') }}</UBadge>
       </div>
 
       <ol class="relative space-y-1">
@@ -119,7 +124,7 @@ function relativeTime(iso: string) {
           color="neutral"
           class="hover:text-primary-600 dark:hover:text-primary-400 flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors dark:text-zinc-400"
         >
-          Xem tất cả hoạt động
+          {{ $t('admin_profile_act_view_all') }}
           <UIcon name="i-lucide-chevron-right" class="h-3.5 w-3.5" />
         </UButton>
       </div>

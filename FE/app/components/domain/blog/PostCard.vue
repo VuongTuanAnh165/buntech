@@ -41,7 +41,7 @@ const date = computed(() => formatDate(props.post.publishedAt || props.post.crea
           <span
             class="badge bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400"
           >
-            Nổi bật
+            {{ $t('public_blog_featured_badge') }}
           </span>
           <span class="text-xs text-gray-400 dark:text-zinc-500">
             {{ date }}
@@ -58,7 +58,7 @@ const date = computed(() => formatDate(props.post.publishedAt || props.post.crea
         <div
           class="text-primary-600 dark:text-primary-400 flex items-center gap-2 text-sm font-medium transition-all group-hover:gap-3"
         >
-          Đọc tiếp
+          {{ $t('public_blog_read_more') }}
           <ChevronRight class="h-4 w-4" aria-hidden="true" />
         </div>
       </div>
@@ -90,7 +90,8 @@ const date = computed(() => formatDate(props.post.publishedAt || props.post.crea
         </span>
         <span aria-hidden="true">•</span>
         <span class="inline-flex items-center gap-1">
-          <User class="h-3 w-3" aria-hidden="true" /> Tác giả ({{ post.authorId }})
+          <User class="h-3 w-3" aria-hidden="true" />
+          {{ $t('public_blog_detail_author', { id: post.authorId }) }}
         </span>
       </div>
       <h3
@@ -102,7 +103,7 @@ const date = computed(() => formatDate(props.post.publishedAt || props.post.crea
       <div
         class="text-primary-600 dark:text-primary-400 mt-3 flex items-center gap-1 text-sm font-medium transition-all group-hover:gap-2"
       >
-        Đọc tiếp
+        {{ $t('public_blog_read_more') }}
         <ChevronRight class="h-4 w-4" aria-hidden="true" />
       </div>
     </div>

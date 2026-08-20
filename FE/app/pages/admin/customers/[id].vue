@@ -7,6 +7,7 @@ import CustomerFormDrawer from '~/components/features/admin/customers/CustomerFo
 import CustomerPricesTab from '~/components/features/admin/customers/CustomerPricesTab.vue'
 
 import { useUsers } from '~/composables/admin/useUsers'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 const route = useRoute()
@@ -82,50 +83,50 @@ const debtTransactions = computed(() =>
 const tabs = computed(() => [
   {
     value: 'orders',
-    label: 'Lịch sử đơn hàng',
+    label: t('wholesale_orders_title'),
     icon: 'i-lucide-shopping-bag',
     count: orders.value.length
   },
   {
     value: 'debt',
-    label: 'Công nợ',
+    label: t('nav_debt'),
     icon: 'i-lucide-wallet',
     count: debtTransactions.value.length
   },
   {
     value: 'addresses',
-    label: 'Sổ địa chỉ',
+    label: t('admin_address_title'),
     icon: 'i-lucide-map-pin',
     count: addresses.value.length
   },
   {
     value: 'prices',
-    label: 'Bảng giá riêng',
+    label: t('admin_customer_detail_tab_price'),
     icon: 'i-lucide-tag'
   }
 ])
 
 const statCards = computed(() => [
   {
-    title: 'Tổng đơn hàng',
+    title: t('admin_order_kpi_total'),
     value: totalOrders.value,
     icon: 'i-lucide-shopping-bag',
     color: 'primary' as const
   },
   {
-    title: 'Tổng chi tiêu',
+    title: t('wholesale_kpi_total_spent'),
     value: formatVND(totalSpent.value),
     icon: 'i-lucide-trending-up',
     color: 'success' as const
   },
   {
-    title: 'Công nợ hiện tại',
+    title: t('admin_customer_debt_cur'),
     value: formatVND(currentDebt.value),
     icon: 'i-lucide-wallet',
     color: currentDebt.value > 0 ? ('error' as const) : ('success' as const)
   },
   {
-    title: 'Giá trị TB/đơn',
+    title: t('admin_customer_detail_kpi_avg'),
     value: formatVND(avgOrderValue.value),
     icon: 'i-lucide-credit-card',
     color: 'info' as const
@@ -166,21 +167,21 @@ const handleTogglePublic = async (value: boolean) => {
 <template>
   <div class="space-y-6">
     <BasePageHeader
-      :title="customer?.fullName || 'Chi tiết khách hàng'"
+      :title="customer?.fullName || $t('admin_customer_detail_title_fallback')"
       :breadcrumbs="[
-        { label: 'Khách hàng', to: '/admin/customers' },
-        { label: customer?.fullName || 'Chi tiết' }
+        { label: $t('common_customer'), to: '/admin/customers' },
+        { label: customer?.fullName || $t('driver_delivery_btn_detail') }
       ]"
     />
 
     <BaseEmptyState
       v-if="error"
       icon="i-lucide-alert-circle"
-      title="Lỗi tải dữ liệu"
-      description="Không thể tải thông tin khách hàng."
+      :title="$t('admin_customers_err_title')"
+      :description="$t('admin_customer_detail_err_desc')"
     >
       <template #action>
-        <UButton color="primary" @click="refreshCustomer()">Thử lại</UButton>
+        <UButton color="primary" @click="refreshCustomer()">{{ $t('error_btn_retry') }}</UButton>
       </template>
     </BaseEmptyState>
 
@@ -234,7 +235,7 @@ const handleTogglePublic = async (value: boolean) => {
             <div class="mt-1.5 flex flex-wrap items-center gap-3">
               <span class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-zinc-400">
                 <UIcon name="i-lucide-phone" class="h-3.5 w-3.5" aria-hidden="true" />
-                {{ customer.phoneNumber || 'Chưa có SĐT' }}
+                {{ customer.phoneNumber || $t('wholesale_no_phone') }}
               </span>
               <span class="text-slate-300 dark:text-zinc-600">·</span>
               <span class="font-mono text-xs text-slate-400 dark:text-zinc-500"
@@ -254,20 +255,22 @@ const handleTogglePublic = async (value: boolean) => {
               >
                 {{
                   customer.role === 'ADMIN'
-                    ? 'Quản trị viên'
+                    ? $t('admin_role_admin')
                     : customer.role === 'DRIVER'
-                      ? 'Tài xế'
-                      : 'Khách hàng'
+                      ? $t('admin_role_driver')
+                      : $t('common_customer')
                 }}
               </UBadge>
               <UBadge v-if="isPublic" color="info" variant="soft" icon="i-lucide-map-pin">
-                Hiển thị công khai
+                {{ $t('admin_customer_detail_public') }}
               </UBadge>
             </div>
           </div>
           <div class="flex flex-shrink-0 flex-col items-end gap-3">
             <div class="text-right">
-              <p class="text-xs text-slate-500 dark:text-zinc-400">Hạn mức công nợ</p>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">
+                {{ $t('admin_customer_debt_limit') }}
+              </p>
               <p class="text-surface-foreground text-xl font-bold tabular-nums">
                 {{ formatVND(debtLimit) }}
               </p>
@@ -276,7 +279,9 @@ const handleTogglePublic = async (value: boolean) => {
               v-if="customer.role === 'customer' || customer.role === 'CUSTOMER'"
               class="flex items-center gap-2"
             >
-              <span class="text-xs text-slate-500 dark:text-zinc-400">Bản đồ công khai</span>
+              <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+                $t('admin_customer_detail_public_map')
+              }}</span>
               <USwitch
                 :model-value="isPublic"
                 :loading="isTogglingPublic"

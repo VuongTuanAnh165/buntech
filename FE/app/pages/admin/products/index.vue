@@ -2,9 +2,10 @@
 import { productService } from '~/services/productService'
 import type { AdminProduct, ProductCategory } from '~/utils/types'
 import { normalizePaginationResponse } from '~/utils/api'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Quản lý Sản phẩm - BunTech Admin' })
+useSeoMeta({ title: t('admin_products_seo_title') })
 
 // ─── State ────────────────────────────────────────────────
 const search = ref('')
@@ -19,7 +20,7 @@ const { data: catData } = useAsyncData('admin-product-categories', () =>
 const categoryOptions = computed(() => {
   const options =
     catData.value?.data?.data?.map((c: ProductCategory) => ({ label: c.name, value: c.id })) || []
-  return [{ label: 'Tất cả danh mục', value: 'ALL' }, ...options]
+  return [{ label: t('admin_blog_all_cats'), value: 'ALL' }, ...options]
 })
 
 const {
@@ -50,21 +51,21 @@ const inactiveProducts = computed(() => products.value.filter((p) => !p.isActive
 
 const kpiStats = computed(() => [
   {
-    title: 'Tổng sản phẩm',
+    title: t('admin_prod_kpi_total'),
     value: totalProducts.value,
     icon: 'i-lucide-package',
     color: 'primary' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Đang bán (trang này)',
+    title: t('admin_products_kpi_active'),
     value: activeProducts.value,
     icon: 'i-lucide-check-circle-2',
     color: 'success' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Ngừng bán (trang này)',
+    title: t('admin_products_kpi_inactive'),
     value: inactiveProducts.value,
     icon: 'i-lucide-minus-circle',
     color: 'warning' as const,
@@ -73,15 +74,15 @@ const kpiStats = computed(() => [
 ])
 
 const columns = [
-  { accessorKey: 'product', header: 'Sản phẩm' },
-  { accessorKey: 'category', header: 'Danh mục' },
-  { accessorKey: 'price', header: 'Giá / Đơn vị' },
-  { accessorKey: 'status', header: 'Trạng thái' },
-  { accessorKey: 'actions', header: 'Hành động' }
+  { accessorKey: 'product', header: t('nav_products') },
+  { accessorKey: 'category', header: t('nav_categories') },
+  { accessorKey: 'price', header: t('admin_products_col_price') },
+  { accessorKey: 'status', header: t('status') },
+  { accessorKey: 'actions', header: t('actions') }
 ]
 
 async function handleDelete(id: number) {
-  if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return
+  if (!confirm(t('admin_products_del_confirm'))) return
   try {
     await productService.deleteProduct(id)
     await refresh()
@@ -94,19 +95,19 @@ async function handleDelete(id: number) {
 <template>
   <div>
     <BasePageHeader
-      title="Sản phẩm"
-      description="Quản lý danh sách sản phẩm, giá bán và hình ảnh hiển thị."
+      :title="$t('nav_products')"
+      :description="$t('admin_products_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Sản phẩm' }
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('nav_products') }
       ]"
     >
       <template #actions>
         <UButton variant="outline" color="neutral" to="/admin/products/categories">
-          <UIcon name="i-lucide-layers" class="mr-1 h-4 w-4" /> Danh mục
+          <UIcon name="i-lucide-layers" class="mr-1 h-4 w-4" /> {{ $t('nav_categories') }}
         </UButton>
         <UButton to="/admin/products/edit">
-          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm sản phẩm
+          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> {{ $t('admin_products_add') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -123,7 +124,10 @@ async function handleDelete(id: number) {
       <div class="card stagger-item p-5" style="animation-delay: 200ms">
         <div class="mb-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div class="w-full max-w-sm flex-1">
-            <BaseSearchInput v-model="search" placeholder="Lọc sản phẩm theo tên..." />
+            <BaseSearchInput
+              v-model="search"
+              :placeholder="$t('admin_products_filter_placeholder')"
+            />
           </div>
           <div class="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row">
             <USelectMenu
@@ -136,9 +140,9 @@ async function handleDelete(id: number) {
             <USelectMenu
               v-model="statusFilter"
               :items="[
-                { label: 'Tất cả trạng thái', value: 'ALL' },
-                { label: 'Đang bán', value: 'PUBLISHED' },
-                { label: 'Ngừng bán', value: 'DRAFT' }
+                { label: $t('admin_blog_status_all'), value: 'ALL' },
+                { label: $t('status_published'), value: 'PUBLISHED' },
+                { label: $t('status_draft'), value: 'DRAFT' }
               ]"
               value-key="value"
               label-key="label"
@@ -151,8 +155,8 @@ async function handleDelete(id: number) {
           <BaseDataTable
             :columns="columns"
             :rows="products"
-            empty-title="Không tìm thấy sản phẩm"
-            empty-description="Thử đổi bộ lọc hoặc thêm sản phẩm mới."
+            :empty-title="$t('admin_order_picker_empty')"
+            :empty-description="$t('admin_products_empty_desc')"
             empty-icon="i-lucide-package-x"
           >
             <template #product-cell="{ row }">
@@ -180,7 +184,7 @@ async function handleDelete(id: number) {
             </template>
             <template #category-cell="{ row }">
               <UBadge color="primary" variant="subtle" size="sm">
-                {{ row.category?.name || 'Chưa phân loại' }}
+                {{ row.category?.name || $t('admin_blog_default_cat') }}
               </UBadge>
             </template>
             <template #price-cell="{ row }">
@@ -194,7 +198,9 @@ async function handleDelete(id: number) {
                     )
                   }}
                 </span>
-                <span class="text-xs text-slate-500"> / {{ row.unit || 'sản phẩm' }} </span>
+                <span class="text-xs text-slate-500">
+                  / {{ row.unit || $t('admin_products_default_unit') }}
+                </span>
               </div>
             </template>
             <template #status-cell="{ row }">
@@ -204,7 +210,7 @@ async function handleDelete(id: number) {
                     class="h-1.5 w-1.5 rounded-full"
                     :class="row.isActive ? 'bg-success-500' : 'bg-warning-500'"
                   />
-                  {{ row.isActive ? 'Đang bán' : 'Ngừng bán' }}
+                  {{ row.isActive ? $t('status_published') : $t('status_draft') }}
                 </span>
               </UBadge>
             </template>

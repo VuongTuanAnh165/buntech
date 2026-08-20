@@ -16,6 +16,7 @@ import {
 import { extractIdFromSlug, generateSeoSlug } from '~/utils/idEncoder'
 import { productService } from '~/services/productService'
 import { productReviewService } from '~/services/productReviewService'
+import { t } from '~/utils/i18n'
 
 const toast = useToast()
 const route = useRoute()
@@ -105,8 +106,8 @@ const decrementQty = () => {
 const toggleWishlist = () => {
   isWishlisted.value = !isWishlisted.value
   toast.add({
-    title: 'Thành công',
-    description: 'Đã cập nhật danh sách yêu thích',
+    title: t('success'),
+    description: t('public_product_msg_wishlist_updated'),
     color: 'success'
   })
 }
@@ -114,13 +115,21 @@ const toggleWishlist = () => {
 const shareProduct = () => {
   if (import.meta.client) {
     navigator.clipboard.writeText(window.location.href)
-    toast.add({ title: 'Thành công', description: 'Đã copy đường dẫn', color: 'success' })
+    toast.add({
+      title: t('success'),
+      description: t('public_product_msg_link_copied'),
+      color: 'success'
+    })
   }
 }
 
 const addToCart = () => {
   if (!product.value) return
-  toast.add({ title: 'Thành công', description: 'Đã thêm vào giỏ', color: 'success' })
+  toast.add({
+    title: t('success'),
+    description: t('public_product_msg_cart_added'),
+    color: 'success'
+  })
 }
 
 const quickOrder = () => {
@@ -129,7 +138,7 @@ const quickOrder = () => {
 }
 
 useSeoMeta({
-  title: () => (product.value ? `${product.value.name} - BunTech` : 'Sản phẩm - BunTech')
+  title: () => (product.value ? `${product.value.name} - BunTech` : t('public_products_seo_title'))
 })
 </script>
 
@@ -142,7 +151,7 @@ useSeoMeta({
           <NuxtLink
             to="/"
             class="hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-zinc-400"
-            >Trang chủ</NuxtLink
+            >{{ $t('nav_home') }}</NuxtLink
           >
         </li>
         <li class="text-gray-300 dark:text-zinc-600" aria-hidden="true">/</li>
@@ -150,7 +159,7 @@ useSeoMeta({
           <NuxtLink
             to="/products"
             class="hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-zinc-400"
-            >Sản phẩm</NuxtLink
+            >{{ $t('nav_products') }}</NuxtLink
           >
         </li>
         <li class="text-gray-300 dark:text-zinc-600" aria-hidden="true">/</li>
@@ -166,13 +175,13 @@ useSeoMeta({
     <!-- Error -->
     <div v-if="error" class="py-8 text-center">
       <EmptyState
-        title="Lỗi"
-        description="Không tìm thấy sản phẩm"
+        :title="$t('wholesale_msg_error')"
+        :description="$t('admin_order_picker_empty')"
         icon="i-lucide-alert-circle"
         color="error"
       />
       <UButton class="mt-4" color="primary" @click="navigateTo('/products')">
-        Quay lại danh sách
+        {{ $t('public_product_btn_back') }}
       </UButton>
     </div>
 
@@ -228,7 +237,7 @@ useSeoMeta({
                   ? 'border-primary-500 ring-primary-500/20 ring-2'
                   : 'border-surface-border hover:border-primary-300'
               ]"
-              :aria-label="`Xem ảnh ${i + 1}`"
+              :aria-label="$t('public_product_img_view', { i: i + 1 })"
               @click="
                 () => {
                   activeImage = i
@@ -238,7 +247,7 @@ useSeoMeta({
               <NuxtImg
                 v-if="img"
                 :src="img"
-                :alt="`Ảnh ${i + 1}`"
+                :alt="$t('public_product_img_alt', { i: i + 1 })"
                 class="h-full w-full object-cover"
                 loading="lazy"
               />
@@ -253,7 +262,9 @@ useSeoMeta({
               class="bg-surface-muted flex flex-col items-center gap-1.5 rounded-xl p-3 text-center"
             >
               <Truck class="text-primary-600 dark:text-primary-400 h-5 w-5" aria-hidden="true" />
-              <span class="text-xs font-medium text-gray-600 dark:text-zinc-300">Giao 2h</span>
+              <span class="text-xs font-medium text-gray-600 dark:text-zinc-300">{{
+                $t('public_product_badge_fast')
+              }}</span>
             </div>
             <div
               class="bg-surface-muted flex flex-col items-center gap-1.5 rounded-xl p-3 text-center"
@@ -262,7 +273,9 @@ useSeoMeta({
                 class="text-success-600 dark:text-success-400 h-5 w-5"
                 aria-hidden="true"
               />
-              <span class="text-xs font-medium text-gray-600 dark:text-zinc-300">An toàn</span>
+              <span class="text-xs font-medium text-gray-600 dark:text-zinc-300">{{
+                $t('public_product_badge_safe')
+              }}</span>
             </div>
             <div
               class="bg-surface-muted flex flex-col items-center gap-1.5 rounded-xl p-3 text-center"
@@ -271,7 +284,9 @@ useSeoMeta({
                 class="text-secondary-600 dark:text-secondary-400 h-5 w-5"
                 aria-hidden="true"
               />
-              <span class="text-xs font-medium text-gray-600 dark:text-zinc-300">Đổi trả</span>
+              <span class="text-xs font-medium text-gray-600 dark:text-zinc-300">{{
+                $t('public_product_badge_return')
+              }}</span>
             </div>
           </div>
         </div>
@@ -279,7 +294,7 @@ useSeoMeta({
         <!-- Info -->
         <div>
           <p class="text-primary-600 dark:text-primary-400 mb-2 text-sm font-medium">
-            {{ product.category?.name || 'Chưa phân loại' }}
+            {{ product.category?.name || $t('admin_blog_default_cat') }}
           </p>
           <h1 class="text-surface-foreground mb-3 text-2xl font-bold tracking-tight sm:text-3xl">
             {{ product.name }}
@@ -300,9 +315,9 @@ useSeoMeta({
                 aria-hidden="true"
               />
             </div>
-            <span class="text-sm text-gray-500 dark:text-zinc-400"
-              >{{ avgRating.toFixed(1) }} ({{ reviews.length }} đánh giá)</span
-            >
+            <span class="text-sm text-gray-500 dark:text-zinc-400">{{
+              $t('public_product_rating', { rating: avgRating.toFixed(1), count: reviews.length })
+            }}</span>
           </div>
 
           <!-- Price -->
@@ -315,7 +330,9 @@ useSeoMeta({
 
           <!-- Quantity selector -->
           <div class="mb-6 flex items-center gap-4">
-            <label class="text-surface-foreground text-sm font-medium">Số lượng:</label>
+            <label class="text-surface-foreground text-sm font-medium">{{
+              $t('public_product_qty_label')
+            }}</label>
             <div
               class="border-surface-border flex items-center gap-1 overflow-hidden rounded-lg border"
             >
@@ -325,7 +342,7 @@ useSeoMeta({
                 type="button"
                 class="hover:bg-surface-hover flex h-11 min-h-[44px] w-11 min-w-[44px] items-center justify-center transition-colors disabled:opacity-40"
                 :disabled="quantity <= 1"
-                :aria-label="'Giảm số lượng'"
+                :aria-label="$t('quick_order_cart_dec')"
                 @click="decrementQty"
               >
                 <Minus class="h-4 w-4" aria-hidden="true" />
@@ -339,26 +356,26 @@ useSeoMeta({
                 color="neutral"
                 type="button"
                 class="hover:bg-surface-hover flex h-11 min-h-[44px] w-11 min-w-[44px] items-center justify-center transition-colors disabled:opacity-40"
-                :aria-label="'Tăng số lượng'"
+                :aria-label="$t('quick_order_cart_inc')"
                 @click="incrementQty"
               >
                 <Plus class="h-4 w-4" aria-hidden="true" />
               </UButton>
             </div>
-            <span class="text-sm text-gray-400 dark:text-zinc-500"
-              >Tổng: {{ formatVND(product.basePrice * quantity) }}</span
-            >
+            <span class="text-sm text-gray-400 dark:text-zinc-500">{{
+              $t('public_product_total', { total: formatVND(product.basePrice * quantity) })
+            }}</span>
           </div>
 
           <!-- Actions -->
           <div class="mb-6 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
             <UButton size="lg" variant="outline" class="group flex-1" @click="addToCart">
               <ShoppingCart class="h-5 w-5" aria-hidden="true" />
-              Thêm vào giỏ
+              {{ $t('public_product_btn_add_cart') }}
             </UButton>
             <UButton size="lg" class="group flex-1" @click="quickOrder">
               <Zap class="h-5 w-5" aria-hidden="true" />
-              Đặt hàng nhanh
+              {{ $t('quick_order_title') }}
               <ArrowRight
                 class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
                 aria-hidden="true"
@@ -374,7 +391,11 @@ useSeoMeta({
                   ? 'bg-danger-50 dark:bg-danger-900/20 text-danger-600 dark:text-danger-400 border-danger-200 dark:border-danger-800'
                   : 'hover:text-danger-600 dark:hover:text-danger-400 hover:bg-surface-hover text-gray-400 dark:text-zinc-500'
               ]"
-              :aria-label="isWishlisted ? 'Bỏ yêu thích' : 'Thêm yêu thích'"
+              :aria-label="
+                isWishlisted
+                  ? $t('public_product_btn_remove_wishlist')
+                  : $t('public_product_btn_add_wishlist')
+              "
               :aria-pressed="isWishlisted"
               @click="toggleWishlist"
             >
@@ -385,7 +406,7 @@ useSeoMeta({
               color="neutral"
               type="button"
               class="border-surface-border hover:text-primary-600 dark:hover:text-primary-400 hover:bg-surface-hover flex h-12 min-h-[44px] w-12 min-w-[44px] flex-shrink-0 items-center justify-center rounded-xl border text-gray-400 transition-all duration-200 dark:text-zinc-500"
-              aria-label="Chia sẻ sản phẩm"
+              :aria-label="$t('public_product_btn_share')"
               @click="shareProduct"
             >
               <Share2 class="h-5 w-5" aria-hidden="true" />
@@ -395,13 +416,13 @@ useSeoMeta({
           <!-- Quick info -->
           <div class="card space-y-2 p-4 text-sm">
             <div class="flex justify-between">
-              <span class="text-gray-500 dark:text-zinc-400">Đơn vị</span>
+              <span class="text-gray-500 dark:text-zinc-400">{{ $t('admin_prod_form_unit') }}</span>
               <span class="text-surface-foreground font-medium">{{ product.unit }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-gray-500 dark:text-zinc-400">Danh mục</span>
+              <span class="text-gray-500 dark:text-zinc-400">{{ $t('nav_categories') }}</span>
               <span class="text-surface-foreground font-medium">{{
-                product.category?.name || 'Chưa phân loại'
+                product.category?.name || $t('admin_blog_default_cat')
               }}</span>
             </div>
           </div>
@@ -416,8 +437,11 @@ useSeoMeta({
         >
           <UButton
             v-for="tab in [
-              { accessorKey: 'description', header: 'Mô tả sản phẩm' },
-              { accessorKey: 'reviews', header: `Đánh giá (${reviews.length})` }
+              { accessorKey: 'description', header: $t('public_product_tab_desc') },
+              {
+                accessorKey: 'reviews',
+                header: $t('public_product_tab_reviews', { count: reviews.length })
+              }
             ]"
             :key="tab.accessorKey"
             variant="ghost"
@@ -445,7 +469,7 @@ useSeoMeta({
             class="prose prose-sm prose-primary dark:prose-invert max-w-none pb-8 text-gray-600 dark:text-zinc-300"
           >
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <div v-html="product.shortDescription || 'Mô tả đang cập nhật...'" />
+            <div v-html="product.shortDescription || $t('public_product_desc_empty')" />
           </div>
         </div>
 
@@ -469,7 +493,7 @@ useSeoMeta({
                   />
                 </div>
                 <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
-                  {{ reviews.length }} đánh giá
+                  {{ $t('public_product_reviews_count', { count: reviews.length }) }}
                 </p>
               </div>
               <!-- Distribution -->
@@ -503,10 +527,10 @@ useSeoMeta({
             >
               <div class="mb-2 flex items-start justify-between">
                 <div class="flex items-center gap-3">
-                  <UAvatar :alt="review.user?.fullName || 'Khách'" size="sm" />
+                  <UAvatar :alt="review.user?.fullName || $t('public_product_guest')" size="sm" />
                   <div>
                     <p class="text-surface-foreground font-medium">
-                      {{ review.user?.fullName || 'Khách' }}
+                      {{ review.user?.fullName || $t('public_product_guest') }}
                     </p>
                     <div class="mt-0.5 flex items-center gap-1">
                       <Star
@@ -532,7 +556,7 @@ useSeoMeta({
                 class="bg-surface-muted border-primary-300 dark:border-primary-700 mt-3 rounded-lg border-l-2 p-3"
               >
                 <p class="text-primary-600 dark:text-primary-400 mb-1 text-xs font-medium">
-                  Phản hồi từ BunTech:
+                  {{ $t('public_product_review_reply') }}
                 </p>
                 <p class="text-sm text-gray-700 dark:text-zinc-200">{{ review.replyContent }}</p>
               </div>
@@ -540,8 +564,8 @@ useSeoMeta({
           </template>
           <BaseEmptyState
             v-else
-            title="Chưa có đánh giá"
-            description="Hãy là người đầu tiên đánh giá sản phẩm này!"
+            :title="$t('public_product_review_empty_title')"
+            :description="$t('public_product_review_empty_desc')"
           />
         </div>
       </div>
@@ -549,7 +573,7 @@ useSeoMeta({
       <!-- Related Products -->
       <div v-if="relatedProducts.length" class="mt-16">
         <h2 class="text-surface-foreground mb-6 text-xl font-bold sm:text-2xl">
-          Sản phẩm liên quan
+          {{ $t('public_product_related_title') }}
         </h2>
         <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
           <NuxtLink
@@ -598,7 +622,7 @@ useSeoMeta({
         </div>
         <UButton size="lg" class="!px-6" @click="quickOrder">
           <Zap class="h-4 w-4" aria-hidden="true" />
-          Đặt hàng
+          {{ $t('wholesale_qa_order') }}
         </UButton>
       </div>
     </div>

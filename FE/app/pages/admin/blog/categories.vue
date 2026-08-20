@@ -2,9 +2,10 @@
 import { z } from 'zod'
 import { blogService } from '~/services/blogService'
 import type { BlogCategory } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Danh mục Blog - BunTech Admin' })
+useSeoMeta({ title: t('admin_blog_cat_seo_title') })
 
 // ─── State ────────────────────────────────────────────────
 const {
@@ -22,11 +23,11 @@ const filteredCategories = computed(() => {
 })
 
 const columns = [
-  { accessorKey: 'name', header: 'Tên danh mục' },
-  { accessorKey: 'slug', header: 'Đường dẫn (Slug)' },
-  { accessorKey: 'description', header: 'Mô tả' },
-  { accessorKey: 'createdAt', header: 'Ngày tạo' },
-  { accessorKey: 'actions', header: 'Hành động' }
+  { accessorKey: 'name', header: t('admin_blog_cat_form_name') },
+  { accessorKey: 'slug', header: t('admin_categories_col_slug') },
+  { accessorKey: 'description', header: t('admin_prod_form_desc') },
+  { accessorKey: 'createdAt', header: t('created_at') },
+  { accessorKey: 'actions', header: t('actions') }
 ]
 
 // ─── Form State ───────────────────────────────────────────
@@ -43,13 +44,16 @@ const formState = reactive({
 const formErrors = reactive<Record<string, string>>({})
 
 const schema = z.object({
-  name: z.string().min(1, 'Tên danh mục không được để trống').max(100, 'Tên không quá 100 ký tự'),
-  description: z.string().max(191, 'Mô tả không quá 191 ký tự').optional()
+  name: z
+    .string()
+    .min(1, t('admin_blog_cat_form_name_req'))
+    .max(100, t('admin_blog_cat_form_name_max')),
+  description: z.string().max(191, t('admin_blog_cat_form_desc_max')).optional()
 })
 
 // ─── Handlers ─────────────────────────────────────────────
 async function handleDelete(id: number) {
-  if (!confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return
+  if (!confirm(t('admin_blog_cat_del_confirm'))) return
   try {
     await blogService.deleteCategory(id)
     await refresh()
@@ -115,20 +119,21 @@ async function handleSave() {
 <template>
   <div class="mx-auto max-w-6xl">
     <BasePageHeader
-      title="Danh mục Blog"
-      description="Quản lý các chuyên mục bài viết"
+      :title="$t('admin_blog_cat_title')"
+      :description="$t('admin_blog_cat_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Blog', to: '/admin/blog' },
-        { label: 'Danh mục' }
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('nav_blog_posts'), to: '/admin/blog' },
+        { label: $t('nav_categories') }
       ]"
     >
       <template #actions>
         <UButton variant="outline" color="neutral" to="/admin/blog">
-          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" /> Quay lại
+          <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" />
+          {{ $t('admin_blog_cat_btn_back') }}
         </UButton>
         <UButton @click="openAdd">
-          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm danh mục
+          <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> {{ $t('admin_categories_add') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -139,15 +144,15 @@ async function handleSave() {
       <div class="card animate-fade-in-up p-5">
         <div class="mb-4 flex items-center gap-4">
           <div class="max-w-sm flex-1">
-            <BaseSearchInput v-model="search" placeholder="Tìm kiếm danh mục..." />
+            <BaseSearchInput v-model="search" :placeholder="$t('admin_blog_cat_search')" />
           </div>
         </div>
         <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">
           <BaseDataTable
             :columns="columns"
             :rows="filteredCategories"
-            empty-title="Không tìm thấy danh mục"
-            empty-description="Chưa có danh mục nào được tìm thấy."
+            :empty-title="$t('admin_blog_cat_empty_title')"
+            :empty-description="$t('admin_blog_cat_empty_desc')"
             empty-icon="i-lucide-folder"
           >
             <template #name-cell="{ row }">
@@ -190,14 +195,17 @@ async function handleSave() {
         </div>
       </div>
       <!-- Add/Edit Modal -->
-      <UModal v-model:open="showModal" :title="isEditing ? 'Sửa danh mục' : 'Thêm danh mục mới'">
+      <UModal
+        v-model:open="showModal"
+        :title="isEditing ? $t('admin_blog_cat_modal_edit') : $t('admin_blog_cat_modal_add')"
+      >
         <template #body>
           <form id="categoryForm" class="space-y-4" @submit.prevent="handleSave">
-            <UFormField label="Tên danh mục" :error="formErrors.name" required>
-              <UInput v-model="formState.name" placeholder="VD: Khuyến mãi, Tin tức..." />
+            <UFormField :label="$t('admin_blog_cat_form_name')" :error="formErrors.name" required>
+              <UInput v-model="formState.name" :placeholder="$t('admin_blog_cat_form_name_ph')" />
             </UFormField>
 
-            <UFormField label="Đường dẫn (Slug)">
+            <UFormField :label="$t('admin_categories_col_slug')">
               <div class="flex items-center gap-2">
                 <span class="text-sm text-slate-400">/</span>
                 <UInput
@@ -208,14 +216,16 @@ async function handleSave() {
                 />
               </div>
               <template #hint>
-                <span class="text-xs text-slate-500">Tự động tạo từ tên danh mục</span>
+                <span class="text-xs text-slate-500">{{
+                  $t('admin_blog_cat_form_slug_hint')
+                }}</span>
               </template>
             </UFormField>
 
-            <UFormField label="Mô tả" :error="formErrors.description">
+            <UFormField :label="$t('admin_categories_form_desc')" :error="formErrors.description">
               <UTextarea
                 v-model="formState.description"
-                placeholder="Mô tả ngắn gọn về danh mục..."
+                :placeholder="$t('admin_categories_form_desc_placeholder')"
               />
             </UFormField>
           </form>
@@ -230,10 +240,10 @@ async function handleSave() {
                   showModal = false
                 }
               "
-              >Hủy</UButton
+              >{{ $t('common_cancel') }}</UButton
             >
             <UButton type="submit" form="categoryForm" :loading="isSubmitting">
-              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> Lưu
+              <UIcon name="i-lucide-check" class="mr-1 h-4 w-4" /> {{ $t('save') }}
             </UButton>
           </div>
         </template>

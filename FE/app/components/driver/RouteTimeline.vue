@@ -28,7 +28,7 @@ const _props = defineProps<{
       >
         <div class="mb-1 flex items-start justify-between">
           <h4 class="line-clamp-1 text-sm font-medium text-neutral-900 dark:text-white">
-            {{ order.user?.full_name || order.guest_info?.name || 'Khách hàng' }}
+            {{ order.user?.full_name || order.guest_info?.name || $t('common_customer') }}
           </h4>
           <span class="text-[10px] whitespace-nowrap text-neutral-500">{{
             formatDate(order.created_at)

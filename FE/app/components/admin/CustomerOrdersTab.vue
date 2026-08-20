@@ -8,15 +8,19 @@ defineProps<{
   <div class="animate-fade-in-up">
     <BaseDataTable
       :columns="[
-        { accessorKey: 'id', header: 'Mã đơn' },
-        { accessorKey: 'status', header: 'Trạng thái' },
-        { accessorKey: 'totalAmount', header: 'Tổng tiền', class: 'text-right' },
-        { accessorKey: 'amountCollected', header: 'Đã thu', class: 'text-right' },
-        { accessorKey: 'createdAt', header: 'Ngày đặt' }
+        { accessorKey: 'id', header: $t('wholesale_col_id') },
+        { accessorKey: 'status', header: $t('status') },
+        { accessorKey: 'totalAmount', header: $t('wholesale_col_total'), class: 'text-right' },
+        {
+          accessorKey: 'amountCollected',
+          header: $t('driver_history_stat_collected'),
+          class: 'text-right'
+        },
+        { accessorKey: 'createdAt', header: $t('wholesale_col_date') }
       ]"
       :rows="orders as unknown as Record<string, unknown>[]"
-      empty-title="Chưa có đơn hàng"
-      empty-description="Khách hàng này chưa đặt đơn hàng nào"
+      :empty-title="$t('wholesale_empty_orders_title')"
+      :empty-description="$t('admin_customer_order_empty_desc')"
     >
       <template #id-cell="{ row }">
         <span

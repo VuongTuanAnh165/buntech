@@ -1,30 +1,32 @@
 <script setup lang="ts">
-const features = [
+import { t } from '~/utils/i18n'
+
+const features = computed(() => [
   {
     icon: 'i-lucide-sparkles',
-    title: 'Bún tươi mỗi ngày',
-    desc: 'Sản xuất mỗi sáng, giao đến tay khách hàng trong vòng 2 giờ.',
+    title: t('public_landing_feat_1_title'),
+    desc: t('public_landing_feat_1_desc'),
     color: 'primary'
   },
   {
     icon: 'i-lucide-truck',
-    title: 'Giao hàng siêu tốc',
-    desc: 'Nội thành 2 giờ, ngoại thành 4 giờ. Đảm bảo bún còn nóng nguyên bọc.',
+    title: t('public_landing_feat_2_title'),
+    desc: t('public_landing_feat_2_desc'),
     color: 'secondary'
   },
   {
     icon: 'i-lucide-shield-check',
-    title: 'An toàn vệ sinh',
-    desc: 'Đạt tiêu chuẩn VSATTP, quy trình khép kín từ gạo đến thành phẩm.',
+    title: t('public_landing_feat_3_title'),
+    desc: t('public_landing_feat_3_desc'),
     color: 'success'
   },
   {
     icon: 'i-lucide-clock',
-    title: 'Đặt hàng 24/7',
-    desc: 'App đặt hàng anytime, theo dõi đơn hàng và công nợ realtime.',
+    title: t('public_landing_feat_4_title'),
+    desc: t('public_landing_feat_4_desc'),
     color: 'warning'
   }
-]
+])
 
 const colorMap: Record<string, { bg: string; text: string }> = {
   primary: {
@@ -51,10 +53,10 @@ const colorMap: Record<string, { bg: string; text: string }> = {
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-12 text-center">
         <h2 class="text-surface-foreground mb-2 text-2xl font-bold sm:text-3xl">
-          Tại sao chọn BunTech
+          {{ $t('public_landing_feat_title') }}
         </h2>
         <p class="text-sm text-slate-500 dark:text-zinc-400">
-          Hơn 60 năm uy tín — chúng tôi hiểu bún như hiểu gia đình mình
+          {{ $t('public_landing_feat_subtitle') }}
         </p>
       </div>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { t } from '~/utils/i18n'
 import { useOfflineSync } from '~/composables/driver/useOfflineSync'
 import { useFCM } from '~/composables/useFCM'
 import { useDriverNotifications } from '~/composables/driver/useDriverNotifications'
@@ -52,11 +53,11 @@ function toggleDark() {
 }
 
 const navItems = [
-  { to: '/driver/delivery', label: 'Tuyến giao hàng', icon: 'i-lucide-route' },
-  { to: '/driver/history', label: 'Lịch sử', icon: 'i-lucide-history' },
-  { to: '/driver/notifications', label: 'Thông báo', icon: 'i-lucide-bell' },
-  { to: '/driver/vehicle', label: 'Phương tiện', icon: 'i-lucide-bike' },
-  { to: '/driver/profile', label: 'Hồ sơ', icon: 'i-lucide-user' }
+  { to: '/driver/delivery', label: t('driver_delivery_route'), icon: 'i-lucide-route' },
+  { to: '/driver/history', label: t('driver_history'), icon: 'i-lucide-history' },
+  { to: '/driver/notifications', label: t('driver_notifications'), icon: 'i-lucide-bell' },
+  { to: '/driver/vehicle', label: t('driver_vehicle'), icon: 'i-lucide-bike' },
+  { to: '/driver/profile', label: t('profile'), icon: 'i-lucide-user' }
 ]
 </script>
 
@@ -77,7 +78,7 @@ const navItems = [
         <div>
           <p class="text-sm leading-tight font-bold">BunTech Driver</p>
           <p class="mt-0.5 text-[11px] leading-tight text-slate-400">
-            {{ authStore.user?.fullName || 'Tài xế' }}
+            {{ authStore.user?.fullName || $t('admin_role_driver') }}
           </p>
         </div>
       </div>
@@ -153,7 +154,7 @@ const navItems = [
             @click="authStore.logout()"
           >
             <UIcon name="i-lucide-log-out" class="h-5 w-5" />
-            Đăng xuất
+            {{ $t('logout') }}
           </UButton>
         </nav>
       </div>
@@ -178,7 +179,7 @@ const navItems = [
           ]"
         >
           <UIcon name="i-lucide-route" class="h-5 w-5" />
-          <span class="text-[10px] font-medium">Tuyến giao</span>
+          <span class="text-[10px] font-medium">{{ $t('driver_delivery_route') }}</span>
         </NuxtLink>
         <NuxtLink
           to="/driver/history"
@@ -190,7 +191,7 @@ const navItems = [
           ]"
         >
           <UIcon name="i-lucide-history" class="h-5 w-5" />
-          <span class="text-[10px] font-medium">Lịch sử</span>
+          <span class="text-[10px] font-medium">{{ $t('driver_history') }}</span>
         </NuxtLink>
         <NuxtLink
           to="/driver/notifications"
@@ -201,9 +202,14 @@ const navItems = [
               : 'hover:text-primary-400 text-slate-400 dark:text-zinc-500'
           ]"
         >
-          <UIcon name="i-lucide-bell" class="h-5 w-5" />
-          <span v-if="hasUnread" class="bg-error-500 absolute top-1 right-2 h-2 w-2 rounded-full" />
-          <span class="text-[10px] font-medium">Thông báo</span>
+          <div class="relative">
+            <UIcon name="i-lucide-bell" class="h-5 w-5" />
+            <span
+              v-if="hasUnread"
+              class="bg-error-500 absolute -top-1 -right-1 h-2 w-2 rounded-full"
+            />
+          </div>
+          <span class="text-[10px] font-medium">{{ $t('driver_notifications') }}</span>
         </NuxtLink>
         <NuxtLink
           to="/driver/profile"
@@ -215,7 +221,7 @@ const navItems = [
           ]"
         >
           <UIcon name="i-lucide-user" class="h-5 w-5" />
-          <span class="text-[10px] font-medium">Hồ sơ</span>
+          <span class="text-[10px] font-medium">{{ $t('profile') }}</span>
         </NuxtLink>
       </div>
     </nav>

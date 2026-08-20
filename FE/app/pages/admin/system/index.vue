@@ -2,11 +2,12 @@
 import type { SystemConfig } from '~/utils/types'
 import { useSystemConfigs } from '~/composables/admin/useSystemConfigs'
 import SystemConfigFormDrawer from '~/components/features/admin/system/SystemConfigFormDrawer.vue'
+import { t } from '~/utils/i18n'
 
 const { confirm } = useConfirmDialog()
 const { fetchConfigs, createConfig, updateConfig, deleteConfig } = useSystemConfigs()
 
-useSeoMeta({ title: 'Cấu hình hệ thống - BunTech Admin' })
+useSeoMeta({ title: `${t('nav_system_config')} - BunTech Admin` })
 definePageMeta({ layout: 'admin' })
 
 // ─── State ────────────────────────────────────────────────────────
@@ -22,11 +23,11 @@ watch(debouncedSearch, () => {
 })
 
 const columns = [
-  { accessorKey: 'key', header: 'Key' },
-  { accessorKey: 'value', header: 'Value' },
-  { accessorKey: 'description', header: 'Mô tả' },
-  { accessorKey: 'createdAt', header: 'Ngày tạo' },
-  { accessorKey: 'actions', header: 'Thao tác', align: 'right' as const, width: '120px' }
+  { accessorKey: 'key', header: t('admin_system_form_key') },
+  { accessorKey: 'value', header: t('admin_system_form_val') },
+  { accessorKey: 'description', header: t('admin_prod_form_desc') },
+  { accessorKey: 'createdAt', header: t('created_at') },
+  { accessorKey: 'actions', header: t('actions'), align: 'right' as const, width: '120px' }
 ]
 
 // ─── Data fetching ────────────────────────────────────────────────
@@ -101,10 +102,10 @@ async function handleSave(data: { key: string; value: string; description?: stri
 async function handleDelete(row: unknown) {
   const config = row as SystemConfig
   const isConfirmed = await confirm({
-    title: 'Xóa cấu hình',
-    description: `Bạn có chắc chắn muốn xóa cấu hình "${config.key}"? Việc này có thể ảnh hưởng đến hệ thống.`,
-    confirmLabel: 'Xóa',
-    cancelLabel: 'Hủy',
+    title: t('admin_system_delete_title'),
+    description: t('admin_system_delete_desc', { key: config.key }),
+    confirmLabel: t('delete'),
+    cancelLabel: t('common_cancel'),
     color: 'error'
   })
 
@@ -125,19 +126,18 @@ async function handleDelete(row: unknown) {
 
 <template>
   <div class="pb-10">
-    <BasePageHeader
-      title="Cấu hình hệ thống"
-      description="Quản lý các biến cấu hình động (Ship, Liên hệ, System...)"
-    >
+    <BasePageHeader :title="$t('nav_system_config')" :description="$t('admin_system_desc')">
       <template #actions>
-        <UButton icon="i-lucide-plus" color="primary" @click="openAdd">Thêm cấu hình</UButton>
+        <UButton icon="i-lucide-plus" color="primary" @click="openAdd">{{
+          $t('admin_system_add')
+        }}</UButton>
       </template>
     </BasePageHeader>
 
     <div class="card p-5">
       <div class="mb-4 flex items-center justify-between gap-4">
         <div class="max-w-sm flex-1">
-          <BaseSearchInput v-model="search" placeholder="Tìm kiếm cấu hình..." />
+          <BaseSearchInput v-model="search" :placeholder="$t('admin_system_search')" />
         </div>
       </div>
 
@@ -146,12 +146,12 @@ async function handleDelete(row: unknown) {
           :rows="configs"
           :columns="columns"
           :loading="loading"
-          empty-title="Không có cấu hình"
-          empty-description="Chưa có cấu hình hệ thống nào."
+          :empty-title="$t('admin_system_empty_title')"
+          :empty-description="$t('admin_system_empty_desc')"
           empty-icon="i-lucide-settings"
         >
           <template #actions-header>
-            <div class="w-full text-right">Thao tác</div>
+            <div class="w-full text-right">{{ $t('actions') }}</div>
           </template>
 
           <template #key-cell="{ row }">
@@ -180,7 +180,7 @@ async function handleDelete(row: unknown) {
 
           <template #actions-cell="{ row }">
             <div class="flex justify-end gap-1">
-              <UTooltip text="Chỉnh sửa">
+              <UTooltip :text="$t('edit')">
                 <UButton
                   color="neutral"
                   variant="ghost"
@@ -189,7 +189,7 @@ async function handleDelete(row: unknown) {
                   @click="openEdit(row)"
                 />
               </UTooltip>
-              <UTooltip text="Xóa">
+              <UTooltip :text="$t('delete')">
                 <UButton
                   color="error"
                   variant="ghost"

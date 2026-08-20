@@ -44,7 +44,9 @@ const paymentTransactions = computed(() =>
               aria-hidden="true"
             />
           </div>
-          <h2 class="text-surface-foreground text-sm font-semibold">Công nợ hiện tại</h2>
+          <h2 class="text-surface-foreground text-sm font-semibold">
+            {{ $t('admin_customer_debt_cur') }}
+          </h2>
         </div>
         <p
           :class="[
@@ -57,7 +59,7 @@ const paymentTransactions = computed(() =>
           {{ formatVND(currentDebt) }}
         </p>
         <p class="mt-1 text-xs text-slate-500 dark:text-zinc-400">
-          Từ {{ debtTransactions.length }} giao dịch
+          {{ $t('admin_customer_debt_tx_count', { count: debtTransactions.length }) }}
         </p>
       </UCard>
       <UCard class="stagger-item" style="animation-delay: 40ms">
@@ -70,14 +72,18 @@ const paymentTransactions = computed(() =>
               aria-hidden="true"
             />
           </div>
-          <h2 class="text-surface-foreground text-sm font-semibold">Hạn mức công nợ</h2>
+          <h2 class="text-surface-foreground text-sm font-semibold">
+            {{ $t('admin_customer_debt_limit') }}
+          </h2>
         </div>
         <p class="text-surface-foreground text-3xl font-bold tabular-nums">
           {{ formatVND(debtLimit) }}
         </p>
         <div class="mt-3">
           <div class="mb-1.5 flex items-center justify-between text-xs">
-            <span class="text-slate-500 dark:text-zinc-400">Đã sử dụng</span>
+            <span class="text-slate-500 dark:text-zinc-400">{{
+              $t('admin_customer_debt_used')
+            }}</span>
             <span class="text-surface-foreground font-medium tabular-nums"
               >{{ debtUtilization }}%</span
             >
@@ -96,7 +102,7 @@ const paymentTransactions = computed(() =>
             />
           </div>
           <p class="mt-1.5 text-xs text-slate-400 dark:text-zinc-500">
-            Còn lại: {{ formatVND(debtRemaining) }}
+            {{ $t('admin_customer_debt_remain') }} {{ formatVND(debtRemaining) }}
           </p>
         </div>
       </UCard>
@@ -110,18 +116,22 @@ const paymentTransactions = computed(() =>
               aria-hidden="true"
             />
           </div>
-          <h2 class="text-surface-foreground text-sm font-semibold">Tổng đã thanh toán</h2>
+          <h2 class="text-surface-foreground text-sm font-semibold">
+            {{ $t('admin_customer_debt_total_paid') }}
+          </h2>
         </div>
         <p class="text-success-600 dark:text-success-400 text-3xl font-bold tabular-nums">
           {{ formatVND(paymentTransactions.reduce((s, tx) => s + tx.amount, 0)) }}
         </p>
         <p class="mt-1 text-xs text-slate-500 dark:text-zinc-400">
-          {{ paymentTransactions.length }} lần thanh toán
+          {{ $t('admin_customer_debt_paid_count', { count: paymentTransactions.length }) }}
         </p>
       </UCard>
     </div>
     <UCard class="stagger-item" style="animation-delay: 120ms">
-      <h2 class="text-surface-foreground mb-4 text-sm font-semibold">Lịch sử giao dịch</h2>
+      <h2 class="text-surface-foreground mb-4 text-sm font-semibold">
+        {{ $t('admin_customer_debt_history') }}
+      </h2>
       <template v-if="transactions.length">
         <div class="space-y-0">
           <div
@@ -157,12 +167,12 @@ const paymentTransactions = computed(() =>
               <p class="text-surface-foreground text-sm font-medium">
                 {{
                   tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
-                    ? 'Tăng công nợ'
+                    ? $t('admin_customer_debt_tx_inc')
                     : tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_PAYMENT
-                      ? 'Giảm công nợ'
+                      ? $t('admin_customer_debt_tx_dec')
                       : tx.type === constants?.[ConstantKey.TransactionType]?.PAYMENT
-                        ? 'Thanh toán'
-                        : 'Hoàn tiền'
+                        ? $t('wholesale_qa_payment')
+                        : $t('admin_customer_debt_tx_refund')
                 }}
               </p>
               <p class="truncate text-xs text-slate-500 dark:text-zinc-400">{{ tx.note }}</p>
@@ -187,8 +197,8 @@ const paymentTransactions = computed(() =>
       <BaseEmptyState
         v-else
         icon="i-lucide-file-text"
-        title="Chưa có giao dịch"
-        description="Lịch sử công nợ sẽ hiển thị tại đây"
+        :title="$t('admin_customer_debt_empty_title')"
+        :description="$t('admin_customer_debt_empty_desc')"
       />
     </UCard>
   </div>

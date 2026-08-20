@@ -3,6 +3,8 @@
  * Trang hiển thị lỗi — 404, 403, 500...
  * Hiển thị thay vì trang trắng khi có lỗi xảy ra.
  */
+import { t } from '~/utils/i18n'
+
 interface Props {
   error: {
     statusCode: number
@@ -13,35 +15,37 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const errorConfig: Record<
-  number,
-  { title: string; description: string; icon: string; color: 'primary' | 'warning' | 'error' }
-> = {
+const errorConfig = computed<
+  Record<
+    number,
+    { title: string; description: string; icon: string; color: 'primary' | 'warning' | 'error' }
+  >
+>(() => ({
   404: {
-    title: 'Không tìm thấy trang',
-    description: 'Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.',
+    title: t('error_404_title'),
+    description: t('error_404_desc'),
     icon: 'i-lucide-search-x',
     color: 'warning'
   },
   403: {
-    title: 'Không có quyền truy cập',
-    description: 'Bạn không có quyền truy cập trang này. Vui lòng liên hệ quản trị viên.',
+    title: t('error_403_title'),
+    description: t('error_403_desc'),
     icon: 'i-lucide-shield-x',
     color: 'error'
   },
   500: {
-    title: 'Lỗi máy chủ',
-    description: 'Đã có lỗi xảy ra phía máy chủ. Vui lòng thử lại sau.',
+    title: t('error_500_title'),
+    description: t('error_500_desc'),
     icon: 'i-lucide-server-crash',
     color: 'error'
   }
-}
+}))
 
 const config = computed(() => {
   return (
-    errorConfig[props.error.statusCode] || {
-      title: 'Đã xảy ra lỗi',
-      description: props.error.statusMessage || props.error.message || 'Vui lòng thử lại sau.',
+    errorConfig.value[props.error.statusCode] || {
+      title: t('error_default_title'),
+      description: props.error.statusMessage || props.error.message || t('error_default_desc'),
       icon: 'i-lucide-alert-circle',
       color: 'primary'
     }
@@ -116,7 +120,7 @@ onMounted(() => {
       <!-- Actions -->
       <div class="flex flex-col justify-center gap-3 sm:flex-row">
         <UButton size="lg" icon="i-lucide-home" class="w-full sm:w-auto" @click="handleGoHome">
-          Quay về trang chủ
+          {{ $t('error_btn_home') }}
         </UButton>
         <UButton
           size="lg"
@@ -131,7 +135,7 @@ onMounted(() => {
               class="h-5 w-5 transition-transform duration-500 group-hover:rotate-180"
             />
           </template>
-          Thử lại
+          {{ $t('error_btn_retry') }}
         </UButton>
       </div>
     </div>

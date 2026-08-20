@@ -5,6 +5,7 @@ import { updateProfileSchema } from '~/utils/validation'
 import { authService } from '~/services/authService'
 import { useAuthStore } from '~/stores/auth'
 import type { z } from 'zod'
+import { t } from '~/utils/i18n'
 
 const authStore = useAuthStore()
 const { constants } = useMasterData()
@@ -12,13 +13,13 @@ const { constants } = useMasterData()
 const ROLE_LABELS = computed<Record<string, string>>(() => {
   const roleConstants = constants.value?.[ConstantKey.Role] || {}
   return {
-    [roleConstants.ADMIN || 'admin']: 'Quản trị viên',
-    [roleConstants.DRIVER || 'driver']: 'Tài xế',
-    [roleConstants.CUSTOMER || 'customer']: 'Khách hàng'
+    [roleConstants.ADMIN || 'admin']: t('admin_role_admin'),
+    [roleConstants.DRIVER || 'driver']: t('admin_role_driver'),
+    [roleConstants.CUSTOMER || 'customer']: t('common_customer')
   }
 })
 
-useSeoMeta({ title: 'Hồ sơ cá nhân - BunTech Admin' })
+useSeoMeta({ title: t('admin_profile_seo_title') })
 definePageMeta({ layout: 'admin' })
 
 const ROLE_COLORS = computed<Record<string, string>>(() => {
@@ -57,8 +58,8 @@ const activities = ref<ActivityEntry[]>([
   {
     id: 'act-1',
     type: 'login',
-    title: 'Đăng nhập hệ thống',
-    description: 'Đăng nhập từ trình duyệt Chrome trên Windows · TP. HCM',
+    title: t('admin_profile_act_login'),
+    description: t('admin_profile_act_login_desc'),
     timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
     icon: 'i-lucide-log-in',
     color: 'success'
@@ -66,8 +67,8 @@ const activities = ref<ActivityEntry[]>([
   {
     id: 'act-2',
     type: 'order',
-    title: 'Tạo đơn hàng mới',
-    description: 'Đơn #ORD-0042 cho khách Phạm Thị Mai · 1.850.000 ₫',
+    title: t('admin_profile_act_order'),
+    description: t('admin_profile_act_order_desc'),
     timestamp: new Date(Date.now() - 5 * 3600000).toISOString(),
     icon: 'i-lucide-package',
     color: 'primary'
@@ -75,8 +76,8 @@ const activities = ref<ActivityEntry[]>([
   {
     id: 'act-3',
     type: 'profile',
-    title: 'Cập nhật hồ sơ',
-    description: 'Thay đổi số điện thoại liên hệ',
+    title: t('admin_profile_modal_edit'),
+    description: t('admin_profile_act_profile_desc'),
     timestamp: new Date(Date.now() - 26 * 3600000).toISOString(),
     icon: 'i-lucide-user-cog',
     color: 'info'
@@ -84,8 +85,8 @@ const activities = ref<ActivityEntry[]>([
   {
     id: 'act-4',
     type: 'report',
-    title: 'Xuất báo cáo doanh thu',
-    description: 'Báo cáo tuần từ 29/07 đến 04/08 · PDF',
+    title: t('admin_profile_act_report'),
+    description: t('admin_profile_act_report_desc'),
     timestamp: new Date(Date.now() - 2 * 86400000).toISOString(),
     icon: 'i-lucide-file-text',
     color: 'accent'
@@ -93,8 +94,8 @@ const activities = ref<ActivityEntry[]>([
   {
     id: 'act-5',
     type: 'product',
-    title: 'Cập nhật giá sản phẩm',
-    description: 'Bún tươi sợi nhỏ: 23.000 ₫ → 25.000 ₫',
+    title: t('admin_prod_form_add_title'),
+    description: t('admin_profile_act_product_desc'),
     timestamp: new Date(Date.now() - 3 * 86400000).toISOString(),
     icon: 'i-lucide-trending-up',
     color: 'warning'
@@ -102,8 +103,8 @@ const activities = ref<ActivityEntry[]>([
   {
     id: 'act-6',
     type: 'password',
-    title: 'Đổi mật khẩu',
-    description: 'Mật khẩu được cập nhật thành công',
+    title: t('admin_profile_act_pw'),
+    description: t('admin_profile_act_pw_desc'),
     timestamp: new Date(Date.now() - 7 * 86400000).toISOString(),
     icon: 'i-lucide-key-round',
     color: 'secondary'
@@ -144,12 +145,12 @@ const _activityColorMap = {
 function _relativeTime(isoStr: string): string {
   const diff = Date.now() - new Date(isoStr).getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1) return 'Vừa xong'
-  if (mins < 60) return `${mins} phút trước`
+  if (mins < 1) return t('admin_profile_time_just_now')
+  if (mins < 60) return t('admin_profile_time_min', { min: mins })
   const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours} giờ trước`
+  if (hours < 24) return t('admin_profile_time_hour', { hour: hours })
   const days = Math.floor(hours / 24)
-  if (days < 7) return `${days} ngày trước`
+  if (days < 7) return t('admin_profile_time_day', { day: days })
   return formatDate(isoStr)
 }
 
@@ -198,17 +199,17 @@ const handleFormSubmit = () => {
 }
 // Personal info rows
 const personalInfo = computed(() => [
-  { label: 'Họ và tên', value: user.value?.fullName || '—', icon: 'i-lucide-user-cog' },
-  { label: 'Số điện thoại', value: user.value?.phoneNumber || '—', icon: 'i-lucide-phone' },
-  { label: 'Email', value: email.value, icon: 'i-lucide-mail' },
+  { label: t('val_fullname'), value: user.value?.fullName || '—', icon: 'i-lucide-user-cog' },
+  { label: t('auth_login_phone'), value: user.value?.phoneNumber || '—', icon: 'i-lucide-phone' },
+  { label: t('admin_profile_info_email'), value: email.value, icon: 'i-lucide-mail' },
   {
-    label: 'Vai trò',
+    label: t('admin_profile_info_role'),
     value: user.value ? ROLE_LABELS.value[user.value.role] || user.value.role : '—',
     icon: 'i-lucide-badge-check'
   },
   {
-    label: 'Trạng thái',
-    value: 'Hoạt động',
+    label: t('status'),
+    value: t('admin_profile_info_active'),
     icon: 'i-lucide-circle-dot'
   }
 ])
@@ -216,9 +217,9 @@ const personalInfo = computed(() => [
 <template>
   <div>
     <BasePageHeader
-      title="Hồ sơ cá nhân"
-      subtitle="Xem và quản lý thông tin tài khoản cá nhân"
-      breadcrumb-label="Hồ sơ"
+      :title="$t('admin_profile_title')"
+      :subtitle="$t('admin_profile_subtitle')"
+      :breadcrumb-label="$t('admin_profile_title')"
     >
       <template #actions>
         <UButton
@@ -227,9 +228,11 @@ const personalInfo = computed(() => [
           to="/admin/change-password"
           icon="i-lucide-key-round"
         >
-          Đổi mật khẩu
+          {{ $t('auth_reset_btn') }}
         </UButton>
-        <UButton icon="i-lucide-pencil" @click="openEdit"> Chỉnh sửa </UButton>
+        <UButton icon="i-lucide-pencil" @click="openEdit">
+          {{ $t('admin_profile_btn_edit') }}
+        </UButton>
       </template>
     </BasePageHeader>
     <!-- Profile Header Card -->
@@ -282,12 +285,12 @@ const personalInfo = computed(() => [
             </span>
             <span class="flex items-center gap-1.5">
               <UIcon name="i-lucide-calendar-days" class="h-3.5 w-3.5" />
-              Thành viên từ {{ formatDate(new Date().toISOString()) }}
+              {{ $t('admin_profile_member_since') }} {{ formatDate(new Date().toISOString()) }}
             </span>
           </div>
         </div>
         <div class="hidden flex-col items-end gap-1 lg:flex">
-          <UBadge color="success" variant="soft"> Hoạt động </UBadge>
+          <UBadge color="success" variant="soft"> {{ $t('admin_profile_info_active') }} </UBadge>
           <span class="text-xs text-slate-400 dark:text-zinc-500"
             >ID: {{ user?.id?.toString().slice(0, 12) }}</span
           >
@@ -312,7 +315,9 @@ const personalInfo = computed(() => [
                   class="text-primary-600 dark:text-primary-400 h-4 w-4"
                 />
               </div>
-              <h3 class="text-surface-foreground text-sm font-semibold">Thông tin cá nhân</h3>
+              <h3 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('admin_profile_card_title') }}
+              </h3>
             </div>
             <UButton
               variant="ghost"
@@ -320,7 +325,7 @@ const personalInfo = computed(() => [
               class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-0.5 text-xs font-medium transition-colors"
               @click="openEdit"
             >
-              Sửa <UIcon name="i-lucide-chevron-right" class="h-3 w-3" />
+              {{ $t('edit') }} <UIcon name="i-lucide-chevron-right" class="h-3 w-3" />
             </UButton>
           </div>
           <dl class="space-y-3">
@@ -346,13 +351,25 @@ const personalInfo = computed(() => [
       </div>
       <AdminActivityTimeline :activities="activities" />
     </div>
-    <UModal v-model:open="showEditModal" title="Chỉnh sửa hồ sơ" :ui="{ content: 'sm:max-w-md' }">
+    <UModal
+      v-model:open="showEditModal"
+      :title="$t('admin_profile_modal_edit')"
+      :ui="{ content: 'sm:max-w-md' }"
+    >
       <template #body>
         <form id="profile-form" class="space-y-4" @submit.prevent="handleFormSubmit">
-          <UFormField label="Họ và tên" name="fullName" required :error="formErrors.fullName">
+          <UFormField
+            :label="$t('val_fullname')"
+            name="fullName"
+            required
+            :error="formErrors.fullName"
+          >
             <UInput v-model="editForm.fullName" class="w-full" />
           </UFormField>
-          <UFormField label="Số điện thoại (Chỉ xem)" help="SĐT được dùng để đăng nhập">
+          <UFormField
+            :label="$t('admin_profile_form_phone_readonly')"
+            :help="$t('admin_profile_form_phone_help')"
+          >
             <UInput v-model="editForm.phone" type="tel" class="w-full" disabled />
           </UFormField>
 
@@ -366,9 +383,11 @@ const personalInfo = computed(() => [
                 }
               "
             >
-              Huỷ
+              {{ $t('common_cancel') }}
             </UButton>
-            <UButton type="submit" color="primary" :loading="saving" size="lg"> Lưu </UButton>
+            <UButton type="submit" color="primary" :loading="saving" size="lg">
+              {{ $t('admin_profile_btn_save') }}
+            </UButton>
           </div>
         </form>
       </template>

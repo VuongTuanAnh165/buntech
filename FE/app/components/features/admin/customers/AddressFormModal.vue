@@ -4,6 +4,7 @@ import { requiredString } from '~/utils/validation'
 import type { Address } from '~/utils/types'
 import { useUsers } from '~/composables/admin/useUsers'
 import AddressSelect from '~/components/base/AddressSelect.vue'
+import { t } from '~/utils/i18n'
 
 const { createAddress, updateAddress } = useUsers()
 
@@ -27,9 +28,12 @@ const isOpen = computed({
 const isEdit = computed(() => !!props.address)
 
 const schema = z.object({
-  addressLine: requiredString('Địa chỉ cụ thể').max(191, 'Địa chỉ quá dài'),
-  province: requiredString('Tỉnh/Thành phố').max(100),
-  ward: requiredString('Phường/Xã').max(100),
+  addressLine: requiredString(t('address_specific')).max(
+    191,
+    t('admin_address_form_err_address_max')
+  ),
+  province: requiredString(t('province')).max(100),
+  ward: requiredString(t('ward')).max(100),
   isDefault: z.boolean().optional()
 })
 
@@ -91,7 +95,10 @@ const handleFormSubmit = () => {
 </script>
 
 <template>
-  <UModal v-model:open="isOpen" :title="isEdit ? 'Cập nhật Địa chỉ' : 'Thêm mới Địa chỉ'">
+  <UModal
+    v-model:open="isOpen"
+    :title="isEdit ? $t('admin_address_form_title_edit') : $t('admin_address_form_title_add')"
+  >
     <template #body>
       <form id="address-form" class="space-y-4" @submit.prevent="handleFormSubmit">
         <AddressSelect
@@ -101,7 +108,7 @@ const handleFormSubmit = () => {
         />
 
         <UFormField name="isDefault">
-          <UCheckbox v-model="state.isDefault" label="Đặt làm địa chỉ mặc định" />
+          <UCheckbox v-model="state.isDefault" :label="$t('admin_address_form_is_default')" />
         </UFormField>
       </form>
     </template>
@@ -116,7 +123,7 @@ const handleFormSubmit = () => {
               isOpen = false
             }
           "
-          >Hủy</UButton
+          >{{ $t('common_cancel') }}</UButton
         >
         <UButton
           type="submit"
@@ -124,7 +131,7 @@ const handleFormSubmit = () => {
           color="primary"
           :loading="isSubmitting || loading"
         >
-          {{ isEdit ? 'Lưu thay đổi' : 'Thêm mới' }}
+          {{ isEdit ? $t('admin_profile_btn_save') : $t('common_add_new') }}
         </UButton>
       </div>
     </template>

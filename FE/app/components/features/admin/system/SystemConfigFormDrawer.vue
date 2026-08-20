@@ -2,6 +2,7 @@
 import { z } from 'zod'
 import { requiredString } from '~/utils/validation'
 import type { SystemConfig } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
 const props = defineProps<{
   open: boolean
@@ -24,9 +25,9 @@ const isEdit = computed(() => !!props.config)
 const schema = z.object({
   key: z
     .string()
-    .min(1, 'Mã cấu hình (Key) không được để trống')
-    .regex(/^[a-z0-9_]+$/, 'Chỉ được chứa chữ thường, số và dấu gạch dưới'),
-  value: requiredString('Giá trị (Value)'),
+    .min(1, t('admin_system_form_key_req'))
+    .regex(/^[a-z0-9_]+$/, t('admin_system_form_key_regex')),
+  value: requiredString(t('admin_system_form_val')),
   description: z.string().optional()
 })
 
@@ -79,24 +80,49 @@ const handleFormSubmit = () => {
 </script>
 
 <template>
-  <USlideover v-model:open="isOpen" :title="isEdit ? 'Chỉnh sửa cấu hình' : 'Thêm cấu hình mới'">
+  <USlideover
+    v-model:open="isOpen"
+    :title="isEdit ? $t('admin_system_form_title_edit') : $t('admin_system_form_title_add')"
+  >
     <template #body>
       <form id="config-form" class="space-y-6" @submit.prevent="handleFormSubmit">
-        <UFormField label="Mã cấu hình (Key)" name="key" required :error="formErrors.key">
+        <UFormField
+          :label="$t('admin_system_form_key')"
+          name="key"
+          required
+          :error="formErrors.key"
+        >
           <template #description>
-            Chỉ chứa chữ cái thường, số và dấu gạch dưới. Ví dụ: <code>freeship_threshold</code>
+            {{ $t('admin_system_form_key_desc') }} <code>freeship_threshold</code>
           </template>
-          <UInput v-model="state.key" placeholder="Nhập mã cấu hình..." :disabled="isEdit" />
+          <UInput
+            v-model="state.key"
+            :placeholder="$t('admin_system_form_key_placeholder')"
+            :disabled="isEdit"
+          />
         </UFormField>
 
-        <UFormField label="Giá trị (Value)" name="value" required :error="formErrors.value">
-          <UTextarea v-model="state.value" :rows="4" placeholder="Nhập giá trị..." />
+        <UFormField
+          :label="$t('admin_system_form_val')"
+          name="value"
+          required
+          :error="formErrors.value"
+        >
+          <UTextarea
+            v-model="state.value"
+            :rows="4"
+            :placeholder="$t('admin_system_form_val_placeholder')"
+          />
         </UFormField>
 
-        <UFormField label="Mô tả" name="description" :error="formErrors.description">
+        <UFormField
+          :label="$t('admin_prod_form_desc')"
+          name="description"
+          :error="formErrors.description"
+        >
           <UInput
             v-model="state.description"
-            placeholder="Giải thích ý nghĩa của cấu hình này..."
+            :placeholder="$t('admin_system_form_desc_placeholder')"
           />
         </UFormField>
       </form>
@@ -112,10 +138,10 @@ const handleFormSubmit = () => {
             }
           "
         >
-          Hủy bỏ
+          {{ $t('admin_system_form_cancel') }}
         </UButton>
         <UButton type="submit" form="config-form" color="primary" :loading="loading">
-          Lưu lại
+          {{ $t('admin_system_form_save') }}
         </UButton>
       </div>
     </template>

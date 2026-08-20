@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useDebounceFn } from '@vueuse/core'
 
+import { t } from '~/utils/i18n'
+
 useSeoMeta({
-  title: 'Hệ Thống Phân Phối - BunTech',
-  description:
-    'Khám phá mạng lưới đại lý BunTech trên toàn quốc. Tìm điểm bán chính hãng gần bạn nhất qua bản đồ trực tuyến.',
-  ogTitle: 'Hệ Thống Phân Phối BunTech - Mạng Lưới Đại Lý Toàn Quốc',
-  ogDescription: 'Tìm đại lý chính hãng BunTech gần bạn. Hệ thống phân phối B2B uy tín, chất lượng.'
+  title: t('public_distribution_seo_title'),
+  description: t('public_distribution_seo_desc'),
+  ogTitle: t('public_distribution_og_title'),
+  ogDescription: t('public_distribution_og_desc')
 })
 
 const { filteredCustomers, customersWithCoords, searchQuery, status } = usePublicCustomers()
@@ -53,21 +54,21 @@ const tierStats = computed(() => {
           class="animate-fade-in-up mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur-md"
         >
           <UIcon name="i-lucide-map-pin" class="text-primary-400 h-4 w-4" />
-          Hệ thống Đại lý Phân phối
+          {{ $t('public_distribution_badge') }}
         </div>
         <h1
           class="animate-fade-in-up mb-6 text-4xl leading-[1.1] font-bold tracking-tight text-white sm:text-5xl md:text-6xl"
           style="letter-spacing: -0.02em"
         >
-          Mạng lưới <span class="text-primary-400">BunTech</span>
+          {{ $t('public_distribution_title_1') }}
+          <span class="text-primary-400">{{ $t('public_distribution_title_highlight') }}</span>
           <br class="hidden sm:block" />
-          trên toàn quốc
+          {{ $t('public_distribution_title_2') }}
         </h1>
         <p
           class="animate-fade-in-up mx-auto max-w-2xl text-lg leading-relaxed text-slate-300 sm:text-xl"
         >
-          Khám phá mạng lưới đại lý chính hãng. Tìm điểm bán bún tươi truyền thống gần bạn nhất hoặc
-          đăng ký trở thành đối tác phân phối cùng chúng tôi.
+          {{ $t('public_distribution_subtitle') }}
         </p>
 
         <!-- Search Bar -->
@@ -79,7 +80,7 @@ const tierStats = computed(() => {
             <input
               v-model="localSearch"
               type="text"
-              placeholder="Tìm theo tên cửa hàng hoặc tỉnh/thành..."
+              :placeholder="$t('public_distribution_search_ph')"
               class="flex-1 border-0 bg-transparent px-4 py-3.5 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500"
             />
           </div>
@@ -104,8 +105,12 @@ const tierStats = computed(() => {
     <section class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div class="mb-6 flex items-center gap-3">
         <UIcon name="i-lucide-map" class="h-6 w-6 text-blue-500" />
-        <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">Bản Đồ Điểm Bán</h2>
-        <UBadge color="info" variant="soft"> {{ customersWithCoords.length }} điểm </UBadge>
+        <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">
+          {{ $t('public_distribution_map_title') }}
+        </h2>
+        <UBadge color="info" variant="soft">
+          {{ $t('public_distribution_map_count', { count: customersWithCoords.length }) }}
+        </UBadge>
       </div>
       <ClientOnly>
         <PublicCustomerMapSection :markers="customersWithCoords" />
@@ -118,7 +123,7 @@ const tierStats = computed(() => {
                 name="i-lucide-loader-2"
                 class="mx-auto mb-2 h-8 w-8 animate-spin text-blue-500"
               />
-              <p class="text-sm text-neutral-500">Đang tải bản đồ...</p>
+              <p class="text-sm text-neutral-500">{{ $t('public_distribution_map_loading') }}</p>
             </div>
           </div>
         </template>
@@ -130,8 +135,12 @@ const tierStats = computed(() => {
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="mb-8 flex items-center gap-3">
           <UIcon name="i-lucide-award" class="h-6 w-6 text-yellow-500" />
-          <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">Đại Lý Đối Tác</h2>
-          <UBadge color="primary" variant="soft"> {{ filteredCustomers.length }} đại lý </UBadge>
+          <h2 class="text-2xl font-bold text-neutral-900 dark:text-white">
+            {{ $t('public_distribution_partner_title') }}
+          </h2>
+          <UBadge color="primary" variant="soft">
+            {{ $t('public_distribution_partner_count', { count: filteredCustomers.length }) }}
+          </UBadge>
         </div>
 
         <!-- Loading -->
@@ -156,10 +165,10 @@ const tierStats = computed(() => {
             class="mb-4 h-16 w-16 text-neutral-300 dark:text-neutral-600"
           />
           <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">
-            Không tìm thấy đại lý
+            {{ $t('public_distribution_partner_empty_title') }}
           </h3>
           <p class="mt-2 text-sm text-neutral-500">
-            Thử tìm với từ khóa khác hoặc xem toàn bộ danh sách.
+            {{ $t('public_distribution_partner_empty_desc') }}
           </p>
           <UButton
             v-if="searchQuery"
@@ -172,7 +181,7 @@ const tierStats = computed(() => {
               }
             "
           >
-            Xóa bộ lọc
+            {{ $t('public_distribution_partner_clear_filter') }}
           </UButton>
         </div>
 
@@ -201,10 +210,12 @@ const tierStats = computed(() => {
           aria-hidden="true"
         />
         <div class="relative">
-          <h2 class="mb-4 text-2xl font-bold text-white sm:text-3xl">Kinh Doanh Cùng BunTech</h2>
+          <h2 class="mb-4 text-2xl font-bold text-white sm:text-3xl">
+            {{ $t('public_distribution_cta_title') }}
+          </h2>
           <p class="mx-auto mb-8 max-w-xl text-white/80">
-            Hưởng giá xuất xưởng — Lên bản đồ toàn quốc.<br />
-            Trở thành đại lý ngay hôm nay!
+            {{ $t('public_distribution_cta_desc_1') }}<br />
+            {{ $t('public_distribution_cta_desc_2') }}
           </p>
           <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <UButton
@@ -215,7 +226,7 @@ const tierStats = computed(() => {
               to="tel:0123456789"
               class="!text-primary-600 group !bg-white hover:!bg-white/90"
             >
-              Hotline: 0123 456 789
+              {{ $t('public_distribution_cta_hotline') }}
             </UButton>
             <UButton
               color="primary"
@@ -226,7 +237,7 @@ const tierStats = computed(() => {
               target="_blank"
               class="!border-white !text-white hover:!bg-white/10"
             >
-              Chat Zalo
+              {{ $t('public_distribution_cta_zalo') }}
             </UButton>
           </div>
         </div>

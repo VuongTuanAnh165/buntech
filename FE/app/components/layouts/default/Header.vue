@@ -42,13 +42,13 @@ const route = useRoute()
           icon="i-lucide-shopping-cart"
           variant="ghost"
           color="neutral"
-          aria-label="Đặt hàng nhanh"
+          :aria-label="$t('quick_order_title')"
         />
         <UColorModeButton />
         <NuxtLink
           to="/auth/customer/login"
           class="text-primary-600 hover:text-primary-500 hidden text-sm font-medium transition-colors md:block"
-          >Đăng nhập khách hàng</NuxtLink
+          >{{ $t('header_login_customer') }}</NuxtLink
         >
       </div>
     </div>

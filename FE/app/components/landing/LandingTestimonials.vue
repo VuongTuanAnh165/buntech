@@ -1,28 +1,28 @@
 <script setup lang="ts">
+import { t } from '~/utils/i18n'
 import { productReviewService } from '~/services/productReviewService'
 import { Carousel, Slide, Navigation } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 
 const { data } = useAsyncData('featured-reviews', () => productReviewService.getFeaturedReviews())
 const apiReviews = computed(() => data.value?.data || [])
-
 const defaultTestimonials = [
   {
-    name: 'Chị Mai',
-    role: 'Tiệm bún Mai Hoàng, Q.5',
-    text: 'Đặt hàng online rất tiện, giao đúng giờ. Bún ngon, sạch, khách quen khen nhiều. Dùng app BunTech từ ngày đầu, không bao giờ thất vọng.',
+    name: t('public_landing_testi_def_1_name'),
+    role: t('public_landing_testi_def_1_role'),
+    text: t('public_landing_testi_def_1_text'),
     rating: 5
   },
   {
-    name: 'Anh Hùng',
-    role: 'Quán phở Hùng, Bình Thạnh',
-    text: 'Công nợ rõ ràng, dễ theo dõi. Không cần gọi điện đặt hàng mỗi ngày nữa. Tiết kiệm được rất nhiều thời gian cho quán.',
+    name: t('public_landing_testi_def_2_name'),
+    role: t('public_landing_testi_def_2_role'),
+    text: t('public_landing_testi_def_2_text'),
     rating: 5
   },
   {
-    name: 'Chị Lan',
-    role: 'Hộ kinh doanh, Gò Vấp',
-    text: 'App dễ xài, tài xế nhiệt tình. Bún giao còn nóng nguyên bọc. Giá sỉ rẻ hơn mua lẻ nhiều, lại có chương trình tích điểm.',
+    name: t('public_landing_testi_def_3_name'),
+    role: t('public_landing_testi_def_3_role'),
+    text: t('public_landing_testi_def_3_text'),
     rating: 5
   }
 ]
@@ -31,8 +31,10 @@ const testimonials = computed(() => {
   let results: Array<{ name: string; role: string; text: string; rating: number }> = []
   if (apiReviews.value.length > 0) {
     results = apiReviews.value.map((r) => ({
-      name: r.user?.fullName || 'Khách hàng',
-      role: r.product?.name ? `Đã mua: ${r.product.name}` : 'Khách hàng',
+      name: r.user?.fullName || t('common_customer'),
+      role: r.product?.name
+        ? t('public_landing_testi_bought', { product: r.product.name })
+        : t('common_customer'),
       text: r.content || '',
       rating: Number(r.rating) || 5
     }))
@@ -59,9 +61,11 @@ const breakpoints = {
 <template>
   <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
     <div class="mb-12 text-center">
-      <h2 class="text-surface-foreground mb-2 text-2xl font-bold sm:text-3xl">Khách hàng nói gì</h2>
+      <h2 class="text-surface-foreground mb-2 text-2xl font-bold sm:text-3xl">
+        {{ $t('public_landing_testi_title') }}
+      </h2>
       <p class="text-sm text-slate-500 dark:text-zinc-400">
-        Hàng trăm quán ăn, tiệm bún tin tưởng BunTech mỗi ngày
+        {{ $t('public_landing_testi_subtitle') }}
       </p>
     </div>
     <div class="pt-4 pb-8">

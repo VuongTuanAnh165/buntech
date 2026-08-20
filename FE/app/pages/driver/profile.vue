@@ -3,9 +3,11 @@ import { useAuthStore } from '~/stores/auth'
 import { useDriverHistory } from '~/composables/driver/useDriverHistory'
 import type { DriverRouteDTO } from '~/services/driverService'
 import { ConstantKey } from '~/enums/constantKeys'
+import { t } from '~/utils/i18n'
+
 const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
-useSeoMeta({ title: 'Hồ sơ tài xế - BunTech Driver' })
+useSeoMeta({ title: t('driver_profile_seo_title') })
 const _router = useRouter()
 const toast = useToast()
 const loading = ref(true)
@@ -55,11 +57,11 @@ const recentActivity = computed(() =>
           : 'shipping',
     label:
       o.status === constants.value?.[ConstantKey.OrderStatus]?.DELIVERED
-        ? `Giao thành công #${o.id}`
+        ? t('driver_profile_activity_delivered', { id: o.id })
         : o.status === constants.value?.[ConstantKey.OrderStatus]?.CANCELLED
-          ? `Đơn hủy #${o.id}`
-          : `Đang giao #${o.id}`,
-    customer: o.user?.fullName || 'Khách vãng lai',
+          ? t('driver_profile_activity_cancelled', { id: o.id })
+          : t('driver_profile_activity_shipping', { id: o.id }),
+    customer: o.user?.fullName || t('driver_history_guest'),
     address: o.shippingAddress?.addressLine || '',
     amount: Number(o.amountCollected) || 0,
     time: o.createdAt
@@ -69,8 +71,8 @@ function copyPhone() {
   if (driver.value?.phoneNumber) {
     navigator.clipboard
       ?.writeText(driver.value.phoneNumber)
-      .then(() => toast.add({ title: 'Đã sao chép số điện thoại', color: 'success' }))
-      .catch(() => toast.add({ title: 'Không thể sao chép', color: 'error' }))
+      .then(() => toast.add({ title: t('driver_profile_msg_copy_success'), color: 'success' }))
+      .catch(() => toast.add({ title: t('driver_profile_msg_copy_err'), color: 'error' }))
   }
 }
 function handleLogout() {
@@ -88,10 +90,10 @@ onMounted(() => {
     <!-- Header -->
     <div class="mb-4">
       <h1 class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
-        Hồ sơ tài xế
+        {{ $t('driver_profile_title') }}
       </h1>
       <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">
-        Thông tin và thành tích của bạn
+        {{ $t('driver_profile_desc') }}
       </p>
     </div>
     <!-- Loading -->
@@ -115,14 +117,16 @@ onMounted(() => {
           <div class="mb-4 flex items-center gap-4">
             <UAvatar
               :src="driver?.profile?.avatarUrl || ''"
-              :alt="driver?.fullName || 'Tài xế'"
+              :alt="driver?.fullName || $t('admin_role_driver')"
               size="lg"
             />
             <div class="min-w-0 flex-1">
               <p class="truncate text-lg font-bold">{{ driver?.fullName }}</p>
               <p class="font-mono text-xs text-slate-400">ID: {{ driver?.id }}</p>
               <div class="mt-1.5 flex items-center gap-2">
-                <UBadge color="success" variant="solid" size="xs">Đang hoạt động</UBadge>
+                <UBadge color="success" variant="solid" size="xs">{{
+                  $t('admin_profile_info_active')
+                }}</UBadge>
                 <span class="flex items-center gap-0.5 text-xs">
                   <UIcon
                     v-for="i in 5"
@@ -151,7 +155,9 @@ onMounted(() => {
           <div class="relative">
             <div class="mb-1 flex items-center gap-1.5">
               <UIcon name="i-lucide-package" class="text-primary-500 h-3.5 w-3.5" />
-              <span class="text-xs text-slate-500 dark:text-zinc-400">Tổng chuyến</span>
+              <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+                $t('driver_history_stat_total')
+              }}</span>
             </div>
             <p class="text-2xl font-bold text-neutral-900 tabular-nums dark:text-white">
               {{ formatNumber(stats.totalDeliveries) }}
@@ -163,7 +169,9 @@ onMounted(() => {
           <div class="relative">
             <div class="mb-1 flex items-center gap-1.5">
               <UIcon name="i-lucide-trending-up" class="text-success-500 h-3.5 w-3.5" />
-              <span class="text-xs text-slate-500 dark:text-zinc-400">Tỷ lệ thành công</span>
+              <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+                $t('driver_history_stat_success_rate')
+              }}</span>
             </div>
             <p class="text-success-600 dark:text-success-400 text-2xl font-bold tabular-nums">
               {{ stats.successRate }}%
@@ -175,7 +183,9 @@ onMounted(() => {
           <div class="relative">
             <div class="mb-1 flex items-center gap-1.5">
               <UIcon name="i-lucide-wallet" class="text-warning-500 h-3.5 w-3.5" />
-              <span class="text-xs text-slate-500 dark:text-zinc-400">Tổng thu nhập</span>
+              <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+                $t('driver_profile_stat_earnings')
+              }}</span>
             </div>
             <p class="truncate text-lg font-bold text-neutral-900 tabular-nums dark:text-white">
               {{ formatVND(stats.totalEarnings) }}
@@ -187,7 +197,9 @@ onMounted(() => {
           <div class="relative">
             <div class="mb-1 flex items-center gap-1.5">
               <UIcon name="i-lucide-star" class="text-info-500 h-3.5 w-3.5" />
-              <span class="text-xs text-slate-500 dark:text-zinc-400">Điểm đánh giá</span>
+              <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+                $t('driver_profile_stat_rating')
+              }}</span>
             </div>
             <p class="text-info-600 dark:text-info-400 text-2xl font-bold tabular-nums">
               {{ stats.rating.toFixed(1)
@@ -200,7 +212,7 @@ onMounted(() => {
       <div class="card mb-4 p-5">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
           <UIcon name="i-lucide-id-card" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-          Thông tin cá nhân
+          {{ $t('driver_profile_info_title') }}
         </h2>
         <div class="space-y-3.5">
           <div class="flex items-center gap-3">
@@ -210,9 +222,9 @@ onMounted(() => {
               <UIcon name="i-lucide-phone" class="h-4 w-4 text-slate-500 dark:text-zinc-400" />
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-xs text-slate-500 dark:text-zinc-400">Số điện thoại</p>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">{{ $t('auth_login_phone') }}</p>
               <p class="text-sm font-medium text-neutral-900 tabular-nums dark:text-white">
-                {{ driver?.phoneNumber || 'Chưa có' }}
+                {{ driver?.phoneNumber || $t('driver_profile_info_phone_empty') }}
               </p>
             </div>
             <UButton
@@ -220,7 +232,7 @@ onMounted(() => {
               color="neutral"
               class="text-primary-600 dark:text-primary-400 text-xs font-medium hover:underline"
               @click="copyPhone"
-              >Sao chép</UButton
+              >{{ $t('admin_order_list_btn_copy') }}</UButton
             >
           </div>
           <div class="flex items-center gap-3">
@@ -230,12 +242,14 @@ onMounted(() => {
               <UIcon name="i-lucide-mail" class="h-4 w-4 text-slate-500 dark:text-zinc-400" />
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-xs text-slate-500 dark:text-zinc-400">Email</p>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">
+                {{ $t('admin_profile_info_email') }}
+              </p>
               <p class="truncate text-sm font-medium text-neutral-900 dark:text-white">
                 {{
                   driver?.phoneNumber
                     ? `driver${driver.phoneNumber.slice(-4)}@buntech.vn`
-                    : 'Chưa có'
+                    : $t('driver_profile_info_phone_empty')
                 }}
               </p>
             </div>
@@ -247,7 +261,9 @@ onMounted(() => {
               <UIcon name="i-lucide-id-card" class="h-4 w-4 text-slate-500 dark:text-zinc-400" />
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-xs text-slate-500 dark:text-zinc-400">Số giấy phép lái</p>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">
+                {{ $t('driver_profile_info_license') }}
+              </p>
               <p class="text-sm font-medium text-neutral-900 tabular-nums dark:text-white">
                 B2-0{{ (driver?.phoneNumber || '000').slice(-6) }}
               </p>
@@ -260,8 +276,12 @@ onMounted(() => {
               <UIcon name="i-lucide-calendar" class="h-4 w-4 text-slate-500 dark:text-zinc-400" />
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-xs text-slate-500 dark:text-zinc-400">Ngày tham gia</p>
-              <p class="text-sm font-medium text-neutral-900 dark:text-white">Đang cập nhật</p>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">
+                {{ $t('driver_profile_info_join_date') }}
+              </p>
+              <p class="text-sm font-medium text-neutral-900 dark:text-white">
+                {{ $t('driver_profile_info_join_date_empty') }}
+              </p>
             </div>
           </div>
         </div>
@@ -281,7 +301,7 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between">
           <h2 class="flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
             <UIcon name="i-lucide-truck" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-            Phương tiện được phân công
+            {{ $t('driver_profile_vehicle_title') }}
           </h2>
           <UIcon name="i-lucide-chevron-right" class="h-5 w-5 text-slate-300 dark:text-zinc-600" />
         </div>
@@ -297,23 +317,29 @@ onMounted(() => {
             </p>
             <p class="text-xs text-slate-500 dark:text-zinc-400">Honda Blade 110 · 2022</p>
           </div>
-          <UBadge color="success" variant="subtle" size="xs">Hoạt động</UBadge>
+          <UBadge color="success" variant="subtle" size="xs">{{
+            $t('admin_profile_info_active')
+          }}</UBadge>
         </div>
       </div>
       <!-- Performance card -->
       <div class="card mb-4 p-5">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
           <UIcon name="i-lucide-award" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-          Hiệu suất
+          {{ $t('driver_profile_performance_title') }}
         </h2>
         <!-- Weekly chart -->
         <div class="mb-5">
           <div class="mb-3 flex items-center justify-between">
             <p class="text-xs text-slate-500 dark:text-zinc-400">
-              Chuyến giao theo ngày (tuần này)
+              {{ $t('driver_profile_performance_weekly') }}
             </p>
             <p class="text-xs font-medium text-neutral-900 tabular-nums dark:text-white">
-              {{ stableWeekly.reduce((s, d) => s + d.count, 0) }} chuyến
+              {{
+                $t('driver_profile_performance_trips', {
+                  count: stableWeekly.reduce((s, d) => s + d.count, 0)
+                })
+              }}
             </p>
           </div>
           <div class="flex h-32 items-end justify-between gap-2">
@@ -355,19 +381,27 @@ onMounted(() => {
           class="grid grid-cols-3 gap-3 border-t border-neutral-100 pt-4 dark:border-neutral-800"
         >
           <div class="text-center">
-            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">Tỷ lệ hoàn thành</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">
+              {{ $t('driver_profile_performance_completion') }}
+            </p>
             <p class="text-success-600 dark:text-success-400 text-lg font-bold tabular-nums">
               {{ stats.successRate }}%
             </p>
           </div>
           <div class="text-center">
-            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">TB thời gian giao</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">
+              {{ $t('driver_profile_performance_avg_time') }}
+            </p>
             <p class="text-lg font-bold text-neutral-900 tabular-nums dark:text-white">
-              24<span class="text-xs font-medium text-slate-400"> phút</span>
+              24<span class="text-xs font-medium text-slate-400">
+                {{ $t('driver_profile_performance_avg_time_unit') }}</span
+              >
             </p>
           </div>
           <div class="text-center">
-            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">Điểm đánh giá</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">
+              {{ $t('driver_profile_stat_rating') }}
+            </p>
             <p class="text-info-600 dark:text-info-400 text-lg font-bold tabular-nums">
               {{ stats.rating.toFixed(1) }}
             </p>
@@ -379,7 +413,7 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between">
           <h2 class="flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
             <UIcon name="i-lucide-clock" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-            Hoạt động gần đây
+            {{ $t('driver_profile_activity_title') }}
           </h2>
           <UButton
             variant="ghost"
@@ -390,7 +424,7 @@ onMounted(() => {
                 navigateTo('/driver/history')
               }
             "
-            >Xem tất cả</UButton
+            >{{ $t('wholesale_view_all') }}</UButton
           >
         </div>
         <div class="relative">
@@ -460,7 +494,9 @@ onMounted(() => {
           >
             <UIcon name="i-lucide-bell" class="text-info-600 dark:text-info-400 h-4.5 w-4.5" />
           </div>
-          <span class="flex-1 text-sm font-medium text-neutral-900 dark:text-white">Thông báo</span>
+          <span class="flex-1 text-sm font-medium text-neutral-900 dark:text-white">{{
+            $t('driver_notifications')
+          }}</span>
           <UIcon name="i-lucide-chevron-right" class="h-5 w-5 text-slate-300 dark:text-zinc-600" />
         </NuxtLink>
         <UButton
@@ -474,9 +510,9 @@ onMounted(() => {
           >
             <UIcon name="i-lucide-log-out" class="text-error-600 dark:text-error-400 h-4.5 w-4.5" />
           </div>
-          <span class="text-error-600 dark:text-error-400 flex-1 text-left text-sm font-medium"
-            >Đăng xuất</span
-          >
+          <span class="text-error-600 dark:text-error-400 flex-1 text-left text-sm font-medium">{{
+            $t('logout')
+          }}</span>
           <UIcon name="i-lucide-chevron-right" class="h-5 w-5 text-slate-300 dark:text-zinc-600" />
         </UButton>
       </div>

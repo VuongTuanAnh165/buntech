@@ -3,10 +3,9 @@ import { ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-vue-next'
 import { resetPasswordSchema } from '~/utils/validation'
 import { authService } from '~/services/authService'
 import type { z } from 'zod'
+import { t } from '~/utils/i18n'
 
-const { t } = useI18n()
-
-useSeoMeta({ title: 'Đặt lại mật khẩu - BunTech Admin' })
+useSeoMeta({ title: t('auth_reset_seo') })
 definePageMeta({ layout: 'auth' })
 
 const success = ref(false)
@@ -60,7 +59,13 @@ const strength = computed(() => {
 })
 
 const strengthLabel = computed(() => {
-  const labels = ['', 'Yếu', 'Trung bình', 'Khá', 'Mạnh']
+  const labels = [
+    '',
+    t('auth_pw_strength_1'),
+    t('auth_pw_strength_2'),
+    t('auth_pw_strength_3'),
+    t('auth_pw_strength_4')
+  ]
   return labels[strength.value] || ''
 })
 
@@ -86,12 +91,12 @@ const strengthColor = computed(() => {
         class="bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium"
       >
         <ShieldCheck class="h-4 w-4" aria-hidden="true" />
-        {{ t('auth.resetPassword') }}
+        {{ t('auth_reset_title') }}
       </div>
       <h2 class="text-surface-foreground mb-2 text-2xl font-bold tracking-tight">
-        {{ t('auth.resetPasswordTitle') }}
+        {{ t('auth_reset_title') }}
       </h2>
-      <p class="text-sm text-gray-500 dark:text-zinc-400">{{ t('auth.resetPasswordSubtitle') }}</p>
+      <p class="text-sm text-gray-500 dark:text-zinc-400">{{ t('auth_reset_subtitle') }}</p>
     </div>
 
     <Transition name="fade" mode="out-in">
@@ -103,22 +108,23 @@ const strengthColor = computed(() => {
           <CheckCircle2 class="text-success-600 dark:text-success-400 h-8 w-8" aria-hidden="true" />
         </div>
         <h3 class="text-surface-foreground mb-2 text-lg font-semibold">
-          {{ t('auth.passwordResetSuccess') }}
+          {{ t('auth_reset_success') }}
         </h3>
         <p class="mb-6 text-sm text-gray-500 dark:text-zinc-400">
-          {{
-            t('auth.passwordResetSuccessDesc') ||
-            'Mật khẩu đã được cập nhật. Vui lòng đăng nhập lại.'
-          }}
+          {{ t('auth_reset_success_desc') }}
         </p>
         <UButton color="primary" class="w-full" to="/auth/admin/login">
-          {{ t('auth.loginTitle') }}
+          {{ t('auth_reset_btn_login') }}
         </UButton>
       </div>
 
       <!-- Form -->
       <form v-else key="form" class="space-y-5" @submit.prevent="handleFormSubmit">
-        <UFormField label="Số điện thoại" name="phoneNumber" :error="formErrors.phoneNumber">
+        <UFormField
+          :label="t('auth_login_phone')"
+          name="phoneNumber"
+          :error="formErrors.phoneNumber"
+        >
           <UInput
             v-model="state.phoneNumber"
             type="tel"
@@ -128,12 +134,12 @@ const strengthColor = computed(() => {
           />
         </UFormField>
 
-        <UFormField label="Mã OTP" name="token" :error="formErrors.token">
-          <UInput v-model="state.token" placeholder="Mã xác thực 6 số" class="w-full" />
+        <UFormField :label="t('val_otp')" name="token" :error="formErrors.token">
+          <UInput v-model="state.token" :placeholder="t('auth_reset_otp_ph')" class="w-full" />
         </UFormField>
 
         <UFormField
-          :label="t('auth.newPassword')"
+          :label="t('auth_reset_new_pw')"
           name="newPassword"
           :error="formErrors.newPassword"
         >
@@ -161,7 +167,7 @@ const strengthColor = computed(() => {
         </div>
 
         <UFormField
-          :label="t('auth.confirmPassword')"
+          :label="t('val_confirm_pass')"
           name="confirmPassword"
           :error="formErrors.confirmPassword"
         >
@@ -177,11 +183,11 @@ const strengthColor = computed(() => {
           v-if="state.confirmPassword && state.confirmPassword === state.newPassword"
           class="text-success-600 dark:text-success-400 -mt-3 flex items-center gap-1 text-sm"
         >
-          <CheckCircle2 class="h-3.5 w-3.5" aria-hidden="true" /> {{ t('auth.passwordsMatch') }}
+          <CheckCircle2 class="h-3.5 w-3.5" aria-hidden="true" /> {{ t('auth_reset_pw_match') }}
         </p>
 
         <UButton type="submit" :loading="loading" class="!mt-8 w-full" size="lg">
-          {{ t('auth.resetPasswordButton') }}
+          {{ t('auth_reset_btn') }}
         </UButton>
       </form>
     </Transition>

@@ -3,8 +3,9 @@ import { dashboardService } from '~/services/dashboardService'
 import { adminOrderService } from '~/services/adminOrderService'
 import { getOrderStatusColor, getOrderStatusIcon, getOrderStatusLabel } from '~/utils/orderStatus'
 import dayjs from 'dayjs'
+import { t } from '~/utils/i18n'
 
-useSeoMeta({ title: 'Dashboard - BunTech Admin' })
+useSeoMeta({ title: t('admin_dashboard_seo_title') })
 definePageMeta({ layout: 'admin' })
 
 const { constants } = useMasterData()
@@ -32,28 +33,28 @@ const loading = computed(() => status.value === 'pending')
 
 const kpiStats = computed(() => [
   {
-    title: 'Doanh thu hôm nay',
+    title: t('admin_dashboard_kpi_revenue'),
     value: formatVND(data.value?.overview?.revenueToday || 0),
     icon: 'i-lucide-wallet',
     color: 'primary' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Đơn hàng hôm nay',
+    title: t('admin_dashboard_kpi_orders'),
     value: data.value?.overview?.ordersToday || 0,
     icon: 'i-lucide-shopping-cart',
     color: 'info' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Tổng khách hàng',
+    title: t('admin_dashboard_kpi_customers'),
     value: data.value?.overview?.totalCustomers || 0,
     icon: 'i-lucide-users',
     color: 'success' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Tổng sản phẩm',
+    title: t('admin_prod_kpi_total'),
     value: data.value?.overview?.totalProducts || 0,
     icon: 'i-lucide-package',
     color: 'warning' as const,
@@ -64,7 +65,16 @@ const kpiStats = computed(() => [
 const displayRevenue = computed(() => {
   if (!data.value?.overview?.revenueChart) return []
   return data.value.overview.revenueChart.map((r) => ({
-    day: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(r.date).getDay()] || '',
+    day:
+      [
+        t('admin_debt_chart_day_sun'),
+        t('admin_debt_chart_day_mon'),
+        t('admin_debt_chart_day_tue'),
+        t('admin_debt_chart_day_wed'),
+        t('admin_debt_chart_day_thu'),
+        t('admin_debt_chart_day_fri'),
+        t('admin_debt_chart_day_sat')
+      ][new Date(r.date).getDay()] || '',
     revenue: r.value
   }))
 })
@@ -85,9 +95,12 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
 </script>
 <template>
   <div>
-    <BasePageHeader title="Tổng quan" description="Hoạt động kinh doanh hôm nay" />
+    <BasePageHeader :title="$t('nav_overview')" :description="$t('admin_dashboard_desc')" />
     <template v-if="error">
-      <BaseEmptyState title="Lỗi tải dữ liệu" description="Đã có lỗi xảy ra, vui lòng thử lại." />
+      <BaseEmptyState
+        :title="$t('admin_customers_err_title')"
+        :description="$t('admin_dashboard_err_desc')"
+      />
     </template>
     <template v-else>
       <!-- KPI Cards -->
@@ -101,9 +114,11 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
             <div class="flex items-center justify-between">
               <div>
                 <h2 class="text-surface-foreground text-sm font-semibold tracking-tight">
-                  Biểu đồ doanh thu
+                  {{ $t('admin_dashboard_revenue_title') }}
                 </h2>
-                <p class="mt-1 text-xs text-slate-500 dark:text-zinc-400">7 ngày gần nhất</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-zinc-400">
+                  {{ $t('admin_dashboard_revenue_desc') }}
+                </p>
               </div>
               <div
                 class="text-success-600 dark:text-success-400 bg-success-50 dark:bg-success-900/20 flex items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium tabular-nums"
@@ -124,14 +139,14 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
           <div v-else class="flex h-[260px] items-center justify-center">
             <div class="flex items-center gap-3 text-slate-400">
               <UIcon name="i-lucide-activity" class="h-5 w-5 animate-pulse" />
-              <span class="text-sm">Đang tải dữ liệu...</span>
+              <span class="text-sm">{{ $t('admin_dashboard_loading') }}</span>
             </div>
           </div>
         </UCard>
         <UCard class="animate-fade-in-up" style="animation-delay: 200ms">
           <template #header>
             <h2 class="text-surface-foreground text-sm font-semibold tracking-tight">
-              Phân bố trạng thái đơn
+              {{ $t('admin_dashboard_status_title') }}
             </h2>
           </template>
           <BaseDashboardChart
@@ -146,7 +161,7 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
           <div v-else class="flex h-[260px] items-center justify-center">
             <div class="flex items-center gap-3 text-slate-400">
               <UIcon name="i-lucide-activity" class="h-5 w-5 animate-pulse" />
-              <span class="text-sm">Đang tải...</span>
+              <span class="text-sm">{{ $t('public_products_loading') }}</span>
             </div>
           </div>
         </UCard>
@@ -156,7 +171,7 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
         <UCard class="animate-fade-in-up lg:col-span-2" style="animation-delay: 240ms">
           <template #header>
             <h2 class="text-surface-foreground text-sm font-semibold tracking-tight">
-              Sản phẩm bán chạy nhất
+              {{ $t('admin_dashboard_top_products_title') }}
             </h2>
           </template>
           <BaseDashboardChart
@@ -171,7 +186,7 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
           <div v-else class="flex h-[240px] items-center justify-center">
             <div class="flex items-center gap-3 text-slate-400">
               <UIcon name="i-lucide-activity" class="h-5 w-5 animate-pulse" />
-              <span class="text-sm">Đang tải...</span>
+              <span class="text-sm">{{ $t('public_products_loading') }}</span>
             </div>
           </div>
         </UCard>
@@ -182,13 +197,14 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="text-surface-foreground text-sm font-semibold tracking-tight">
-              Đơn hàng gần đây
+              {{ $t('wholesale_recent_orders') }}
             </h2>
             <NuxtLink
               to="/admin/orders"
               class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-0.5 text-xs font-medium"
             >
-              Xem tất cả <UIcon name="i-lucide-arrow-up-right" class="h-3 w-3" />
+              {{ $t('wholesale_view_all') }}
+              <UIcon name="i-lucide-arrow-up-right" class="h-3 w-3" />
             </NuxtLink>
           </div>
         </template>
@@ -237,7 +253,7 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-surface-foreground truncate text-sm font-medium">
-                  {{ order.user?.fullName || 'Khách vãng lai' }}
+                  {{ order.user?.fullName || $t('driver_history_guest') }}
                 </p>
                 <p class="mt-0.5 flex items-center gap-1 text-xs text-slate-500 dark:text-zinc-400">
                   <UIcon name="i-lucide-clock" class="h-3 w-3" /> {{ formatDate(order.createdAt) }}
@@ -256,8 +272,8 @@ const displayRecentOrders = computed(() => data.value?.recentOrders || [])
           </div>
           <BaseEmptyState
             v-if="displayRecentOrders.length === 0"
-            title="Trống"
-            description="Chưa có dữ liệu"
+            :title="$t('common_empty_title')"
+            :description="$t('common_empty_desc')"
           />
         </template>
       </UCard>

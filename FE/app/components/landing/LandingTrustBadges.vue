@@ -1,10 +1,12 @@
 <script setup lang="ts">
-const trustBadges = [
-  { icon: 'i-lucide-leaf', label: '100% Gạo tự nhiên' },
-  { icon: 'i-lucide-truck', label: 'Giao hàng 2 giờ' },
-  { icon: 'i-lucide-store', label: '50+ đại lý' },
-  { icon: 'i-lucide-award', label: '3 đời kinh nghiệm' }
-]
+import { t } from '~/utils/i18n'
+
+const trustBadges = computed(() => [
+  { icon: 'i-lucide-leaf', label: t('public_landing_trust_1') },
+  { icon: 'i-lucide-truck', label: t('public_landing_trust_2') },
+  { icon: 'i-lucide-store', label: t('public_landing_trust_3') },
+  { icon: 'i-lucide-award', label: t('public_landing_trust_4') }
+])
 </script>
 
 <template>

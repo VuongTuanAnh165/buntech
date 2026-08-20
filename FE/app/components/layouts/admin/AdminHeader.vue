@@ -34,7 +34,7 @@ const handleLogout = async () => {
       >
         ⌘K
       </kbd>
-      <span class="text-[13px] font-medium">Tìm kiếm nhanh...</span>
+      <span class="text-[13px] font-medium">{{ $t('search_quick') }}</span>
     </div>
 
     <div class="flex-1 lg:hidden" />
@@ -63,12 +63,16 @@ const handleLogout = async () => {
         <UDropdownMenu
           :items="[
             [
-              { label: 'Hồ sơ', icon: 'i-lucide-user', to: '/admin/profile' },
-              { label: 'Đổi mật khẩu', icon: 'i-lucide-settings', to: '/admin/change-password' }
+              { label: $t('profile'), icon: 'i-lucide-user', to: '/admin/profile' },
+              {
+                label: $t('auth_reset_btn'),
+                icon: 'i-lucide-settings',
+                to: '/admin/change-password'
+              }
             ],
             [
               {
-                label: 'Đăng xuất',
+                label: $t('logout'),
                 icon: 'i-lucide-log-out',
                 color: 'error',
                 onSelect: handleLogout
@@ -98,7 +102,7 @@ const handleLogout = async () => {
               <p
                 class="mt-1 text-[11px] leading-none font-medium text-slate-500 dark:text-zinc-400"
               >
-                {{ authStore.user?.role || 'Quản trị viên' }}
+                {{ authStore.user?.role || $t('admin_role_admin') }}
               </p>
             </div>
             <UIcon

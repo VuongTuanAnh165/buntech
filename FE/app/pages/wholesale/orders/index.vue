@@ -2,9 +2,11 @@
 import { customerService } from '~/services/customerService'
 import { getOrderStatusColor, getOrderStatusLabel } from '~/utils/orderStatus'
 
+import { t } from '~/utils/i18n'
+
 const { constants } = useMasterData()
 
-useSeoMeta({ title: 'Lịch sử đơn hàng - BunTech' })
+useSeoMeta({ title: t('wholesale_orders_seo_title') })
 definePageMeta({ layout: 'default' })
 
 const route = useRoute()
@@ -41,7 +43,7 @@ const statusOptions = computed(() => {
     value: enumValue
   }))
 
-  return [{ label: 'Tất cả trạng thái', value: undefined }, ...options]
+  return [{ label: t('admin_blog_status_all'), value: undefined }, ...options]
 })
 
 const actualStatus = computed(() => {
@@ -69,13 +71,13 @@ const { data: ordersResponse, pending: loading } = useAsyncData(
 const orders = computed(() => ordersResponse.value?.data?.data || [])
 const totalOrders = computed(() => ordersResponse.value?.data?.meta?.total || 0)
 
-const tableColumns = [
-  { accessorKey: 'id', header: 'Mã đơn' },
-  { accessorKey: 'createdAt', header: 'Ngày đặt' },
-  { accessorKey: 'status', header: 'Trạng thái' },
-  { accessorKey: 'totalAmount', header: 'Tổng tiền' },
+const tableColumns = computed(() => [
+  { accessorKey: 'id', header: t('wholesale_col_id') },
+  { accessorKey: 'createdAt', header: t('wholesale_col_date') },
+  { accessorKey: 'status', header: t('status') },
+  { accessorKey: 'totalAmount', header: t('wholesale_col_total') },
   { accessorKey: 'actions', header: '' }
-]
+])
 
 const handleStatusChange = (val: string | Record<string, string> | undefined) => {
   // If Nuxt UI emits an object, extract the value
@@ -94,13 +96,13 @@ const handleStatusChange = (val: string | Record<string, string> | undefined) =>
           class="hover:text-primary-600 dark:hover:text-primary-400 mb-2 inline-flex items-center text-sm font-medium text-slate-500 dark:text-zinc-400"
         >
           <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" />
-          Quay lại tổng quan
+          {{ $t('wholesale_orders_back_overview') }}
         </NuxtLink>
         <h1 class="text-surface-foreground text-2xl font-bold tracking-tight sm:text-3xl">
-          Lịch sử đơn hàng
+          {{ $t('wholesale_orders_title') }}
         </h1>
         <p class="mt-2 text-sm text-slate-500 dark:text-zinc-400">
-          Xem và theo dõi trạng thái các đơn hàng bạn đã đặt.
+          {{ $t('wholesale_orders_desc') }}
         </p>
       </div>
 
@@ -110,11 +112,13 @@ const handleStatusChange = (val: string | Record<string, string> | undefined) =>
           :items="statusOptions"
           value-key="value"
           label-key="label"
-          placeholder="Lọc theo trạng thái"
+          :placeholder="$t('wholesale_orders_filter_ph')"
           class="w-48"
           @update:model-value="handleStatusChange"
         />
-        <UButton to="/wholesale/order" icon="i-lucide-plus">Đặt hàng mới</UButton>
+        <UButton to="/wholesale/order" icon="i-lucide-plus">{{
+          $t('wholesale_orders_btn_new')
+        }}</UButton>
       </div>
     </div>
 
@@ -123,8 +127,8 @@ const handleStatusChange = (val: string | Record<string, string> | undefined) =>
         :rows="orders"
         :columns="tableColumns"
         :loading="loading"
-        empty-title="Không tìm thấy đơn hàng"
-        empty-description="Bạn chưa có đơn hàng nào hoặc không có đơn hàng nào khớp với bộ lọc."
+        :empty-title="$t('admin_order_list_empty_title')"
+        :empty-description="$t('wholesale_orders_empty_desc')"
         empty-icon="i-lucide-search-x"
         class="w-full"
       >
@@ -166,7 +170,7 @@ const handleStatusChange = (val: string | Record<string, string> | undefined) =>
               size="sm"
               :to="`/wholesale/orders/${row.id}`"
             >
-              Chi tiết
+              {{ $t('driver_delivery_btn_detail') }}
             </UButton>
           </div>
         </template>

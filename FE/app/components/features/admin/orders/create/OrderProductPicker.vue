@@ -12,7 +12,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'add', productId: number): void
+  (e: 'common_add_new', productId: number): void
 }>()
 
 const searchQuery = defineModel<string>('searchQuery', { default: '' })
@@ -26,12 +26,18 @@ const searchQuery = defineModel<string>('searchQuery', { default: '' })
           <UIcon name="i-lucide-package" class="text-primary-600 h-4 w-4" />
         </div>
         <div>
-          <h2 class="text-surface-foreground text-sm font-semibold">Chọn sản phẩm</h2>
-          <p class="text-xs text-slate-500">Bấm để thêm vào giỏ hàng</p>
+          <h2 class="text-surface-foreground text-sm font-semibold">
+            {{ $t('admin_order_picker_title') }}
+          </h2>
+          <p class="text-xs text-slate-500">{{ $t('admin_order_picker_desc') }}</p>
         </div>
       </div>
       <div class="relative w-48 text-sm">
-        <BaseSearchInput v-model="searchQuery" placeholder="Tìm sản phẩm..." class="w-full" />
+        <BaseSearchInput
+          v-model="searchQuery"
+          :placeholder="$t('quick_order_search_ph')"
+          class="w-full"
+        />
       </div>
     </div>
     <div
@@ -51,7 +57,7 @@ const searchQuery = defineModel<string>('searchQuery', { default: '' })
             : 'border-surface-border bg-surface hover:border-primary-400 shadow-sm'
         ]"
         :style="{ animationDelay: `${Math.min(i * 20, 200)}ms` }"
-        @click="emit('add', p.id)"
+        @click="emit('common_add_new', p.id)"
       >
         <div class="flex w-full flex-col p-3 text-left">
           <div
@@ -91,6 +97,8 @@ const searchQuery = defineModel<string>('searchQuery', { default: '' })
         </div>
       </UButton>
     </div>
-    <div v-else class="py-8 text-center text-sm text-slate-500">Không tìm thấy sản phẩm</div>
+    <div v-else class="py-8 text-center text-sm text-slate-500">
+      {{ $t('admin_order_picker_empty') }}
+    </div>
   </div>
 </template>

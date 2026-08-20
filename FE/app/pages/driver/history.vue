@@ -3,9 +3,11 @@ import { ConstantKey } from '~/enums/constantKeys'
 import type { DriverRouteDTO } from '~/services/driverService'
 import { useDriverHistory } from '~/composables/driver/useDriverHistory'
 
+import { t } from '~/utils/i18n'
+
 const { constants } = useMasterData()
 definePageMeta({ layout: 'driver' })
-useSeoMeta({ title: 'Lịch sử giao hàng - BunTech Driver' })
+useSeoMeta({ title: t('driver_history_seo_title') })
 const toast = useToast()
 const refreshing = ref(false)
 
@@ -103,7 +105,7 @@ async function refresh() {
   refreshing.value = true
   await refreshHistory()
   refreshing.value = false
-  toast.add({ title: 'Đã làm mới lịch sử', color: 'success' })
+  toast.add({ title: t('driver_history_msg_refresh'), color: 'success' })
 }
 </script>
 <template>
@@ -112,10 +114,10 @@ async function refresh() {
     <div class="mb-4 flex items-center justify-between">
       <div>
         <h1 class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
-          Lịch sử giao hàng
+          {{ $t('driver_history_title') }}
         </h1>
         <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">
-          Xem lại các chuyến giao đã hoàn thành
+          {{ $t('driver_history_desc') }}
         </p>
       </div>
       <UButton
@@ -139,9 +141,9 @@ async function refresh() {
       >
         <UButton
           v-for="opt in [
-            { accessorKey: 'today', header: 'Hôm nay' },
-            { accessorKey: '7days', header: '7 ngày' },
-            { accessorKey: '30days', header: '30 ngày' }
+            { accessorKey: 'today', header: t('driver_history_range_today') },
+            { accessorKey: '7days', header: t('driver_history_range_7days') },
+            { accessorKey: '30days', header: t('driver_history_range_30days') }
           ]"
           :key="opt.accessorKey"
           variant="ghost"
@@ -164,7 +166,9 @@ async function refresh() {
         <div class="relative">
           <div class="mb-1 flex items-center gap-1.5">
             <UIcon name="i-lucide-package" class="text-primary-500 h-3.5 w-3.5" />
-            <span class="text-xs text-slate-500 dark:text-zinc-400">Tổng chuyến</span>
+            <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+              $t('driver_history_stat_total')
+            }}</span>
           </div>
           <p class="text-2xl font-bold text-neutral-900 tabular-nums dark:text-white">
             {{ stats.total }}
@@ -176,7 +180,9 @@ async function refresh() {
         <div class="relative">
           <div class="mb-1 flex items-center gap-1.5">
             <UIcon name="i-lucide-trending-up" class="text-success-500 h-3.5 w-3.5" />
-            <span class="text-xs text-slate-500 dark:text-zinc-400">Tỷ lệ thành công</span>
+            <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+              $t('driver_history_stat_success_rate')
+            }}</span>
           </div>
           <p class="text-success-600 dark:text-success-400 text-2xl font-bold tabular-nums">
             {{ stats.successRate }}%
@@ -188,7 +194,9 @@ async function refresh() {
         <div class="relative">
           <div class="mb-1 flex items-center gap-1.5">
             <UIcon name="i-lucide-wallet" class="text-warning-500 h-3.5 w-3.5" />
-            <span class="text-xs text-slate-500 dark:text-zinc-400">Đã thu</span>
+            <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+              $t('driver_history_stat_collected')
+            }}</span>
           </div>
           <p class="truncate text-lg font-bold text-neutral-900 tabular-nums dark:text-white">
             {{ formatVND(stats.totalCollected) }}
@@ -200,7 +208,9 @@ async function refresh() {
         <div class="relative">
           <div class="mb-1 flex items-center gap-1.5">
             <UIcon name="i-lucide-route" class="text-info-500 h-3.5 w-3.5" />
-            <span class="text-xs text-slate-500 dark:text-zinc-400">Tổng quãng đường</span>
+            <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+              $t('driver_history_stat_distance')
+            }}</span>
           </div>
           <p class="text-2xl font-bold text-neutral-900 tabular-nums dark:text-white">
             {{ stats.totalDistance }} <span class="text-sm font-medium text-slate-400">km</span>
@@ -219,9 +229,17 @@ async function refresh() {
       >
         <UButton
           v-for="tab in [
-            { accessorKey: 'all', header: 'Tất cả', count: stats.total },
-            { accessorKey: 'delivered', header: 'Đã giao', count: stats.delivered },
-            { accessorKey: 'cancelled', header: 'Đã hủy', count: stats.cancelled }
+            { accessorKey: 'all', header: t('admin_debt_type_all'), count: stats.total },
+            {
+              accessorKey: 'delivered',
+              header: t('status_order_delivered'),
+              count: stats.delivered
+            },
+            {
+              accessorKey: 'cancelled',
+              header: t('status_order_cancelled'),
+              count: stats.cancelled
+            }
           ]"
           :key="tab.accessorKey"
           variant="ghost"
@@ -300,7 +318,7 @@ async function refresh() {
             <div>
               <p class="font-mono text-xs text-slate-400 dark:text-zinc-500">#{{ order.id }}</p>
               <p class="font-semibold text-neutral-900 dark:text-white">
-                {{ order.user?.fullName || 'Khách vãng lai' }}
+                {{ order.user?.fullName || $t('driver_history_guest') }}
               </p>
             </div>
           </div>
@@ -312,8 +330,8 @@ async function refresh() {
             size="xs"
             >{{
               order.status === constants?.[ConstantKey.OrderStatus]?.DELIVERED
-                ? 'Đã giao'
-                : 'Đã hủy'
+                ? $t('status_order_delivered')
+                : $t('status_order_cancelled')
             }}</UBadge
           >
         </div>
@@ -358,20 +376,22 @@ async function refresh() {
       </div>
       <!-- Load more -->
       <div v-if="hasMore" class="flex justify-center pt-2 pb-4">
-        <UButton variant="outline" :loading="loading" @click="loadMore"> Xem thêm </UButton>
+        <UButton variant="outline" :loading="loading" @click="loadMore">
+          {{ $t('driver_history_btn_load_more') }}
+        </UButton>
       </div>
       <p v-else class="py-4 text-center text-xs text-slate-400 dark:text-zinc-500">
-        Đã hiển thị tất cả {{ meta?.total || history.length }} chuyến
+        {{ $t('driver_history_msg_all_loaded', { count: meta?.total || history.length }) }}
       </p>
     </template>
     <!-- Empty -->
     <BaseEmptyState
       v-else
-      title="Chưa có lịch sử giao hàng"
+      :title="$t('driver_history_empty_title')"
       :description="
         statusFilterStr === 'all'
-          ? 'Chưa có chuyến giao nào trong khoảng thời gian này.'
-          : 'Không có chuyến nào phù hợp với bộ lọc đã chọn.'
+          ? $t('driver_history_empty_desc_all')
+          : $t('driver_history_empty_desc_filter')
       "
     />
   </div>

@@ -2,7 +2,8 @@
 import { changePasswordSchema } from '~/utils/validation'
 import { authService } from '~/services/authService'
 import type { z } from 'zod'
-useSeoMeta({ title: 'Đổi mật khẩu - BunTech Admin' })
+import { t } from '~/utils/i18n'
+useSeoMeta({ title: t('admin_change_pw_seo_title') })
 definePageMeta({ layout: 'admin' })
 
 type Schema = z.output<typeof changePasswordSchema>
@@ -41,8 +42,8 @@ const handleChangePassword = handleSubmit(
       passwordHistory.value.unshift({
         id: `ph-${Date.now()}`,
         date: new Date().toISOString(),
-        label: 'Đổi mật khẩu',
-        note: 'Tự đổi từ trang Bảo mật',
+        label: t('auth_reset_btn'),
+        note: t('admin_change_pw_hist_1'),
         current: true
       })
       passwordHistory.value = passwordHistory.value.map((h, i) => ({ ...h, current: i === 0 }))
@@ -69,10 +70,10 @@ interface Requirement {
 }
 
 const requirements: Requirement[] = [
-  { label: 'Ít nhất 6 ký tự', test: (pw) => pw.length >= 6 },
-  { label: 'Có chữ số', test: (pw) => /\d/.test(pw) },
-  { label: 'Có chữ in hoa', test: (pw) => /[A-Z]/.test(pw) },
-  { label: 'Có ký tự đặc biệt', test: (pw) => /[^A-Za-z0-9]/.test(pw) }
+  { label: t('admin_change_pw_req_1'), test: (pw) => pw.length >= 6 },
+  { label: t('admin_change_pw_req_2'), test: (pw) => /\d/.test(pw) },
+  { label: t('admin_change_pw_req_3'), test: (pw) => /[A-Z]/.test(pw) },
+  { label: t('admin_change_pw_req_4'), test: (pw) => /[^A-Za-z0-9]/.test(pw) }
 ]
 
 const metRequirements = computed(() => requirements.map((r) => r.test(state.newPassword)))
@@ -86,31 +87,31 @@ const strengthLevel = computed(() => {
 const strengthInfo = computed(() => {
   const levels = [
     {
-      label: 'Chưa nhập',
+      label: t('admin_change_pw_strength_0'),
       color: 'bg-slate-200 dark:bg-zinc-700',
       text: 'text-slate-400 dark:text-zinc-500',
       barWidth: '0%'
     },
     {
-      label: 'Yếu',
+      label: t('auth_pw_strength_1'),
       color: 'bg-error-500',
       text: 'text-error-600 dark:text-error-400',
       barWidth: '25%'
     },
     {
-      label: 'Trung bình',
+      label: t('auth_pw_strength_2'),
       color: 'bg-warning-500',
       text: 'text-warning-600 dark:text-warning-400',
       barWidth: '50%'
     },
     {
-      label: 'Khá',
+      label: t('auth_pw_strength_4'),
       color: 'bg-info-500',
       text: 'text-info-600 dark:text-info-400',
       barWidth: '75%'
     },
     {
-      label: 'Mạnh',
+      label: t('admin_change_pw_strength_4'),
       color: 'bg-success-500',
       text: 'text-success-600 dark:text-success-400',
       barWidth: '100%'
@@ -124,22 +125,22 @@ const passwordHistory = ref([
   {
     id: 'ph-1',
     date: new Date(Date.now() - 7 * 86400000).toISOString(),
-    label: 'Đổi mật khẩu',
-    note: 'Tự đổi từ trang Bảo mật',
+    label: t('auth_reset_btn'),
+    note: t('admin_change_pw_hist_1'),
     current: true
   },
   {
     id: 'ph-2',
     date: new Date(Date.now() - 45 * 86400000).toISOString(),
-    label: 'Đổi mật khẩu',
-    note: 'Yêu cầu bởi quản trị viên',
+    label: t('auth_reset_btn'),
+    note: t('admin_change_pw_hist_2'),
     current: false
   },
   {
     id: 'ph-3',
     date: new Date(Date.now() - 120 * 86400000).toISOString(),
-    label: 'Tạo mật khẩu đầu tiên',
-    note: 'Khi đăng ký tài khoản',
+    label: t('admin_change_pw_hist_3'),
+    note: t('admin_change_pw_hist_4'),
     current: false
   }
 ])
@@ -155,9 +156,9 @@ watch(
 <template>
   <div>
     <BasePageHeader
-      title="Đổi mật khẩu"
-      subtitle="Bảo mật tài khoản bằng mật khẩu mạnh và định kỳ cập nhật"
-      breadcrumb-label="Đổi mật khẩu"
+      :title="$t('auth_reset_btn')"
+      :subtitle="$t('admin_change_pw_desc')"
+      :breadcrumb-label="$t('auth_reset_btn')"
     >
       <template #actions>
         <div
@@ -167,9 +168,9 @@ watch(
             name="i-lucide-shield-check"
             class="text-success-600 dark:text-success-400 h-4 w-4"
           />
-          <span class="text-success-700 dark:text-success-300 text-xs font-medium"
-            >Tài khoản được bảo vệ</span
-          >
+          <span class="text-success-700 dark:text-success-300 text-xs font-medium">{{
+            $t('admin_change_pw_protected')
+          }}</span>
         </div>
       </template>
     </BasePageHeader>
@@ -188,27 +189,29 @@ watch(
               />
             </div>
             <div>
-              <h2 class="text-surface-foreground text-sm font-semibold">Đặt mật khẩu mới</h2>
+              <h2 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('admin_change_pw_form_title') }}
+              </h2>
               <p class="text-xs text-slate-500 dark:text-zinc-400">
-                Mật khẩu mới phải đáp ứng các yêu cầu bên dưới
+                {{ $t('admin_change_pw_form_desc') }}
               </p>
             </div>
           </div>
 
           <form class="space-y-4" @submit.prevent="handleFormSubmit">
             <UFormField
-              label="Mật khẩu hiện tại"
+              :label="$t('val_old_pass')"
               name="oldPassword"
               required
               :error="formErrors.oldPassword"
-              help="Nhập mật khẩu hiện tại của bạn"
+              :help="$t('admin_change_pw_form_old_help')"
             >
               <UInput v-model="state.oldPassword" type="password" class="w-full" />
             </UFormField>
 
             <div>
               <UFormField
-                label="Mật khẩu mới"
+                :label="$t('auth_reset_new_pw')"
                 name="newPassword"
                 required
                 :error="formErrors.newPassword"
@@ -220,7 +223,9 @@ watch(
               <Transition name="fade">
                 <div v-if="showStrength" class="mt-3">
                   <div class="mb-1.5 flex items-center justify-between">
-                    <span class="text-xs text-slate-500 dark:text-zinc-400">Độ mạnh mật khẩu</span>
+                    <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+                      $t('admin_change_pw_strength')
+                    }}</span>
                     <span :class="['text-xs font-medium', strengthInfo?.text]">{{
                       strengthInfo?.label
                     }}</span>
@@ -239,7 +244,7 @@ watch(
             </div>
 
             <UFormField
-              label="Xác nhận mật khẩu"
+              :label="$t('val_confirm_pass')"
               name="confirmPassword"
               required
               :error="formErrors.confirmPassword"
@@ -251,7 +256,7 @@ watch(
             <div class="border-surface-border bg-surface-hover/40 rounded-lg border p-4">
               <p class="text-surface-foreground mb-3 flex items-center gap-1.5 text-xs font-medium">
                 <UIcon name="i-lucide-sparkles" class="text-primary-500 h-3.5 w-3.5" />
-                Yêu cầu mật khẩu
+                {{ $t('admin_change_pw_req_title') }}
               </p>
               <ul class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 <li
@@ -299,8 +304,7 @@ watch(
                 class="text-info-600 dark:text-info-400 h-4 w-4 flex-shrink-0"
               />
               <p class="text-info-700 dark:text-info-300 text-xs leading-relaxed">
-                Mẹo: Dùng một cụm từ dễ nhớ rồi thay thế vài ký tự thành số và ký tự đặc biệt, ví dụ
-                "BunTech@2024".
+                {{ $t('admin_change_pw_tip') }}
               </p>
             </div>
 
@@ -313,7 +317,7 @@ watch(
                 class="w-full justify-center"
                 icon="i-lucide-shield"
               >
-                Đổi mật khẩu
+                {{ $t('auth_reset_btn') }}
               </UButton>
             </div>
           </form>

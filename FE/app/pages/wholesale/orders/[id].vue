@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { customerService } from '~/services/customerService'
 import { getOrderStatusColor, getOrderStatusLabel } from '~/utils/orderStatus'
+import { t } from '~/utils/i18n'
 
 const route = useRoute()
 const { constants } = useMasterData()
 const orderId = route.params.id as string
 
-useSeoMeta({ title: `Chi tiết đơn hàng #${orderId} - BunTech` })
+useSeoMeta({ title: t('wholesale_order_detail_seo', { id: orderId }) })
 definePageMeta({ layout: 'default' })
 
 const { data: response, pending: loading } = useAsyncData(`wholesale-order-${orderId}`, () =>
@@ -16,8 +17,8 @@ const { data: response, pending: loading } = useAsyncData(`wholesale-order-${ord
 const order = computed(() => response.value?.data)
 
 const getPaymentStatusLabel = (status: string | null) => {
-  if (!status) return 'Chưa thanh toán'
-  return status === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'
+  if (!status) return t('wholesale_order_detail_unpaid')
+  return status === 'PAID' ? t('wholesale_order_detail_paid') : t('wholesale_order_detail_unpaid')
 }
 </script>
 
@@ -31,11 +32,11 @@ const getPaymentStatusLabel = (status: string | null) => {
           class="hover:text-primary-600 dark:hover:text-primary-400 mb-3 inline-flex items-center text-sm font-medium text-slate-500 dark:text-zinc-400"
         >
           <UIcon name="i-lucide-arrow-left" class="mr-1 h-4 w-4" />
-          Quay lại danh sách
+          {{ $t('public_product_btn_back') }}
         </NuxtLink>
         <div class="flex items-center gap-3">
           <h1 class="text-surface-foreground text-2xl font-bold tracking-tight sm:text-3xl">
-            Đơn hàng #{{ orderId }}
+            {{ $t('admin_order_detail_title', { id: orderId }) }}
           </h1>
           <UBadge
             v-if="order"
@@ -47,11 +48,13 @@ const getPaymentStatusLabel = (status: string | null) => {
           </UBadge>
         </div>
         <p v-if="order" class="mt-2 text-sm text-slate-500 dark:text-zinc-400">
-          Đặt lúc {{ formatDateTime(order.createdAt) }}
+          {{ $t('wholesale_order_detail_date', { date: formatDateTime(order.createdAt) }) }}
         </p>
       </div>
       <div v-if="order" class="flex gap-2">
-        <UButton color="neutral" variant="outline" icon="i-lucide-printer">In đơn</UButton>
+        <UButton color="neutral" variant="outline" icon="i-lucide-printer">{{
+          $t('wholesale_order_detail_btn_print')
+        }}</UButton>
       </div>
     </div>
 
@@ -68,16 +71,22 @@ const getPaymentStatusLabel = (status: string | null) => {
         <!-- Order Items -->
         <div class="card overflow-hidden p-0">
           <div class="border-surface-border border-b p-4">
-            <h2 class="text-surface-foreground font-semibold">Sản phẩm đã đặt</h2>
+            <h2 class="text-surface-foreground font-semibold">
+              {{ $t('wholesale_order_detail_items_title') }}
+            </h2>
           </div>
           <div class="p-0">
             <table class="w-full text-left text-sm">
               <thead class="bg-surface-muted text-surface-foreground">
                 <tr>
-                  <th class="p-4 font-medium">Sản phẩm</th>
-                  <th class="p-4 font-medium">Đơn giá</th>
-                  <th class="p-4 text-center font-medium">SL</th>
-                  <th class="p-4 text-right font-medium">Thành tiền</th>
+                  <th class="p-4 font-medium">{{ $t('nav_products') }}</th>
+                  <th class="p-4 font-medium">{{ $t('wholesale_order_detail_col_price') }}</th>
+                  <th class="p-4 text-center font-medium">
+                    {{ $t('wholesale_order_detail_col_qty') }}
+                  </th>
+                  <th class="p-4 text-right font-medium">
+                    {{ $t('wholesale_order_detail_col_total') }}
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-surface-border divide-y">
@@ -90,7 +99,9 @@ const getPaymentStatusLabel = (status: string | null) => {
                         size="md"
                         class="bg-surface-muted"
                       />
-                      <span class="font-medium">{{ item.product?.name || 'Sản phẩm' }}</span>
+                      <span class="font-medium">{{
+                        item.product?.name || $t('nav_products')
+                      }}</span>
                     </div>
                   </td>
                   <td class="p-4 tabular-nums">{{ formatVND(Number(item.unitPrice)) }}</td>
@@ -109,23 +120,23 @@ const getPaymentStatusLabel = (status: string | null) => {
             class="bg-surface-muted border-surface-border flex flex-col gap-2 border-t p-4 sm:items-end"
           >
             <div class="flex w-full justify-between sm:w-64">
-              <span class="text-slate-500">Tạm tính:</span>
+              <span class="text-slate-500">{{ $t('wholesale_order_detail_subtotal') }}</span>
               <span class="tabular-nums">{{ formatVND(Number(order.totalAmount)) }}</span>
             </div>
             <div class="flex w-full justify-between sm:w-64">
-              <span class="text-slate-500">Phí giao hàng:</span>
+              <span class="text-slate-500">{{ $t('wholesale_order_detail_shipping') }}</span>
               <span class="tabular-nums">{{ formatVND(0) }}</span>
             </div>
             <div
               class="mt-2 flex w-full justify-between border-t border-slate-200 pt-2 sm:w-64 dark:border-zinc-700"
             >
-              <span class="font-semibold">Tổng tiền:</span>
+              <span class="font-semibold">{{ $t('wholesale_order_detail_total') }}</span>
               <span class="text-primary-600 dark:text-primary-400 text-lg font-bold tabular-nums">
                 {{ formatVND(Number(order.totalAmount)) }}
               </span>
             </div>
             <div class="flex w-full justify-between sm:w-64">
-              <span class="text-slate-500">Đã thanh toán:</span>
+              <span class="text-slate-500">{{ $t('wholesale_order_detail_paid_amount') }}</span>
               <span class="text-success-600 tabular-nums">{{
                 formatVND(Number(order.amountCollected || 0))
               }}</span>
@@ -138,7 +149,9 @@ const getPaymentStatusLabel = (status: string | null) => {
       <div class="space-y-6">
         <!-- Delivery Info -->
         <div class="card p-5">
-          <h2 class="text-surface-foreground mb-4 font-semibold">Thông tin nhận hàng</h2>
+          <h2 class="text-surface-foreground mb-4 font-semibold">
+            {{ $t('wholesale_order_detail_info_title') }}
+          </h2>
           <div v-if="order.shippingAddress" class="space-y-3 text-sm">
             <div class="flex gap-2">
               <UIcon name="i-lucide-map-pin" class="text-primary-500 mt-0.5 h-4 w-4 shrink-0" />
@@ -151,24 +164,30 @@ const getPaymentStatusLabel = (status: string | null) => {
             <div class="flex gap-2">
               <UIcon name="i-lucide-phone" class="text-primary-500 mt-0.5 h-4 w-4 shrink-0" />
               <p class="text-slate-600 dark:text-zinc-300">
-                {{ order.user?.phoneNumber || 'Chưa có SĐT' }}
+                {{ order.user?.phoneNumber || $t('wholesale_no_phone') }}
               </p>
             </div>
           </div>
-          <div v-else class="text-sm text-slate-500 italic">Không có thông tin địa chỉ</div>
+          <div v-else class="text-sm text-slate-500 italic">
+            {{ $t('wholesale_order_detail_no_address') }}
+          </div>
 
           <div
             v-if="order.note"
             class="bg-warning-50 dark:bg-warning-900/20 mt-4 rounded-lg p-3 text-sm"
           >
-            <p class="text-warning-800 dark:text-warning-300 font-medium">Ghi chú:</p>
+            <p class="text-warning-800 dark:text-warning-300 font-medium">
+              {{ $t('wholesale_order_detail_note') }}
+            </p>
             <p class="text-warning-700 dark:text-warning-400 mt-1">{{ order.note }}</p>
           </div>
         </div>
 
         <!-- Payment Info -->
         <div class="card p-5">
-          <h2 class="text-surface-foreground mb-4 font-semibold">Trạng thái thanh toán</h2>
+          <h2 class="text-surface-foreground mb-4 font-semibold">
+            {{ $t('wholesale_order_detail_payment_title') }}
+          </h2>
           <div class="flex items-center gap-3">
             <div
               class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
@@ -188,8 +207,8 @@ const getPaymentStatusLabel = (status: string | null) => {
               <p class="text-xs text-slate-500">
                 {{
                   order.paymentStatus === 'PAID'
-                    ? 'Hoàn tất thanh toán'
-                    : 'Sẽ thanh toán khi nhận hàng hoặc chốt công nợ'
+                    ? $t('wholesale_order_detail_payment_done')
+                    : $t('wholesale_order_detail_payment_pending')
                 }}
               </p>
             </div>
@@ -198,7 +217,9 @@ const getPaymentStatusLabel = (status: string | null) => {
 
         <!-- Driver Info -->
         <div v-if="order.driver" class="card p-5">
-          <h2 class="text-surface-foreground mb-4 font-semibold">Tài xế giao hàng</h2>
+          <h2 class="text-surface-foreground mb-4 font-semibold">
+            {{ $t('auth_login_title_driver') }}
+          </h2>
           <div class="flex items-center gap-3">
             <UAvatar :alt="order.driver.fullName" size="md" />
             <div>
@@ -215,9 +236,11 @@ const getPaymentStatusLabel = (status: string | null) => {
       <div class="bg-error-50 dark:bg-error-900/20 mb-4 rounded-full p-4">
         <UIcon name="i-lucide-package-x" class="text-error-500 h-8 w-8" />
       </div>
-      <h2 class="text-lg font-semibold">Không tìm thấy đơn hàng</h2>
-      <p class="mt-2 mb-6 text-slate-500">Đơn hàng không tồn tại hoặc bạn không có quyền xem.</p>
-      <UButton to="/wholesale/orders" icon="i-lucide-arrow-left">Quay lại danh sách</UButton>
+      <h2 class="text-lg font-semibold">{{ $t('admin_order_list_empty_title') }}</h2>
+      <p class="mt-2 mb-6 text-slate-500">{{ $t('wholesale_order_detail_err_desc') }}</p>
+      <UButton to="/wholesale/orders" icon="i-lucide-arrow-left">{{
+        $t('public_product_btn_back')
+      }}</UButton>
     </div>
   </div>
 </template>

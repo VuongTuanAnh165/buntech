@@ -9,6 +9,7 @@ import OrderListTable from '~/components/features/admin/orders/OrderListTable.vu
 import OrderKpiCards from '~/components/features/admin/orders/OrderKpiCards.vue'
 import OrderBatchAssignModal from '~/components/features/admin/orders/OrderBatchAssignModal.vue'
 import { useAdminSSE } from '~/composables/admin/useSSE'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 const toast = useToast()
@@ -16,7 +17,7 @@ const { fetchOrders, batchAssignDriver, exportOrders } = useAdminOrders()
 const { fetchUsers } = useUsers()
 const { connect } = useAdminSSE()
 
-useSeoMeta({ title: 'Đơn hàng - BunTech Admin' })
+useSeoMeta({ title: t('admin_orders_seo_title') })
 definePageMeta({ layout: 'admin' })
 
 // State
@@ -70,8 +71,8 @@ onMounted(async () => {
   connect({
     onOrderDelivered: (orderData: { id: number }) => {
       toast.add({
-        title: 'Đơn hàng đã được giao!',
-        description: `Tài xế vừa chốt thành công đơn hàng #${orderData.id}`,
+        title: t('admin_orders_toast_deliv_title'),
+        description: t('admin_orders_toast_deliv_desc', { id: orderData.id }),
         color: 'success',
         icon: 'i-lucide-check-circle'
       })
@@ -84,15 +85,27 @@ const statusPills = computed(() => {
   // Vì đã chuyển sang SSR Pagination, chúng ta chỉ đếm trên trang hiện tại hoặc ẩn số đếm đi.
   // Để giữ UI mượt, hiển thị count = 0 nếu không có data.
   return [
-    { key: 'ALL' as const, label: 'Tất cả' },
-    { key: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string, label: 'Chờ xử lý' },
+    { key: 'ALL' as const, label: t('admin_debt_type_all') },
+    {
+      key: constants.value?.[ConstantKey.OrderStatus]?.PENDING as string,
+      label: t('status_order_pending')
+    },
     {
       key: constants.value?.[ConstantKey.OrderStatus]?.PROCESSING as string,
-      label: 'Đang chuẩn bị'
+      label: t('order_status_processing')
     },
-    { key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERING as string, label: 'Đang giao' },
-    { key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string, label: 'Đã giao' },
-    { key: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string, label: 'Đã hủy' }
+    {
+      key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERING as string,
+      label: t('status_order_delivering')
+    },
+    {
+      key: constants.value?.[ConstantKey.OrderStatus]?.DELIVERED as string,
+      label: t('status_order_delivered')
+    },
+    {
+      key: constants.value?.[ConstantKey.OrderStatus]?.CANCELLED as string,
+      label: t('status_order_cancelled')
+    }
   ]
 })
 
@@ -139,11 +152,11 @@ async function exportCSV(overrideParams?: Record<string, unknown>) {
     // ApiClient.download automatically handles blob generation and downloading
     await exportOrders(params)
 
-    toast.add({ title: 'Xuất Excel thành công', color: 'success' })
+    toast.add({ title: t('admin_orders_export_success'), color: 'success' })
   } catch (error: unknown) {
     toast.add({
-      title: 'Lỗi khi xuất file',
-      description: (error as Error)?.message || 'Có lỗi xảy ra',
+      title: t('admin_orders_export_err_title'),
+      description: (error as Error)?.message || t('error_occurred'),
       color: 'error'
     })
   } finally {
@@ -154,14 +167,14 @@ async function exportCSV(overrideParams?: Record<string, unknown>) {
 const exportOptions = [
   [
     {
-      label: 'Danh sách hiện tại',
+      label: t('admin_orders_export_opt_current'),
       icon: 'i-lucide-list-filter',
       onSelect: () => exportCSV()
     }
   ],
   [
     {
-      label: 'Báo cáo hôm nay',
+      label: t('admin_orders_export_opt_today'),
       icon: 'i-lucide-calendar-1',
       onSelect: () => {
         const today = dayjs().format('YYYY-MM-DD')
@@ -188,14 +201,14 @@ const activeFilterCount = computed(() => {
 </script>
 <template>
   <div>
-    <BasePageHeader title="Đơn hàng" description="Quản lý đơn hàng, điều phối tài xế và doanh thu">
+    <BasePageHeader :title="$t('nav_orders')" :description="$t('admin_orders_desc')">
       <template #actions>
         <UButton
           class="relative lg:hidden"
           variant="outline"
           color="neutral"
           icon="i-lucide-filter"
-          aria-label="Lọc"
+          :aria-label="$t('admin_orders_btn_filter')"
           @click="
             () => {
               showFilters = !showFilters
@@ -216,7 +229,7 @@ const activeFilterCount = computed(() => {
             class="hidden sm:inline-flex"
             icon="i-lucide-download"
           >
-            <span class="hidden md:inline">Xuất Excel</span>
+            <span class="hidden md:inline">{{ $t('admin_orders_btn_export') }}</span>
           </UButton>
         </UDropdownMenu>
         <UButton
@@ -231,10 +244,10 @@ const activeFilterCount = computed(() => {
             }
           "
         >
-          Điều phối ({{ selectedOrders.size }})
+          {{ $t('admin_orders_btn_assign', { count: selectedOrders.size }) }}
         </UButton>
         <UButton to="/admin/orders/create" icon="i-lucide-plus">
-          <span class="hidden sm:inline">Tạo đơn</span>
+          <span class="hidden sm:inline">{{ $t('admin_orders_btn_create') }}</span>
         </UButton>
       </template>
     </BasePageHeader>
@@ -273,13 +286,25 @@ const activeFilterCount = computed(() => {
         <div class="min-w-0 flex-1 pl-1">
           <BaseSearchInput
             v-model="search"
-            placeholder="Tìm theo mã đơn, khách hàng, địa chỉ..."
+            :placeholder="$t('admin_orders_search_ph')"
             class="w-full"
           />
         </div>
         <div class="bg-surface-border h-6 w-px" />
-        <UInput v-model="startDate" type="date" size="sm" class="w-36" placeholder="Từ ngày" />
-        <UInput v-model="endDate" type="date" size="sm" class="w-36" placeholder="Đến ngày" />
+        <UInput
+          v-model="startDate"
+          type="date"
+          size="sm"
+          class="w-36"
+          :placeholder="$t('admin_orders_date_from')"
+        />
+        <UInput
+          v-model="endDate"
+          type="date"
+          size="sm"
+          class="w-36"
+          :placeholder="$t('admin_orders_date_to')"
+        />
         <UButton
           v-if="activeFilterCount > 0"
           variant="ghost"
@@ -287,18 +312,22 @@ const activeFilterCount = computed(() => {
           size="sm"
           icon="i-lucide-x"
           @click="clearFilters"
-          >Xóa lọc</UButton
+          >{{ $t('public_blog_btn_clear') }}</UButton
         >
       </div>
       <!-- Mobile search -->
       <div class="mb-4 lg:hidden">
-        <BaseSearchInput v-model="search" placeholder="Tìm đơn hàng..." class="w-full" />
+        <BaseSearchInput
+          v-model="search"
+          :placeholder="$t('admin_orders_search_ph_mobile')"
+          class="w-full"
+        />
       </div>
       <!-- Mobile filter slideover -->
-      <USlideover v-model:open="showFilters" side="bottom" title="Bộ lọc">
+      <USlideover v-model:open="showFilters" side="bottom" :title="$t('admin_orders_filter_title')">
         <template #body>
           <div class="space-y-4">
-            <UFormField label="Trạng thái">
+            <UFormField :label="$t('status')">
               <div class="flex flex-wrap gap-2">
                 <UButton
                   v-for="pill in statusPills"
@@ -316,7 +345,7 @@ const activeFilterCount = computed(() => {
                 </UButton>
               </div>
             </UFormField>
-            <UFormField label="Khoảng thời gian">
+            <UFormField :label="$t('admin_orders_filter_date')">
               <div class="grid grid-cols-2 gap-3">
                 <UInput v-model="startDate" type="date" />
                 <UInput v-model="endDate" type="date" />
@@ -331,7 +360,7 @@ const activeFilterCount = computed(() => {
               color="error"
               class="flex-1 justify-center"
               @click="clearFilters"
-              >Xóa lọc</UButton
+              >{{ $t('public_blog_btn_clear') }}</UButton
             >
             <UButton
               color="primary"
@@ -341,7 +370,7 @@ const activeFilterCount = computed(() => {
                   showFilters = false
                 }
               "
-              >Áp dụng</UButton
+              >{{ $t('admin_orders_btn_apply') }}</UButton
             >
           </div>
         </template>
@@ -354,14 +383,14 @@ const activeFilterCount = computed(() => {
         >
           <div class="flex items-center gap-2">
             <div class="i-lucide-check-circle-2 text-primary-600 dark:text-primary-400 h-5 w-5" />
-            <span class="text-primary-700 dark:text-primary-300 text-sm font-medium"
-              >Đã chọn {{ selectedOrders.size }} đơn</span
-            >
+            <span class="text-primary-700 dark:text-primary-300 text-sm font-medium">{{
+              $t('admin_orders_selected_count', { count: selectedOrders.size })
+            }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <UButton variant="ghost" color="neutral" size="sm" @click="clearSelection"
-              >Bỏ chọn</UButton
-            >
+            <UButton variant="ghost" color="neutral" size="sm" @click="clearSelection">{{
+              $t('admin_orders_btn_deselect')
+            }}</UButton>
             <UButton
               size="sm"
               icon="i-lucide-truck"
@@ -371,7 +400,7 @@ const activeFilterCount = computed(() => {
                 }
               "
             >
-              Điều phối
+              {{ $t('admin_orders_btn_assign', { count: '' }).replace('()', '').trim() }}
             </UButton>
           </div>
         </div>
@@ -393,7 +422,9 @@ const activeFilterCount = computed(() => {
               {{ total }}
             </span>
             <USelectMenu v-model="limit" :items="[10, 20, 50]" class="w-32">
-              <template #default>{{ limit }} / trang</template>
+              <template #default>{{
+                $t('admin_customers_pagination_per_page', { limit })
+              }}</template>
             </USelectMenu>
           </div>
           <UPagination v-model:page="page" :total="total" :items-per-page="limit" :max="5" />

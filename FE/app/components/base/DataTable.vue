@@ -21,8 +21,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   loadingLines: 5,
-  emptyTitle: 'Không có dữ liệu',
-  emptyDescription: 'Chưa có dữ liệu nào được tìm thấy.',
+  emptyTitle: undefined,
+  emptyDescription: undefined,
   emptyIcon: 'i-lucide-inbox'
 })
 
@@ -79,8 +79,8 @@ const mappedColumns = computed(() => {
         <template #empty>
           <BaseEmptyState
             :icon="props.emptyIcon"
-            :title="props.emptyTitle"
-            :description="props.emptyDescription"
+            :title="props.emptyTitle || $t('not_found')"
+            :description="props.emptyDescription || $t('empty_description')"
           >
             <template #action>
               <slot name="empty-action" />

@@ -5,30 +5,33 @@
   Reason: Extracted to keep admin/profile.vue under 400 lines limit.
 -->
 <script setup lang="ts">
-const accountAgeLabel = 'Từ lâu'
+import type { UserProfileDTO } from '~/utils/types'
+import { t } from '~/utils/i18n'
+defineProps<{ user: UserProfileDTO }>()
+const accountAgeLabel = t('admin_profile_stat_hint')
 
 // Stats
 const stats = computed(() => [
   {
-    label: 'Tổng thao tác',
+    label: t('admin_profile_stat_actions'),
     value: '1.248',
     icon: 'i-lucide-zap',
     color: 'primary' as const,
-    hint: 'Trong 30 ngày qua'
+    hint: t('wholesale_kpi_orders_30days')
   },
   {
-    label: 'Đăng nhập gần nhất',
-    value: '2 giờ trước',
+    label: t('admin_profile_stat_login'),
+    value: t('admin_profile_session_2_status'),
     icon: 'i-lucide-log-in',
     color: 'success' as const,
     hint: formatDateTime(new Date(Date.now() - 2 * 3600000).toISOString())
   },
   {
-    label: 'Tuổi tài khoản',
+    label: t('admin_profile_stat_age'),
     value: accountAgeLabel,
     icon: 'i-lucide-calendar-days',
     color: 'accent' as const,
-    hint: `Từ lâu`
+    hint: t('admin_profile_stat_hint')
   }
 ])
 const colorMap = {

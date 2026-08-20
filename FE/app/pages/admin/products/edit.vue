@@ -3,16 +3,19 @@ import { z } from 'zod'
 import { productService } from '~/services/productService'
 import { slugify } from '~/utils/string'
 import type { ProductImage, ProductCategory } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Sản phẩm - BunTech Admin' })
+useSeoMeta({ title: t('admin_product_edit_seo_title') })
 
 const route = useRoute()
 const toast = useToast()
 
 const isEditing = computed(() => !!route.query.id)
 const productId = computed(() => Number(route.query.id))
-const pageTitle = computed(() => (isEditing.value ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'))
+const pageTitle = computed(() =>
+  isEditing.value ? t('admin_prod_form_edit_title') : t('admin_prod_form_add_title')
+)
 
 // ─── Data fetching ─────────────────────────────────────────
 const { data: catData } = useAsyncData('admin-product-categories', () =>
@@ -29,17 +32,23 @@ const formState = reactive({
   name: '',
   categoryId: '' as string | number,
   basePrice: 0,
-  unit: 'phần',
+  unit: t('admin_prod_default_unit'),
   shortDescription: '',
   content: '',
   isActive: true
 })
 
 const schema = z.object({
-  name: z.string().min(1, 'Vui lòng nhập tên sản phẩm').max(191, 'Tối đa 191 ký tự'),
-  categoryId: z.number().min(1, 'Danh mục không hợp lệ'),
-  basePrice: z.number().min(0, 'Giá không hợp lệ'),
-  unit: z.string().min(1, 'Vui lòng nhập đơn vị tính').max(20, 'Tối đa 20 ký tự'),
+  name: z
+    .string()
+    .min(1, t('admin_prod_form_name_req'))
+    .max(191, t('admin_product_edit_form_name_max')),
+  categoryId: z.number().min(1, t('admin_blog_edit_form_cat_invalid')),
+  basePrice: z.number().min(0, t('admin_prod_form_price_invalid')),
+  unit: z
+    .string()
+    .min(1, t('admin_product_edit_form_unit_req'))
+    .max(20, t('admin_product_edit_form_unit_max')),
   shortDescription: z.string().optional().or(z.literal('')),
   content: z.string().optional().or(z.literal('')),
   isActive: z.boolean()
@@ -69,7 +78,7 @@ onMounted(async () => {
         formState.name = res.data.name
         formState.categoryId = res.data.categoryId || ''
         formState.basePrice = res.data.basePrice
-        formState.unit = res.data.unit || 'phần'
+        formState.unit = res.data.unit || t('admin_prod_default_unit')
         formState.shortDescription = res.data.shortDescription || ''
         formState.content = res.data.content || ''
         formState.isActive = res.data.isActive ?? true
@@ -82,7 +91,7 @@ onMounted(async () => {
         }
       }
     } catch {
-      toast.add({ title: 'Lỗi tải sản phẩm', color: 'error' })
+      toast.add({ title: t('admin_product_edit_load_err'), color: 'error' })
       navigateTo('/admin/products')
     }
   }
@@ -99,7 +108,7 @@ function handleThumbnailChange(event: Event) {
   if (!file) return
 
   if (file.size > 2 * 1024 * 1024) {
-    toast.add({ title: 'Ảnh không được vượt quá 2MB', color: 'warning' })
+    toast.add({ title: t('admin_categories_file_size_err'), color: 'warning' })
     return
   }
   selectedThumbnail.value = file
@@ -136,7 +145,7 @@ async function handleSave() {
   }
 
   if (!validate(dataToValidate)) {
-    toast.add({ title: 'Vui lòng kiểm tra lại thông tin', color: 'warning' })
+    toast.add({ title: t('admin_blog_edit_form_invalid'), color: 'warning' })
     return
   }
 
@@ -198,17 +207,20 @@ async function handleSave() {
   <div class="mx-auto max-w-5xl">
     <BasePageHeader
       :title="pageTitle"
-      description="Quản lý thông tin, giá bán và hình ảnh của sản phẩm"
+      :description="$t('admin_product_edit_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Sản phẩm', to: '/admin/products' },
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('nav_products'), to: '/admin/products' },
         { label: pageTitle }
       ]"
     >
       <template #actions>
-        <UButton variant="outline" color="neutral" to="/admin/products"> Hủy </UButton>
+        <UButton variant="outline" color="neutral" to="/admin/products">
+          {{ $t('common_cancel') }}
+        </UButton>
         <UButton type="button" :loading="submitting" @click="handleSave">
-          <UIcon name="i-lucide-save" class="mr-1 h-4 w-4" /> Lưu Sản Phẩm
+          <UIcon name="i-lucide-save" class="mr-1 h-4 w-4" />
+          {{ $t('admin_product_edit_btn_save') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -221,32 +233,56 @@ async function handleSave() {
       <!-- Main Content Area -->
       <div class="space-y-6 lg:col-span-2">
         <div class="card p-6">
-          <h2 class="text-surface-foreground mb-4 text-lg font-semibold">Thông tin cơ bản</h2>
+          <h2 class="text-surface-foreground mb-4 text-lg font-semibold">
+            {{ $t('admin_product_edit_basic_info') }}
+          </h2>
 
           <div class="space-y-4">
-            <UFormField label="Tên sản phẩm" :error="formErrors.name" required>
-              <UInput v-model="formState.name" placeholder="Nhập tên sản phẩm..." size="lg" />
+            <UFormField :label="$t('admin_prod_form_name')" :error="formErrors.name" required>
+              <UInput
+                v-model="formState.name"
+                :placeholder="$t('admin_product_edit_form_name_placeholder')"
+                size="lg"
+              />
             </UFormField>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <UFormField label="Giá bán (VND)" :error="formErrors.basePrice" required>
-                <UInput v-model="formState.basePrice" type="number" placeholder="VD: 50000" />
+              <UFormField
+                :label="$t('admin_product_edit_form_price')"
+                :error="formErrors.basePrice"
+                required
+              >
+                <UInput
+                  v-model="formState.basePrice"
+                  type="number"
+                  :placeholder="$t('admin_product_edit_form_price_placeholder')"
+                />
               </UFormField>
 
-              <UFormField label="Đơn vị tính" :error="formErrors.unit" required>
-                <UInput v-model="formState.unit" placeholder="VD: kg, phần, gói..." />
+              <UFormField
+                :label="$t('admin_product_edit_form_unit')"
+                :error="formErrors.unit"
+                required
+              >
+                <UInput
+                  v-model="formState.unit"
+                  :placeholder="$t('admin_product_edit_form_unit_placeholder')"
+                />
               </UFormField>
             </div>
 
-            <UFormField label="Mô tả ngắn" :error="formErrors.shortDescription">
+            <UFormField
+              :label="$t('admin_blog_edit_form_excerpt')"
+              :error="formErrors.shortDescription"
+            >
               <UTextarea
                 v-model="formState.shortDescription"
-                placeholder="Đoạn mô tả ngắn gọn về sản phẩm..."
+                :placeholder="$t('admin_product_edit_form_short_desc_placeholder')"
                 :rows="3"
               />
             </UFormField>
 
-            <UFormField label="Mô tả chi tiết" :error="formErrors.content">
+            <UFormField :label="$t('admin_product_edit_form_detail')" :error="formErrors.content">
               <BaseRichTextEditor v-model="formState.content" />
             </UFormField>
           </div>
@@ -264,15 +300,15 @@ async function handleSave() {
       <!-- Sidebar -->
       <div class="space-y-6">
         <div class="card p-6">
-          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">Trạng thái</h2>
+          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">{{ $t('status') }}</h2>
 
           <div class="space-y-4">
             <UFormField :error="formErrors.isActive">
               <USelectMenu
                 v-model="formState.isActive"
                 :items="[
-                  { label: 'Đang bán (Hiển thị)', value: true },
-                  { label: 'Ngừng bán', value: false }
+                  { label: $t('admin_product_edit_status_active'), value: true },
+                  { label: $t('status_product_inactive'), value: false }
                 ]"
                 value-key="value"
                 label-key="label"
@@ -283,15 +319,17 @@ async function handleSave() {
         </div>
 
         <div class="card p-6">
-          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">Phân loại</h2>
+          <h2 class="text-surface-foreground mb-4 text-sm font-semibold">
+            {{ $t('admin_product_edit_form_cat') }}
+          </h2>
 
           <div class="space-y-4">
-            <UFormField label="Danh mục" :error="formErrors.categoryId" required>
+            <UFormField :label="$t('nav_categories')" :error="formErrors.categoryId" required>
               <USelectMenu
                 v-model="formState.categoryId as any"
                 :items="categoryOptions"
                 value-key="value"
-                placeholder="Chọn danh mục..."
+                :placeholder="$t('admin_prod_form_cat_ph')"
                 class="w-full"
               />
             </UFormField>
@@ -300,7 +338,7 @@ async function handleSave() {
 
         <div class="card p-6">
           <h2 class="text-surface-foreground mb-4 text-sm font-semibold">
-            Ảnh đại diện (Thumbnail)
+            {{ $t('admin_categories_form_thumb') }}
           </h2>
 
           <input
@@ -317,8 +355,10 @@ async function handleSave() {
             @click="triggerThumbnailSelect"
           >
             <UIcon name="i-lucide-image-plus" class="mb-2 h-8 w-8 text-slate-400" />
-            <p class="text-surface-foreground text-center text-sm font-medium">Click để chọn ảnh</p>
-            <p class="mt-1 text-xs text-slate-500">JPG, PNG, WebP (Max 2MB)</p>
+            <p class="text-surface-foreground text-center text-sm font-medium">
+              {{ $t('admin_blog_edit_file_click') }}
+            </p>
+            <p class="mt-1 text-xs text-slate-500">{{ $t('admin_categories_file_hint') }}</p>
           </div>
 
           <div
@@ -330,13 +370,14 @@ async function handleSave() {
               class="absolute inset-0 flex items-center justify-center gap-2 bg-slate-900/60 opacity-0 transition-opacity group-hover:opacity-100"
             >
               <UButton color="neutral" variant="solid" size="sm" @click="triggerThumbnailSelect">
-                Đổi ảnh
+                {{ $t('admin_categories_btn_change_img') }}
               </UButton>
               <UButton
                 color="error"
                 variant="solid"
                 size="sm"
                 icon="i-lucide-trash-2"
+                :aria-label="$t('aria_del_img')"
                 @click="clearThumbnail"
               />
             </div>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { transactionService } from '~/services/transactionService'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Tài chính - BunTech Admin' })
+useSeoMeta({ title: t('admin_debt_seo_title') })
 const toast = useToast()
 
 // ─── State ────────────────────────────────────────────────
@@ -46,28 +47,28 @@ const debtRemaining = computed(() => totalDebt.value)
 
 const kpiStats = computed(() => [
   {
-    title: 'Tổng doanh thu',
+    title: t('admin_debt_kpi_total_revenue'),
     value: formatVND(totalRevenue.value),
     icon: 'i-lucide-wallet',
     color: 'primary' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Tổng công nợ',
+    title: t('admin_debt_kpi_total_debt'),
     value: formatVND(totalDebt.value),
     icon: 'i-lucide-credit-card',
     color: 'error' as const,
     trend: { value: 0, isPositive: false }
   },
   {
-    title: 'Đã thu hồi',
+    title: t('admin_debt_kpi_collected'),
     value: formatVND(totalCollected.value),
     icon: 'i-lucide-trending-up',
     color: 'success' as const,
     trend: { value: 0, isPositive: true }
   },
   {
-    title: 'Công nợ còn lại',
+    title: t('admin_debt_kpi_remaining'),
     value: formatVND(debtRemaining.value),
     icon: 'i-lucide-alert-circle',
     color: 'warning' as const,
@@ -89,7 +90,15 @@ const topDebtors = computed(() => {
 
 // ─── Cashflow chart data (7 days) ─────────────────────────
 const cashflowData = computed(() => {
-  const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+  const days = [
+    t('admin_debt_chart_day_sun'),
+    t('admin_debt_chart_day_mon'),
+    t('admin_debt_chart_day_tue'),
+    t('admin_debt_chart_day_wed'),
+    t('admin_debt_chart_day_thu'),
+    t('admin_debt_chart_day_fri'),
+    t('admin_debt_chart_day_sat')
+  ]
   const deterministicData = [
     { income: 4200000, expense: 2100000 },
     { income: 3800000, expense: 1500000 },
@@ -108,37 +117,41 @@ const cashflowData = computed(() => {
 // ─── Filter & Pagination ─────────────────────────────────
 const typePills = computed(() => {
   return [
-    { accessorKey: 'ALL', header: 'Tất cả', icon: 'i-lucide-list' },
+    { accessorKey: 'ALL', header: t('admin_debt_type_all'), icon: 'i-lucide-list' },
     {
       accessorKey: 'payment',
-      header: 'Thanh toán',
+      header: t('wholesale_qa_payment'),
       icon: 'i-lucide-banknote'
     },
-    { accessorKey: 'order_payment', header: 'Thanh toán đơn', icon: 'i-lucide-shopping-cart' },
+    {
+      accessorKey: 'order_payment',
+      header: t('admin_debt_type_order_payment'),
+      icon: 'i-lucide-shopping-cart'
+    },
     {
       accessorKey: 'order_charge',
-      header: 'Ghi nợ đơn',
+      header: t('admin_debt_type_order_charge'),
       icon: 'i-lucide-arrow-down-left'
     },
     {
       accessorKey: 'debt_record',
-      header: 'Ghi nhận nợ',
+      header: t('admin_debt_type_debt_record'),
       icon: 'i-lucide-arrow-down-left'
     },
     {
       accessorKey: 'debt_payment',
-      header: 'Trả nợ',
+      header: t('admin_debt_type_debt_payment'),
       icon: 'i-lucide-arrow-up-right'
     }
   ]
 })
 
 const transactionTypeLabel: Record<string, string> = {
-  payment: 'Thanh toán',
-  order_payment: 'Thanh toán đơn',
-  order_charge: 'Ghi nợ đơn',
-  debt_record: 'Ghi nhận nợ',
-  debt_payment: 'Trả nợ'
+  payment: t('wholesale_qa_payment'),
+  order_payment: t('admin_debt_type_order_payment'),
+  order_charge: t('admin_debt_type_order_charge'),
+  debt_record: t('admin_debt_type_debt_record'),
+  debt_payment: t('admin_debt_type_debt_payment')
 }
 
 const transactionTypeColor: Record<string, 'success' | 'error' | 'warning' | 'info'> = {
@@ -153,35 +166,39 @@ const filteredTransactions = computed(() => txData.value?.data || [])
 
 const totalItems = computed(() => txData.value?.meta.total || 0)
 
-const columns = [
-  { accessorKey: 'user', header: 'Khách hàng' },
-  { accessorKey: 'type', header: 'Loại giao dịch' },
-  { accessorKey: 'amount', header: 'Số tiền' },
-  { accessorKey: 'referenceCode', header: 'Mã tham chiếu' },
-  { accessorKey: 'createdAt', header: 'Ngày' }
-]
+const columns = computed(() => [
+  { accessorKey: 'user', header: t('common_customer') },
+  { accessorKey: 'type', header: t('admin_debt_col_type') },
+  { accessorKey: 'amount', header: t('admin_debt_col_amount') },
+  { accessorKey: 'referenceCode', header: t('admin_debt_col_ref') },
+  { accessorKey: 'createdAt', header: t('admin_debt_col_date') }
+])
 
 // ─── Quick actions ────────────────────────────────────────
-const quickActions = [
+const quickActions = computed(() => [
   {
     icon: 'i-lucide-wallet',
-    label: 'Thu tiền nợ',
-    description: 'Ghi nhận khách trả nợ',
+    label: t('admin_debt_action_pay_label'),
+    description: t('admin_debt_pay_desc'),
     to: '/admin/debt/pay'
   },
-  { icon: 'i-lucide-download', label: 'Xuất CSV', description: 'Tải danh sách giao dịch' },
+  {
+    icon: 'i-lucide-download',
+    label: t('admin_debt_action_export_label'),
+    description: t('admin_debt_action_export_desc')
+  },
   {
     icon: 'i-lucide-file-bar-chart',
-    label: 'Báo cáo tài chính',
-    description: 'Xem báo cáo chi tiết'
+    label: t('admin_debt_action_report_label'),
+    description: t('admin_debt_action_report_desc')
   }
-]
+])
 
-function handleQuickAction(action: (typeof quickActions)[0]) {
+function handleQuickAction(action: { label: string; to?: string }) {
   if (action.to) {
     navigateTo(action.to)
   } else {
-    toast.add({ title: action.label, description: 'Tính năng đang phát triển', color: 'info' })
+    toast.add({ title: action.label, description: t('admin_debt_action_dev'), color: 'info' })
   }
 }
 
@@ -193,16 +210,16 @@ function setFilter(filterKey: string) {
 <template>
   <div>
     <BasePageHeader
-      title="Tài chính"
-      description="Tổng quan dòng tiền và công nợ khách hàng"
+      :title="$t('admin_debt_title')"
+      :description="$t('admin_debt_desc')"
       :breadcrumbs="[
-        { label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' },
-        { label: 'Tài chính' }
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('admin_debt_title') }
       ]"
     >
       <template #actions>
         <UButton to="/admin/debt/pay">
-          <UIcon name="i-lucide-wallet" class="mr-1 h-4 w-4" /> Thanh toán nợ
+          <UIcon name="i-lucide-wallet" class="mr-1 h-4 w-4" /> {{ $t('admin_debt_btn_pay') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -221,14 +238,18 @@ function setFilter(filterKey: string) {
           <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <UIcon name="i-lucide-bar-chart-3" class="text-primary-500 h-5 w-5" />
-              <h3 class="text-surface-foreground text-sm font-semibold">Dòng tiền 7 ngày</h3>
+              <h3 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('admin_debt_chart_title') }}
+              </h3>
             </div>
             <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-zinc-400">
               <span class="flex items-center gap-1"
-                ><span class="bg-success-500 h-2 w-2 rounded-full" /> Thu</span
+                ><span class="bg-success-500 h-2 w-2 rounded-full" />
+                {{ $t('admin_debt_chart_income') }}</span
               >
               <span class="flex items-center gap-1"
-                ><span class="bg-error-500 h-2 w-2 rounded-full" /> Chi</span
+                ><span class="bg-error-500 h-2 w-2 rounded-full" />
+                {{ $t('admin_debt_chart_expense') }}</span
               >
             </div>
           </div>
@@ -265,13 +286,15 @@ function setFilter(filterKey: string) {
           <div class="mb-4 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <UIcon name="i-lucide-alert-triangle" class="text-error-500 h-4 w-4" />
-              <h3 class="text-surface-foreground text-sm font-semibold">Nợ nhiều nhất</h3>
+              <h3 class="text-surface-foreground text-sm font-semibold">
+                {{ $t('admin_debt_top_title') }}
+              </h3>
             </div>
             <NuxtLink
               to="/admin/customers"
               class="text-primary-500 hover:text-primary-600 text-xs transition-colors"
             >
-              Tất cả →
+              {{ $t('admin_debt_top_all') }}
             </NuxtLink>
           </div>
           <div class="space-y-3.5">
@@ -363,10 +386,7 @@ function setFilter(filterKey: string) {
       <!-- Search -->
       <div class="animate-fade-in-up mb-4 flex items-center gap-3" style="animation-delay: 540ms">
         <div class="max-w-md flex-1">
-          <BaseSearchInput
-            v-model="search"
-            placeholder="Tìm giao dịch theo mã hoặc khách hàng..."
-          />
+          <BaseSearchInput v-model="search" :placeholder="$t('admin_debt_search_ph')" />
         </div>
       </div>
       <!-- Table -->
@@ -382,13 +402,13 @@ function setFilter(filterKey: string) {
           <template #user-cell="{ row }">
             <div class="flex items-center gap-2">
               <UAvatar
-                :alt="row.user?.full_name || 'Khách'"
+                :alt="row.user?.full_name || $t('public_product_guest')"
                 :src="row.user?.profile?.avatar_url || row.user?.avatar_url || undefined"
                 size="sm"
               />
               <div>
                 <p class="text-surface-foreground text-sm font-medium">
-                  {{ row.user?.full_name || 'Khách' }}
+                  {{ row.user?.full_name || $t('public_product_guest') }}
                 </p>
                 <p class="text-xs text-slate-400 dark:text-zinc-500">
                   {{ row.user?.phone_number || '' }}
@@ -450,7 +470,7 @@ function setFilter(filterKey: string) {
                   {{ totalItems }}
                 </span>
                 <USelectMenu v-model="perPage" :items="[10, 20, 50]" class="w-32">
-                  <template #default>{{ perPage }} / trang</template>
+                  <template #default>{{ $t('admin_debt_pagination', { perPage }) }}</template>
                 </USelectMenu>
               </div>
               <UPagination

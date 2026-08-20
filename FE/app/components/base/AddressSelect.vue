@@ -78,29 +78,33 @@ const wardModel = computed({
 
 <template>
   <div class="space-y-4">
-    <UFormField label="Địa chỉ cụ thể" name="addressLine" :error="props.errors?.addressLine">
+    <UFormField
+      :label="$t('address_specific')"
+      name="addressLine"
+      :error="props.errors?.addressLine"
+    >
       <UInput
         :model-value="state.addressLine"
-        placeholder="Số nhà, tên đường..."
+        :placeholder="$t('address_placeholder')"
         @update:model-value="(val) => updateField('addressLine', String(val))"
       />
     </UFormField>
 
     <div class="space-y-4">
-      <UFormField label="Tỉnh/Thành phố" name="province" :error="props.errors?.province">
+      <UFormField :label="$t('province')" name="province" :error="props.errors?.province">
         <USelectMenu
           v-model="provinceModel"
           :items="provinceOptions"
           value-key="value"
           label-key="label"
           class="w-full"
-          placeholder="Chọn Tỉnh/Thành phố"
+          :placeholder="$t('province_placeholder')"
           searchable
-          searchable-placeholder="Tìm kiếm..."
+          :searchable-placeholder="$t('search')"
         />
       </UFormField>
 
-      <UFormField label="Phường/Xã" name="ward" :error="props.errors?.ward">
+      <UFormField :label="$t('ward')" name="ward" :error="props.errors?.ward">
         <USelectMenu
           v-model="wardModel"
           :items="wardOptions"
@@ -108,9 +112,9 @@ const wardModel = computed({
           label-key="label"
           class="w-full"
           :disabled="!state.province"
-          placeholder="Chọn Phường/Xã"
+          :placeholder="$t('ward_placeholder')"
           searchable
-          searchable-placeholder="Tìm kiếm..."
+          :searchable-placeholder="$t('search')"
         />
       </UFormField>
     </div>

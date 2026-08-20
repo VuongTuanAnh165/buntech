@@ -2,9 +2,10 @@
 import { z } from 'zod'
 import { rawMaterialService } from '~/services/rawMaterialService'
 import { inventoryService } from '~/services/inventoryService'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Kho nguyên liệu - BunTech Admin' })
+useSeoMeta({ title: t('admin_inventory_seo_title') })
 const toast = useToast()
 
 // ─── State ────────────────────────────────────────────────
@@ -62,27 +63,27 @@ const kpiStats = computed(() => {
   const summary = summaryData.value || { totalItems: 0, totalQuantity: 0, lowStockItems: 0 }
   return [
     {
-      title: 'Tổng nguyên liệu',
+      title: t('admin_inventory_kpi_total_items'),
       value: formatNumber(summary.totalItems),
       icon: 'i-lucide-package',
       color: 'primary' as const,
       trend: { value: 0, isPositive: true }
     },
     {
-      title: 'Tổng số lượng',
+      title: t('admin_inventory_kpi_total_qty'),
       value: formatNumber(summary.totalQuantity),
       icon: 'i-lucide-layers',
       color: 'success' as const,
       trend: { value: 0, isPositive: true }
     },
     {
-      title: 'Sắp hết hàng',
+      title: t('admin_inventory_kpi_low_stock'),
       value: String(summary.lowStockItems),
       icon: 'i-lucide-alert-triangle',
       color: 'warning' as const
     },
     {
-      title: 'Giao dịch (10 gần nhất)',
+      title: t('admin_inventory_kpi_recent_tx'),
       value: String(historyData.value?.length || 0),
       icon: 'i-lucide-repeat',
       color: 'info' as const,
@@ -115,12 +116,12 @@ const stockColors: Record<string, string> = {
   low: 'bg-warning-500',
   out: 'bg-error-500'
 }
-const stockLabels: Record<string, string> = {
-  high: 'Đủ',
-  medium: 'Đủ',
-  low: 'Thấp',
-  out: 'Sắp hết'
-}
+const stockLabels = computed<Record<string, string>>(() => ({
+  high: t('admin_inventory_stock_high'),
+  medium: t('admin_inventory_stock_high'),
+  low: t('admin_inventory_stock_low'),
+  out: t('admin_inventory_stock_out')
+}))
 
 // ─── Recent activity ──────────────────────────────────────
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -137,19 +138,19 @@ function movementColor(type: string) {
   return 'text-error-500'
 }
 function movementLabel(type: string) {
-  if (type === 'in') return 'Nhập kho'
-  if (type === 'out') return 'Xuất kho'
-  return 'Hao hụt'
+  if (type === 'in') return t('admin_inventory_btn_import')
+  if (type === 'out') return t('admin_inventory_btn_export')
+  return t('admin_inventory_movement_loss')
 }
 
 // ─── Table columns ────────────────────────────────────────
-const columns = [
-  { accessorKey: 'name', header: 'Nguyên liệu' },
-  { accessorKey: 'unit', header: 'Đơn vị' },
-  { accessorKey: 'quantity', header: 'Số lượng' },
-  { accessorKey: 'createdAt', header: 'Ngày tạo' },
-  { accessorKey: 'actions', header: 'Hành động' }
-]
+const columns = computed(() => [
+  { accessorKey: 'name', header: t('admin_inventory_col_name') },
+  { accessorKey: 'unit', header: t('admin_prod_form_unit') },
+  { accessorKey: 'quantity', header: t('admin_inventory_col_qty') },
+  { accessorKey: 'createdAt', header: t('created_at') },
+  { accessorKey: 'actions', header: t('admin_inventory_col_actions') }
+])
 
 // ─── Form Logic (Native + Zod) ────────────────────────────
 const showFormModal = ref(false)
@@ -157,8 +158,8 @@ const isEditing = ref(false)
 const editId = ref<number | null>(null)
 
 const formSchema = z.object({
-  name: z.string().min(1, 'Tên nguyên liệu không được để trống').max(191),
-  unit: z.string().min(1, 'Đơn vị không được để trống').max(50)
+  name: z.string().min(1, t('admin_inventory_err_name_req')).max(191),
+  unit: z.string().min(1, t('admin_inventory_err_unit_req')).max(50)
 })
 
 const state = reactive({
@@ -253,7 +254,7 @@ function openExportModal() {
 
 async function handleImportSubmit() {
   if (!movementItemId.value || !movementQuantity.value) {
-    toast.add({ title: 'Vui lòng điền đầy đủ thông tin', color: 'warning' })
+    toast.add({ title: t('admin_inventory_toast_fill_info'), color: 'warning' })
     return
   }
   movementSubmitting.value = true
@@ -269,7 +270,7 @@ async function handleImportSubmit() {
     refreshHistory()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    toast.add({ title: 'Có lỗi xảy ra', description: error.message, color: 'error' })
+    toast.add({ title: t('error_occurred'), description: error.message, color: 'error' })
   } finally {
     movementSubmitting.value = false
   }
@@ -277,11 +278,11 @@ async function handleImportSubmit() {
 
 async function handleExportSubmit() {
   if (!movementItemId.value || !movementQuantity.value) {
-    toast.add({ title: 'Vui lòng điền đầy đủ thông tin', color: 'warning' })
+    toast.add({ title: t('admin_inventory_toast_fill_info'), color: 'warning' })
     return
   }
   if (movementExceedsStock.value) {
-    toast.add({ title: 'Số lượng xuất vượt tồn kho', color: 'error' })
+    toast.add({ title: t('admin_inventory_toast_exceed_stock'), color: 'error' })
     return
   }
   movementSubmitting.value = true
@@ -297,7 +298,7 @@ async function handleExportSubmit() {
     refreshHistory()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    toast.add({ title: 'Có lỗi xảy ra', description: error.message, color: 'error' })
+    toast.add({ title: t('error_occurred'), description: error.message, color: 'error' })
   } finally {
     movementSubmitting.value = false
   }
@@ -309,10 +310,10 @@ const { confirm } = useConfirmDialog()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleDelete(item: any) {
   const confirmed = await confirm({
-    title: 'Xóa nguyên liệu',
-    description: `Bạn có chắc chắn muốn xóa nguyên liệu "${item.name}"? Hành động này có thể ẩn dữ liệu tồn kho.`,
-    confirmLabel: 'Xóa',
-    cancelLabel: 'Hủy',
+    title: t('admin_inventory_delete_title'),
+    description: t('admin_inventory_delete_desc', { name: item.name }),
+    confirmLabel: t('delete'),
+    cancelLabel: t('common_cancel'),
     color: 'error'
   })
 
@@ -330,16 +331,21 @@ async function handleDelete(item: any) {
 <template>
   <div>
     <BasePageHeader
-      title="Kho nguyên liệu"
-      description="Quản lý nguyên liệu và theo dõi nhập xuất tồn"
-      :breadcrumbs="[{ label: 'Trang chủ', to: '/admin', icon: 'i-lucide-home' }, { label: 'Kho' }]"
+      :title="$t('admin_inventory_title')"
+      :description="$t('admin_inventory_desc')"
+      :breadcrumbs="[
+        { label: $t('nav_home'), to: '/admin', icon: 'i-lucide-home' },
+        { label: $t('admin_inventory_breadcrumb_inventory') }
+      ]"
     >
       <template #actions>
         <UButton variant="outline" color="neutral" @click="openImportModal">
-          <UIcon name="i-lucide-arrow-down-to-line" class="mr-1 h-4 w-4" /> Nhập kho
+          <UIcon name="i-lucide-arrow-down-to-line" class="mr-1 h-4 w-4" />
+          {{ $t('admin_inventory_btn_import') }}
         </UButton>
         <UButton color="primary" @click="openExportModal">
-          <UIcon name="i-lucide-arrow-up-from-line" class="mr-1 h-4 w-4" /> Xuất kho
+          <UIcon name="i-lucide-arrow-up-from-line" class="mr-1 h-4 w-4" />
+          {{ $t('admin_inventory_btn_export') }}
         </UButton>
       </template>
     </BasePageHeader>
@@ -354,10 +360,11 @@ async function handleDelete(item: any) {
         <div class="flex h-full flex-col lg:col-span-2">
           <div class="stagger-item mb-4 flex items-center gap-3" style="animation-delay: 200ms">
             <div class="flex-1">
-              <BaseSearchInput v-model="search" placeholder="Tìm nguyên liệu..." />
+              <BaseSearchInput v-model="search" :placeholder="$t('admin_inventory_search_ph')" />
             </div>
             <UButton @click="handleAdd">
-              <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" /> Thêm nguyên liệu
+              <UIcon name="i-lucide-plus" class="mr-1 h-4 w-4" />
+              {{ $t('admin_inventory_btn_add') }}
             </UButton>
           </div>
           <div
@@ -459,7 +466,7 @@ async function handleDelete(item: any) {
                       {{ totalItems }}
                     </span>
                     <USelectMenu v-model="perPage" :items="[10, 20, 50]" class="w-32">
-                      <template #default>{{ perPage }} / trang</template>
+                      <template #default>{{ $t('admin_debt_pagination', { perPage }) }}</template>
                     </USelectMenu>
                   </div>
                   <UPagination
@@ -477,11 +484,11 @@ async function handleDelete(item: any) {
           <div class="mb-4 flex items-center justify-between">
             <h3 class="text-surface-foreground flex items-center gap-2 text-sm font-semibold">
               <UIcon name="i-lucide-activity" class="text-primary-500 h-4 w-4" />
-              Hoạt động gần đây
+              {{ $t('driver_profile_activity_title') }}
             </h3>
             <span
               class="text-primary-500 hover:text-primary-600 cursor-pointer text-xs transition-colors"
-              >Tất cả →</span
+              >{{ $t('admin_debt_top_all') }}</span
             >
           </div>
           <div v-if="historyStatus === 'pending'" class="flex justify-center py-4">
@@ -491,7 +498,7 @@ async function handleDelete(item: any) {
             v-else-if="recentMovements.length === 0"
             class="py-4 text-center text-sm text-slate-500"
           >
-            Chưa có giao dịch nào
+            {{ $t('admin_inventory_activity_empty') }}
           </div>
           <div v-else class="space-y-3">
             <div
@@ -508,7 +515,7 @@ async function handleDelete(item: any) {
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-surface-foreground truncate text-sm font-medium">
-                  {{ mov.rawMaterial?.name || 'Nguyên liệu' }}
+                  {{ mov.rawMaterial?.name || $t('admin_inventory_col_name') }}
                 </p>
                 <div class="mt-0.5 flex items-center gap-1.5">
                   <UBadge
@@ -546,15 +553,25 @@ async function handleDelete(item: any) {
       <!-- Add/Edit Modal -->
       <UModal
         v-model:open="showFormModal"
-        :title="isEditing ? 'Cập nhật nguyên liệu' : 'Thêm nguyên liệu'"
+        :title="isEditing ? $t('admin_inventory_modal_edit_title') : $t('admin_inventory_btn_add')"
       >
         <template #body>
           <form class="space-y-4" @submit.prevent="handleFormSubmit">
-            <UFormField label="Tên nguyên liệu" name="name" :error="formErrors.name" required>
-              <UInput v-model="state.name" placeholder="VD: Gạo tẻ nguyên liệu..." />
+            <UFormField
+              :label="$t('admin_inventory_form_name')"
+              name="name"
+              :error="formErrors.name"
+              required
+            >
+              <UInput v-model="state.name" :placeholder="$t('admin_inventory_form_name_ph')" />
             </UFormField>
-            <UFormField label="Đơn vị" name="unit" :error="formErrors.unit" required>
-              <UInput v-model="state.unit" placeholder="VD: kg, lít, cái..." />
+            <UFormField
+              :label="$t('admin_prod_form_unit')"
+              name="unit"
+              :error="formErrors.unit"
+              required
+            >
+              <UInput v-model="state.unit" :placeholder="$t('admin_inventory_form_unit_ph')" />
             </UFormField>
 
             <div class="mt-6 flex justify-end gap-3">
@@ -566,26 +583,26 @@ async function handleDelete(item: any) {
                     showFormModal = false
                   }
                 "
-                >Hủy</UButton
+                >{{ $t('common_cancel') }}</UButton
               >
               <UButton type="submit" :loading="formLoading">
                 <UIcon name="i-lucide-save" class="mr-1 h-4 w-4" />
-                {{ isEditing ? 'Cập nhật' : 'Thêm' }}
+                {{ isEditing ? $t('common_update') : $t('admin_inventory_btn_add_submit') }}
               </UButton>
             </div>
           </form>
         </template>
       </UModal>
       <!-- Import Modal -->
-      <UModal v-model:open="showImportModal" title="Nhập kho">
+      <UModal v-model:open="showImportModal" :title="$t('admin_inventory_btn_import')">
         <template #body>
           <div class="space-y-4">
-            <UFormField label="Nguyên liệu" required>
+            <UFormField :label="$t('admin_inventory_col_name')" required>
               <USelectMenu
                 v-model="movementItemId"
                 :items="movementOptions"
                 value-key="value"
-                placeholder="Chọn nguyên liệu..."
+                :placeholder="$t('admin_inventory_form_material_ph')"
                 searchable
                 class="w-full"
               />
@@ -596,7 +613,9 @@ async function handleDelete(item: any) {
                 class="bg-success-50 dark:bg-success-900/10 border-success-200 dark:border-success-800/30 rounded-xl border p-3"
               >
                 <div class="flex items-center justify-between">
-                  <p class="text-surface-foreground text-xs font-medium">Tồn kho hiện tại</p>
+                  <p class="text-surface-foreground text-xs font-medium">
+                    {{ $t('admin_inventory_current_stock') }}
+                  </p>
                   <p class="text-success-600 dark:text-success-400 text-sm font-bold tabular-nums">
                     {{ formatNumber(movementSelectedItem.currentStock || 0) }}
                     {{ movementSelectedItem.unit }}
@@ -604,8 +623,12 @@ async function handleDelete(item: any) {
                 </div>
               </div>
             </Transition>
-            <UFormField label="Số lượng nhập" required>
-              <UInput v-model="movementQuantity" type="number" placeholder="Nhập số lượng...">
+            <UFormField :label="$t('admin_inventory_form_import_qty')" required>
+              <UInput
+                v-model="movementQuantity"
+                type="number"
+                :placeholder="$t('admin_inventory_form_qty_ph')"
+              >
                 <template #trailing>
                   <span class="text-sm font-medium text-slate-500">{{
                     movementSelectedItem?.unit || '...'
@@ -613,17 +636,17 @@ async function handleDelete(item: any) {
                 </template>
               </UInput>
             </UFormField>
-            <UFormField label="Ghi chú">
+            <UFormField :label="$t('admin_debt_pay_note')">
               <UTextarea
                 v-model="movementNote"
-                placeholder="VD: Nhập từ nhà cung cấp..."
+                :placeholder="$t('admin_inventory_form_note_import_ph')"
                 :rows="2"
               />
             </UFormField>
             <div class="mt-6 flex justify-end gap-3">
-              <UButton variant="outline" color="neutral" @click="showImportModal = false"
-                >Hủy</UButton
-              >
+              <UButton variant="outline" color="neutral" @click="showImportModal = false">{{
+                $t('common_cancel')
+              }}</UButton>
               <UButton
                 color="success"
                 :loading="movementSubmitting"
@@ -631,7 +654,7 @@ async function handleDelete(item: any) {
                 @click="handleImportSubmit"
               >
                 <UIcon name="i-lucide-arrow-down-to-line" class="mr-1 h-4 w-4" />
-                Nhập kho
+                {{ $t('admin_inventory_btn_import') }}
               </UButton>
             </div>
           </div>
@@ -639,15 +662,15 @@ async function handleDelete(item: any) {
       </UModal>
 
       <!-- Export Modal -->
-      <UModal v-model:open="showExportModal" title="Xuất kho">
+      <UModal v-model:open="showExportModal" :title="$t('admin_inventory_btn_export')">
         <template #body>
           <div class="space-y-4">
-            <UFormField label="Nguyên liệu" required>
+            <UFormField :label="$t('admin_inventory_col_name')" required>
               <USelectMenu
                 v-model="movementItemId"
                 :items="movementOptions"
                 value-key="value"
-                placeholder="Chọn nguyên liệu..."
+                :placeholder="$t('admin_inventory_form_material_ph')"
                 searchable
                 class="w-full"
               />
@@ -658,7 +681,9 @@ async function handleDelete(item: any) {
                 class="bg-primary-50 dark:bg-primary-900/10 border-primary-200 dark:border-primary-800/30 rounded-xl border p-3"
               >
                 <div class="flex items-center justify-between">
-                  <p class="text-surface-foreground text-xs font-medium">Tồn kho hiện tại</p>
+                  <p class="text-surface-foreground text-xs font-medium">
+                    {{ $t('admin_inventory_current_stock') }}
+                  </p>
                   <p
                     class="text-sm font-bold tabular-nums"
                     :class="
@@ -673,8 +698,12 @@ async function handleDelete(item: any) {
                 </div>
               </div>
             </Transition>
-            <UFormField label="Số lượng xuất" required>
-              <UInput v-model="movementQuantity" type="number" placeholder="Nhập số lượng...">
+            <UFormField :label="$t('admin_inventory_form_export_qty')" required>
+              <UInput
+                v-model="movementQuantity"
+                type="number"
+                :placeholder="$t('admin_inventory_form_qty_ph')"
+              >
                 <template #trailing>
                   <span class="text-sm font-medium text-slate-500">{{
                     movementSelectedItem?.unit || '...'
@@ -682,13 +711,17 @@ async function handleDelete(item: any) {
                 </template>
               </UInput>
             </UFormField>
-            <UFormField label="Ghi chú">
-              <UTextarea v-model="movementNote" placeholder="VD: Xuất sản xuất..." :rows="2" />
+            <UFormField :label="$t('admin_debt_pay_note')">
+              <UTextarea
+                v-model="movementNote"
+                :placeholder="$t('admin_inventory_form_note_export_ph')"
+                :rows="2"
+              />
             </UFormField>
             <div class="mt-6 flex justify-end gap-3">
-              <UButton variant="outline" color="neutral" @click="showExportModal = false"
-                >Hủy</UButton
-              >
+              <UButton variant="outline" color="neutral" @click="showExportModal = false">{{
+                $t('common_cancel')
+              }}</UButton>
               <UButton
                 color="primary"
                 :loading="movementSubmitting"
@@ -696,7 +729,7 @@ async function handleDelete(item: any) {
                 @click="handleExportSubmit"
               >
                 <UIcon name="i-lucide-arrow-up-from-line" class="mr-1 h-4 w-4" />
-                Xuất kho
+                {{ $t('admin_inventory_btn_export') }}
               </UButton>
             </div>
           </div>

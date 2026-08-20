@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { driverService } from '~/services/driverService'
+import { t } from '~/utils/i18n'
 
 definePageMeta({ layout: 'driver' })
-useSeoMeta({ title: 'Phương tiện - BunTech Driver' })
+useSeoMeta({ title: t('driver_vehicle_seo_title') })
 const toast = useToast()
 const loading = ref(true)
 
@@ -25,8 +26,8 @@ const maintenanceHistory = ref([
   {
     id: 'm1',
     date: '2024-07-10',
-    type: 'Bảo dưỡng định kỳ',
-    description: 'Thay dầu máy, lọc gió, kiểm tra phanh. Tất cả hoạt động tốt.',
+    type: t('driver_vehicle_mock_type_1'),
+    description: t('driver_vehicle_mock_desc_1'),
     cost: 450000,
     mileage: 28000,
     status: 'completed' as const
@@ -34,8 +35,8 @@ const maintenanceHistory = ref([
   {
     id: 'm2',
     date: '2024-06-01',
-    type: 'Thay lốp trước',
-    description: 'Thay lốp trước do mòn vằn. Lốp mới Mitas MC-28.',
+    type: t('driver_vehicle_mock_type_2'),
+    description: t('driver_vehicle_mock_desc_2'),
     cost: 680000,
     mileage: 26500,
     status: 'completed' as const
@@ -43,8 +44,8 @@ const maintenanceHistory = ref([
   {
     id: 'm3',
     date: '2024-04-15',
-    type: 'Bảo dưỡng định kỳ',
-    description: 'Thay dầu máy, kiểm tra bugi, siết ốc. Xe hoạt động ổn định.',
+    type: t('driver_vehicle_mock_type_1'),
+    description: t('driver_vehicle_mock_desc_3'),
     cost: 520000,
     mileage: 24200,
     status: 'completed' as const
@@ -52,8 +53,8 @@ const maintenanceHistory = ref([
   {
     id: 'm4',
     date: '2024-02-20',
-    type: 'Sửa chữa phanh',
-    description: 'Thay má phanh sau và độ mâm phanh. Phanh hoạt động nhạy hơn.',
+    type: t('driver_vehicle_mock_type_4'),
+    description: t('driver_vehicle_mock_desc_4'),
     cost: 380000,
     mileage: 22100,
     status: 'completed' as const
@@ -61,8 +62,8 @@ const maintenanceHistory = ref([
   {
     id: 'm5',
     date: '2024-08-15',
-    type: 'Bảo dưỡng định kỳ sắp tới',
-    description: 'Kiểm tra tổng quát, thay dầu máy và lọc gió.',
+    type: t('driver_vehicle_mock_type_5'),
+    description: t('driver_vehicle_mock_desc_5'),
     cost: 0,
     mileage: 30000,
     status: 'scheduled' as const
@@ -76,21 +77,23 @@ const daysUntilNextMaintenance = computed(() =>
 )
 const registrationStatus = computed(() => {
   const days = Math.ceil((new Date(registrationExpiry).getTime() - Date.now()) / 86400000)
-  if (days < 0) return { label: 'Đã hết hạn', color: 'error' as const }
-  if (days < 30) return { label: `Còn ${days} ngày`, color: 'warning' as const }
-  return { label: `Còn ${days} ngày`, color: 'success' as const }
+  if (days < 0) return { label: t('driver_vehicle_docs_expired'), color: 'error' as const }
+  if (days < 30)
+    return { label: t('driver_vehicle_docs_expires_in', { days }), color: 'warning' as const }
+  return { label: t('driver_vehicle_docs_expires_in', { days }), color: 'success' as const }
 })
 const insuranceStatus = computed(() => {
   const days = Math.ceil((new Date(insuranceExpiry).getTime() - Date.now()) / 86400000)
-  if (days < 0) return { label: 'Đã hết hạn', color: 'error' as const }
-  if (days < 30) return { label: `Còn ${days} ngày`, color: 'warning' as const }
-  return { label: `Còn ${days} ngày`, color: 'success' as const }
+  if (days < 0) return { label: t('driver_vehicle_docs_expired'), color: 'error' as const }
+  if (days < 30)
+    return { label: t('driver_vehicle_docs_expires_in', { days }), color: 'warning' as const }
+  return { label: t('driver_vehicle_docs_expires_in', { days }), color: 'success' as const }
 })
 function reportIssue() {
-  toast.add({ title: 'Đã gửi báo cáo hỏng hóc. Quản lý sẽ liên hệ bạn sớm.', color: 'success' })
+  toast.add({ title: t('driver_vehicle_msg_report_success'), color: 'success' })
 }
 function viewSchedule() {
-  toast.add({ title: 'Mở lịch bảo dưỡng...', color: 'info' })
+  toast.add({ title: t('driver_vehicle_msg_schedule'), color: 'info' })
 }
 onMounted(() => {
   setTimeout(() => {
@@ -102,8 +105,12 @@ onMounted(() => {
   <div class="p-4 pb-6">
     <!-- Header -->
     <div class="mb-4">
-      <h1 class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">Phương tiện</h1>
-      <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">Thông tin xe giao hàng của bạn</p>
+      <h1 class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
+        {{ $t('driver_vehicle') }}
+      </h1>
+      <p class="mt-0.5 text-sm text-slate-500 dark:text-zinc-400">
+        {{ $t('driver_vehicle_desc') }}
+      </p>
     </div>
     <!-- Loading -->
     <template v-if="loading">
@@ -127,11 +134,13 @@ onMounted(() => {
                 <UIcon name="i-lucide-truck" class="text-primary-400 h-6 w-6" />
               </div>
               <div>
-                <p class="text-xs text-slate-400">Biển số</p>
+                <p class="text-xs text-slate-400">{{ $t('driver_vehicle_plate') }}</p>
                 <p class="text-2xl font-bold tracking-tight tabular-nums">51F-1234</p>
               </div>
             </div>
-            <UBadge color="success" variant="solid" size="xs">Hoạt động</UBadge>
+            <UBadge color="success" variant="solid" size="xs">{{
+              $t('status_user_active')
+            }}</UBadge>
           </div>
           <div class="mb-4 flex items-center gap-2 text-slate-300">
             <span class="text-sm font-medium">Honda Blade 110</span>
@@ -147,13 +156,15 @@ onMounted(() => {
       </div>
       <!-- Info grid -->
       <h2 class="mb-3 px-1 text-sm font-semibold text-neutral-900 dark:text-white">
-        Thông số kỹ thuật
+        {{ $t('driver_vehicle_specs_title') }}
       </h2>
       <div class="mb-4 grid grid-cols-2 gap-3">
         <div class="card p-4">
           <div class="mb-1 flex items-center gap-1.5">
             <UIcon name="i-lucide-gauge" class="text-primary-500 h-3.5 w-3.5" />
-            <span class="text-xs text-slate-500 dark:text-zinc-400">Số km hiện tại</span>
+            <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+              $t('driver_vehicle_specs_mileage')
+            }}</span>
           </div>
           <p class="text-lg font-bold text-neutral-900 tabular-nums dark:text-white">
             {{ formatNumber(vehicleStats.distance * 10) }}
@@ -163,7 +174,9 @@ onMounted(() => {
         <div class="card p-4">
           <div class="mb-1 flex items-center gap-1.5">
             <UIcon name="i-lucide-zap" class="text-warning-500 h-3.5 w-3.5" />
-            <span class="text-xs text-slate-500 dark:text-zinc-400">Tải trọng</span>
+            <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+              $t('driver_vehicle_specs_payload')
+            }}</span>
           </div>
           <p class="text-lg font-bold text-neutral-900 dark:text-white">
             120 <span class="text-xs font-medium text-slate-400">kg</span>
@@ -172,14 +185,20 @@ onMounted(() => {
         <div class="card p-4">
           <div class="mb-1 flex items-center gap-1.5">
             <UIcon name="i-lucide-fuel" class="text-info-500 h-3.5 w-3.5" />
-            <span class="text-xs text-slate-500 dark:text-zinc-400">Nhiên liệu</span>
+            <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+              $t('driver_vehicle_specs_fuel')
+            }}</span>
           </div>
-          <p class="text-lg font-bold text-neutral-900 dark:text-white">Xăng</p>
+          <p class="text-lg font-bold text-neutral-900 dark:text-white">
+            {{ $t('driver_vehicle_specs_fuel_type') }}
+          </p>
         </div>
         <div class="card p-4">
           <div class="mb-1 flex items-center gap-1.5">
             <UIcon name="i-lucide-calendar" class="text-success-500 h-3.5 w-3.5" />
-            <span class="text-xs text-slate-500 dark:text-zinc-400">Lần bảo dưỡng cuối</span>
+            <span class="text-xs text-slate-500 dark:text-zinc-400">{{
+              $t('driver_vehicle_specs_last_maintenance')
+            }}</span>
           </div>
           <p class="text-sm font-bold text-neutral-900 dark:text-white">
             {{ formatDate('2024-07-10') }}
@@ -216,7 +235,7 @@ onMounted(() => {
           </div>
           <div class="flex-1">
             <p class="text-sm font-semibold text-neutral-900 dark:text-white">
-              Bảo dưỡng tiếp theo
+              {{ $t('driver_vehicle_next_maintenance') }}
             </p>
             <p class="text-xs text-slate-500 dark:text-zinc-400">
               {{ formatDate(nextMaintenance) }} ·
@@ -226,7 +245,7 @@ onMounted(() => {
                     ? 'text-warning-600 dark:text-warning-400 font-medium'
                     : ''
                 "
-                >còn {{ daysUntilNextMaintenance }} ngày</span
+                >{{ $t('driver_vehicle_days_left', { days: daysUntilNextMaintenance }) }}</span
               >
             </p>
           </div>
@@ -238,11 +257,13 @@ onMounted(() => {
         <div class="mb-4 flex items-center justify-between">
           <h2 class="flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
             <UIcon name="i-lucide-wrench" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-            Lịch sử bảo dưỡng
+            {{ $t('driver_vehicle_history_title') }}
           </h2>
-          <span class="text-xs text-slate-400 tabular-nums dark:text-zinc-500"
-            >{{ maintenanceHistory.filter((m) => m.status === 'completed').length }} lần</span
-          >
+          <span class="text-xs text-slate-400 tabular-nums dark:text-zinc-500">{{
+            $t('driver_vehicle_history_count', {
+              count: maintenanceHistory.filter((m) => m.status === 'completed').length
+            })
+          }}</span>
         </div>
         <div class="relative">
           <div
@@ -271,10 +292,16 @@ onMounted(() => {
               <div class="flex-1 pb-1">
                 <div class="mb-0.5 flex items-start justify-between gap-2">
                   <p class="text-sm font-medium text-neutral-900 dark:text-white">{{ m.type }}</p>
-                  <UBadge v-if="m.status === 'scheduled'" color="warning" variant="subtle" size="xs"
-                    >Sắp tới</UBadge
+                  <UBadge
+                    v-if="m.status === 'scheduled'"
+                    color="warning"
+                    variant="subtle"
+                    size="xs"
+                    >{{ $t('driver_vehicle_status_scheduled') }}</UBadge
                   >
-                  <UBadge v-else color="success" variant="subtle" size="xs">Hoàn thành</UBadge>
+                  <UBadge v-else color="success" variant="subtle" size="xs">{{
+                    $t('driver_deliv_status_done')
+                  }}</UBadge>
                 </div>
                 <p class="mb-1 text-xs leading-relaxed text-slate-500 dark:text-zinc-400">
                   {{ m.description }}
@@ -299,34 +326,44 @@ onMounted(() => {
       <div class="card mb-4 p-5">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
           <UIcon name="i-lucide-trending-up" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-          Thống kê xe
+          {{ $t('driver_vehicle_stats_title') }}
         </h2>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">Tổng số chuyến</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">
+              {{ $t('driver_vehicle_stats_trips') }}
+            </p>
             <p class="text-xl font-bold text-neutral-900 tabular-nums dark:text-white">
               {{ formatNumber(vehicleStats.trips) }}
             </p>
           </div>
           <div>
-            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">Tổng quãng đường</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">
+              {{ $t('driver_history_stat_distance') }}
+            </p>
             <p class="text-xl font-bold text-neutral-900 tabular-nums dark:text-white">
               {{ formatNumber(vehicleStats.distance) }}
               <span class="text-xs font-medium text-slate-400">km</span>
             </p>
           </div>
           <div>
-            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">Tiêu hao nhiên liệu</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">
+              {{ $t('driver_vehicle_stats_fuel_efficiency') }}
+            </p>
             <p class="text-success-600 dark:text-success-400 text-xl font-bold tabular-nums">
               {{ vehicleStats.fuelEfficiency }}
               <span class="text-xs font-medium text-slate-400">km/l</span>
             </p>
           </div>
           <div>
-            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">Số ngày hoạt động</p>
+            <p class="mb-1 text-xs text-slate-500 dark:text-zinc-400">
+              {{ $t('driver_vehicle_stats_days_active') }}
+            </p>
             <p class="text-xl font-bold text-neutral-900 tabular-nums dark:text-white">
               {{ formatNumber(vehicleStats.daysActive) }}
-              <span class="text-xs font-medium text-slate-400">ngày</span>
+              <span class="text-xs font-medium text-slate-400">{{
+                $t('driver_vehicle_days')
+              }}</span>
             </p>
           </div>
         </div>
@@ -335,7 +372,7 @@ onMounted(() => {
       <div class="card mb-4 p-5">
         <h2 class="mb-4 flex items-center gap-2 font-semibold text-neutral-900 dark:text-white">
           <UIcon name="i-lucide-file-text" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-          Giấy tờ xe
+          {{ $t('driver_vehicle_docs_title') }}
         </h2>
         <div class="space-y-3">
           <div class="flex items-center gap-3 rounded-xl bg-neutral-50 p-3 dark:bg-zinc-800/50">
@@ -348,9 +385,11 @@ onMounted(() => {
               />
             </div>
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-neutral-900 dark:text-white">Đăng kiểm xe</p>
+              <p class="text-sm font-medium text-neutral-900 dark:text-white">
+                {{ $t('driver_vehicle_docs_registration') }}
+              </p>
               <p class="text-xs text-slate-500 dark:text-zinc-400">
-                Hết hạn: {{ formatDate(registrationExpiry) }}
+                {{ $t('driver_vehicle_docs_expiry', { date: formatDate(registrationExpiry) }) }}
               </p>
             </div>
             <UBadge :color="registrationStatus.color" variant="subtle" size="xs">{{
@@ -368,10 +407,10 @@ onMounted(() => {
             </div>
             <div class="min-w-0 flex-1">
               <p class="text-sm font-medium text-neutral-900 dark:text-white">
-                Bảo hiểm trách nhiệm
+                {{ $t('driver_vehicle_docs_insurance') }}
               </p>
               <p class="text-xs text-slate-500 dark:text-zinc-400">
-                Hết hạn: {{ formatDate(insuranceExpiry) }}
+                {{ $t('driver_vehicle_docs_expiry', { date: formatDate(insuranceExpiry) }) }}
               </p>
             </div>
             <UBadge :color="insuranceStatus.color" variant="subtle" size="xs">{{
@@ -384,11 +423,11 @@ onMounted(() => {
       <div class="grid grid-cols-2 gap-3 pb-6">
         <UButton variant="outline" size="lg" block @click="viewSchedule">
           <UIcon name="i-lucide-calendar" class="mr-1 h-4 w-4" />
-          Lịch bảo dưỡng
+          {{ $t('driver_vehicle_btn_schedule') }}
         </UButton>
         <UButton color="warning" size="lg" block @click="reportIssue">
           <UIcon name="i-lucide-alert-triangle" class="mr-1 h-4 w-4" />
-          Báo cáo hỏng hóc
+          {{ $t('driver_vehicle_btn_report') }}
         </UButton>
       </div>
     </template>

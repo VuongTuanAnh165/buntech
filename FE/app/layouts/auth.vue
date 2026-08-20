@@ -1,6 +1,4 @@
-<script setup lang="ts">
-const { t } = useI18n()
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="flex min-h-screen">
@@ -53,21 +51,18 @@ const { t } = useI18n()
             class="animate-fade-in mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-sm font-medium text-white/90 backdrop-blur-sm"
           >
             <span class="bg-success-400 h-2 w-2 animate-pulse rounded-full" aria-hidden="true" />
-            {{ t('app.tagline') }}
+            {{ $t('app_tagline') }}
           </div>
           <h1
             class="animate-fade-in-up mb-5 text-4xl leading-[1.1] font-bold tracking-tight xl:text-5xl"
           >
-            {{ t('auth.heroTitle') || 'Hệ thống quản lý xưởng bún' }}
+            {{ $t('auth_hero_title') }}
           </h1>
           <p
             class="animate-fade-in-up max-w-sm text-lg leading-relaxed text-slate-300"
             style="animation-delay: 100ms"
           >
-            {{
-              t('auth.heroSubtitle') ||
-              'Chuyển đổi số toàn diện cho xưởng bún gia đình — từ đặt hàng, giao nhận đến công nợ.'
-            }}
+            {{ $t('auth_hero_subtitle') }}
           </p>
 
           <!-- Feature highlights -->
@@ -78,19 +73,19 @@ const { t } = useI18n()
             <div class="text-center">
               <div class="text-primary-400 text-2xl font-bold">24/7</div>
               <div class="mt-1 text-xs text-slate-400">
-                {{ t('auth.featureOnline') || 'Online' }}
+                {{ $t('auth_feature_online') }}
               </div>
             </div>
             <div class="text-center">
               <div class="text-accent-400 text-2xl font-bold">100%</div>
               <div class="mt-1 text-xs text-slate-400">
-                {{ t('auth.featureAutomated') || 'Tự động' }}
+                {{ $t('auth_feature_automated') }}
               </div>
             </div>
             <div class="text-center">
               <div class="text-success-400 text-2xl font-bold">SSE</div>
               <div class="mt-1 text-xs text-slate-400">
-                {{ t('auth.featureRealtime') || 'Realtime' }}
+                {{ $t('auth_feature_realtime') }}
               </div>
             </div>
           </div>
@@ -100,10 +95,10 @@ const { t } = useI18n()
           <span>&copy; {{ new Date().getFullYear() }} BunTech</span>
           <div class="flex items-center gap-4">
             <NuxtLink to="/" class="transition-colors hover:text-white">{{
-              t('nav.home')
+              $t('nav_home')
             }}</NuxtLink>
             <NuxtLink to="/about" class="transition-colors hover:text-white">{{
-              t('nav.about')
+              $t('nav_about')
             }}</NuxtLink>
           </div>
         </div>

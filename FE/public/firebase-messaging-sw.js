@@ -21,7 +21,7 @@ if (firebaseConfig.apiKey) {
 
   messaging.onBackgroundMessage((payload) => {
     console.log('[firebase-messaging-sw.js] Received background message ', payload)
-    const notificationTitle = payload.notification?.title || 'Thông báo mới'
+    const notificationTitle = payload.notification?.title || 'Notification'
     const notificationOptions = {
       body: payload.notification?.body || '',
       icon: '/favicon.ico' // Thay bằng đường dẫn icon của app

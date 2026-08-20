@@ -4,6 +4,7 @@ import { productService } from '~/services/productService'
 import type { CustomPrice, AdminProduct } from '~/utils/types'
 import { useCustomerPrices } from '~/composables/admin/useCustomerPrices'
 import type { PaginationMeta } from '~/types/api'
+import { t } from '~/utils/i18n'
 
 const props = defineProps<{
   userId: string | number
@@ -55,11 +56,10 @@ function handlePageChange(p: number) {
 const { confirm } = useConfirmDialog()
 async function handleDelete(productId: number) {
   const confirmed = await confirm({
-    title: 'Xóa giá riêng',
-    description:
-      'Bạn có chắc chắn muốn xóa giá riêng của sản phẩm này? Hệ thống sẽ sử dụng lại giá gốc.',
+    title: t('admin_price_del_title'),
+    description: t('admin_price_del_desc'),
     color: 'error',
-    confirmLabel: 'Xóa'
+    confirmLabel: t('delete')
   })
   if (!confirmed) return
 
@@ -80,8 +80,10 @@ const isEditing = ref(false)
 const selectedProduct = ref<AdminProduct | undefined>(undefined)
 
 const schema = z.object({
-  productId: z.number({ message: 'Vui lòng chọn sản phẩm' }),
-  customPrice: z.coerce.number({ message: 'Vui lòng nhập giá riêng' }).min(1, 'Giá phải lớn hơn 0')
+  productId: z.number({ message: t('admin_price_err_product') }),
+  customPrice: z.coerce
+    .number({ message: t('admin_price_err_price_req') })
+    .min(1, t('admin_price_err_price_min'))
 })
 
 const state = reactive({
@@ -185,19 +187,22 @@ watch(selectedProduct, (val) => {
 <template>
   <div>
     <div class="mb-4 flex justify-end">
-      <UButton icon="i-lucide-plus" color="primary" @click="openAddModal">Thiết lập giá</UButton>
+      <UButton icon="i-lucide-plus" color="primary" @click="openAddModal">{{
+        $t('admin_price_btn_add')
+      }}</UButton>
     </div>
 
     <BaseDataTable
       :columns="[
-        { accessorKey: 'product', header: 'Sản phẩm' },
-        { accessorKey: 'price', header: 'Giá riêng', class: 'text-right' },
+        { accessorKey: 'product', header: $t('nav_products') },
+        { accessorKey: 'price', header: $t('admin_price_col_price'), class: 'text-right' },
         { accessorKey: 'actions', header: '', class: 'w-16' }
       ]"
       :rows="prices"
       :loading="loading"
       :meta="meta"
-      empty-title="Chưa có giá riêng"
+      :empty-title="$t('admin_price_empty_title')"
+      :empty-description="$t('admin_price_empty_desc')"
       @page-change="handlePageChange"
     >
       <template #product-cell="{ row }">
@@ -210,7 +215,7 @@ watch(selectedProduct, (val) => {
             class="bg-slate-100 dark:bg-slate-800"
           />
           <span class="text-surface-foreground font-medium">{{
-            (row as CustomPrice).product?.name || 'Sản phẩm đã xoá'
+            (row as CustomPrice).product?.name || $t('admin_price_col_product_deleted')
           }}</span>
         </div>
       </template>
@@ -241,15 +246,20 @@ watch(selectedProduct, (val) => {
       </template>
     </BaseDataTable>
 
-    <UModal v-model:open="showModal" title="Thiết lập giá riêng">
+    <UModal v-model:open="showModal" :title="$t('admin_price_modal_title')">
       <template #body>
         <form id="custom-price-form" class="space-y-4" @submit.prevent="handleFormSubmit">
-          <UFormField label="Sản phẩm" name="productId" required :error="formErrors.productId">
+          <UFormField
+            :label="$t('nav_products')"
+            name="productId"
+            required
+            :error="formErrors.productId"
+          >
             <USelectMenu
               v-model="selectedProduct"
               v-model:search-term="searchQuery"
               :items="searchProducts"
-              placeholder="Tìm kiếm sản phẩm..."
+              :placeholder="$t('public_products_search_ph')"
               label-key="name"
               class="w-full"
               :disabled="isEditing"
@@ -267,12 +277,17 @@ watch(selectedProduct, (val) => {
             </USelectMenu>
           </UFormField>
 
-          <UFormField label="Giá riêng" name="customPrice" required :error="formErrors.customPrice">
+          <UFormField
+            :label="$t('admin_price_modal_price')"
+            name="customPrice"
+            required
+            :error="formErrors.customPrice"
+          >
             <div class="relative">
               <UInput
                 v-model.number="state.customPrice"
                 type="number"
-                placeholder="Ví dụ: 15000"
+                :placeholder="$t('admin_price_modal_price_ph')"
                 class="w-full"
               />
               <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
@@ -287,10 +302,12 @@ watch(selectedProduct, (val) => {
       </template>
       <template #footer>
         <div class="flex justify-end gap-2">
-          <UButton color="neutral" variant="ghost" @click="showModal = false">Hủy</UButton>
-          <UButton form="custom-price-form" type="submit" color="primary" :loading="isSubmitting"
-            >Lưu giá</UButton
-          >
+          <UButton color="neutral" variant="ghost" @click="showModal = false">{{
+            $t('common_cancel')
+          }}</UButton>
+          <UButton form="custom-price-form" type="submit" color="primary" :loading="isSubmitting">{{
+            $t('admin_price_modal_btn_save2')
+          }}</UButton>
         </div>
       </template>
     </UModal>

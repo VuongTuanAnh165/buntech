@@ -1,13 +1,15 @@
 <script setup lang="ts">
-useSeoMeta({ title: 'Đăng nhập - BunTech Admin' })
+import { t } from '~/utils/i18n'
+
+useSeoMeta({ title: t('auth_login_seo_admin') })
 definePageMeta({ layout: 'auth' })
 </script>
 
 <template>
   <AuthLoginForm
     role="admin"
-    title="Admin Portal"
-    subtitle="Vui lòng đăng nhập để tiếp tục"
+    :title="$t('auth_login_title_admin')"
+    :subtitle="$t('auth_login_sub_admin')"
     icon="shield"
   />
 </template>

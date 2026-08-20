@@ -2,6 +2,7 @@
 import AddressFormModal from './AddressFormModal.vue'
 import type { Address } from '~/utils/types'
 import { useUsers } from '~/composables/admin/useUsers'
+import { t } from '~/utils/i18n'
 
 const props = defineProps<{
   userId: string | number
@@ -32,16 +33,16 @@ const openEdit = (addr: Address) => {
 
 const handleDelete = async (addr: Address) => {
   const confirmed = await confirm({
-    title: 'Xóa địa chỉ',
-    description: `Bạn có chắc chắn muốn xóa địa chỉ này? Hành động này không thể hoàn tác.`,
-    confirmLabel: 'Xóa',
+    title: t('admin_address_del_title'),
+    description: t('admin_address_del_desc'),
+    confirmLabel: t('delete'),
     color: 'error'
   })
 
   if (confirmed) {
     try {
       await deleteAddress(props.userId, addr.id)
-      toast.add({ title: 'Xóa địa chỉ thành công', color: 'success' })
+      toast.add({ title: t('admin_address_del_success'), color: 'success' })
       emit('refresh')
     } catch {
       // Errors handled by API Client
@@ -59,18 +60,22 @@ const sortedAddresses = computed(() => {
 })
 
 const columns = [
-  { accessorKey: 'address', header: 'Địa chỉ' },
-  { accessorKey: 'location', header: 'Khu vực' },
-  { accessorKey: 'isDefault', header: 'Mặc định' },
-  { accessorKey: 'actions', header: 'Thao tác', align: 'right' as const, width: '120px' }
+  { accessorKey: 'address', header: t('admin_address_col_address') },
+  { accessorKey: 'location', header: t('admin_address_col_location') },
+  { accessorKey: 'isDefault', header: t('admin_address_col_default') },
+  { accessorKey: 'actions', header: t('actions'), align: 'right' as const, width: '120px' }
 ]
 </script>
 
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-medium text-slate-800 dark:text-slate-200">Sổ địa chỉ</h3>
-      <UButton icon="i-lucide-plus" size="sm" @click="openAdd"> Thêm địa chỉ mới </UButton>
+      <h3 class="text-lg font-medium text-slate-800 dark:text-slate-200">
+        {{ $t('admin_address_title') }}
+      </h3>
+      <UButton icon="i-lucide-plus" size="sm" @click="openAdd">
+        {{ $t('admin_address_btn_add') }}
+      </UButton>
     </div>
 
     <!-- Data table -->
@@ -78,17 +83,17 @@ const columns = [
       :rows="sortedAddresses"
       :columns="columns"
       :loading="loading"
-      empty-title="Chưa có địa chỉ nào"
-      empty-description="Khách hàng chưa có địa chỉ nào trong sổ."
+      :empty-title="$t('admin_address_empty_title')"
+      :empty-description="$t('admin_address_empty_desc')"
       empty-icon="i-lucide-map-pin"
       class="bg-surface ring-surface-border min-h-[300px] rounded-xl ring-1"
     >
       <template #empty-action>
-        <UButton color="primary" @click="openAdd">Thêm địa chỉ mới</UButton>
+        <UButton color="primary" @click="openAdd">{{ $t('admin_address_btn_add') }}</UButton>
       </template>
 
       <template #actions-header>
-        <div class="w-full text-right">Thao tác</div>
+        <div class="w-full text-right">{{ $t('actions') }}</div>
       </template>
 
       <template #address-cell="{ row }">
@@ -108,13 +113,13 @@ const columns = [
           v-if="row.isDefault"
           class="bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-400 rounded px-2 py-0.5 text-xs font-medium"
         >
-          Mặc định
+          {{ $t('admin_address_col_default') }}
         </span>
       </template>
 
       <template #actions-cell="{ row }">
         <div class="flex justify-end gap-1">
-          <UTooltip text="Chỉnh sửa">
+          <UTooltip :text="$t('edit')">
             <UButton
               color="neutral"
               variant="ghost"
@@ -123,7 +128,7 @@ const columns = [
               @click="openEdit(row)"
             />
           </UTooltip>
-          <UTooltip text="Xóa">
+          <UTooltip :text="$t('delete')">
             <UButton
               color="error"
               variant="ghost"

@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import { ConstantKey } from '~/enums/constantKeys'
 import type { Product, Category } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 
@@ -73,9 +74,9 @@ watch(
 
 function validateForm() {
   formErrors.value = {}
-  if (!form.value.name.trim()) formErrors.value.name = 'Vui lòng nhập tên sản phẩm'
-  if (form.value.price < 0) formErrors.value.price = 'Giá không hợp lệ'
-  if (form.value.stock < 0) formErrors.value.stock = 'Tồn kho không hợp lệ'
+  if (!form.value.name.trim()) formErrors.value.name = t('admin_prod_form_name_req')
+  if (form.value.price < 0) formErrors.value.price = t('admin_prod_form_price_invalid')
+  if (form.value.stock < 0) formErrors.value.stock = t('admin_prod_form_stock_invalid')
   return Object.keys(formErrors.value).length === 0
 }
 
@@ -95,38 +96,41 @@ function handleSave() {
 </script>
 
 <template>
-  <USlideover v-model:open="isOpen" :title="product ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'">
+  <USlideover
+    v-model:open="isOpen"
+    :title="product ? $t('admin_prod_form_edit_title') : $t('admin_prod_form_add_title')"
+  >
     <template #body>
       <form class="space-y-4" @submit.prevent="handleSave">
-        <UFormField label="Tên sản phẩm" required :error="formErrors.name">
+        <UFormField :label="$t('admin_prod_form_name')" required :error="formErrors.name">
           <UInput v-model="form.name" @update:model-value="form.slug = slugify($event)" />
         </UFormField>
-        <UFormField label="Slug" help="Tự động tạo từ tên sản phẩm">
+        <UFormField :label="$t('admin_prod_form_slug')" :help="$t('admin_prod_form_slug_help')">
           <UInput v-model="form.slug" />
         </UFormField>
-        <UFormField label="Hình ảnh">
-          <BaseDropzone v-model="imagePreview" help-text="Định dạng JPG, PNG, WEBP. Tối đa 5MB." />
+        <UFormField :label="$t('admin_prod_form_image')">
+          <BaseDropzone v-model="imagePreview" :help-text="$t('admin_prod_form_image_help')" />
         </UFormField>
-        <UFormField label="Mô tả">
+        <UFormField :label="$t('admin_prod_form_desc')">
           <UTextarea v-model="form.description" />
         </UFormField>
         <div class="grid grid-cols-2 gap-3">
-          <UFormField label="Giá (VND)" required :error="formErrors.price">
+          <UFormField :label="$t('admin_prod_form_price')" required :error="formErrors.price">
             <UInput v-model.number="form.price" type="number" :min="0" :step="1000" />
           </UFormField>
-          <UFormField label="Tồn kho" required :error="formErrors.stock">
+          <UFormField :label="$t('nav_inventory')" required :error="formErrors.stock">
             <UInput v-model.number="form.stock" type="number" :min="0" />
           </UFormField>
         </div>
         <div class="grid grid-cols-2 gap-3">
-          <UFormField label="Đơn vị">
+          <UFormField :label="$t('admin_prod_form_unit')">
             <UInput v-model="form.unit" />
           </UFormField>
-          <UFormField label="Danh mục">
+          <UFormField :label="$t('nav_categories')">
             <USelectMenu
               v-model="form.category_id"
               :items="[
-                { value: '', label: 'Chọn danh mục' },
+                { value: '', label: $t('admin_prod_form_cat_ph') },
                 ...categories.map((c) => ({ value: c.id, label: c.name }))
               ]"
               value-key="value"
@@ -134,12 +138,18 @@ function handleSave() {
             />
           </UFormField>
         </div>
-        <UFormField label="Trạng thái">
+        <UFormField :label="$t('status')">
           <USelectMenu
             v-model="form.status"
             :items="[
-              { value: constants?.[ConstantKey.ProductStatus]?.ACTIVE, label: 'Đang bán' },
-              { value: constants?.[ConstantKey.ProductStatus]?.INACTIVE, label: 'Ngừng bán' }
+              {
+                value: constants?.[ConstantKey.ProductStatus]?.ACTIVE,
+                label: $t('status_product_active')
+              },
+              {
+                value: constants?.[ConstantKey.ProductStatus]?.INACTIVE,
+                label: $t('status_product_inactive')
+              }
             ]"
             value-key="value"
             label-key="label"
@@ -158,10 +168,10 @@ function handleSave() {
             }
           "
         >
-          Hủy
+          {{ $t('common_cancel') }}
         </UButton>
         <UButton :loading="saving" color="primary" @click="handleSave">
-          {{ product ? 'Cập nhật' : 'Thêm mới' }}
+          {{ product ? $t('common_update') : $t('common_add_new') }}
         </UButton>
       </div>
     </template>

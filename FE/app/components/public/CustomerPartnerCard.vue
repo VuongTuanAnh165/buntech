@@ -57,7 +57,7 @@ const tierConfig: Record<string, { label: string; color: string; ribbon: string;
       v-if="customer.isRecentlyRestocked"
       class="bg-primary-500/90 border-primary-400 absolute top-3 left-3 z-10 animate-pulse rounded-full border px-3 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-sm"
     >
-      🔥 Vừa nhập lô mới
+      {{ $t('public_customer_restocked') }}
     </div>
 
     <div class="p-5">
@@ -85,7 +85,7 @@ const tierConfig: Record<string, { label: string; color: string; ribbon: string;
             <UIcon
               name="i-lucide-badge-check"
               class="text-primary-500 h-4 w-4 flex-shrink-0"
-              aria-label="Đại lý chính hãng"
+              :aria-label="$t('public_customer_agent')"
             />
           </div>
           <p :class="['text-xs font-medium', tierConfig[customer.tier]?.color]">
@@ -107,7 +107,7 @@ const tierConfig: Record<string, { label: string; color: string; ribbon: string;
           </span>
         </div>
         <p v-if="customer.addresses.length > 3" class="text-primary-500 text-xs font-medium">
-          +{{ customer.addresses.length - 3 }} chi nhánh khác
+          {{ $t('public_customer_more_branches', { count: customer.addresses.length - 3 }) }}
         </p>
       </div>
 

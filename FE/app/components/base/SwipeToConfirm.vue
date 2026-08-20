@@ -78,7 +78,7 @@ watch(
         class="text-sm font-medium transition-opacity duration-300"
         :class="[isConfirmed || isSwiping ? 'opacity-0' : 'text-slate-500 dark:text-zinc-400']"
       >
-        {{ text || 'Vuốt để xác nhận' }}
+        {{ text || $t('swipe_to_confirm') }}
       </span>
     </div>
 
@@ -88,7 +88,7 @@ watch(
         class="text-success-600 dark:text-success-400 text-sm font-bold transition-opacity duration-300"
         :class="[isConfirmed && !loading ? 'opacity-100' : 'opacity-0']"
       >
-        Đã xác nhận
+        {{ $t('confirmed') }}
       </span>
     </div>
 
@@ -98,7 +98,7 @@ watch(
         class="text-primary-600 dark:text-primary-400 text-sm font-bold transition-opacity duration-300"
         :class="[loading ? 'opacity-100' : 'opacity-0']"
       >
-        Đang xử lý...
+        {{ $t('processing') }}
       </span>
     </div>
 

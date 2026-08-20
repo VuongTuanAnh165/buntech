@@ -7,6 +7,7 @@
 <script setup lang="ts">
 import { ConstantKey } from '~/enums/constantKeys'
 import type { Product } from '~/utils/types'
+import { t } from '~/utils/i18n'
 
 const { constants } = useMasterData()
 
@@ -26,7 +27,7 @@ const kpiCards = computed(() => {
   const lowStock = list.filter((p) => p.stock > 0 && p.stock < 10).length
   return [
     {
-      label: 'Tổng sản phẩm',
+      label: t('admin_prod_kpi_total'),
       value: formatNumber(list.length),
       icon: 'i-lucide-package',
       accent: 'bg-gradient-to-r from-primary-500 to-primary-400',
@@ -36,7 +37,7 @@ const kpiCards = computed(() => {
       trend: '+8%'
     },
     {
-      label: 'Đang bán',
+      label: t('status_product_active'),
       value: formatNumber(active),
       icon: 'i-lucide-package-check',
       accent: 'bg-gradient-to-r from-success-500 to-success-400',
@@ -46,7 +47,7 @@ const kpiCards = computed(() => {
       trend: '+4%'
     },
     {
-      label: 'Ngừng bán',
+      label: t('status_product_inactive'),
       value: formatNumber(inactive),
       icon: 'i-lucide-package-x',
       accent: 'bg-gradient-to-r from-gray-500 to-gray-400',
@@ -56,7 +57,7 @@ const kpiCards = computed(() => {
       trend: '0%'
     },
     {
-      label: 'Tồn kho thấp',
+      label: t('admin_prod_kpi_low'),
       value: formatNumber(lowStock),
       icon: 'i-lucide-alert-triangle',
       accent: 'bg-gradient-to-r from-warning-500 to-warning-400',

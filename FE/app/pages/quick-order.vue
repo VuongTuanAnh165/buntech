@@ -5,9 +5,10 @@ import { productService } from '~/services/productService'
 import { publicOrderService } from '~/services/publicOrderService'
 import { phoneSchema, requiredString } from '~/utils/validation'
 import AddressSelect from '~/components/base/AddressSelect.vue'
+import { t } from '~/utils/i18n'
 
 const toast = useToast()
-useSeoMeta({ title: 'Đặt hàng nhanh - BunTech' })
+useSeoMeta({ title: t('quick_order_seo_title') })
 definePageMeta({ layout: 'default' })
 
 const search = ref('')
@@ -33,11 +34,11 @@ const formState = reactive({
 })
 
 const quickOrderSchema = z.object({
-  name: requiredString('Họ tên').max(100, 'Họ tên không được vượt quá 100 ký tự'),
+  name: requiredString(t('quick_order_val_name')).max(100, t('quick_order_val_name_max')),
   phone: phoneSchema,
-  addressLine: requiredString('Địa chỉ cụ thể').max(191),
-  province: requiredString('Tỉnh/Thành phố').max(100),
-  ward: requiredString('Phường/Xã').max(100),
+  addressLine: requiredString(t('address_specific')).max(191),
+  province: requiredString(t('province')).max(100),
+  ward: requiredString(t('ward')).max(100),
   note: z.string().trim().optional()
 })
 
@@ -75,7 +76,11 @@ const addProduct = (productId: number) => {
   const existing = orderItems.value.find((i) => i.productId === productId)
   if (existing) {
     existing.quantity++
-    toast.add({ title: 'Thành công', description: 'Đã cập nhật giỏ hàng', color: 'success' })
+    toast.add({
+      title: t('success'),
+      description: t('quick_order_msg_cart_updated'),
+      color: 'success'
+    })
     return
   }
   orderItems.value.push({
@@ -85,7 +90,7 @@ const addProduct = (productId: number) => {
     price: Number(product.basePrice),
     unit: product.unit
   })
-  toast.add({ title: 'Thành công', description: 'Đã thêm vào giỏ hàng', color: 'success' })
+  toast.add({ title: t('success'), description: t('quick_order_msg_cart_added'), color: 'success' })
 }
 
 const incrementQty = (index: number) => {
@@ -100,12 +105,20 @@ const decrementQty = (index: number) => {
 
 const removeItem = (index: number) => {
   orderItems.value.splice(index, 1)
-  toast.add({ title: 'Thông báo', description: 'Đã xóa sản phẩm', color: 'info' })
+  toast.add({
+    title: t('driver_notifications'),
+    description: t('quick_order_msg_item_removed'),
+    color: 'info'
+  })
 }
 
 const clearCart = () => {
   orderItems.value = []
-  toast.add({ title: 'Thông báo', description: 'Đã xóa toàn bộ giỏ hàng', color: 'info' })
+  toast.add({
+    title: t('driver_notifications'),
+    description: t('quick_order_msg_cart_cleared'),
+    color: 'info'
+  })
 }
 
 const validateForm = () => {
@@ -113,7 +126,7 @@ const validateForm = () => {
     return false // Honeypot trap
   }
   if (orderItems.value.length === 0) {
-    toast.add({ title: 'Thất bại', description: 'Giỏ hàng trống', color: 'error' })
+    toast.add({ title: t('error'), description: t('admin_order_cart_empty'), color: 'error' })
     return false
   }
   return validate(formState)
@@ -137,7 +150,7 @@ const handleQuickOrder = handleSubmit(
     if (res.data?.orderId) {
       successOrderCode.value = `BT${res.data.orderId}`
     } else {
-      successOrderCode.value = 'Đã tiếp nhận'
+      successOrderCode.value = t('quick_order_status_received')
     }
     success.value = true
   },
@@ -174,18 +187,20 @@ const resetForm = () => {
           <NuxtLink
             to="/"
             class="hover:text-primary-600 dark:hover:text-primary-400 text-gray-500 transition-colors dark:text-zinc-400"
-            >Trang chủ</NuxtLink
+            >{{ $t('nav_home') }}</NuxtLink
           >
         </li>
         <li class="text-gray-300 dark:text-zinc-600" aria-hidden="true">/</li>
-        <li aria-current="page" class="text-surface-foreground font-medium">Đặt hàng nhanh</li>
+        <li aria-current="page" class="text-surface-foreground font-medium">
+          {{ $t('quick_order_title') }}
+        </li>
       </ol>
     </nav>
     <h1 class="text-surface-foreground mb-2 text-2xl font-bold tracking-tight sm:text-3xl">
-      Đặt hàng nhanh
+      {{ $t('quick_order_title') }}
     </h1>
     <p class="mb-8 text-sm text-gray-500 dark:text-zinc-400">
-      Chọn sản phẩm, điền thông tin — giao hàng tận nơi trong 2 giờ
+      {{ $t('quick_order_desc') }}
     </p>
 
     <!-- Success state -->
@@ -199,37 +214,51 @@ const resetForm = () => {
             aria-hidden="true"
           />
         </div>
-        <h2 class="text-surface-foreground mb-2 text-2xl font-bold">Đặt hàng thành công!</h2>
-        <p class="mb-2 text-sm text-gray-500 dark:text-zinc-400">Mã đơn hàng của bạn:</p>
+        <h2 class="text-surface-foreground mb-2 text-2xl font-bold">
+          {{ $t('quick_order_success_title') }}
+        </h2>
+        <p class="mb-2 text-sm text-gray-500 dark:text-zinc-400">
+          {{ $t('quick_order_success_code_label') }}
+        </p>
         <p class="text-primary-600 dark:text-primary-400 mb-6 font-mono text-xl font-bold">
           {{ successOrderCode }}
         </p>
         <div class="card bg-surface-muted mb-6 p-4 text-left">
           <div class="mb-2 flex justify-between text-sm">
-            <span class="text-gray-500 dark:text-zinc-400">Khách hàng</span>
+            <span class="text-gray-500 dark:text-zinc-400">{{ $t('common_customer') }}</span>
             <span class="text-surface-foreground font-medium">{{ formState.name }}</span>
           </div>
           <div class="mb-2 flex justify-between text-sm">
-            <span class="text-gray-500 dark:text-zinc-400">Số điện thoại</span>
+            <span class="text-gray-500 dark:text-zinc-400">{{ $t('auth_login_phone') }}</span>
             <span class="text-surface-foreground font-medium">{{ formState.phone }}</span>
           </div>
           <div class="mb-2 flex justify-between text-sm">
-            <span class="text-gray-500 dark:text-zinc-400">Số sản phẩm</span>
-            <span class="text-surface-foreground font-medium">{{ orderItems.length }} loại</span>
+            <span class="text-gray-500 dark:text-zinc-400">{{
+              $t('quick_order_success_products')
+            }}</span>
+            <span class="text-surface-foreground font-medium">{{
+              $t('quick_order_success_products_count', { count: orderItems.length })
+            }}</span>
           </div>
           <div class="border-surface-border flex justify-between border-t pt-2 text-sm">
-            <span class="text-surface-foreground font-semibold">Tổng tiền</span>
+            <span class="text-surface-foreground font-semibold">{{
+              $t('wholesale_col_total')
+            }}</span>
             <span class="text-primary-600 dark:text-primary-400 font-bold">{{
               formatVND(total)
             }}</span>
           </div>
         </div>
         <p class="mb-6 text-sm text-gray-500 dark:text-zinc-400">
-          Chúng tôi sẽ liên hệ với bạn trong vòng 15 phút để xác nhận đơn hàng.
+          {{ $t('quick_order_success_msg') }}
         </p>
         <div class="flex flex-col justify-center gap-3 sm:flex-row">
-          <NuxtLink to="/products"><UButton variant="outline">Tiếp tục mua sắm</UButton></NuxtLink>
-          <UButton @click="resetForm">Đặt đơn mới</UButton>
+          <NuxtLink to="/products"
+            ><UButton variant="outline">{{
+              $t('quick_order_success_btn_continue')
+            }}</UButton></NuxtLink
+          >
+          <UButton @click="resetForm">{{ $t('quick_order_success_btn_new') }}</UButton>
         </div>
       </div>
     </template>
@@ -242,7 +271,11 @@ const resetForm = () => {
           <div class="card p-4">
             <!-- Search -->
             <div class="mb-4">
-              <BaseSearchInput v-model="search" placeholder="Tìm sản phẩm..." class="w-full" />
+              <BaseSearchInput
+                v-model="search"
+                :placeholder="$t('quick_order_search_ph')"
+                class="w-full"
+              />
             </div>
 
             <!-- Category pills -->
@@ -263,7 +296,7 @@ const resetForm = () => {
                   }
                 "
               >
-                Tất cả
+                {{ $t('admin_debt_type_all') }}
               </UButton>
               <UButton
                 v-for="cat in categories"
@@ -348,7 +381,7 @@ const resetForm = () => {
               </div>
             </template>
             <div v-else class="py-8 text-center text-sm text-gray-500 dark:text-zinc-400">
-              Không tìm thấy sản phẩm
+              {{ $t('admin_order_picker_empty') }}
             </div>
           </div>
         </div>
@@ -360,7 +393,7 @@ const resetForm = () => {
             <div class="mb-4 flex items-center justify-between">
               <h2 class="text-surface-foreground flex items-center gap-2 font-semibold">
                 <ShoppingCart class="h-5 w-5" aria-hidden="true" />
-                Giỏ hàng ({{ orderItems.length }})
+                {{ $t('quick_order_cart_title', { count: orderItems.length }) }}
               </h2>
               <UButton
                 v-if="orderItems.length"
@@ -370,7 +403,7 @@ const resetForm = () => {
                 class="hover:text-danger-600 dark:hover:text-danger-400 min-h-[44px] px-2 text-xs text-gray-400 transition-colors dark:text-zinc-500"
                 @click="clearCart"
               >
-                Xóa tất cả
+                {{ $t('quick_order_cart_clear') }}
               </UButton>
             </div>
 
@@ -395,7 +428,7 @@ const resetForm = () => {
                       color="neutral"
                       type="button"
                       class="bg-surface-hover hover:bg-surface-border text-surface-foreground flex h-8 min-h-[36px] w-8 min-w-[36px] items-center justify-center rounded-md transition-colors"
-                      :aria-label="'Giảm số lượng'"
+                      :aria-label="$t('quick_order_cart_dec')"
                       @click="decrementQty(i)"
                     >
                       <Minus class="h-3.5 w-3.5" aria-hidden="true" />
@@ -409,7 +442,7 @@ const resetForm = () => {
                       color="neutral"
                       type="button"
                       class="bg-surface-hover hover:bg-surface-border text-surface-foreground flex h-8 min-h-[36px] w-8 min-w-[36px] items-center justify-center rounded-md transition-colors"
-                      :aria-label="'Tăng số lượng'"
+                      :aria-label="$t('quick_order_cart_inc')"
                       @click="incrementQty(i)"
                     >
                       <Plus class="h-3.5 w-3.5" aria-hidden="true" />
@@ -420,7 +453,7 @@ const resetForm = () => {
                     color="neutral"
                     type="button"
                     class="hover:text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20 flex h-8 min-h-[36px] w-8 min-w-[36px] flex-shrink-0 items-center justify-center rounded-md text-gray-400 transition-colors"
-                    :aria-label="'Xóa ' + item.productName"
+                    :aria-label="$t('quick_order_cart_remove', { name: item.productName })"
                     @click="removeItem(i)"
                   >
                     <Trash2 class="h-3.5 w-3.5" aria-hidden="true" />
@@ -430,7 +463,9 @@ const resetForm = () => {
               <div
                 class="border-surface-border mb-4 flex items-center justify-between border-t pt-3"
               >
-                <span class="text-surface-foreground font-semibold">Tổng cộng</span>
+                <span class="text-surface-foreground font-semibold">{{
+                  $t('quick_order_cart_total')
+                }}</span>
                 <span class="text-primary-600 dark:text-primary-400 text-xl font-bold">{{
                   formatVND(total)
                 }}</span>
@@ -442,9 +477,11 @@ const resetForm = () => {
               >
                 <Package class="h-7 w-7 text-gray-400 dark:text-zinc-500" aria-hidden="true" />
               </div>
-              <p class="text-sm text-gray-500 dark:text-zinc-400">Chưa có sản phẩm nào</p>
+              <p class="text-sm text-gray-500 dark:text-zinc-400">
+                {{ $t('quick_order_cart_empty_title') }}
+              </p>
               <p class="mt-1 text-xs text-gray-400 dark:text-zinc-500">
-                Chọn sản phẩm bên cạnh để thêm vào giỏ
+                {{ $t('quick_order_cart_empty_desc') }}
               </p>
             </div>
 
@@ -454,12 +491,20 @@ const resetForm = () => {
               class="border-surface-border mt-4 space-y-3 border-t pt-4"
               @submit.prevent="submitOrder"
             >
-              <UFormField label="Họ và tên" :error="formErrors.name">
-                <UInput v-model="formState.name" placeholder="Nguyễn Văn A" class="w-full" />
+              <UFormField :label="$t('val_fullname')" :error="formErrors.name">
+                <UInput
+                  v-model="formState.name"
+                  :placeholder="$t('quick_order_form_name_ph')"
+                  class="w-full"
+                />
               </UFormField>
 
-              <UFormField label="Số điện thoại" :error="formErrors.phone">
-                <UInput v-model="formState.phone" placeholder="0901234567" class="w-full" />
+              <UFormField :label="$t('auth_login_phone')" :error="formErrors.phone">
+                <UInput
+                  v-model="formState.phone"
+                  :placeholder="$t('quick_order_form_phone_ph')"
+                  class="w-full"
+                />
               </UFormField>
 
               <AddressSelect
@@ -468,8 +513,12 @@ const resetForm = () => {
                 @update:model-value="Object.assign(formState, $event)"
               />
 
-              <UFormField label="Ghi chú (tùy chọn)" :error="formErrors.note">
-                <UInput v-model="formState.note" placeholder="Giao trước 9h sáng" class="w-full" />
+              <UFormField :label="$t('quick_order_form_note')" :error="formErrors.note">
+                <UInput
+                  v-model="formState.note"
+                  :placeholder="$t('quick_order_form_note_ph')"
+                  class="w-full"
+                />
               </UFormField>
 
               <!-- Honeypot -->
@@ -489,7 +538,7 @@ const resetForm = () => {
 
               <UButton type="submit" :loading="submitting" size="lg" class="w-full justify-center">
                 <ShoppingCart class="mr-2 h-5 w-5" aria-hidden="true" />
-                Đặt hàng — {{ formatVND(total) }}
+                {{ $t('quick_order_form_submit', { total: formatVND(total) }) }}
               </UButton>
             </form>
           </div>
