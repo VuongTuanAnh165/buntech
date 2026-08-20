@@ -462,7 +462,12 @@ async function handleDelete(item: any) {
                       <template #default>{{ perPage }} / trang</template>
                     </USelectMenu>
                   </div>
-                  <UPagination v-model="page" :total="totalItems" :page-count="perPage" :max="5" />
+                  <UPagination
+                    v-model:page="page"
+                    :total="totalItems"
+                    :items-per-page="perPage"
+                    :max="5"
+                  />
                 </div>
               </template>
             </BaseDataTable>

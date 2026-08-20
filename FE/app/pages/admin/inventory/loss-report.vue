@@ -301,7 +301,11 @@ watch(search, () => {
               {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, filteredList.length) }} /
               {{ filteredList.length }}
             </span>
-            <UPagination v-model="page" :total="filteredList.length" :items-per-page="perPage" />
+            <UPagination
+              v-model:page="page"
+              :total="filteredList.length"
+              :items-per-page="perPage"
+            />
           </div>
         </div>
       </div>

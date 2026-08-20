@@ -1,6 +1,5 @@
 <script setup lang="ts">
-const heroImage =
-  'https://images.pexels.com/photos/1001773/pexels-photo-1001773.jpeg?auto=compress&cs=tinysrgb&w=1600'
+const heroImage = '/images/banner_1.webp'
 </script>
 
 <template>

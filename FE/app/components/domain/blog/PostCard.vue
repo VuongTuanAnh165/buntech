@@ -28,7 +28,9 @@ const date = computed(() => formatDate(props.post.publishedAt || props.post.crea
     <div class="grid grid-cols-1 lg:grid-cols-2">
       <div class="bg-surface-muted aspect-[16/9] overflow-hidden lg:aspect-auto">
         <NuxtImg
-          :src="getImageUrl(post.thumbnailUrl) || 'https://picsum.photos/400/300?random=1'"
+          :src="getImageUrl(post.thumbnailUrl) || '/images/logo_sm.webp'"
+          width="400"
+          height="300"
           :alt="post.title"
           class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="eager"
@@ -72,7 +74,9 @@ const date = computed(() => formatDate(props.post.publishedAt || props.post.crea
   >
     <div class="bg-surface-muted group relative aspect-[16/9] overflow-hidden">
       <NuxtImg
-        :src="getImageUrl(post.thumbnailUrl) || 'https://picsum.photos/400/300?random=1'"
+        :src="getImageUrl(post.thumbnailUrl) || '/images/logo_sm.webp'"
+        width="400"
+        height="300"
         :alt="post.title"
         class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         loading="lazy"

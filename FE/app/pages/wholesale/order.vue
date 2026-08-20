@@ -259,7 +259,7 @@ const columns = [
           </UTable>
 
           <div v-if="totalProducts > 0" class="mt-4 flex justify-end">
-            <UPagination v-model="page" :total="totalProducts" :page-count="12" />
+            <UPagination v-model:page="page" :total="totalProducts" :items-per-page="12" />
           </div>
         </UCard>
       </div>

@@ -134,84 +134,86 @@ async function handleDelete(row: unknown) {
       </template>
     </BasePageHeader>
 
-    <div
-      class="bg-surface ring-surface-border flex flex-col items-center gap-3 rounded-t-xl p-3 ring-1 sm:flex-row"
-    >
-      <BaseSearchInput
-        v-model="search"
-        placeholder="Tìm kiếm cấu hình..."
-        class="w-full max-w-sm flex-1"
-      />
-    </div>
-
-    <BaseDataTable
-      :rows="configs"
-      :columns="columns"
-      :loading="loading"
-      class="bg-surface ring-surface-border min-h-[400px] rounded-b-xl ring-1"
-      empty-title="Không có cấu hình"
-      empty-description="Chưa có cấu hình hệ thống nào."
-      empty-icon="i-lucide-settings"
-    >
-      <template #actions-header>
-        <div class="w-full text-right">Thao tác</div>
-      </template>
-
-      <template #key-cell="{ row }">
-        <span class="text-primary-600 dark:text-primary-400 font-mono text-sm font-medium">
-          {{ row.key }}
-        </span>
-      </template>
-
-      <template #value-cell="{ row }">
-        <span class="text-slate-700 dark:text-slate-300">
-          {{ row.value }}
-        </span>
-      </template>
-
-      <template #description-cell="{ row }">
-        <span class="text-sm text-slate-500">
-          {{ row.description || '-' }}
-        </span>
-      </template>
-
-      <template #created_at-cell="{ row }">
-        <span class="text-slate-500 dark:text-zinc-400">
-          {{ formatDate(row.created_at || new Date()) }}
-        </span>
-      </template>
-
-      <template #actions-cell="{ row }">
-        <div class="flex justify-end gap-1">
-          <UTooltip text="Chỉnh sửa">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              icon="i-lucide-edit"
-              size="sm"
-              @click="openEdit(row)"
-            />
-          </UTooltip>
-          <UTooltip text="Xóa">
-            <UButton
-              color="error"
-              variant="ghost"
-              icon="i-lucide-trash-2"
-              size="sm"
-              @click="handleDelete(row)"
-            />
-          </UTooltip>
+    <div class="card p-5">
+      <div class="mb-4 flex items-center justify-between gap-4">
+        <div class="max-w-sm flex-1">
+          <BaseSearchInput v-model="search" placeholder="Tìm kiếm cấu hình..." />
         </div>
-      </template>
-    </BaseDataTable>
-
-    <!-- Pagination -->
-    <div v-if="total > 0" class="mt-4 flex items-center justify-between">
-      <div class="text-sm text-slate-500">
-        Hiển thị {{ (page - 1) * limit + 1 }} - {{ Math.min(page * limit, total) }} trong tổng số
-        {{ total }}
       </div>
-      <UPagination v-model="page" :total="total" :page-count="limit" />
+
+      <div class="bg-surface ring-surface-border overflow-hidden rounded-lg ring-1">
+        <BaseDataTable
+          :rows="configs"
+          :columns="columns"
+          :loading="loading"
+          empty-title="Không có cấu hình"
+          empty-description="Chưa có cấu hình hệ thống nào."
+          empty-icon="i-lucide-settings"
+        >
+          <template #actions-header>
+            <div class="w-full text-right">Thao tác</div>
+          </template>
+
+          <template #key-cell="{ row }">
+            <span class="text-primary-600 dark:text-primary-400 font-mono text-sm font-medium">
+              {{ row.key }}
+            </span>
+          </template>
+
+          <template #value-cell="{ row }">
+            <span class="text-slate-700 dark:text-slate-300">
+              {{ row.value }}
+            </span>
+          </template>
+
+          <template #description-cell="{ row }">
+            <span class="text-sm text-slate-500">
+              {{ row.description || '-' }}
+            </span>
+          </template>
+
+          <template #createdAt-cell="{ row }">
+            <span class="text-slate-500 dark:text-zinc-400">
+              {{ formatDate(row.created_at || new Date()) }}
+            </span>
+          </template>
+
+          <template #actions-cell="{ row }">
+            <div class="flex justify-end gap-1">
+              <UTooltip text="Chỉnh sửa">
+                <UButton
+                  color="neutral"
+                  variant="ghost"
+                  icon="i-lucide-edit"
+                  size="sm"
+                  @click="openEdit(row)"
+                />
+              </UTooltip>
+              <UTooltip text="Xóa">
+                <UButton
+                  color="error"
+                  variant="ghost"
+                  icon="i-lucide-trash-2"
+                  size="sm"
+                  @click="handleDelete(row)"
+                />
+              </UTooltip>
+            </div>
+          </template>
+
+          <template #pagination>
+            <div
+              v-if="total > 0"
+              class="border-surface-border flex items-center justify-between border-t px-4 py-3"
+            >
+              <span class="text-sm text-slate-500 tabular-nums">
+                {{ (page - 1) * limit + 1 }}-{{ Math.min(page * limit, total) }} / {{ total }}
+              </span>
+              <UPagination v-model:page="page" :total="total" :items-per-page="limit" />
+            </div>
+          </template>
+        </BaseDataTable>
+      </div>
     </div>
 
     <!-- Tường minh Drawer để đảm bảo luôn load được -->

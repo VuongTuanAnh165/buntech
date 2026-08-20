@@ -10,7 +10,7 @@ const { t } = useI18n()
       <div
         class="absolute inset-0 opacity-30 transition-opacity duration-700"
         style="
-          background-image: url('https://images.pexels.com/photos/6711678/pexels-photo-6711678.jpeg?auto=compress&cs=tinysrgb&w=1200');
+          background-image: url('/images/banner_3.webp');
           background-size: cover;
           background-position: center;
         "

@@ -209,7 +209,9 @@ async function handleSave() {
           >
             <template #thumbnail-cell="{ row }">
               <NuxtImg
-                :src="getImageUrl(row.thumbnailUrl) || 'https://picsum.photos/100/100?random=3'"
+                :src="getImageUrl(row.thumbnailUrl) || '/images/logo_sm.webp'"
+                width="100"
+                height="100"
                 class="border-surface-border h-12 w-12 flex-shrink-0 rounded border object-cover shadow-sm"
                 loading="lazy"
               />
@@ -254,21 +256,10 @@ async function handleSave() {
                   {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, meta.total) }} /
                   {{ meta.total }}
                 </span>
-                <UPagination v-model="page" :total="meta.total" :items-per-page="perPage" />
+                <UPagination v-model:page="page" :total="meta.total" :items-per-page="perPage" />
               </div>
             </template>
           </BaseDataTable>
-
-          <div
-            v-if="meta.total > 0"
-            class="border-surface-border flex items-center justify-between border-t px-4 py-3"
-          >
-            <span class="text-sm text-slate-500 tabular-nums">
-              {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, meta.total) }} /
-              {{ meta.total }}
-            </span>
-            <UPagination v-model="page" :total="meta.total" :items-per-page="perPage" />
-          </div>
         </div>
       </div>
 

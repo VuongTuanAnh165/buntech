@@ -43,7 +43,7 @@ const tierStats = computed(() => {
       <div class="absolute inset-0">
         <!-- Ảnh nền xưởng bún truyền thống mờ -->
         <div
-          class="absolute inset-0 bg-[url('https://images.pexels.com/photos/1001773/pexels-photo-1001773.jpeg?auto=compress&cs=tinysrgb&w=1600')] bg-cover bg-center opacity-10"
+          class="absolute inset-0 bg-[url('/images/banner_1.webp')] bg-cover bg-center opacity-10"
           aria-hidden="true"
         />
       </div>

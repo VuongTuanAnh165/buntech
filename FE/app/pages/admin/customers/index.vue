@@ -317,7 +317,7 @@ const handleDelete = async (row: UserDTO) => {
                     <template #default>{{ limit }} / trang</template>
                   </USelectMenu>
                 </div>
-                <UPagination v-model="page" :total="total" :page-count="limit" :max="5" />
+                <UPagination v-model:page="page" :total="total" :items-per-page="limit" :max="5" />
               </div>
             </template>
           </BaseDataTable>

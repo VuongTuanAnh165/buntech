@@ -144,7 +144,9 @@ async function handleDelete(id: number) {
             @click="navigateTo(`/admin/blog/edit?id=${post.id}`)"
           >
             <NuxtImg
-              :src="getImageUrl(post.thumbnailUrl) || 'https://picsum.photos/800/500?random=1'"
+              :src="getImageUrl(post.thumbnailUrl) || '/images/logo_sm.webp'"
+              width="800"
+              height="500"
               class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               loading="lazy"
             />
@@ -208,7 +210,9 @@ async function handleDelete(id: number) {
             <template #title-cell="{ row }">
               <div class="flex max-w-sm gap-3">
                 <NuxtImg
-                  :src="getImageUrl(row.thumbnailUrl) || 'https://picsum.photos/100/100?random=1'"
+                  :src="getImageUrl(row.thumbnailUrl) || '/images/logo_sm.webp'"
+                  width="100"
+                  height="100"
                   class="border-surface-border h-12 w-12 flex-shrink-0 rounded border object-cover"
                 />
                 <div class="min-w-0">
@@ -281,20 +285,10 @@ async function handleDelete(id: number) {
                   {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, meta.total) }} /
                   {{ meta.total }}
                 </span>
-                <UPagination v-model="page" :total="meta.total" :items-per-page="perPage" />
+                <UPagination v-model:page="page" :total="meta.total" :items-per-page="perPage" />
               </div>
             </template>
           </BaseDataTable>
-          <div
-            v-if="meta.total > 0"
-            class="border-surface-border flex items-center justify-between border-t px-4 py-3"
-          >
-            <span class="text-sm text-slate-500 tabular-nums">
-              {{ (page - 1) * perPage + 1 }}-{{ Math.min(page * perPage, meta.total) }} /
-              {{ meta.total }}
-            </span>
-            <UPagination v-model="page" :total="meta.total" :items-per-page="perPage" />
-          </div>
         </div>
       </div>
     </template>

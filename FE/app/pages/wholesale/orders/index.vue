@@ -172,7 +172,7 @@ const handleStatusChange = (val: string | Record<string, string> | undefined) =>
         </template>
       </BaseDataTable>
       <div v-if="totalOrders > 0" class="border-surface-border flex justify-end border-t p-4">
-        <UPagination v-model="page" :total="totalOrders" :page-count="limit" />
+        <UPagination v-model:page="page" :total="totalOrders" :items-per-page="limit" />
       </div>
     </div>
   </div>

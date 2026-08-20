@@ -42,7 +42,9 @@ const blogPosts = computed(() => blogPostsRes.value?.data?.data || [])
           >
             <div class="bg-surface-muted aspect-[16/9] overflow-hidden">
               <NuxtImg
-                :src="getImageUrl(post.thumbnailUrl) || 'https://picsum.photos/400/300?random=1'"
+                :src="getImageUrl(post.thumbnailUrl) || '/images/logo_sm.webp'"
+                width="400"
+                height="300"
                 :alt="post.title"
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"

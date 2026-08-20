@@ -234,7 +234,7 @@ const handleFormSubmit = async () => {
         <p class="text-sm text-slate-500 dark:text-zinc-400">
           Hiển thị {{ meta.from }} đến {{ meta.to }} trong {{ meta.total }} đánh giá
         </p>
-        <UPagination v-model="page" :page-count="perPage" :total="meta.total" />
+        <UPagination v-model:page="page" :items-per-page="perPage" :total="meta.total" />
       </div>
     </template>
 

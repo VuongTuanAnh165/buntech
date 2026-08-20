@@ -18,8 +18,7 @@ import {
 useSeoMeta({ title: 'Về chúng tôi - BunTech' })
 definePageMeta({ layout: 'default' })
 
-const heroImage =
-  'https://images.pexels.com/photos/1001773/pexels-photo-1001773.jpeg?auto=compress&cs=tinysrgb&w=1600'
+const heroImage = '/images/banner_1.webp'
 
 const stats = [
   { value: '60+ năm', label: 'Kinh nghiệm truyền thống', icon: Award },
@@ -210,7 +209,7 @@ const toggleFaq = (index: number) => {
         <div class="relative">
           <div class="aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
             <NuxtImg
-              src="https://images.pexels.com/photos/6711687/pexels-photo-6711687.jpeg?auto=compress&cs=tinysrgb&w=800"
+              src="/images/banner_2.webp"
               alt="Xưởng bún BunTech"
               class="h-full w-full object-cover"
               loading="lazy"
