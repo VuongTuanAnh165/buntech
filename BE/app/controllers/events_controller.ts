@@ -2,13 +2,15 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { inject } from '@adonisjs/core'
 import emitter from '@adonisjs/core/services/emitter'
 import logger from '@adonisjs/core/services/logger'
-import type Order from '#models/order'
+import RealtimeService from '#services/realtime_service'
 
 const SSE_HEARTBEAT_INTERVAL_MS = 30_000
 const SSE_TIMEOUT_MS = 5 * 60 * 1000
 
 @inject()
 export default class EventsController {
+  constructor(protected realtimeService: RealtimeService) {}
+
   /**
    * @sse
    * @summary Kết nối Server-Sent Events (SSE)
@@ -47,18 +49,21 @@ export default class EventsController {
       cleanup()
     }, SSE_TIMEOUT_MS)
 
-    // Listener cho order:delivered
-    const onOrderDelivered = (order: Order) => {
+    // RealtimeService will forward Redis events to 'realtime:forward'
+    const onRealtimeEvent = (payload: { event: string; data: any }) => {
       try {
-        res.write(`event: order:delivered\n`)
-        res.write(`data: ${JSON.stringify(order)}\n\n`)
+        res.write(`event: ${payload.event}\n`)
+        res.write(`data: ${JSON.stringify(payload.data)}\n\n`)
       } catch (error) {
-        logger.error({ err: error }, '[SSE] Error writing order:delivered event')
+        logger.error({ err: error }, '[SSE] Error writing realtime event')
         cleanup()
       }
     }
 
-    emitter.on('order:delivered', onOrderDelivered)
+    emitter.on('realtime:forward', onRealtimeEvent)
+
+    // Ensure the app is subscribed to Redis
+    this.realtimeService.ensureSubscription()
 
     // Cleanup function: dọn dẹp toàn bộ listeners, timers và đóng response
     let cleaned = false
@@ -68,7 +73,7 @@ export default class EventsController {
 
       clearInterval(heartbeatInterval)
       clearTimeout(timeoutTimer)
-      emitter.off('order:delivered', onOrderDelivered)
+      emitter.off('realtime:forward', onRealtimeEvent)
 
       try {
         res.end()

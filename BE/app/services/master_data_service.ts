@@ -5,12 +5,7 @@ import MasterDataSync from '#models/master_data_sync'
 import crypto from 'node:crypto'
 import logger from '@adonisjs/core/services/logger'
 import { DateTime } from 'luxon'
-// import redis from '@adonisjs/redis/services/main'
-const redis = {
-  get: async (_key: string): Promise<string | null> => null,
-  set: async (_key: string, _value: string) => {},
-  del: async (_key: string) => {},
-}
+import redis from '@adonisjs/redis/services/main'
 import axios from 'axios'
 
 interface DivisionTreeItem {

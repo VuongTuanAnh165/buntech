@@ -77,6 +77,15 @@ onMounted(async () => {
         icon: 'i-lucide-check-circle'
       })
       refresh()
+    },
+    onOrderCreated: (orderData: Record<string, unknown>) => {
+      toast.add({
+        title: 'Đơn hàng mới',
+        description: `Có đơn hàng mới vừa được tạo! (ID: ${orderData.id})`,
+        color: 'info',
+        icon: 'i-lucide-bell-ring'
+      })
+      refresh()
     }
   })
 })

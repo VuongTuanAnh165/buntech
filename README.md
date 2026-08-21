@@ -11,6 +11,7 @@ Trước khi chạy dự án, hãy đảm bảo máy bạn đã cài đặt các
 - **Node.js**: Phiên bản >= 20.x.x
 - **NPM**: Đi kèm với Node.js
 - **Database**: MySQL (hoặc SQLite mặc định tùy cấu hình môi trường)
+- **Redis**: Bắt buộc phải có Redis Server chạy nền (Windows có thể dùng Docker, WSL2 hoặc Memurai. Máy Mac dùng Homebrew `brew install redis`).
 - **Môi trường Mobile**: 
   - Android Studio (Nếu muốn build App Android)
   - Xcode & macOS (Nếu muốn build App iOS)

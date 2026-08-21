@@ -3,7 +3,10 @@ export const useAdminSSE = () => {
   const token = useCookie('auth_token')
   let eventSource: EventSource | null = null
 
-  const connect = (callbacks: { onOrderDelivered?: (data: { id: number }) => void }) => {
+  const connect = (callbacks: {
+    onOrderDelivered?: (data: { id: number }) => void
+    onOrderCreated?: (data: Record<string, unknown>) => void
+  }) => {
     if (!import.meta.client) return
 
     const baseUrl = config.public.apiBaseUrl || 'http://localhost:3333'
@@ -21,6 +24,18 @@ export const useAdminSSE = () => {
         try {
           const data = JSON.parse(event.data)
           callbacks.onOrderDelivered(data)
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error('Error parsing SSE data', e)
+        }
+      }
+    })
+
+    eventSource.addEventListener('order:created', (event: MessageEvent) => {
+      if (callbacks.onOrderCreated) {
+        try {
+          const data = JSON.parse(event.data)
+          callbacks.onOrderCreated(data)
         } catch (e) {
           // eslint-disable-next-line no-console
           console.error('Error parsing SSE data', e)

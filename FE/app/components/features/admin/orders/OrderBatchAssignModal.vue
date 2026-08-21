@@ -91,11 +91,10 @@ function handleAssign() {
           class="bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 flex items-center gap-2 rounded-lg border p-3"
         >
           <div class="i-lucide-truck text-primary-600 dark:text-primary-400 h-5 w-5" />
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <p
-            class="text-primary-700 dark:text-primary-300 text-sm"
-            v-html="$t('admin_order_batch_selected_desc', { count: localOrders.length })"
-          />
+          <p class="text-primary-700 dark:text-primary-300 text-sm">
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <span v-html="$t('admin_order_batch_selected_desc', { count: localOrders.length })" />
+          </p>
         </div>
 
         <div
