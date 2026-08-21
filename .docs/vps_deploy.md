@@ -9,6 +9,28 @@ Quy trình này chia làm 2 giai đoạn chính:
 
 ---
 
+## 🤖 CHẾ ĐỘ RẢNH TAY: ĐỂ AI LÀM THAY BẠN TỪ A-Z
+
+Nếu bạn muốn tôi (AI) thao tác toàn bộ các bước từ setup VPS, cài đặt Nginx, Database cho đến viết file CI/CD và gắn Secrets tự động, bạn chỉ cần chuẩn bị và cung cấp cho tôi các thông tin (Input) sau đây. Phần còn lại tôi sẽ tự code và tự chạy lệnh trên máy bạn:
+
+**1. Thông tin Máy chủ (VPS):**
+- **IP của VPS:** (Ví dụ: `103.123.456.789`)
+- **Mật khẩu root:** (Gửi trực tiếp cho tôi để tôi dùng lệnh kết nối, HOẶC bạn tự chạy lệnh SSH vào VPS trên terminal của bạn, sau đó bảo tôi: *"Tôi đã login vào VPS rồi, chạy lệnh cài đặt đi"*).
+
+**2. Thông tin Tên miền (Domain):**
+- **Tên miền chính:** (Ví dụ: `buntech.vn`)
+- **Tên miền API:** (Ví dụ: `api.buntech.vn`)
+- *Lưu ý: Bạn phải tự vào trang quản lý tên miền (Cloudflare/Mắt Bão...) và trỏ Record A của cả 2 tên miền này về IP của VPS trên.*
+
+**3. Môi trường và Bảo mật (Secrets):**
+- Đảm bảo bạn đã điền đủ các biến cần thiết vào 2 file `.env` (của FE và BE) trên máy tính cá nhân.
+- Đảm bảo file chứng chỉ Firebase `buntech-firebase-adminsdk...json` đã có sẵn trong thư mục BE.
+- Bạn cần đăng nhập sẵn GitHub CLI trên máy tính (chạy lệnh `gh auth login` nếu chưa làm) để tôi có thể dùng lệnh tạo GitHub Secrets tự động cho bạn.
+
+👉 **KHI NÀO SẴN SÀNG, HÃY NHẮN:** *"Tôi đã chuẩn bị xong các input trong file vps_deploy, IP của tôi là XXX, chạy setup cho tôi"*
+
+---
+
 ## Giai đoạn 1: Thiết lập Máy chủ (VPS)
 
 ### 💡 Tư vấn Cấu hình VPS Cần Thuê
@@ -85,11 +107,16 @@ cd /var/www/buntech
 
 Tạo thủ công file `.env` cho BE và FE, vì những file này chứa key bảo mật, **tuyệt đối không đẩy lên GitHub**.
 
-**Tạo `.env` cho Backend:**
+**Tạo `.env` cho Backend và upload Firebase Admin SDK:**
 ```bash
 mkdir BE && nano BE/.env
 ```
 Copy nội dung `.env` môi trường thật của bạn vào (Đổi `NODE_ENV=production`, sửa DB_PASSWORD khớp với VPS). Lưu lại (Ctrl+O, Enter, Ctrl+X).
+
+> [!IMPORTANT]
+> **Tải lên chứng chỉ Firebase Admin SDK:**
+> File `buntech-firebase-adminsdk-*.json` của Backend chứa khoá bảo mật nên đã được đưa vào `.gitignore` và không có trên GitHub. Do đó, bạn **bắt buộc phải tải thủ công file này từ máy tính của bạn lên thư mục `BE/` trên VPS**.
+> Bạn có thể dùng phần mềm như WinSCP, FileZilla hoặc dùng lệnh `scp` để copy file này từ máy cá nhân lên đường dẫn `/var/www/buntech/BE/`.
 
 **Tạo `.env` cho Frontend:**
 ```bash
@@ -192,6 +219,32 @@ jobs:
 > Lần đầu tiên chạy Action này, trong thư mục `/var/www/buntech` trên VPS chưa có liên kết `git`. Bạn cần tự clone repo về 1 lần đầu tiên trên VPS:
 > `cd /var/www && git clone <link-repo-github> buntech` (Nếu là repo private, bạn cần tạo Personal Access Token trên GitHub để clone).
 > Từ lần thứ 2 trở đi, GitHub Action sẽ tự chạy lệnh `git pull origin main` thành công.
+
+> [!TIP]
+> **(Nâng cao) Quản lý file bảo mật tự động hoàn toàn bằng CI/CD:**
+> Thay vì phải copy thủ công file `.env` và `firebase.json` lên VPS 1 lần duy nhất, bạn có thể đẩy hết nội dung các file này lên **GitHub Secrets** (ví dụ tạo secret tên `ENV_BE`, `ENV_FE`, `FIREBASE_JSON`).
+> Sau đó trong file `deploy.yml` ở bước `ssh-action`, bạn bổ sung thêm phần `envs` và xuất nó ra file như sau:
+> ```yaml
+>       - name: Deploy qua SSH lên VPS
+>         uses: appleboy/ssh-action@v1.0.0
+>         env:
+>           ENV_BE_CONTENT: ${{ secrets.ENV_BE }}
+>           FIREBASE_JSON_CONTENT: ${{ secrets.FIREBASE_JSON }}
+>         with:
+>           host: ${{ secrets.HOST }}
+>           username: ${{ secrets.USERNAME }}
+>           key: ${{ secrets.SSH_PRIVATE_KEY }}
+>           envs: ENV_BE_CONTENT,FIREBASE_JSON_CONTENT
+>           script: |
+>             cd /var/www/buntech
+>             git pull origin main
+>             
+>             # Tự động tạo file bảo mật mỗi khi Deploy
+>             echo "$ENV_BE_CONTENT" > BE/.env
+>             echo "$FIREBASE_JSON_CONTENT" > BE/buntech-firebase-adminsdk-fbsvc-01d32f5eb7.json
+>             # ... (Tiếp tục với npm run build như cũ)
+> ```
+> Cách này giúp bạn quản lý toàn bộ mật khẩu trên 1 nơi duy nhất (GitHub) và VPS luôn đồng bộ với cấu hình mới nhất mà không cần đụng tay vào server.
 
 ---
 
