@@ -30,3 +30,6 @@ yarn-error.log
 .cd
 
 .adonisjs
+
+# Firebase Admin SDK credentials
+buntech-firebase-adminsdk-*.json

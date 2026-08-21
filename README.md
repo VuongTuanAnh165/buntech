@@ -164,4 +164,7 @@ Hệ thống hỗ trợ Push Notification trên cả Web (PWA) và Mobile App (N
 ### 5.2. Thiết lập cho Mobile Native (Capacitor)
 Đối với ứng dụng Native, Capacitor sử dụng file cấu hình trực tiếp của Firebase thay vì biến môi trường.
 - **Android**: Tải file `google-services.json` từ Firebase Console và đặt vào thư mục `FE/android/app/`.
-- **iOS**: Tải file `GoogleService-Info.plist` từ Firebase Console. Sau đó mở `FE/ios/App/App.xcworkspace` bằng Xcode, kéo thả file này vào thư mục `App` (Cùng cấp với `Info.plist`), và đảm bảo tick chọn "Copy items if needed".
+- **iOS**: Tải file `GoogleService-Info.plist` từ Firebase Console. Đặt vào thư mục `FE/ios/App/App/`.
+  - Bạn cũng cần bổ sung code cấu hình Firebase vào `AppDelegate.swift` (import FirebaseCore, gọi FirebaseApp.configure() và map các token delegate).
+  - **CỰC KỲ QUAN TRỌNG:** Mở thư mục ios qua Xcode (`npx cap open ios`), click vào tên project **App** bên cột trái -> Tab **Signing & Capabilities** -> Bấm **+ Capability** -> Chọn **Push Notifications** thì ứng dụng mới có quyền nhận thông báo.
+- **Backend**: Đặt file chứng chỉ Admin SDK (`.json`) vào dự án Backend (Ví dụ thư mục `BE/`) và tham chiếu trong cấu hình server để gửi thông báo.
