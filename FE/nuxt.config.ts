@@ -113,6 +113,9 @@ export default defineNuxtConfig({
     public: {
       // Biến dùng được ở cả Client và Server
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api',
+      contactEmail: process.env.NUXT_PUBLIC_CONTACT_EMAIL || 'support@tamhung.vn',
+      contactZalo: process.env.NUXT_PUBLIC_CONTACT_ZALO || 'https://zalo.me/tamhung',
+      contactPhone: process.env.NUXT_PUBLIC_CONTACT_PHONE || '0901234567',
       firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
       firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID,

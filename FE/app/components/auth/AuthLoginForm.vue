@@ -223,10 +223,10 @@ const handleFormSubmit = async (event: { data: Schema }) => {
     <p class="mt-8 text-center text-xs font-medium text-slate-400 dark:text-zinc-500">
       {{ $t('auth_login_support') }}
       <a
-        href="mailto:support@tamhung.vn"
+        :href="`mailto:${$config.public.contactEmail}`"
         class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-bold transition-colors"
       >
-        support@tamhung.vn
+        {{ $config.public.contactEmail }}
       </a>
     </p>
   </div>

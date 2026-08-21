@@ -223,7 +223,7 @@ const tierStats = computed(() => {
               variant="solid"
               size="lg"
               icon="i-lucide-phone"
-              to="tel:0123456789"
+              :to="`tel:${$config.public.contactPhone}`"
               class="!text-primary-600 group !bg-white hover:!bg-white/90"
             >
               {{ $t('public_distribution_cta_hotline') }}
@@ -233,7 +233,7 @@ const tierStats = computed(() => {
               variant="outline"
               size="lg"
               icon="i-lucide-message-circle"
-              to="https://zalo.me/tamhung"
+              :to="$config.public.contactZalo"
               target="_blank"
               class="!border-white !text-white hover:!bg-white/10"
             >

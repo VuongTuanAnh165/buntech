@@ -223,14 +223,14 @@ onUnmounted(() => {
                 <Facebook class="h-4 w-4" aria-hidden="true" />
               </a>
               <a
-                href="tel:+84901234567"
+                :href="`tel:${$config.public.contactPhone}`"
                 class="hover:bg-primary-600 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all duration-200 hover:scale-105 hover:text-white"
                 :aria-label="$t('aria_phone')"
               >
                 <Phone class="h-4 w-4" aria-hidden="true" />
               </a>
               <a
-                href="mailto:support@tamhung.vn"
+                :href="`mailto:${$config.public.contactEmail}`"
                 class="hover:bg-primary-600 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all duration-200 hover:scale-105 hover:text-white"
                 aria-label="Email"
               >

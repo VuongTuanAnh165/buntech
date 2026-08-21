@@ -433,7 +433,7 @@ const toggleFaq = (index: number) => {
                 />
               </UButton>
             </NuxtLink>
-            <a href="tel:+84901234567">
+            <NuxtLink :to="`tel:${$config.public.contactPhone}`">
               <UButton
                 variant="outline"
                 size="lg"
@@ -442,7 +442,7 @@ const toggleFaq = (index: number) => {
                 <Phone class="h-4 w-4" aria-hidden="true" />
                 {{ $t('public_about_cta_btn_call') }}
               </UButton>
-            </a>
+            </NuxtLink>
           </div>
           <div class="mt-6 flex items-center justify-center gap-2 text-sm text-white/60">
             <MapPin class="h-4 w-4" aria-hidden="true" />

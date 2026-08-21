@@ -1,4 +1,4 @@
-# BunTech Frontend - Chuyển đổi số Xưởng Bún Gia Đình
+# Tâm Hùng Frontend - Chuyển đổi số Xưởng Bún Gia Đình
 
 Dự án này là toàn bộ mã nguồn Frontend (Nuxt.js) cho hệ thống phần mềm quản lý và vận hành xưởng bún, bao gồm 4 module cốt lõi được xây dựng trong cùng một codebase.
 

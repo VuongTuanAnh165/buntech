@@ -1,4 +1,4 @@
-package com.buntech.app;
+package com.tamhung.app;
 
 import com.getcapacitor.BridgeActivity;
 
