@@ -92,7 +92,7 @@
         </div>
 
         <div class="flex items-center justify-between text-sm text-slate-400">
-          <span>&copy; {{ new Date().getFullYear() }} BunTech</span>
+          <span>&copy; {{ new Date().getFullYear() }} {{ $t('app_name') }}</span>
           <div class="flex items-center gap-4">
             <NuxtLink to="/" class="transition-colors hover:text-white">{{
               $t('nav_home')
@@ -115,7 +115,9 @@
           >
             B
           </div>
-          <span class="text-surface-foreground text-xl font-bold tracking-tight">BunTech</span>
+          <span class="text-surface-foreground text-xl font-bold tracking-tight">{{
+            $t('app_name')
+          }}</span>
         </div>
         <slot />
       </div>

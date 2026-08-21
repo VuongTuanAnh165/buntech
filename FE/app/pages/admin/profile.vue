@@ -39,9 +39,9 @@ const user = computed(() => {
 const email = computed(() => {
   if (!user.value) return '—'
   const roleConstants = constants.value?.[ConstantKey.Role] || {}
-  if (user.value.role === (roleConstants.ADMIN || 'admin')) return 'admin@buntech.vn'
-  if (user.value.role === (roleConstants.DRIVER || 'driver')) return 'driver@buntech.vn'
-  return `${user.value.fullName.toLowerCase().replace(/\s+/g, '.')}@buntech.vn`
+  if (user.value.role === (roleConstants.ADMIN || 'admin')) return 'admin@tamhung.vn'
+  if (user.value.role === (roleConstants.DRIVER || 'driver')) return 'driver@tamhung.vn'
+  return `${user.value.fullName.toLowerCase().replace(/\s+/g, '.')}@tamhung.vn`
 })
 
 // Activity timeline mock data

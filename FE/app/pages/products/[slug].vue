@@ -138,7 +138,8 @@ const quickOrder = () => {
 }
 
 useSeoMeta({
-  title: () => (product.value ? `${product.value.name} - BunTech` : t('public_products_seo_title'))
+  title: () =>
+    product.value ? `${product.value.name} - ${t('app_name')}` : t('public_products_seo_title')
 })
 </script>
 

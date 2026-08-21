@@ -7,7 +7,7 @@ import { t } from '~/utils/i18n'
 const { confirm } = useConfirmDialog()
 const { fetchConfigs, createConfig, updateConfig, deleteConfig } = useSystemConfigs()
 
-useSeoMeta({ title: `${t('nav_system_config')} - BunTech Admin` })
+useSeoMeta({ title: `${t('nav_system_config')} - ${t('app_name_admin')}` })
 definePageMeta({ layout: 'admin' })
 
 // ─── State ────────────────────────────────────────────────────────

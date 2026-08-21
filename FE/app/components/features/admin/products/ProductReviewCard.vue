@@ -103,7 +103,7 @@ const authorName = computed(() => {
               <UIcon name="i-lucide-message-circle" class="h-3.5 w-3.5" aria-hidden="true" />
               <span class="font-medium">{{
                 $t('admin_reviews_card_reply_from', {
-                  name: props.review.replier?.fullName || 'BunTech'
+                  name: props.review.replier?.fullName || t('app_name')
                 })
               }}</span>
             </div>

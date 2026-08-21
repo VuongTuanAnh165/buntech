@@ -1,4 +1,7 @@
 export const viMessages: Record<string, string> = {
+  app_name: 'Xưởng bún Tâm Hùng',
+  app_name_admin: 'Xưởng bún Tâm Hùng Admin',
+  app_name_driver: 'Tài xế Xưởng bún Tâm Hùng',
   // --- Common Actions & Terms ---
   login: 'Đăng nhập',
   save: 'Lưu',
@@ -148,7 +151,7 @@ export const viMessages: Record<string, string> = {
   val_url_invalid: 'URL ảnh không hợp lệ',
 
   // Admin Products Page
-  admin_products_seo_title: 'Quản lý Sản phẩm - BunTech Admin',
+  admin_products_seo_title: 'Quản lý Sản phẩm - Xưởng bún Tâm Hùng Admin',
   admin_products_desc: 'Quản lý danh sách sản phẩm, giá bán và hình ảnh hiển thị.',
   admin_products_add: 'Thêm sản phẩm',
   admin_products_kpi_active: 'Đang bán (trang này)',
@@ -160,7 +163,7 @@ export const viMessages: Record<string, string> = {
   admin_products_default_unit: 'sản phẩm',
 
   // Admin Categories Page
-  admin_categories_seo_title: 'Danh mục Sản phẩm - BunTech Admin',
+  admin_categories_seo_title: 'Danh mục Sản phẩm - Xưởng bún Tâm Hùng Admin',
   admin_categories_title: 'Danh mục Sản phẩm',
   admin_categories_desc: 'Quản lý phân loại sản phẩm, hỗ trợ SEO và tìm kiếm dễ dàng.',
   admin_categories_add: 'Thêm danh mục',
@@ -178,7 +181,7 @@ export const viMessages: Record<string, string> = {
   admin_categories_file_hint: 'JPG, PNG, WebP (Max 2MB)',
 
   // Admin Product Edit Page
-  admin_product_edit_seo_title: 'Sản phẩm - BunTech Admin',
+  admin_product_edit_seo_title: 'Sản phẩm - Xưởng bún Tâm Hùng Admin',
   admin_product_edit_desc: 'Quản lý thông tin, giá bán và hình ảnh của sản phẩm',
   admin_product_edit_form_name_max: 'Tối đa 191 ký tự',
   admin_product_edit_form_unit_req: 'Vui lòng nhập đơn vị tính',
@@ -203,7 +206,7 @@ export const viMessages: Record<string, string> = {
   admin_product_gallery_empty: 'Chưa có ảnh nào. Click "Thêm ảnh" để tải lên.',
 
   // Admin Reviews Page
-  admin_reviews_seo_title: 'Đánh giá sản phẩm - BunTech Admin',
+  admin_reviews_seo_title: 'Đánh giá sản phẩm - Xưởng bún Tâm Hùng Admin',
   admin_reviews_title: 'Đánh giá sản phẩm',
   admin_reviews_desc: 'Duyệt và phản hồi đánh giá từ khách hàng',
   admin_reviews_form_reply_req: 'Vui lòng nhập nội dung phản hồi',
@@ -282,7 +285,7 @@ export const viMessages: Record<string, string> = {
   admin_change_pw_score_hint: '. Bật xác thực 2 bước để đạt mức Xuất sắc.',
 
   // Admin Customers Page
-  admin_customers_seo_title: 'Khách hàng - BunTech Admin',
+  admin_customers_seo_title: 'Khách hàng - Xưởng bún Tâm Hùng Admin',
   admin_customers_role_all: 'Tất cả vai trò',
   admin_customers_kpi_total: 'Tổng người dùng',
   admin_customers_kpi_staff: 'Nhân sự',
@@ -349,7 +352,8 @@ export const viMessages: Record<string, string> = {
   header_login_customer: 'Đăng nhập khách hàng',
   footer_slogan: 'Hệ thống chuyển đổi số toàn diện cho xưởng bún gia đình',
   footer_app_driver: 'App Tài xế',
-  footer_copyright: '© 2026 BunTech. Hệ thống chuyển đổi số toàn diện cho xưởng bún gia đình',
+  footer_copyright:
+    '© 2026 Xưởng bún Tâm Hùng. Hệ thống chuyển đổi số toàn diện cho xưởng bún gia đình',
 
   // Dashboard
   admin_dash_top_buyers: 'Khách hàng hàng đầu',
@@ -422,7 +426,7 @@ export const viMessages: Record<string, string> = {
   admin_price_modal_btn_save2: 'Lưu giá',
 
   // Admin Orders Page
-  admin_orders_seo_title: 'Đơn hàng - BunTech Admin',
+  admin_orders_seo_title: 'Đơn hàng - Xưởng bún Tâm Hùng Admin',
   admin_orders_desc: 'Quản lý đơn hàng, điều phối tài xế và doanh thu',
   admin_orders_toast_deliv_title: 'Đơn hàng đã được giao!',
   admin_orders_toast_deliv_desc: 'Tài xế vừa chốt thành công đơn hàng #{id}',
@@ -461,7 +465,7 @@ export const viMessages: Record<string, string> = {
   admin_order_batch_btn_assign: 'Điều phối ngay',
 
   // Admin Order Create Page
-  admin_order_create_seo_title: 'Tạo đơn hàng - BunTech Admin',
+  admin_order_create_seo_title: 'Tạo đơn hàng - Xưởng bún Tâm Hùng Admin',
   admin_order_create_customer_ph: 'SĐT',
   admin_order_create_toast_old_ok: 'Đã tải dữ liệu đơn hàng cũ',
   admin_order_create_toast_old_err: 'Không thể tải đơn hàng cũ',
@@ -510,7 +514,7 @@ export const viMessages: Record<string, string> = {
   admin_order_detail_timeline_ship_desc: 'Đang trên đường giao',
   admin_order_detail_timeline_done: 'Giao thành công',
   admin_order_detail_timeline_done_desc: 'Khách đã nhận',
-  admin_order_detail_seo_title: 'Đơn hàng #{id} - BunTech Admin',
+  admin_order_detail_seo_title: 'Đơn hàng #{id} - Xưởng bún Tâm Hùng Admin',
   admin_order_detail_breadcrumb_admin: 'Admin',
   admin_order_detail_err_desc: 'Không thể tải thông tin đơn hàng.',
   admin_order_detail_title: 'Đơn hàng #{id}',
@@ -529,7 +533,7 @@ export const viMessages: Record<string, string> = {
   admin_order_detail_not_found_desc: 'Đơn hàng không tồn tại hoặc đã bị xóa',
 
   // Admin Debt Page
-  admin_debt_seo_title: 'Tài chính - BunTech Admin',
+  admin_debt_seo_title: 'Tài chính - Xưởng bún Tâm Hùng Admin',
   admin_debt_kpi_total_revenue: 'Tổng doanh thu',
   admin_debt_kpi_total_debt: 'Tổng công nợ',
   admin_debt_kpi_collected: 'Đã thu hồi',
@@ -568,7 +572,7 @@ export const viMessages: Record<string, string> = {
   admin_debt_pagination: '{perPage} / trang',
 
   // Admin Debt Pay Page
-  admin_debt_pay_seo_title: 'Thu nợ - BunTech Admin',
+  admin_debt_pay_seo_title: 'Thu nợ - Xưởng bún Tâm Hùng Admin',
   admin_debt_pay_err_user: 'Vui lòng chọn khách hàng',
   admin_debt_pay_err_amount_req: 'Vui lòng nhập số tiền',
   admin_debt_pay_err_amount_min: 'Số tiền tối thiểu 1.000đ',
@@ -589,7 +593,7 @@ export const viMessages: Record<string, string> = {
   admin_debt_pay_btn_submit: 'Xác nhận thu nợ',
 
   // Admin Inventory Page
-  admin_inventory_seo_title: 'Kho nguyên liệu - BunTech Admin',
+  admin_inventory_seo_title: 'Kho nguyên liệu - Xưởng bún Tâm Hùng Admin',
   admin_inventory_kpi_total_items: 'Tổng nguyên liệu',
   admin_inventory_kpi_total_qty: 'Tổng số lượng',
   admin_inventory_kpi_low_stock: 'Sắp hết hàng',
@@ -630,7 +634,7 @@ export const viMessages: Record<string, string> = {
   admin_inventory_form_note_export_ph: 'VD: Xuất sản xuất...',
 
   // Admin Dashboard Page
-  admin_dashboard_seo_title: 'Dashboard - BunTech Admin',
+  admin_dashboard_seo_title: 'Dashboard - Xưởng bún Tâm Hùng Admin',
   admin_dashboard_kpi_revenue: 'Doanh thu hôm nay',
   admin_dashboard_kpi_orders: 'Đơn hàng hôm nay',
   admin_dashboard_kpi_customers: 'Tổng khách hàng',
@@ -643,7 +647,7 @@ export const viMessages: Record<string, string> = {
   admin_dashboard_top_products_title: 'Sản phẩm bán chạy nhất',
 
   // Admin Change Password Page
-  admin_change_pw_seo_title: 'Đổi mật khẩu - BunTech Admin',
+  admin_change_pw_seo_title: 'Đổi mật khẩu - Xưởng bún Tâm Hùng Admin',
   admin_change_pw_hist_1: 'Đổi mật khẩu định kỳ 90 ngày',
   admin_change_pw_hist_2: 'Thiết lập mật khẩu mạnh theo chính sách mới',
   admin_change_pw_hist_3: 'Yêu cầu đổi mật khẩu do phát hiện đăng nhập lạ',
@@ -665,7 +669,7 @@ export const viMessages: Record<string, string> = {
     'Mẹo: Sử dụng một cụm từ dễ nhớ nhưng khó đoán. Không sử dụng thông tin cá nhân như ngày sinh hay tên thú cưng.',
 
   // Auth Pages
-  auth_login_seo_admin: 'Đăng nhập - BunTech Admin',
+  auth_login_seo_admin: 'Đăng nhập - Xưởng bún Tâm Hùng Admin',
   auth_login_seo_driver: 'Đăng nhập - Tài xế',
   auth_login_seo_customer: 'Đăng nhập - Khách hàng',
   auth_login_title_admin: 'Admin Portal',
@@ -680,7 +684,7 @@ export const viMessages: Record<string, string> = {
   auth_login_or: 'hoặc đăng nhập với',
   auth_login_support: 'Cần hỗ trợ? Liên hệ',
 
-  auth_forgot_seo: 'Quên mật khẩu - BunTech Admin',
+  auth_forgot_seo: 'Quên mật khẩu - Xưởng bún Tâm Hùng Admin',
   auth_forgot_title: 'Quên mật khẩu',
   auth_forgot_subtitle: 'Nhập số điện thoại để nhận mã xác thực',
   auth_forgot_check_email: 'Kiểm tra điện thoại',
@@ -690,7 +694,7 @@ export const viMessages: Record<string, string> = {
   auth_forgot_btn_get_otp: 'Lấy mã xác thực (OTP)',
   auth_forgot_remember: 'Nhớ mật khẩu?',
 
-  auth_reset_seo: 'Đặt lại mật khẩu - BunTech Admin',
+  auth_reset_seo: 'Đặt lại mật khẩu - Xưởng bún Tâm Hùng Admin',
   auth_reset_title: 'Đặt lại mật khẩu',
   auth_reset_subtitle: 'Nhập mã OTP và thiết lập mật khẩu mới',
   auth_reset_success: 'Đổi mật khẩu thành công',
@@ -706,15 +710,16 @@ export const viMessages: Record<string, string> = {
   auth_pw_strength_4: 'Mạnh',
 
   // Public Distribution Page
-  public_distribution_seo_title: 'Hệ Thống Phân Phối - BunTech',
+  public_distribution_seo_title: 'Hệ Thống Phân Phối - Xưởng bún Tâm Hùng',
   public_distribution_seo_desc:
-    'Khám phá mạng lưới đại lý BunTech trên toàn quốc. Tìm điểm bán chính hãng gần bạn nhất qua bản đồ trực tuyến.',
-  public_distribution_og_title: 'Hệ Thống Phân Phối BunTech - Mạng Lưới Đại Lý Toàn Quốc',
+    'Khám phá mạng lưới đại lý Xưởng bún Tâm Hùng trên toàn quốc. Tìm điểm bán chính hãng gần bạn nhất qua bản đồ trực tuyến.',
+  public_distribution_og_title:
+    'Hệ Thống Phân Phối Xưởng bún Tâm Hùng - Mạng Lưới Đại Lý Toàn Quốc',
   public_distribution_og_desc:
-    'Tìm đại lý chính hãng BunTech gần bạn. Hệ thống phân phối B2B uy tín, chất lượng.',
+    'Tìm đại lý chính hãng Xưởng bún Tâm Hùng gần bạn. Hệ thống phân phối B2B uy tín, chất lượng.',
   public_distribution_badge: 'Hệ thống Đại lý Phân phối',
   public_distribution_title_1: 'Mạng lưới',
-  public_distribution_title_highlight: 'BunTech',
+  public_distribution_title_highlight: 'Xưởng bún Tâm Hùng',
   public_distribution_title_2: 'trên toàn quốc',
   public_distribution_subtitle:
     'Khám phá mạng lưới đại lý chính hãng. Tìm điểm bán bún tươi truyền thống gần bạn nhất hoặc đăng ký trở thành đối tác phân phối cùng chúng tôi.',
@@ -727,14 +732,14 @@ export const viMessages: Record<string, string> = {
   public_distribution_partner_empty_title: 'Không tìm thấy đại lý',
   public_distribution_partner_empty_desc: 'Thử tìm với từ khóa khác hoặc xem toàn bộ danh sách.',
   public_distribution_partner_clear_filter: 'Xóa bộ lọc',
-  public_distribution_cta_title: 'Kinh Doanh Cùng BunTech',
+  public_distribution_cta_title: 'Kinh Doanh Cùng Xưởng bún Tâm Hùng',
   public_distribution_cta_desc_1: 'Hưởng giá xuất xưởng — Lên bản đồ toàn quốc.',
   public_distribution_cta_desc_2: 'Trở thành đại lý ngay hôm nay!',
   public_distribution_cta_hotline: 'Hotline: 0123 456 789',
   public_distribution_cta_zalo: 'Chat Zalo',
 
   // Wholesale Index Page
-  wholesale_seo_title: 'Khách hàng - BunTech',
+  wholesale_seo_title: 'Khách hàng - Xưởng bún Tâm Hùng',
   wholesale_welcome: 'Xin chào, {name} 👋',
   wholesale_role_label: 'Khách sỉ',
   wholesale_no_phone: 'Chưa có SĐT',
@@ -757,7 +762,7 @@ export const viMessages: Record<string, string> = {
   wholesale_col_total: 'Tổng tiền',
 
   // Wholesale Order Page
-  wholesale_order_seo_title: 'Tạo đơn hàng sỉ - BunTech',
+  wholesale_order_seo_title: 'Tạo đơn hàng sỉ - Xưởng bún Tâm Hùng',
   wholesale_order_err_no_address: 'Vui lòng chọn địa chỉ giao hàng',
   wholesale_order_err_no_items: 'Vui lòng chọn ít nhất 1 sản phẩm',
   wholesale_msg_error: 'Lỗi',
@@ -782,7 +787,7 @@ export const viMessages: Record<string, string> = {
   wholesale_order_btn_submit: 'Xác nhận đặt hàng',
 
   // Wholesale Orders List
-  wholesale_orders_seo_title: 'Lịch sử đơn hàng - BunTech',
+  wholesale_orders_seo_title: 'Lịch sử đơn hàng - Xưởng bún Tâm Hùng',
   wholesale_orders_back_overview: 'Quay lại tổng quan',
   wholesale_orders_title: 'Lịch sử đơn hàng',
   wholesale_orders_desc: 'Xem và theo dõi trạng thái các đơn hàng bạn đã đặt.',
@@ -792,7 +797,7 @@ export const viMessages: Record<string, string> = {
     'Bạn chưa có đơn hàng nào hoặc không có đơn hàng nào khớp với bộ lọc.',
 
   // Wholesale Order Detail
-  wholesale_order_detail_seo: 'Chi tiết đơn hàng #{id} - BunTech',
+  wholesale_order_detail_seo: 'Chi tiết đơn hàng #{id} - Xưởng bún Tâm Hùng',
   wholesale_order_detail_unpaid: 'Chưa thanh toán',
   wholesale_order_detail_paid: 'Đã thanh toán',
   wholesale_order_detail_date: 'Đặt lúc {date}',
@@ -814,7 +819,7 @@ export const viMessages: Record<string, string> = {
   wholesale_order_detail_err_desc: 'Đơn hàng không tồn tại hoặc bạn không có quyền xem.',
 
   // Driver Delivery Index
-  driver_delivery_seo_title: 'Tuyến giao hàng - BunTech Driver',
+  driver_delivery_seo_title: 'Tuyến giao hàng - Tài xế Xưởng bún Tâm Hùng',
   driver_delivery_msg_online: 'Bạn đã trực tuyến',
   driver_delivery_msg_offline: 'Bạn đã ngoại tuyến',
   driver_delivery_msg_refresh: 'Đã làm mới danh sách',
@@ -835,7 +840,7 @@ export const viMessages: Record<string, string> = {
   driver_delivery_empty_desc_filter: 'Không có đơn hàng nào phù hợp với bộ lọc đã chọn.',
 
   // Driver Delivery Detail
-  driver_delivery_detail_seo: 'Chi tiết đơn giao - BunTech Driver',
+  driver_delivery_detail_seo: 'Chi tiết đơn giao - Tài xế Xưởng bún Tâm Hùng',
   driver_delivery_detail_call_success: 'Đang gọi {phone}',
   driver_delivery_detail_call_err: 'Không có số điện thoại',
   driver_delivery_detail_map_msg: 'Mở bản đồ điều hướng...',
@@ -859,7 +864,7 @@ export const viMessages: Record<string, string> = {
   driver_delivery_detail_swipe_confirm: 'Vuốt để chốt đơn',
 
   // Driver History
-  driver_history_seo_title: 'Lịch sử giao hàng - BunTech Driver',
+  driver_history_seo_title: 'Lịch sử giao hàng - Tài xế Xưởng bún Tâm Hùng',
   driver_history_msg_refresh: 'Đã làm mới lịch sử',
   driver_history_title: 'Lịch sử giao hàng',
   driver_history_desc: 'Xem lại các chuyến giao đã hoàn thành',
@@ -878,7 +883,7 @@ export const viMessages: Record<string, string> = {
   driver_history_empty_desc_filter: 'Không có chuyến nào phù hợp với bộ lọc đã chọn.',
 
   // Driver Notifications
-  driver_notification_seo_title: 'Thông báo - BunTech Driver',
+  driver_notification_seo_title: 'Thông báo - Tài xế Xưởng bún Tâm Hùng',
   driver_notification_unread_count: '{count} thông báo chưa đọc',
   driver_notification_btn_read_all: 'Đánh dấu tất cả đã đọc',
   driver_notification_tab_unread: 'Chưa đọc',
@@ -890,7 +895,7 @@ export const viMessages: Record<string, string> = {
   driver_notification_empty_desc_all: 'Khi có thông báo mới, nó sẽ hiển thị tại đây.',
 
   // Driver Profile
-  driver_profile_seo_title: 'Hồ sơ tài xế - BunTech Driver',
+  driver_profile_seo_title: 'Hồ sơ tài xế - Tài xế Xưởng bún Tâm Hùng',
   driver_profile_title: 'Hồ sơ tài xế',
   driver_profile_desc: 'Thông tin và thành tích của bạn',
   driver_profile_msg_copy_success: 'Đã sao chép số điện thoại',
@@ -915,7 +920,7 @@ export const viMessages: Record<string, string> = {
   driver_profile_activity_shipping: 'Đang giao #{id}',
 
   // Driver Vehicle
-  driver_vehicle_seo_title: 'Phương tiện - BunTech Driver',
+  driver_vehicle_seo_title: 'Phương tiện - Tài xế Xưởng bún Tâm Hùng',
   driver_vehicle_desc: 'Thông tin xe giao hàng của bạn',
   driver_vehicle_plate: 'Biển số',
   driver_vehicle_specs_title: 'Thông số kỹ thuật',
@@ -945,7 +950,7 @@ export const viMessages: Record<string, string> = {
   driver_vehicle_msg_schedule: 'Mở lịch bảo dưỡng...',
 
   // Quick Order
-  quick_order_seo_title: 'Đặt hàng nhanh - BunTech',
+  quick_order_seo_title: 'Đặt hàng nhanh - Xưởng bún Tâm Hùng',
   quick_order_title: 'Đặt hàng nhanh',
   quick_order_desc: 'Chọn sản phẩm, điền thông tin — giao hàng tận nơi trong 2 giờ',
 
@@ -984,7 +989,7 @@ export const viMessages: Record<string, string> = {
   quick_order_val_name_max: 'Họ tên không được vượt quá 100 ký tự',
 
   // Public Products
-  public_products_seo_title: 'Sản phẩm - BunTech',
+  public_products_seo_title: 'Sản phẩm - Xưởng bún Tâm Hùng',
   public_products_sort_latest: 'Mới nhất',
   public_products_sort_price_asc: 'Giá thấp → cao',
   public_products_sort_price_desc: 'Giá cao → thấp',
@@ -1019,14 +1024,14 @@ export const viMessages: Record<string, string> = {
   public_product_tab_reviews: 'Đánh giá ({count})',
   public_product_desc_empty: 'Mô tả đang cập nhật...',
   public_product_reviews_count: '{count} đánh giá',
-  public_product_review_reply: 'Phản hồi từ BunTech:',
+  public_product_review_reply: 'Phản hồi từ Xưởng bún Tâm Hùng:',
   public_product_review_empty_title: 'Chưa có đánh giá',
   public_product_review_empty_desc: 'Hãy là người đầu tiên đánh giá sản phẩm này!',
   public_product_related_title: 'Sản phẩm liên quan',
   public_product_guest: 'Khách',
 
   // Public Blog
-  public_blog_seo_title: 'Tin tức - BunTech',
+  public_blog_seo_title: 'Tin tức - Xưởng bún Tâm Hùng',
   public_blog_title: 'Tin tức & Mẹo hay',
   public_blog_subtitle: 'Cập nhật kiến thức về bún, ẩm thực và mẹo kinh doanh',
   public_blog_search_ph: 'Tìm kiếm bài viết (trong trang hiện tại)...',
@@ -1045,25 +1050,25 @@ export const viMessages: Record<string, string> = {
   public_blog_detail_share_link: 'Sao chép link',
   public_blog_detail_author_id: 'Tác giả (ID: {id})',
   public_blog_detail_author_desc:
-    'Tác giả tại BunTech với nhiều năm kinh nghiệm trong ngành thực phẩm và ẩm thực Việt. Đam mê chia sẻ kiến thức về bún truyền thống và văn hóa ẩm thực.',
+    'Tác giả tại Xưởng bún Tâm Hùng với nhiều năm kinh nghiệm trong ngành thực phẩm và ẩm thực Việt. Đam mê chia sẻ kiến thức về bún truyền thống và văn hóa ẩm thực.',
   public_blog_detail_related: 'Bài viết liên quan',
   public_blog_featured_badge: 'Nổi bật',
   public_blog_read_more: 'Đọc tiếp',
 
   // Public Landing & About
-  public_landing_seo_title: 'BunTech - Xưởng bún gia đình truyền thống 3 đời',
-  public_about_seo_title: 'Về chúng tôi - BunTech',
+  public_landing_seo_title: 'Xưởng bún Tâm Hùng - Xưởng bún gia đình truyền thống 3 đời',
+  public_about_seo_title: 'Về chúng tôi - Xưởng bún Tâm Hùng',
 
   // Landing specific
   public_landing_hero_badge: 'Xưởng bún truyền thống từ năm 1960',
   public_landing_hero_title:
-    'Bún tươi thủ công BunTech<br class="hidden sm:block" > — Truyền 3 đời',
+    'Bún tươi thủ công Xưởng bún Tâm Hùng<br class="hidden sm:block" > — Truyền 3 đời',
   public_landing_hero_desc:
     'Bún tươi 100% gạo nguyên chất, không chất bảo quản.<br >sản xuất mỗi sáng theo bí truyền gia đình. Giao hàng tận nơi trong 2 giờ, đặt hàng dễ dàng qua app.',
   public_landing_hero_btn_products: 'Xem sản phẩm',
   public_landing_hero_stat_2_lbl: 'Kinh nghiệm',
 
-  public_landing_feat_title: 'Tại sao chọn BunTech',
+  public_landing_feat_title: 'Tại sao chọn Xưởng bún Tâm Hùng',
   public_landing_feat_subtitle: 'Hơn 60 năm uy tín — chúng tôi hiểu bún như hiểu gia đình mình',
   public_landing_feat_1_title: 'Bún tươi mỗi ngày',
   public_landing_feat_1_desc: 'Sản xuất mỗi sáng, giao đến tay khách hàng trong vòng 2 giờ.',
@@ -1076,18 +1081,19 @@ export const viMessages: Record<string, string> = {
   public_landing_feat_4_desc: 'App đặt hàng anytime, theo dõi đơn hàng và công nợ realtime.',
 
   public_landing_prod_cat_title: 'Danh mục sản phẩm',
-  public_landing_prod_cat_subtitle: 'Khám phá đa dạng các loại bún tươi BunTech',
+  public_landing_prod_cat_subtitle: 'Khám phá đa dạng các loại bún tươi Xưởng bún Tâm Hùng',
   public_landing_prod_cat_btn: 'Khám phá ngay',
   public_landing_prod_feat_title: 'Sản phẩm nổi bật',
   public_landing_prod_feat_subtitle: 'Bún tươi mới sản xuất, đặt hàng giao ngay',
   public_landing_prod_btn_all_mobile: 'Xem tất cả sản phẩm',
 
   public_landing_testi_title: 'Khách hàng nói gì',
-  public_landing_testi_subtitle: 'Hàng trăm quán ăn, tiệm bún tin tưởng BunTech mỗi ngày',
+  public_landing_testi_subtitle:
+    'Hàng trăm quán ăn, tiệm bún tin tưởng Xưởng bún Tâm Hùng mỗi ngày',
   public_landing_testi_def_1_name: 'Chị Mai',
   public_landing_testi_def_1_role: 'Tiệm bún Mai Hoàng, Q.5',
   public_landing_testi_def_1_text:
-    'Đặt hàng online rất tiện, giao đúng giờ. Bún ngon, sạch, khách quen khen nhiều. Dùng app BunTech từ ngày đầu, không bao giờ thất vọng.',
+    'Đặt hàng online rất tiện, giao đúng giờ. Bún ngon, sạch, khách quen khen nhiều. Dùng app Xưởng bún Tâm Hùng từ ngày đầu, không bao giờ thất vọng.',
   public_landing_testi_def_2_name: 'Anh Hùng',
   public_landing_testi_def_2_role: 'Quán phở Hùng, Bình Thạnh',
   public_landing_testi_def_2_text:
@@ -1137,7 +1143,7 @@ export const viMessages: Record<string, string> = {
   public_about_ms_2_year: '1990',
   public_about_ms_2_title: 'Mở rộng',
   public_about_ms_2_text:
-    'Bố mẹ tiếp quản, mở rộng quy mô sản xuất. Bún BunTech bắt đầu cung cấp cho các quán ăn, tiệm bún trong khu vực.',
+    'Bố mẹ tiếp quản, mở rộng quy mô sản xuất. Bún Xưởng bún Tâm Hùng bắt đầu cung cấp cho các quán ăn, tiệm bún trong khu vực.',
   public_about_ms_3_year: '2010',
   public_about_ms_3_title: 'Phát triển',
   public_about_ms_3_text:
@@ -1145,12 +1151,12 @@ export const viMessages: Record<string, string> = {
   public_about_ms_4_year: '2024',
   public_about_ms_4_title: 'Chuyển đổi số',
   public_about_ms_4_text:
-    'Ra mắt app BunTech — đặt hàng online, theo dõi đơn hàng và công nợ realtime. Sản lượng 1000+ kg/ngày.',
+    'Ra mắt app Xưởng bún Tâm Hùng — đặt hàng online, theo dõi đơn hàng và công nợ realtime. Sản lượng 1000+ kg/ngày.',
 
   public_about_team_1_name: 'Nguyễn Thị Bích',
   public_about_team_1_role: 'CEO - Thuyền trưởng',
   public_about_team_1_bio:
-    'Đời thứ 3, kế thừa bí truyền gia đình. Tốt nghiệp ĐH Kinh tế, dẫn dắt BunTech chuyển đổi số.',
+    'Đời thứ 3, kế thừa bí truyền gia đình. Tốt nghiệp ĐH Kinh tế, dẫn dắt Xưởng bún Tâm Hùng chuyển đổi số.',
   public_about_team_2_name: 'Trần Văn Hùng',
   public_about_team_2_role: 'Giám đốc sản xuất',
   public_about_team_2_bio:
@@ -1162,47 +1168,47 @@ export const viMessages: Record<string, string> = {
   public_about_team_4_name: 'Phạm Văn Nam',
   public_about_team_4_role: 'Giám đốc công nghệ',
   public_about_team_4_bio:
-    'Dẫn dắt chuyển đổi số BunTech. Xây dựng app đặt hàng và hệ thống quản lý đơn hàng.',
+    'Dẫn dắt chuyển đổi số Xưởng bún Tâm Hùng. Xây dựng app đặt hàng và hệ thống quản lý đơn hàng.',
 
-  public_about_faq_1_q: 'Bún BunTech có sử dụng hàn the không?',
+  public_about_faq_1_q: 'Bún Xưởng bún Tâm Hùng có sử dụng hàn the không?',
   public_about_faq_1_a:
-    'Tuyệt đối không. Bún BunTech được làm từ 100% gạo tự nhiên, sản xuất theo quy trình truyền thống 3 đời. Chúng tôi cam kết không sử dụng hàn the hay bất kỳ chất bảo quản nào.',
+    'Tuyệt đối không. Bún Xưởng bún Tâm Hùng được làm từ 100% gạo tự nhiên, sản xuất theo quy trình truyền thống 3 đời. Chúng tôi cam kết không sử dụng hàn the hay bất kỳ chất bảo quản nào.',
   public_about_faq_2_q: 'Bún tươi để được bao lâu?',
   public_about_faq_2_a:
-    'Bún tươi BunTech nên dùng trong ngày, tốt nhất trong vòng 24 giờ kể từ lúc sản xuất. Nếu bảo quản tủ lạnh có thể để 2-3 ngày, nhưng khuyến cáo dùng tươi để đảm bảo hương vị tốt nhất.',
+    'Bún tươi Xưởng bún Tâm Hùng nên dùng trong ngày, tốt nhất trong vòng 24 giờ kể từ lúc sản xuất. Nếu bảo quản tủ lạnh có thể để 2-3 ngày, nhưng khuyến cáo dùng tươi để đảm bảo hương vị tốt nhất.',
   public_about_faq_3_q: 'Làm thế nào để đặt hàng?',
   public_about_faq_3_a:
-    'Bạn có thể đặt hàng qua app BunTech (nhanh nhất), gọi điện thoại trực tiếp, hoặc đến đại lý gần nhất. Đặt qua app sẽ được giao hàng tận nơi trong 2 giờ tại khu vực nội thành.',
-  public_about_faq_4_q: 'BunTech có giao hàng tận nơi không?',
+    'Bạn có thể đặt hàng qua app Xưởng bún Tâm Hùng (nhanh nhất), gọi điện thoại trực tiếp, hoặc đến đại lý gần nhất. Đặt qua app sẽ được giao hàng tận nơi trong 2 giờ tại khu vực nội thành.',
+  public_about_faq_4_q: 'Xưởng bún Tâm Hùng có giao hàng tận nơi không?',
   public_about_faq_4_a:
     'Có. Chúng tôi giao hàng tận nơi tại TP.HCM và các khu vực lân cận. Nội thành giao trong 2 giờ, ngoại thành trong 4 giờ. Đơn hàng sỉ được giao miễn phí.',
   public_about_faq_5_q: 'Chính sách giá sỉ như thế nào?',
   public_about_faq_5_a:
-    'BunTech có chính sách giá sỉ linh hoạt tùy theo số lượng và tần suất đặt hàng. Đơn hàng sỉ được giảm 10% so với giá lẻ. Liên hệ hotline để được tư vấn chính sách giá tốt nhất.',
+    'Xưởng bún Tâm Hùng có chính sách giá sỉ linh hoạt tùy theo số lượng và tần suất đặt hàng. Đơn hàng sỉ được giảm 10% so với giá lẻ. Liên hệ hotline để được tư vấn chính sách giá tốt nhất.',
   public_about_faq_6_q: 'Nếu bún không đạt chất lượng có đổi trả không?',
   public_about_faq_6_a:
-    'Có. BunTech cam kết đổi trả 100% nếu bún không đạt chất lượng (biến chất, mùi lạ, hư hỏng). Vui lòng liên hệ hotline trong vòng 2 giờ sau khi nhận hàng để được hỗ trợ.',
+    'Có. Xưởng bún Tâm Hùng cam kết đổi trả 100% nếu bún không đạt chất lượng (biến chất, mùi lạ, hư hỏng). Vui lòng liên hệ hotline trong vòng 2 giờ sau khi nhận hàng để được hỗ trợ.',
 
   public_about_hero_badge: 'Xưởng bún truyền thống từ 1960',
   public_about_hero_title: 'Hành trình 3 đời làm bún',
   public_about_hero_desc:
-    'Từ xưởng bún gia đình nhỏ năm 1960 đến thương hiệu bún tươi hàng đầu — BunTech vẫn giữ trọn tinh hoa bí truyền 3 đời.',
+    'Từ xưởng bún gia đình nhỏ năm 1960 đến thương hiệu bún tươi hàng đầu — Xưởng bún Tâm Hùng vẫn giữ trọn tinh hoa bí truyền 3 đời.',
   public_about_story_mission: 'Sứ mệnh của chúng tôi',
   public_about_story_title: 'Bún tươi mỗi sáng — từ gia đình đến gia đình',
   public_about_story_p1:
     'Năm 1960, bà nội chúng tôi bắt đầu làm bún tại một xưởng nhỏ trong hẻm. Bún làm tay, từng sợi mộc mạc, bán cho hàng xóm và chợ phiên. Khách quen gọi là "bún bà Tư" — ngon, sạch, rẻ.',
   public_about_story_p2:
-    'Ba đời tiếp nối, bí truyền gia đình vẫn giữ nguyên. Nhưng cách làm bún thì ngày càng hiện đại — máy móc sạch sẽ, quy trình khép kín, đạt chuẩn VSATTP. Bún BunTech nay phục vụ hơn 50 đại lý, sản xuất 1000+ kg mỗi ngày, nhưng tinh hoa vẫn là tinh hoa.',
+    'Ba đời tiếp nối, bí truyền gia đình vẫn giữ nguyên. Nhưng cách làm bún thì ngày càng hiện đại — máy móc sạch sẽ, quy trình khép kín, đạt chuẩn VSATTP. Bún Xưởng bún Tâm Hùng nay phục vụ hơn 50 đại lý, sản xuất 1000+ kg mỗi ngày, nhưng tinh hoa vẫn là tinh hoa.',
   public_about_story_vision_lbl: 'Tầm nhìn',
   public_about_story_vision_desc:
     'Trở thành thương hiệu bún tươi số 1 Việt Nam — giữ gìn truyền thống, ứng dụng công nghệ, phục vụ cộng đồng.',
   public_about_values_title: 'Giá trị cốt lõi',
   public_about_values_subtitle: 'Những nguyên tắc chúng tôi giữ suốt 60+ năm',
   public_about_ms_title: 'Cột mốc phát triển',
-  public_about_team_title: 'Đội ngũ BunTech',
+  public_about_team_title: 'Đội ngũ Xưởng bún Tâm Hùng',
   public_about_team_subtitle: 'Những người tâm huyết giữ gìn truyền thống 3 đời',
   public_about_faq_title: 'Câu hỏi thường gặp',
-  public_about_cta_title: 'Trải nghiệm bún tươi BunTech',
+  public_about_cta_title: 'Trải nghiệm bún tươi Xưởng bún Tâm Hùng',
   public_about_cta_desc:
     'Đặt hàng online trong 30 giây, giao hàng tận nơi trong 2 giờ. Bún tươi mỗi sáng, từ xưởng đến bàn ăn của bạn.',
   public_about_cta_btn_order: 'Đặt hàng ngay',
@@ -1212,7 +1218,7 @@ export const viMessages: Record<string, string> = {
   // Admin Profile Page
   admin_role_admin: 'Quản trị viên',
   admin_role_driver: 'Tài xế',
-  admin_profile_seo_title: 'Hồ sơ cá nhân - BunTech Admin',
+  admin_profile_seo_title: 'Hồ sơ cá nhân - Xưởng bún Tâm Hùng Admin',
   admin_profile_act_login: 'Đăng nhập hệ thống',
   admin_profile_act_login_desc: 'Đăng nhập thành công từ địa chỉ IP 192.168.1.42',
   admin_profile_act_order: 'Xử lý đơn hàng #ORD-2023-104',
@@ -1242,12 +1248,12 @@ export const viMessages: Record<string, string> = {
   admin_profile_btn_save: 'Lưu thay đổi',
 
   // Admin Statistics Page
-  admin_stat_seo_title: 'Thống kê - BunTech Admin',
+  admin_stat_seo_title: 'Thống kê - Xưởng bún Tâm Hùng Admin',
   admin_stat_dev_title: 'Chức năng đang được phát triển',
   admin_stat_dev_desc: 'Các báo cáo thống kê sẽ sớm được cập nhật trong phiên bản tới.',
 
   // Admin Blog Categories Page
-  admin_blog_cat_seo_title: 'Danh mục Blog - BunTech Admin',
+  admin_blog_cat_seo_title: 'Danh mục Blog - Xưởng bún Tâm Hùng Admin',
   admin_categories_col_slug: 'Đường dẫn',
   admin_blog_cat_form_name_req: 'Tên danh mục không được để trống',
   admin_blog_cat_form_name_max: 'Tên danh mục tối đa 100 ký tự',
@@ -1265,7 +1271,7 @@ export const viMessages: Record<string, string> = {
   admin_blog_cat_form_name_ph: 'VD: Tin tức, Kiến thức...',
 
   // Admin Blog Post & Edit Page
-  admin_blog_seo_title: 'Bài viết - BunTech Admin',
+  admin_blog_seo_title: 'Bài viết - Xưởng bún Tâm Hùng Admin',
   admin_blog_all_cats: 'Tất cả danh mục',
   admin_blog_kpi_total: 'Tổng bài viết',
   admin_blog_kpi_draft: 'Bản nháp',
@@ -1280,7 +1286,7 @@ export const viMessages: Record<string, string> = {
   admin_blog_filter_placeholder: 'Tìm kiếm bài viết...',
   admin_blog_status_all: 'Tất cả trạng thái',
 
-  admin_blog_edit_seo_title: 'Chỉnh sửa bài viết - BunTech Admin',
+  admin_blog_edit_seo_title: 'Chỉnh sửa bài viết - Xưởng bún Tâm Hùng Admin',
   admin_blog_edit_title_edit: 'Chỉnh sửa bài viết',
   admin_blog_edit_title_add: 'Thêm bài viết mới',
   admin_blog_edit_form_title_req: 'Tiêu đề không được để trống',
@@ -1326,7 +1332,7 @@ export const viMessages: Record<string, string> = {
   driver_vehicle_mock_desc_5: 'Kiểm tra tổng quát, thay dầu máy và lọc gió.',
   driver_vehicle_days: 'ngày',
   admin_prod_default_unit: 'phần',
-  public_about_image_alt: 'Xưởng bún BunTech',
+  public_about_image_alt: 'Xưởng bún Tâm Hùng',
   admin_profile_stat_hint: 'Từ lâu',
   common_currency_symbol: 'đ',
   order_status_processing: 'Đang chuẩn bị'

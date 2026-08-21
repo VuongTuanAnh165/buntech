@@ -13,9 +13,9 @@ const route = useRoute()
         >
           B
         </div>
-        <span class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white"
-          >BunTech</span
-        >
+        <span class="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">{{
+          $t('app_name')
+        }}</span>
       </NuxtLink>
 
       <nav class="hidden items-center gap-6 md:flex">

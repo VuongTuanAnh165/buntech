@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.buntech.app',
-  appName: 'BunTech',
+  appId: 'com.tamhung.app',
+  appName: 'Xưởng bún Tâm Hùng',
   webDir: '.output/public',
   server: {
     androidScheme: 'http',

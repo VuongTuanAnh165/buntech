@@ -248,7 +248,7 @@ onMounted(() => {
               <p class="truncate text-sm font-medium text-neutral-900 dark:text-white">
                 {{
                   driver?.phoneNumber
-                    ? `driver${driver.phoneNumber.slice(-4)}@buntech.vn`
+                    ? `driver${driver.phoneNumber.slice(-4)}@tamhung.vn`
                     : $t('driver_profile_info_phone_empty')
                 }}
               </p>

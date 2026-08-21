@@ -10,7 +10,7 @@
             >
               B
             </div>
-            <span class="text-xl font-bold tracking-tight text-white">BunTech</span>
+            <span class="text-xl font-bold tracking-tight text-white">{{ $t('app_name') }}</span>
           </div>
           <p class="text-sm">{{ $t('footer_slogan') }}</p>
           <div class="flex gap-4 pt-2">

@@ -230,7 +230,7 @@ onUnmounted(() => {
                 <Phone class="h-4 w-4" aria-hidden="true" />
               </a>
               <a
-                href="mailto:support@buntech.vn"
+                href="mailto:support@tamhung.vn"
                 class="hover:bg-primary-600 flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 text-slate-400 transition-all duration-200 hover:scale-105 hover:text-white"
                 aria-label="Email"
               >
@@ -282,7 +282,7 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="mt-8 border-t border-white/10 pt-8 text-center text-sm text-slate-500">
-          &copy; {{ new Date().getFullYear() }} BunTech. {{ $t('app_tagline') }}
+          &copy; {{ new Date().getFullYear() }} {{ $t('app_name') }}. {{ $t('app_tagline') }}
         </div>
       </div>
     </footer>

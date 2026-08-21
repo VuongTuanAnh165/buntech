@@ -76,7 +76,7 @@ const navItems = [
           {{ authStore.userInitials || 'B' }}
         </div>
         <div>
-          <p class="text-sm leading-tight font-bold">BunTech Driver</p>
+          <p class="text-sm leading-tight font-bold">{{ $t('app_name_driver') }}</p>
           <p class="mt-0.5 text-[11px] leading-tight text-slate-400">
             {{ authStore.user?.fullName || $t('admin_role_driver') }}
           </p>

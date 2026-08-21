@@ -9,7 +9,7 @@ export interface SyncTask {
   timestamp: number
 }
 
-const SYNC_QUEUE_KEY = 'buntech_driver_offline_sync_queue'
+const SYNC_QUEUE_KEY = 'tamhung_driver_offline_sync_queue'
 
 export const useOfflineSync = () => {
   const isSyncing = ref(false)

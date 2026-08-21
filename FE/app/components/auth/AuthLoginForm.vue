@@ -223,10 +223,10 @@ const handleFormSubmit = async (event: { data: Schema }) => {
     <p class="mt-8 text-center text-xs font-medium text-slate-400 dark:text-zinc-500">
       {{ $t('auth_login_support') }}
       <a
-        href="mailto:support@buntech.vn"
+        href="mailto:support@tamhung.vn"
         class="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-bold transition-colors"
       >
-        support@buntech.vn
+        support@tamhung.vn
       </a>
     </p>
   </div>

@@ -75,8 +75,8 @@ export default defineNuxtConfig({
   // --- Cấu hình PWA ---
   pwa: {
     manifest: {
-      name: 'BunTech App',
-      short_name: 'BunTech',
+      name: 'Xưởng bún Tâm Hùng App',
+      short_name: 'Xưởng bún Tâm Hùng',
       theme_color: '#10b981', // emerald-500
       icons: []
     }

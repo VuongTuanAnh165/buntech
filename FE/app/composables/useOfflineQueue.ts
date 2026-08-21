@@ -8,7 +8,7 @@ export interface OfflineQueueItem {
   createdAt: string
 }
 
-const QUEUE_KEY = 'buntech_offline_queue'
+const QUEUE_KEY = 'tamhung_offline_queue'
 
 export function useOfflineQueue() {
   const getQueue = async (): Promise<OfflineQueueItem[]> => {

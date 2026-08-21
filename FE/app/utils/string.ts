@@ -157,7 +157,7 @@ export const removeVietnameseTones = (text: string): string => {
 
 /**
  * Chuyển chuỗi thành slug URL-friendly.
- * @example slugify('Bún tươi BunTech') → 'bun-tuoi-buntech'
+ * @example slugify('Bún tươi Xưởng bún Tâm Hùng') → 'bun-tuoi-tamhung'
  */
 export const slugify = (text: string): string => {
   return removeVietnameseTones(text)
@@ -170,7 +170,7 @@ export const slugify = (text: string): string => {
 
 /**
  * Cắt ngắn chuỗi và thêm dấu "...".
- * @example truncate('Xưởng bún gia đình BunTech', 15) → 'Xưởng bún gia đ...'
+ * @example truncate('Xưởng bún gia đình Xưởng bún Tâm Hùng', 15) → 'Xưởng bún gia đ...'
  */
 export const truncate = (text: string | null | undefined, maxLength: number): string => {
   if (!text) return ''

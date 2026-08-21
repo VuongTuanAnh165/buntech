@@ -233,7 +233,7 @@ const tierStats = computed(() => {
               variant="outline"
               size="lg"
               icon="i-lucide-message-circle"
-              to="https://zalo.me/buntech"
+              to="https://zalo.me/tamhung"
               target="_blank"
               class="!border-white !text-white hover:!bg-white/10"
             >

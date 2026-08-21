@@ -83,7 +83,7 @@ const shareTwitter = () => {
 useSeoMeta({
   title: () =>
     post.value
-      ? `${post.value.metaTitle || post.value.title} - BunTech`
+      ? `${post.value.metaTitle || post.value.title} - ${t('app_name')}`
       : t('public_blog_seo_title'),
   description: () => post.value?.metaDescription || post.value?.excerpt || ''
 })
