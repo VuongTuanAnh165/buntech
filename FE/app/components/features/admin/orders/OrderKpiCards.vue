@@ -80,7 +80,7 @@ const totalRevenue = computed(() =>
         <div
           class="bg-success-50 dark:bg-success-900/20 ring-success-100 dark:ring-success-900/30 flex h-10 w-10 items-center justify-center rounded-lg ring-1"
         >
-          <div class="i-lucide-banknote text-success-600 dark:text-success-400 h-5 w-5" />
+          <UIcon name="i-lucide-banknote" class="text-success-600 dark:text-success-400 h-5 w-5" />
         </div>
         <div>
           <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">
@@ -101,7 +101,7 @@ const totalRevenue = computed(() =>
         <span
           class="flex hidden items-center gap-1 text-xs text-slate-500 sm:flex dark:text-zinc-400"
         >
-          <div class="i-lucide-radio h-3.5 w-3.5" />
+          <UIcon name="i-lucide-radio" class="h-3.5 w-3.5" />
           {{ $t('admin_order_kpi_realtime') }}
         </span>
       </div>

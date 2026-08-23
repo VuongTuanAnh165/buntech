@@ -39,8 +39,9 @@ const paymentTransactions = computed(() =>
           <div
             class="bg-error-50 dark:bg-error-900/20 flex h-7 w-7 items-center justify-center rounded-lg"
           >
-            <span
-              class="i-lucide-wallet text-error-600 dark:text-error-400 h-4 w-4"
+            <UIcon
+              name="i-lucide-wallet"
+              class="text-error-600 dark:text-error-400 h-4 w-4"
               aria-hidden="true"
             />
           </div>
@@ -67,8 +68,9 @@ const paymentTransactions = computed(() =>
           <div
             class="bg-primary-50 dark:bg-primary-900/20 flex h-7 w-7 items-center justify-center rounded-lg"
           >
-            <span
-              class="i-lucide-credit-card text-primary-600 dark:text-primary-400 h-4 w-4"
+            <UIcon
+              name="i-lucide-credit-card"
+              class="text-primary-600 dark:text-primary-400 h-4 w-4"
               aria-hidden="true"
             />
           </div>
@@ -111,8 +113,9 @@ const paymentTransactions = computed(() =>
           <div
             class="bg-success-50 dark:bg-success-900/20 flex h-7 w-7 items-center justify-center rounded-lg"
           >
-            <span
-              class="i-lucide-trending-down text-success-600 dark:text-success-400 h-4 w-4"
+            <UIcon
+              name="i-lucide-trending-down"
+              class="text-success-600 dark:text-success-400 h-4 w-4"
               aria-hidden="true"
             />
           </div>
@@ -150,11 +153,13 @@ const paymentTransactions = computed(() =>
                     : 'bg-primary-50 dark:bg-primary-900/20'
               ]"
             >
-              <span
-                :class="[
+              <UIcon
+                :name="
                   tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
                     ? 'i-lucide-trending-up'
-                    : 'i-lucide-trending-down',
+                    : 'i-lucide-trending-down'
+                "
+                :class="[
                   'h-4 w-4',
                   tx.type === constants?.[ConstantKey.TransactionType]?.DEBT_INCREASE
                     ? 'text-error-600 dark:text-error-400'

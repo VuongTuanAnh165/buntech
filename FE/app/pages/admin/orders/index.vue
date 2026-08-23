@@ -391,7 +391,10 @@ const activeFilterCount = computed(() => {
           class="card bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800 mb-3 flex items-center justify-between p-3"
         >
           <div class="flex items-center gap-2">
-            <div class="i-lucide-check-circle-2 text-primary-600 dark:text-primary-400 h-5 w-5" />
+            <UIcon
+              name="i-lucide-check-circle-2"
+              class="text-primary-600 dark:text-primary-400 h-5 w-5"
+            />
             <span class="text-primary-700 dark:text-primary-300 text-sm font-medium">{{
               $t('admin_orders_selected_count', { count: selectedOrders.size })
             }}</span>

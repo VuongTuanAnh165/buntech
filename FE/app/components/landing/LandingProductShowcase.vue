@@ -44,9 +44,9 @@ const categories = computed(() => catRes.value?.data || [])
               class="h-full w-full object-cover"
               loading="lazy"
             />
-            <span
-              v-else
-              class="i-lucide-package text-primary-600 dark:text-primary-400 h-8 w-8 sm:h-10 sm:w-10"
+            <UIcon
+              name="i-lucide-package"
+              class="text-primary-600 dark:text-primary-400 h-8 w-8 sm:h-10 sm:w-10"
               aria-hidden="true"
             />
           </div>
@@ -78,8 +78,9 @@ const categories = computed(() => catRes.value?.data || [])
           class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 group hidden min-h-[44px] items-center gap-1 px-2 text-sm font-medium transition-colors sm:flex"
         >
           {{ $t('wholesale_view_all') }}
-          <span
-            class="i-lucide-chevron-right h-4 w-4 transition-transform group-hover:translate-x-0.5"
+          <UIcon
+            name="i-lucide-chevron-right"
+            class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
             aria-hidden="true"
           />
         </NuxtLink>
@@ -109,8 +110,9 @@ const categories = computed(() => catRes.value?.data || [])
               loading="lazy"
             />
             <div v-else class="flex h-full w-full items-center justify-center">
-              <span
-                class="i-lucide-package h-12 w-12 text-gray-300 dark:text-zinc-600"
+              <UIcon
+                name="i-lucide-package"
+                class="h-12 w-12 text-gray-300 dark:text-zinc-600"
                 aria-hidden="true"
               />
             </div>

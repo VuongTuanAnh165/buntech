@@ -27,8 +27,9 @@ const blogPosts = computed(() => blogPostsRes.value?.data?.data || [])
             class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 group hidden min-h-[44px] items-center gap-1 px-2 text-sm font-medium transition-colors sm:flex"
           >
             {{ $t('wholesale_view_all') }}
-            <span
-              class="i-lucide-chevron-right h-4 w-4 transition-transform group-hover:translate-x-0.5"
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
               aria-hidden="true"
             />
           </NuxtLink>
@@ -93,8 +94,9 @@ const blogPosts = computed(() => blogPostsRes.value?.data?.data || [])
               class="!text-primary-600 group !bg-white hover:!bg-white/90"
             >
               {{ $t('public_about_cta_btn_order') }}
-              <span
-                class="i-lucide-arrow-right h-5 w-5 transition-transform group-hover:translate-x-1"
+              <UIcon
+                name="i-lucide-arrow-right"
+                class="h-5 w-5 transition-transform group-hover:translate-x-1"
                 aria-hidden="true"
               />
             </UButton>

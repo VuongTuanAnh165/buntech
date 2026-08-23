@@ -72,8 +72,9 @@ const colorMap: Record<string, { bg: string; text: string }> = {
               colorMap[feature.color]?.bg
             ]"
           >
-            <span
-              :class="[feature.icon, 'h-6 w-6', colorMap[feature.color]?.text]"
+            <UIcon
+              :name="feature.icon"
+              :class="['h-6 w-6', colorMap[feature.color]?.text]"
               aria-hidden="true"
             />
           </div>
