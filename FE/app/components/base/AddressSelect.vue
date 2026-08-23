@@ -6,17 +6,31 @@ const props = defineProps<{
     province: string
     ward: string
     addressLine: string
+    latitude?: string | null
+    longitude?: string | null
   }
   errors?: {
     province?: string
     ward?: string
     addressLine?: string
+    latitude?: string | null
+    longitude?: string | null
   }
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: { province: string; ward: string; addressLine: string }]
+  'update:modelValue': [
+    value: {
+      province: string
+      ward: string
+      addressLine: string
+      latitude?: string | null
+      longitude?: string | null
+    }
+  ]
 }>()
+
+const isMapOpen = ref(false)
 
 // Use Master Data to fetch provinces and wards
 const { divisions } = useMasterData()
@@ -39,6 +53,23 @@ const updateField = (
   }
 
   state.value = newValue
+}
+
+const handleLocationUpdate = (payload: { latitude: string; longitude: string }) => {
+  state.value = {
+    ...state.value,
+    latitude: payload.latitude,
+    longitude: payload.longitude
+  }
+  isMapOpen.value = false
+}
+
+const clearLocation = () => {
+  state.value = {
+    ...state.value,
+    latitude: null,
+    longitude: null
+  }
 }
 
 // 1. Get list of Provinces
@@ -78,18 +109,6 @@ const wardModel = computed({
 
 <template>
   <div class="space-y-4">
-    <UFormField
-      :label="$t('address_specific')"
-      name="addressLine"
-      :error="props.errors?.addressLine"
-    >
-      <UInput
-        :model-value="state.addressLine"
-        :placeholder="$t('address_placeholder')"
-        @update:model-value="(val) => updateField('addressLine', String(val))"
-      />
-    </UFormField>
-
     <div class="space-y-4">
       <UFormField :label="$t('province')" name="province" :error="props.errors?.province">
         <USelectMenu
@@ -118,5 +137,63 @@ const wardModel = computed({
         />
       </UFormField>
     </div>
+
+    <UFormField
+      :label="$t('address_specific')"
+      name="addressLine"
+      :error="props.errors?.addressLine"
+    >
+      <div class="mt-2 flex items-center gap-2">
+        <UInput
+          :model-value="state.addressLine"
+          :placeholder="$t('address_placeholder')"
+          class="flex-1"
+          @update:model-value="(val) => updateField('addressLine', String(val))"
+        />
+        <UTooltip text="Bản đồ">
+          <UButton
+            icon="i-heroicons-map"
+            color="primary"
+            variant="soft"
+            @click="isMapOpen = true"
+          />
+        </UTooltip>
+      </div>
+
+      <!-- Coordinate Display -->
+      <div
+        v-if="state.latitude && state.longitude"
+        class="bg-primary-50 dark:bg-primary-950/50 mt-2 flex items-center justify-between rounded-md px-3 py-2 text-sm"
+      >
+        <div class="text-primary-700 dark:text-primary-300 flex items-center gap-2">
+          <UIcon name="i-heroicons-map-pin" class="h-4 w-4" />
+          <span
+            >{{ Number(state.latitude).toFixed(5) }}, {{ Number(state.longitude).toFixed(5) }}</span
+          >
+        </div>
+        <UButton
+          icon="i-heroicons-x-mark"
+          color="neutral"
+          variant="ghost"
+          size="xs"
+          padded
+          @click="clearLocation"
+        />
+      </div>
+    </UFormField>
+
+    <!-- Map Modal -->
+    <UModal v-model:open="isMapOpen" title="Chọn vị trí trên bản đồ" prevent-close>
+      <template #body>
+        <template v-if="isMapOpen">
+          <BaseMapLocationPicker
+            :latitude="state.latitude"
+            :longitude="state.longitude"
+            @update:location="handleLocationUpdate"
+            @close="isMapOpen = false"
+          />
+        </template>
+      </template>
+    </UModal>
   </div>
 </template>

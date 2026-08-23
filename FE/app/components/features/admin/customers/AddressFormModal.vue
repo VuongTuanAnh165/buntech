@@ -34,14 +34,18 @@ const schema = z.object({
   ),
   province: requiredString(t('province')).max(100),
   ward: requiredString(t('ward')).max(100),
-  isDefault: z.boolean().optional()
+  isDefault: z.boolean().optional(),
+  latitude: z.string().nullable().optional(),
+  longitude: z.string().nullable().optional()
 })
 
 const state = reactive({
   addressLine: '',
   province: '',
   ward: '',
-  isDefault: false
+  isDefault: false,
+  latitude: null as string | null,
+  longitude: null as string | null
 })
 
 const { formErrors, formRef, validate: validateForm } = useZodForm(schema)
@@ -55,11 +59,15 @@ watch(
         state.province = props.address.province || props.address.city || ''
         state.ward = props.address.ward || ''
         state.isDefault = !!props.address.isDefault
+        state.latitude = props.address.latitude ? String(props.address.latitude) : null
+        state.longitude = props.address.longitude ? String(props.address.longitude) : null
       } else {
         state.addressLine = ''
         state.province = ''
         state.ward = ''
         state.isDefault = false
+        state.latitude = null
+        state.longitude = null
       }
       formRef.value.clearErrors()
     }

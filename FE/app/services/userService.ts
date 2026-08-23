@@ -31,6 +31,8 @@ export type CreateAddressPayload = {
   district?: string
   city?: string
   isDefault?: boolean
+  latitude?: string | null
+  longitude?: string | null
 }
 
 export const userService = {

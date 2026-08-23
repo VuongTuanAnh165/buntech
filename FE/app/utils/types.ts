@@ -98,6 +98,8 @@ export interface Address {
   city?: string
   isDefault: boolean
   createdAt: string
+  latitude?: string | null
+  longitude?: string | null
 }
 
 export interface Order {
