@@ -11,7 +11,7 @@ type UpdateCategoryDTO = Infer<typeof updateCategoryValidator>
 
 @inject()
 export default class CategoryService {
-  constructor(protected fileUploadService: FileUploadService) {}
+  constructor(protected fileUploadService: FileUploadService) { }
 
   /**
    * Lấy danh sách phân trang (Cho Admin)
@@ -19,7 +19,7 @@ export default class CategoryService {
   async paginate(page: number = 1, limit: number = 10) {
     const safeLimit = getSafeLimit(limit)
     return await Category.query()
-      .select('id', 'name', 'slug', 'thumbnailUrl', 'createdAt', 'updatedAt')
+      .select('id', 'name', 'slug', 'description', 'thumbnailUrl', 'createdAt', 'updatedAt')
       .paginate(page, safeLimit)
   }
 

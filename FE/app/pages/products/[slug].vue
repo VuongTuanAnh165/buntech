@@ -75,7 +75,7 @@ const galleryImages = computed(() => {
   const imgs: string[] = []
   if (product.value.thumbnailUrl) imgs.push(getImageUrl(product.value.thumbnailUrl))
   if (product.value.images && Array.isArray(product.value.images)) {
-    imgs.push(...product.value.images.map((g: { fileUrl: string }) => g.fileUrl))
+    imgs.push(...product.value.images.map((g: { fileUrl: string }) => getImageUrl(g.fileUrl)))
   }
   return imgs.length ? imgs : []
 })
@@ -415,16 +415,25 @@ useSeoMeta({
           </div>
 
           <!-- Quick info -->
-          <div class="card space-y-2 p-4 text-sm">
-            <div class="flex justify-between">
-              <span class="text-gray-500 dark:text-zinc-400">{{ $t('admin_prod_form_unit') }}</span>
-              <span class="text-surface-foreground font-medium">{{ product.unit }}</span>
+          <div class="card p-4 text-sm">
+            <div class="space-y-2">
+              <div class="flex justify-between">
+                <span class="text-gray-500 dark:text-zinc-400">{{
+                  $t('admin_prod_form_unit')
+                }}</span>
+                <span class="text-surface-foreground font-medium">{{ product.unit }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-500 dark:text-zinc-400">{{ $t('nav_categories') }}</span>
+                <span class="text-surface-foreground font-medium">{{
+                  product.category?.name || $t('admin_blog_default_cat')
+                }}</span>
+              </div>
             </div>
-            <div class="flex justify-between">
-              <span class="text-gray-500 dark:text-zinc-400">{{ $t('nav_categories') }}</span>
-              <span class="text-surface-foreground font-medium">{{
-                product.category?.name || $t('admin_blog_default_cat')
-              }}</span>
+            <div v-if="product.shortDescription" class="border-surface-border mt-4 border-t pt-4">
+              <p class="leading-relaxed whitespace-pre-line text-gray-600 dark:text-zinc-300">
+                {{ product.shortDescription }}
+              </p>
             </div>
           </div>
         </div>
@@ -470,7 +479,7 @@ useSeoMeta({
             class="prose prose-sm prose-primary dark:prose-invert max-w-none pb-8 text-gray-600 dark:text-zinc-300"
           >
             <!-- eslint-disable-next-line vue/no-v-html -->
-            <div v-html="product.shortDescription || $t('public_product_desc_empty')" />
+            <div v-html="product.content || $t('public_product_desc_empty')" />
           </div>
         </div>
 

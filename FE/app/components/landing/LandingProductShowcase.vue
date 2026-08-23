@@ -26,19 +26,27 @@ const categories = computed(() => catRes.value?.data || [])
           {{ $t('public_landing_prod_cat_subtitle') }}
         </p>
       </div>
-      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
+      <div class="flex flex-wrap justify-center gap-4 sm:gap-6">
         <NuxtLink
           v-for="(cat, i) in categories"
           :key="cat.id"
           :to="`/products?category=${generateSeoSlug(cat.slug, cat.id)}`"
-          class="card card-hover group stagger-item p-5 text-center"
+          class="card card-hover group stagger-item w-[calc(50%-0.5rem)] max-w-[280px] p-5 text-center sm:w-[calc(25%-1.125rem)]"
           :style="{ animationDelay: `${i * 60}ms` }"
         >
           <div
-            class="from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/10 mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br transition-transform duration-300 group-hover:scale-110"
+            class="from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/10 mx-auto mb-3 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br transition-transform duration-300 group-hover:scale-110 sm:h-20 sm:w-20"
           >
+            <NuxtImg
+              v-if="cat.thumbnailUrl"
+              :src="getImageUrl(cat.thumbnailUrl) || undefined"
+              :alt="cat.name"
+              class="h-full w-full object-cover"
+              loading="lazy"
+            />
             <span
-              class="i-lucide-package text-primary-600 dark:text-primary-400 h-7 w-7"
+              v-else
+              class="i-lucide-package text-primary-600 dark:text-primary-400 h-8 w-8 sm:h-10 sm:w-10"
               aria-hidden="true"
             />
           </div>

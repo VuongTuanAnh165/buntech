@@ -4,12 +4,14 @@ import { productService } from '~/services/productService'
 import { slugify } from '~/utils/string'
 import type { ProductImage, ProductCategory } from '~/utils/types'
 import { t } from '~/utils/i18n'
+import { ConstantKey } from '~/enums/constantKeys'
 
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: t('admin_product_edit_seo_title') })
 
 const route = useRoute()
 const toast = useToast()
+const { constants } = useMasterData()
 
 const isEditing = computed(() => !!route.query.id)
 const productId = computed(() => Number(route.query.id))
@@ -35,7 +37,7 @@ const formState = reactive({
   unit: t('admin_prod_default_unit'),
   shortDescription: '',
   content: '',
-  isActive: true
+  isActive: constants.value?.[ConstantKey.ProductStatus]?.ACTIVE as string | number | undefined
 })
 
 const schema = z.object({
@@ -51,7 +53,7 @@ const schema = z.object({
     .max(20, t('admin_product_edit_form_unit_max')),
   shortDescription: z.string().optional().or(z.literal('')),
   content: z.string().optional().or(z.literal('')),
-  isActive: z.boolean()
+  isActive: z.union([z.number(), z.string()]).optional()
 })
 
 const { formErrors, formRef: _formRef, validate } = useZodForm(schema)
@@ -81,7 +83,9 @@ onMounted(async () => {
         formState.unit = res.data.unit || t('admin_prod_default_unit')
         formState.shortDescription = res.data.shortDescription || ''
         formState.content = res.data.content || ''
-        formState.isActive = res.data.isActive ?? true
+        formState.isActive = res.data.isActive
+          ? constants.value?.[ConstantKey.ProductStatus]?.ACTIVE
+          : constants.value?.[ConstantKey.ProductStatus]?.INACTIVE
 
         if (res.data.thumbnailUrl) {
           thumbnailPreviewUrl.value = getImageUrl(res.data.thumbnailUrl)
@@ -170,7 +174,11 @@ async function handleSave() {
       (parseResult.data.shortDescription || parseResult.data.name).substring(0, 160)
     )
 
-    formData.append('isActive', parseResult.data.isActive ? 'true' : 'false')
+    const isProductActive =
+      parseResult.data.isActive === constants.value?.[ConstantKey.ProductStatus]?.ACTIVE ||
+      parseResult.data.isActive === '1' ||
+      parseResult.data.isActive === 1
+    formData.append('isActive', isProductActive ? 'true' : 'false')
 
     if (selectedThumbnail.value) {
       formData.append('thumbnail', selectedThumbnail.value)
@@ -307,8 +315,14 @@ async function handleSave() {
               <USelectMenu
                 v-model="formState.isActive"
                 :items="[
-                  { label: $t('admin_product_edit_status_active'), value: true },
-                  { label: $t('status_product_inactive'), value: false }
+                  {
+                    label: $t('admin_product_edit_status_active'),
+                    value: constants?.[ConstantKey.ProductStatus]?.ACTIVE ?? 1
+                  },
+                  {
+                    label: $t('status_product_inactive'),
+                    value: constants?.[ConstantKey.ProductStatus]?.INACTIVE ?? 0
+                  }
                 ]"
                 value-key="value"
                 label-key="label"

@@ -234,7 +234,13 @@ async function handleSave() {
               </span>
             </template>
             <template #description-cell="{ row }">
-              <span class="line-clamp-2 text-sm text-slate-500">{{ row.description || '-' }}</span>
+              <div class="max-w-xs break-words whitespace-normal md:max-w-sm lg:max-w-md">
+                <span
+                  class="line-clamp-2 text-sm text-slate-500"
+                  :title="row.description || undefined"
+                  >{{ row.description || '-' }}</span
+                >
+              </div>
             </template>
             <template #actions-cell="{ row }">
               <div class="flex items-center gap-1">
