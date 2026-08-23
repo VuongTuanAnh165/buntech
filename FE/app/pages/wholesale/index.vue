@@ -85,7 +85,7 @@ const tableColumns = computed(() => [
       <div class="flex items-center gap-4">
         <UAvatar
           :alt="customerProfile?.fullName || 'User'"
-          :src="customerProfile?.profile?.avatarUrl || undefined"
+          :src="getImageUrl(customerProfile?.profile?.avatarUrl || undefined) || undefined"
           size="lg"
         />
         <div>

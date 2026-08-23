@@ -202,7 +202,7 @@ const columns = computed(() => [
             <template #product-cell="{ row }">
               <div class="flex items-center gap-3">
                 <UAvatar
-                  :src="(row as any).thumbnailUrl"
+                  :src="getImageUrl((row as any).thumbnailUrl) || undefined"
                   :alt="(row as any).name"
                   size="lg"
                   class="shrink-0 rounded-md bg-gray-100"

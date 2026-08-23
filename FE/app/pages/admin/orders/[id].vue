@@ -412,7 +412,7 @@ const breadcrumbItems = computed(() => [
                   >
                     <NuxtImg
                       v-if="item.product?.thumbnailUrl"
-                      :src="item.product.thumbnailUrl"
+                      :src="getImageUrl(item.product.thumbnailUrl) || undefined"
                       :alt="item.product?.name"
                       class="h-full w-full object-cover"
                     />
@@ -643,7 +643,11 @@ const breadcrumbItems = computed(() => [
               </h2>
             </div>
             <div class="mb-4 flex items-center gap-3">
-              <UAvatar :alt="customerName" size="lg" :src="customer?.avatarUrl || undefined" />
+              <UAvatar
+                :alt="customerName"
+                size="lg"
+                :src="getImageUrl(customer?.avatarUrl || undefined) || undefined"
+              />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-semibold">
                   {{ customerName }}
@@ -761,7 +765,11 @@ const breadcrumbItems = computed(() => [
               v-if="driverName"
               class="border-surface-border mb-4 flex items-center gap-3 border-b pb-4"
             >
-              <UAvatar :alt="driverName" size="md" :src="driver?.avatarUrl || undefined" />
+              <UAvatar
+                :alt="driverName"
+                size="md"
+                :src="getImageUrl(driver?.avatarUrl || undefined) || undefined"
+              />
               <div class="min-w-0">
                 <p class="text-surface-foreground truncate text-sm font-medium">{{ driverName }}</p>
                 <p class="text-xs text-slate-500 dark:text-zinc-400">

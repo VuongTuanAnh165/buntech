@@ -94,7 +94,7 @@ const getPaymentStatusLabel = (status: string | null) => {
                   <td class="p-4">
                     <div class="flex items-center gap-3">
                       <UAvatar
-                        :src="item.product?.thumbnailUrl || undefined"
+                        :src="getImageUrl(item.product?.thumbnailUrl || undefined) || undefined"
                         icon="i-lucide-package"
                         size="md"
                         class="bg-surface-muted"

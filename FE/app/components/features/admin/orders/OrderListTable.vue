@@ -64,7 +64,7 @@ function toggleSelectOrder(id: number, checked: boolean) {
       <div class="flex min-w-0 items-center gap-2">
         <UAvatar
           :alt="row.user?.fullName || $t('driver_history_guest')"
-          :src="row.user?.avatarUrl ?? undefined"
+          :src="getImageUrl(row.user?.avatarUrl ?? undefined) || undefined"
           size="sm"
         />
         <div class="min-w-0">

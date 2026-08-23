@@ -95,7 +95,7 @@ const categories = computed(() => catRes.value?.data || [])
           <div class="bg-surface-muted relative mb-3 aspect-square overflow-hidden rounded-lg">
             <NuxtImg
               v-if="product.thumbnailUrl"
-              :src="product.thumbnailUrl"
+              :src="getImageUrl(product.thumbnailUrl) || undefined"
               :alt="product.name"
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"

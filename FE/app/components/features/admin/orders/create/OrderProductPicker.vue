@@ -71,7 +71,7 @@ const searchQuery = defineModel<string>('searchQuery', { default: '' })
           >
             <NuxtImg
               v-if="p.thumbnailUrl"
-              :src="p.thumbnailUrl"
+              :src="getImageUrl(p.thumbnailUrl) || undefined"
               :alt="p.name"
               class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"

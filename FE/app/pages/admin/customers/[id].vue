@@ -212,7 +212,7 @@ const handleTogglePublic = async (value: boolean) => {
         <div class="relative flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <UAvatar
             :alt="customer.fullName"
-            :src="customer.profile?.avatarUrl || undefined"
+            :src="getImageUrl(customer.profile?.avatarUrl || undefined) || undefined"
             size="3xl"
           />
           <div class="min-w-0 flex-1">

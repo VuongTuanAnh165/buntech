@@ -42,7 +42,7 @@ const debtCustomers = computed(() => {
     .map((c: UserDTO) => ({
       label: `${c.fullName} — ${c.phoneNumber}`,
       value: c.id,
-      avatar: c.profile?.avatarUrl ? { src: c.profile.avatarUrl } : undefined,
+      avatar: c.profile?.avatarUrl ? { src: getImageUrl(c.profile.avatarUrl) } : undefined,
       avatarUrl: c.profile?.avatarUrl || undefined,
       debt: Number(c.profile?.currentDebt) || 0
     }))
@@ -140,7 +140,7 @@ const handleFormSubmit = () => {
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <UAvatar
-                    :src="selectedCustomer.avatarUrl"
+                    :src="getImageUrl(selectedCustomer.avatarUrl) || undefined"
                     :alt="selectedCustomer.label"
                     size="sm"
                   />

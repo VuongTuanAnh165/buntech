@@ -202,7 +202,10 @@ const handleDelete = async (row: UserDTO) => {
               >
                 <UAvatar
                   :alt="(row as UserDTO).fullName as string"
-                  :src="((row as UserDTO).profile?.avatarUrl as string) || undefined"
+                  :src="
+                    getImageUrl(((row as UserDTO).profile?.avatarUrl as string) || undefined) ||
+                    undefined
+                  "
                   size="sm"
                 />
                 <div class="min-w-0">

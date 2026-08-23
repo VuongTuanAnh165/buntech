@@ -116,7 +116,7 @@ onMounted(() => {
         <div class="relative">
           <div class="mb-4 flex items-center gap-4">
             <UAvatar
-              :src="driver?.profile?.avatarUrl || ''"
+              :src="getImageUrl(driver?.profile?.avatarUrl || '') || undefined"
               :alt="driver?.fullName || $t('admin_role_driver')"
               size="lg"
             />

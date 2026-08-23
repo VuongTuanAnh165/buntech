@@ -208,7 +208,7 @@ watch(selectedProduct, (val) => {
       <template #product-cell="{ row }">
         <div class="flex items-center gap-3">
           <UAvatar
-            :src="(row as CustomPrice).product?.thumbnailUrl || undefined"
+            :src="getImageUrl((row as CustomPrice).product?.thumbnailUrl || undefined) || undefined"
             :alt="(row as CustomPrice).product?.name"
             icon="i-lucide-image"
             size="md"
@@ -267,7 +267,9 @@ watch(selectedProduct, (val) => {
               <template #item="{ item }">
                 <div class="flex items-center gap-2">
                   <UAvatar
-                    :src="(item as AdminProduct).thumbnailUrl || undefined"
+                    :src="
+                      getImageUrl((item as AdminProduct).thumbnailUrl || undefined) || undefined
+                    "
                     icon="i-lucide-image"
                     size="2xs"
                   />

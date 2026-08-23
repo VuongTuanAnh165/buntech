@@ -55,7 +55,7 @@ const tierLabels: Record<string, string> = {
             <div class="flex items-center gap-2">
               <img
                 v-if="item.customer.avatarUrl"
-                :src="item.customer.avatarUrl"
+                :src="getImageUrl(item.customer.avatarUrl) || undefined"
                 :alt="item.customer.storeName || item.customer.fullName"
                 class="h-10 w-10 rounded-full object-cover"
               />

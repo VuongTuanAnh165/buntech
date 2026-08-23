@@ -73,7 +73,7 @@ const relatedProducts = computed(() => {
 const galleryImages = computed(() => {
   if (!product.value) return []
   const imgs: string[] = []
-  if (product.value.thumbnailUrl) imgs.push(product.value.thumbnailUrl)
+  if (product.value.thumbnailUrl) imgs.push(getImageUrl(product.value.thumbnailUrl))
   if (product.value.images && Array.isArray(product.value.images)) {
     imgs.push(...product.value.images.map((g: { fileUrl: string }) => g.fileUrl))
   }
@@ -587,7 +587,7 @@ useSeoMeta({
             <div class="bg-surface-muted mb-3 aspect-square overflow-hidden rounded-lg">
               <NuxtImg
                 v-if="rp.thumbnailUrl"
-                :src="rp.thumbnailUrl"
+                :src="getImageUrl(rp.thumbnailUrl) || undefined"
                 :alt="rp.name"
                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"

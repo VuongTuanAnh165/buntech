@@ -91,7 +91,11 @@ const handleSortChange = (val: 'revenue' | 'quantity') => {
           class="hover:bg-surface-hover/60 flex items-center gap-2.5 py-3 transition-colors duration-150"
         >
           <div class="relative">
-            <UAvatar :alt="buyer.fullName" :src="buyer.avatarUrl || undefined" size="sm" />
+            <UAvatar
+              :alt="buyer.fullName"
+              :src="getImageUrl(buyer.avatarUrl || undefined) || undefined"
+              size="sm"
+            />
             <span
               :class="[
                 'ring-surface absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ring-2',

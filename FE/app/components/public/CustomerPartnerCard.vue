@@ -66,7 +66,7 @@ const tierConfig: Record<string, { label: string; color: string; ribbon: string;
         <div class="relative flex-shrink-0">
           <img
             v-if="customer.avatarUrl"
-            :src="customer.avatarUrl"
+            :src="getImageUrl(customer.avatarUrl) || undefined"
             :alt="customer.storeName || customer.fullName"
             class="h-14 w-14 rounded-full border-2 border-white object-cover shadow-sm dark:border-neutral-700"
           />

@@ -348,7 +348,7 @@ const resetForm = () => {
                     >
                       <NuxtImg
                         v-if="product.thumbnailUrl"
-                        :src="product.thumbnailUrl"
+                        :src="getImageUrl(product.thumbnailUrl) || undefined"
                         :alt="product.name"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
