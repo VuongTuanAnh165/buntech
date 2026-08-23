@@ -293,27 +293,36 @@ function clearImage() {
           />
         </UFormField>
 
-        <UFormField label="Loại khách hàng" name="customerType" :error="formErrors.customerType">
-          <USelectMenu
-            v-model="state.customerType"
-            :items="customerTypeOptions"
-            value-key="value"
-            label-key="label"
-            placeholder="Chọn loại khách hàng"
-          />
-        </UFormField>
+        <template
+          v-if="
+            state.role === 'customer' ||
+            state.role === 'CUSTOMER' ||
+            (state.role && (state.role as any).value === 'customer') ||
+            (state.role && (state.role as any).value === 'CUSTOMER')
+          "
+        >
+          <UFormField label="Loại khách hàng" name="customerType" :error="formErrors.customerType">
+            <USelectMenu
+              v-model="state.customerType"
+              :items="customerTypeOptions"
+              value-key="value"
+              label-key="label"
+              placeholder="Chọn loại khách hàng"
+            />
+          </UFormField>
 
-        <UFormField label="Tên cửa hàng" name="storeName" :error="formErrors.storeName">
-          <UInput v-model="state.storeName" placeholder="Ví dụ: Tạp hóa Cô Lan" />
-        </UFormField>
+          <UFormField label="Tên cửa hàng" name="storeName" :error="formErrors.storeName">
+            <UInput v-model="state.storeName" placeholder="Ví dụ: Tạp hóa Cô Lan" />
+          </UFormField>
 
-        <UFormField label="Hạn mức công nợ" name="debtLimit" :error="formErrors.debtLimit">
-          <UInput v-model="state.debtLimit" type="number" placeholder="Nhập hạn mức nợ" />
-        </UFormField>
+          <UFormField label="Hạn mức công nợ" name="debtLimit" :error="formErrors.debtLimit">
+            <UInput v-model="state.debtLimit" type="number" placeholder="Nhập hạn mức nợ" />
+          </UFormField>
 
-        <UFormField name="isPublic" :error="formErrors.isPublic">
-          <UCheckbox v-model="state.isPublic" label="Hiển thị đại lý trên bản đồ" />
-        </UFormField>
+          <UFormField name="isPublic" :error="formErrors.isPublic">
+            <UCheckbox v-model="state.isPublic" label="Hiển thị đại lý trên bản đồ" />
+          </UFormField>
+        </template>
       </form>
     </template>
 
