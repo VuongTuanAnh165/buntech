@@ -1,3 +1,5 @@
+const yearsOfExp = new Date().getFullYear() - 1990
+
 export const viMessages: Record<string, string> = {
   app_name: 'Xưởng bún Tâm Hùng',
   app_name_admin: 'Xưởng bún Tâm Hùng Admin',
@@ -1056,20 +1058,19 @@ export const viMessages: Record<string, string> = {
   public_blog_read_more: 'Đọc tiếp',
 
   // Public Landing & About
-  public_landing_seo_title: 'Xưởng bún Tâm Hùng - Xưởng bún gia đình truyền thống 3 đời',
+  public_landing_seo_title: `Xưởng bún Tâm Hùng - Xưởng bún gia đình truyền thống hơn ${yearsOfExp} năm`,
   public_about_seo_title: 'Về chúng tôi - Xưởng bún Tâm Hùng',
 
   // Landing specific
-  public_landing_hero_badge: 'Xưởng bún truyền thống từ năm 1960',
-  public_landing_hero_title:
-    'Bún tươi thủ công Xưởng bún Tâm Hùng<br class="hidden sm:block" > — Truyền 3 đời',
+  public_landing_hero_badge: 'Xưởng bún truyền thống từ năm 1990',
+  public_landing_hero_title: `Bún tươi thủ công Xưởng bún Tâm Hùng<br class="hidden sm:block" > — Hơn ${yearsOfExp} năm kinh nghiệm`,
   public_landing_hero_desc:
     'Bún tươi 100% gạo nguyên chất, không chất bảo quản.<br >sản xuất mỗi sáng theo bí truyền gia đình. Giao hàng tận nơi trong 2 giờ, đặt hàng dễ dàng qua app.',
   public_landing_hero_btn_products: 'Xem sản phẩm',
   public_landing_hero_stat_2_lbl: 'Kinh nghiệm',
 
   public_landing_feat_title: 'Tại sao chọn Xưởng bún Tâm Hùng',
-  public_landing_feat_subtitle: 'Hơn 60 năm uy tín — chúng tôi hiểu bún như hiểu gia đình mình',
+  public_landing_feat_subtitle: `Hơn ${yearsOfExp} năm uy tín — chúng tôi hiểu bún như hiểu gia đình mình`,
   public_landing_feat_1_title: 'Bún tươi mỗi ngày',
   public_landing_feat_1_desc: 'Sản xuất mỗi sáng, giao đến tay khách hàng trong vòng 2 giờ.',
   public_landing_feat_2_title: 'Giao hàng siêu tốc',
@@ -1107,14 +1108,14 @@ export const viMessages: Record<string, string> = {
   public_landing_trust_1: '100% Gạo tự nhiên',
   public_landing_trust_2: 'Giao hàng 2 giờ',
   public_landing_trust_3: '50+ đại lý',
-  public_landing_trust_4: '3 đời kinh nghiệm',
+  public_landing_trust_4: `Hơn ${yearsOfExp} năm kinh nghiệm`,
 
   public_landing_cta_blog_subtitle: 'Cập nhật kiến thức về bún và ẩm thực Việt',
   public_landing_cta_order_title: 'Sẵn sàng đặt hàng bún tươi?',
   public_landing_cta_order_subtitle:
     'Đặt hàng online trong 30 giây, giao hàng tận nơi trong 2 giờ. Bún tươi mỗi ngày, từ xưởng đến bàn ăn của bạn.',
 
-  public_about_stat_1_val: '60+ năm',
+  public_about_stat_1_val: `${yearsOfExp}+ năm`,
   public_about_stat_1_lbl: 'Kinh nghiệm truyền thống',
   public_about_stat_2_val: '50+',
   public_about_stat_2_lbl: 'Đại lý phục vụ',
@@ -1136,7 +1137,7 @@ export const viMessages: Record<string, string> = {
   public_about_val_4_desc:
     'Đạt tiêu chuẩn VSATTP, quy trình khép kín từ gạo đến thành phẩm. Đổi trả nếu không hài lòng.',
 
-  public_about_ms_1_year: '1960',
+  public_about_ms_1_year: '1990',
   public_about_ms_1_title: 'Khởi đầu',
   public_about_ms_1_text:
     'Bà nội bắt đầu làm bún gia đình tại xưởng nhỏ ở quê nhà, bán cho hàng xóm và chợ phiên.',
@@ -1156,7 +1157,7 @@ export const viMessages: Record<string, string> = {
   public_about_team_1_name: 'Nguyễn Thị Bích',
   public_about_team_1_role: 'CEO - Thuyền trưởng',
   public_about_team_1_bio:
-    'Đời thứ 3, kế thừa bí truyền gia đình. Tốt nghiệp ĐH Kinh tế, dẫn dắt Xưởng bún Tâm Hùng chuyển đổi số.',
+    'Thế hệ tiếp nối, kế thừa bí truyền gia đình. Tốt nghiệp ĐH Kinh tế, dẫn dắt Xưởng bún Tâm Hùng chuyển đổi số.',
   public_about_team_2_name: 'Trần Văn Hùng',
   public_about_team_2_role: 'Giám đốc sản xuất',
   public_about_team_2_bio:
@@ -1171,8 +1172,7 @@ export const viMessages: Record<string, string> = {
     'Dẫn dắt chuyển đổi số Xưởng bún Tâm Hùng. Xây dựng app đặt hàng và hệ thống quản lý đơn hàng.',
 
   public_about_faq_1_q: 'Bún Xưởng bún Tâm Hùng có sử dụng hàn the không?',
-  public_about_faq_1_a:
-    'Tuyệt đối không. Bún Xưởng bún Tâm Hùng được làm từ 100% gạo tự nhiên, sản xuất theo quy trình truyền thống 3 đời. Chúng tôi cam kết không sử dụng hàn the hay bất kỳ chất bảo quản nào.',
+  public_about_faq_1_a: `Tuyệt đối không. Bún Xưởng bún Tâm Hùng được làm từ 100% gạo tự nhiên, sản xuất theo quy trình truyền thống hơn ${yearsOfExp} năm. Chúng tôi cam kết không sử dụng hàn the hay bất kỳ chất bảo quản nào.`,
   public_about_faq_2_q: 'Bún tươi để được bao lâu?',
   public_about_faq_2_a:
     'Bún tươi Xưởng bún Tâm Hùng nên dùng trong ngày, tốt nhất trong vòng 24 giờ kể từ lúc sản xuất. Nếu bảo quản tủ lạnh có thể để 2-3 ngày, nhưng khuyến cáo dùng tươi để đảm bảo hương vị tốt nhất.',
@@ -1189,24 +1189,23 @@ export const viMessages: Record<string, string> = {
   public_about_faq_6_a:
     'Có. Xưởng bún Tâm Hùng cam kết đổi trả 100% nếu bún không đạt chất lượng (biến chất, mùi lạ, hư hỏng). Vui lòng liên hệ hotline trong vòng 2 giờ sau khi nhận hàng để được hỗ trợ.',
 
-  public_about_hero_badge: 'Xưởng bún truyền thống từ 1960',
-  public_about_hero_title: 'Hành trình 3 đời làm bún',
-  public_about_hero_desc:
-    'Từ xưởng bún gia đình nhỏ năm 1960 đến thương hiệu bún tươi hàng đầu — Xưởng bún Tâm Hùng vẫn giữ trọn tinh hoa bí truyền 3 đời.',
+  public_about_hero_badge: 'Xưởng bún truyền thống từ 1990',
+  public_about_hero_title: `Hành trình hơn ${yearsOfExp} năm làm bún`,
+  public_about_hero_desc: `Từ xưởng bún gia đình nhỏ năm 1990 đến thương hiệu bún tươi hàng đầu — Xưởng bún Tâm Hùng vẫn giữ trọn tinh hoa truyền thống hơn ${yearsOfExp} năm.`,
   public_about_story_mission: 'Sứ mệnh của chúng tôi',
   public_about_story_title: 'Bún tươi mỗi sáng — từ gia đình đến gia đình',
   public_about_story_p1:
-    'Năm 1960, bà nội chúng tôi bắt đầu làm bún tại một xưởng nhỏ trong hẻm. Bún làm tay, từng sợi mộc mạc, bán cho hàng xóm và chợ phiên. Khách quen gọi là "bún bà Tư" — ngon, sạch, rẻ.',
+    'Năm 1990, bà nội chúng tôi bắt đầu làm bún tại một xưởng nhỏ trong hẻm. Bún làm tay, từng sợi mộc mạc, bán cho hàng xóm và chợ phiên. Khách quen gọi là "bún bà Tư" — ngon, sạch, rẻ.',
   public_about_story_p2:
-    'Ba đời tiếp nối, bí truyền gia đình vẫn giữ nguyên. Nhưng cách làm bún thì ngày càng hiện đại — máy móc sạch sẽ, quy trình khép kín, đạt chuẩn VSATTP. Bún Xưởng bún Tâm Hùng nay phục vụ hơn 50 đại lý, sản xuất 1000+ kg mỗi ngày, nhưng tinh hoa vẫn là tinh hoa.',
+    'Nhiều năm tiếp nối, bí truyền gia đình vẫn giữ nguyên. Nhưng cách làm bún thì ngày càng hiện đại — máy móc sạch sẽ, quy trình khép kín, đạt chuẩn VSATTP. Bún Xưởng bún Tâm Hùng nay phục vụ hơn 50 đại lý, sản xuất 1000+ kg mỗi ngày, nhưng tinh hoa vẫn là tinh hoa.',
   public_about_story_vision_lbl: 'Tầm nhìn',
   public_about_story_vision_desc:
     'Trở thành thương hiệu bún tươi số 1 Việt Nam — giữ gìn truyền thống, ứng dụng công nghệ, phục vụ cộng đồng.',
   public_about_values_title: 'Giá trị cốt lõi',
-  public_about_values_subtitle: 'Những nguyên tắc chúng tôi giữ suốt 60+ năm',
+  public_about_values_subtitle: `Những nguyên tắc chúng tôi giữ suốt ${yearsOfExp}+ năm`,
   public_about_ms_title: 'Cột mốc phát triển',
   public_about_team_title: 'Đội ngũ Xưởng bún Tâm Hùng',
-  public_about_team_subtitle: 'Những người tâm huyết giữ gìn truyền thống 3 đời',
+  public_about_team_subtitle: `Những người tâm huyết giữ gìn truyền thống hơn ${yearsOfExp} năm`,
   public_about_faq_title: 'Câu hỏi thường gặp',
   public_about_cta_title: 'Trải nghiệm bún tươi Xưởng bún Tâm Hùng',
   public_about_cta_desc:

@@ -69,7 +69,9 @@ onUnmounted(() => {
 
 <template>
   <div class="bg-surface-muted flex min-h-screen flex-col">
-    <header class="glass border-surface-border/50 safe-area-top sticky top-0 z-40 border-b">
+    <header
+      class="border-surface-border/50 safe-area-top sticky top-0 z-40 border-b bg-white/90 backdrop-blur-lg transition-colors duration-300 dark:bg-zinc-950/90"
+    >
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between">
           <NuxtLink to="/" class="flex items-center gap-2.5">

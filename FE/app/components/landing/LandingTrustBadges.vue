@@ -23,8 +23,9 @@ const trustBadges = computed(() => [
           <div
             class="bg-primary-50 dark:bg-primary-900/20 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
           >
-            <span
-              :class="[badge.icon, 'text-primary-600 dark:text-primary-400 h-5 w-5']"
+            <UIcon
+              :name="badge.icon"
+              class="text-primary-600 dark:text-primary-400 h-5 w-5"
               aria-hidden="true"
             />
           </div>
