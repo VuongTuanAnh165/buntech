@@ -40,10 +40,10 @@ const handleLogout = () => {
 
 const bottomNavItems = computed(() => [
   { label: t('nav_home'), to: '/', icon: Home },
-  { label: t('nav_products'), to: '/products', icon: Package },
+  { label: t('nav_about'), to: '/about', icon: User },
   { label: t('nav_distribution'), to: '/distribution', icon: MapPin },
-  { label: t('nav_news'), to: '/blog', icon: FileText },
-  { label: t('nav_about'), to: '/about', icon: User }
+  { label: t('nav_products'), to: '/products', icon: Package },
+  { label: t('nav_news'), to: '/blog', icon: FileText }
 ])
 
 const onOutsideClick = (e: MouseEvent) => {

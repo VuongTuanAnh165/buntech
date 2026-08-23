@@ -79,25 +79,19 @@ const team = computed(() => [
     name: t('public_about_team_1_name'),
     role: t('public_about_team_1_role'),
     bio: t('public_about_team_1_bio'),
-    avatar: ''
+    avatar: '/images/admin2.webp'
   },
   {
     name: t('public_about_team_2_name'),
     role: t('public_about_team_2_role'),
     bio: t('public_about_team_2_bio'),
-    avatar: ''
+    avatar: '/images/admin1.webp'
   },
   {
     name: t('public_about_team_3_name'),
     role: t('public_about_team_3_role'),
     bio: t('public_about_team_3_bio'),
-    avatar: ''
-  },
-  {
-    name: t('public_about_team_4_name'),
-    role: t('public_about_team_4_role'),
-    bio: t('public_about_team_4_bio'),
-    avatar: ''
+    avatar: '/images/admin2.webp'
   }
 ])
 
@@ -208,11 +202,13 @@ const toggleFaq = (index: number) => {
       <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
         <div class="relative">
           <div class="aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
-            <NuxtImg
-              src="/images/banner_2.webp"
-              :alt="$t('public_about_image_alt')"
+            <video
+              src="/videos/gioi_thieu.mp4"
               class="h-full w-full object-cover"
-              loading="lazy"
+              playsinline
+              autoplay
+              muted
+              loop
             />
           </div>
           <div
@@ -341,17 +337,20 @@ const toggleFaq = (index: number) => {
             {{ $t('public_about_team_subtitle') }}
           </p>
         </div>
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="mx-auto grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div
             v-for="(member, i) in team"
             :key="i"
             class="card card-hover animate-fade-in-up p-6 text-center"
             :style="{ animationDelay: `${i * 80}ms` }"
           >
-            <div
-              class="from-primary-100 to-primary-50 dark:from-primary-900/30 dark:to-primary-800/10 ring-primary-100 dark:ring-primary-900/30 mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br ring-1"
-            >
-              <UAvatar :alt="member.name" size="lg" />
+            <div class="mx-auto mb-4 flex justify-center">
+              <NuxtImg
+                :src="member.avatar"
+                :alt="member.name"
+                class="h-18 w-18 rounded-full object-cover"
+                loading="lazy"
+              />
             </div>
             <h3 class="text-surface-foreground mb-0.5 font-semibold">{{ member.name }}</h3>
             <p class="text-primary-600 dark:text-primary-400 mb-2 text-sm font-medium">
@@ -391,7 +390,7 @@ const toggleFaq = (index: number) => {
           </UButton>
           <div
             v-show="openFaq === i"
-            class="animate-fade-in px-4 pb-4 text-sm leading-relaxed text-gray-600 dark:text-zinc-300"
+            class="animate-fade-in px-4 py-4 text-sm leading-relaxed text-gray-600 dark:text-zinc-300"
           >
             {{ faq.a }}
           </div>
