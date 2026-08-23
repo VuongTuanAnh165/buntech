@@ -26,6 +26,11 @@ const { data: ordersData } = useAsyncData(`admin-orders-${customerId}`, () =>
 )
 const orders = computed(() => ordersData.value?.data?.data || [])
 
+const { data: driverOrdersData } = useAsyncData(`admin-driver-orders-${customerId}`, () =>
+  fetchOrders({ driverId: customerId, limit: 100 })
+)
+const driverOrders = computed(() => driverOrdersData.value?.data?.data || [])
+
 const { data: transactionsData } = useAsyncData(`admin-transactions-${customerId}`, () =>
   transactionService.getTransactions(1, 100, undefined, Number(customerId))
 )
@@ -103,58 +108,118 @@ const debtTransactions = computed(() =>
   )
 )
 
-const tabs = computed(() => [
-  {
-    value: 'orders',
-    label: t('wholesale_orders_title'),
-    icon: 'i-lucide-shopping-bag',
-    count: orders.value.length
-  },
-  {
-    value: 'debt',
-    label: t('nav_debt'),
-    icon: 'i-lucide-wallet',
-    count: debtTransactions.value.length
-  },
-  {
-    value: 'addresses',
-    label: t('admin_address_title'),
-    icon: 'i-lucide-map-pin',
-    count: addresses.value.length
-  },
-  {
-    value: 'prices',
-    label: t('admin_customer_detail_tab_price'),
-    icon: 'i-lucide-tag'
-  }
-])
+const driverTotalDelivered = computed(
+  () => driverOrders.value.filter((o) => o.status === 'delivered').length
+)
+const driverTotalPending = computed(
+  () => driverOrders.value.filter((o) => o.status !== 'delivered' && o.status !== 'canceled').length
+)
+const driverCodCollected = computed(() =>
+  driverOrders.value
+    .filter((o) => o.status === 'delivered')
+    .reduce((sum, o) => sum + Number(o.amountCollected || 0), 0)
+)
 
-const statCards = computed(() => [
-  {
-    title: t('admin_order_kpi_total'),
-    value: totalOrders.value,
-    icon: 'i-lucide-shopping-bag',
-    color: 'primary' as const
-  },
-  {
-    title: t('wholesale_kpi_total_spent'),
-    value: formatVND(totalSpent.value),
-    icon: 'i-lucide-trending-up',
-    color: 'success' as const
-  },
-  {
-    title: t('admin_customer_debt_cur'),
-    value: formatVND(currentDebt.value),
-    icon: 'i-lucide-wallet',
-    color: currentDebt.value > 0 ? ('error' as const) : ('success' as const)
-  },
-  {
-    title: t('admin_customer_detail_kpi_avg'),
-    value: formatVND(avgOrderValue.value),
-    icon: 'i-lucide-credit-card',
-    color: 'info' as const
+const tabs = computed(() => {
+  const role = customer.value?.role
+  if (role === 'customer' || role === 'CUSTOMER') {
+    return [
+      {
+        value: 'orders',
+        label: t('wholesale_orders_title'),
+        icon: 'i-lucide-shopping-bag',
+        count: orders.value.length
+      },
+      {
+        value: 'debt',
+        label: t('nav_debt'),
+        icon: 'i-lucide-wallet',
+        count: debtTransactions.value.length
+      },
+      {
+        value: 'addresses',
+        label: t('admin_address_title'),
+        icon: 'i-lucide-map-pin',
+        count: addresses.value.length
+      },
+      {
+        value: 'prices',
+        label: t('admin_customer_detail_tab_price'),
+        icon: 'i-lucide-tag'
+      }
+    ]
+  } else if (role === 'driver' || role === 'DRIVER') {
+    return [
+      {
+        value: 'driver-orders',
+        label: 'Danh sách giao hàng',
+        icon: 'i-lucide-list-ordered',
+        count: driverOrders.value.length
+      }
+    ]
   }
-])
+  return []
+})
+
+const statCards = computed(() => {
+  const role = customer.value?.role
+  if (role === 'customer' || role === 'CUSTOMER') {
+    return [
+      {
+        title: t('admin_order_kpi_total'),
+        value: totalOrders.value,
+        icon: 'i-lucide-shopping-bag',
+        color: 'primary' as const
+      },
+      {
+        title: t('wholesale_kpi_total_spent'),
+        value: formatVND(totalSpent.value),
+        icon: 'i-lucide-trending-up',
+        color: 'success' as const
+      },
+      {
+        title: t('admin_customer_debt_cur'),
+        value: formatVND(currentDebt.value),
+        icon: 'i-lucide-wallet',
+        color: currentDebt.value > 0 ? ('error' as const) : ('success' as const)
+      },
+      {
+        title: t('admin_customer_detail_kpi_avg'),
+        value: formatVND(avgOrderValue.value),
+        icon: 'i-lucide-credit-card',
+        color: 'info' as const
+      }
+    ]
+  } else if (role === 'driver' || role === 'DRIVER') {
+    return [
+      {
+        title: 'Đơn hàng được giao',
+        value: driverOrders.value.length,
+        icon: 'i-lucide-truck',
+        color: 'primary' as const
+      },
+      {
+        title: 'Giao thành công',
+        value: driverTotalDelivered.value,
+        icon: 'i-lucide-check-circle',
+        color: 'success' as const
+      },
+      {
+        title: 'Đang xử lý',
+        value: driverTotalPending.value,
+        icon: 'i-lucide-clock',
+        color: 'warning' as const
+      },
+      {
+        title: 'Tiền thu hộ (COD)',
+        value: formatVND(driverCodCollected.value),
+        icon: 'i-lucide-banknote',
+        color: 'info' as const
+      }
+    ]
+  }
+  return []
+})
 
 const showCustomerEdit = ref(false)
 
@@ -244,12 +309,14 @@ const handleTogglePublic = async (value: boolean) => {
                 "
               />
             </div>
-            <div v-if="storeName" class="mt-1 flex items-center gap-2">
-              <UIcon name="i-lucide-store" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
-              <span class="text-sm font-medium text-slate-600 dark:text-zinc-300">
-                {{ storeName }}
-              </span>
-            </div>
+            <template v-if="customer.role === 'customer' || customer.role === 'CUSTOMER'">
+              <div v-if="storeName" class="mt-1 flex items-center gap-2">
+                <UIcon name="i-lucide-store" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
+                <span class="text-sm font-medium text-slate-600 dark:text-zinc-300">
+                  {{ storeName }}
+                </span>
+              </div>
+            </template>
             <div class="mt-1.5 flex flex-wrap items-center gap-3">
               <span class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-zinc-400">
                 <UIcon name="i-lucide-phone" class="h-3.5 w-3.5" aria-hidden="true" />
@@ -273,19 +340,24 @@ const handleTogglePublic = async (value: boolean) => {
               >
                 {{ roleLabel }}
               </UBadge>
-              <UBadge
-                v-if="customerTypeLabel"
-                :color="customerType === 'wholesale' ? 'secondary' : 'neutral'"
-                variant="soft"
-              >
-                {{ customerTypeLabel }}
-              </UBadge>
-              <UBadge v-if="isPublic" color="info" variant="soft" icon="i-lucide-map-pin">
-                {{ $t('admin_customer_detail_public') }}
-              </UBadge>
+              <template v-if="customer.role === 'customer' || customer.role === 'CUSTOMER'">
+                <UBadge
+                  v-if="customerTypeLabel"
+                  :color="customerType === 'wholesale' ? 'secondary' : 'neutral'"
+                  variant="soft"
+                >
+                  {{ customerTypeLabel }}
+                </UBadge>
+                <UBadge v-if="isPublic" color="info" variant="soft" icon="i-lucide-map-pin">
+                  {{ $t('admin_customer_detail_public') }}
+                </UBadge>
+              </template>
             </div>
           </div>
-          <div class="flex flex-shrink-0 flex-col items-end gap-3">
+          <div
+            v-if="customer.role === 'customer' || customer.role === 'CUSTOMER'"
+            class="flex flex-shrink-0 flex-col items-end gap-3"
+          >
             <div class="text-right">
               <p class="text-xs text-slate-500 dark:text-zinc-400">
                 {{ $t('admin_customer_debt_limit') }}
@@ -312,13 +384,32 @@ const handleTogglePublic = async (value: boolean) => {
         </div>
       </UCard>
 
-      <BaseStatsGrid :stats="statCards" />
+      <BaseStatsGrid v-if="statCards.length > 0" :stats="statCards" />
 
-      <UTabs v-model="activeTab" :items="tabs" class="mt-6 w-full" :ui="{ content: 'mt-6' }">
+      <BaseEmptyState
+        v-if="customer.role === 'admin' || customer.role === 'ADMIN'"
+        icon="i-lucide-shield"
+        title="Tài khoản Quản trị viên"
+        description="Quản trị viên sử dụng hệ thống để điều hành, không có dữ liệu giao dịch."
+        class="mt-6"
+      />
+
+      <UTabs
+        v-if="tabs.length > 0"
+        v-model="activeTab"
+        :items="tabs"
+        class="mt-6 w-full"
+        :ui="{ content: 'mt-6' }"
+      >
         <template #content="{ item }">
           <Transition name="fade" mode="out-in">
             <!-- ===== Orders Tab ===== -->
             <AdminCustomerOrdersTab v-if="item.value === 'orders'" :orders="orders" />
+            <!-- ===== Driver Orders Tab ===== -->
+            <AdminCustomerOrdersTab
+              v-else-if="item.value === 'driver-orders'"
+              :orders="driverOrders"
+            />
             <!-- ===== Debt Tab ===== -->
             <AdminCustomerDebtTab
               v-else-if="item.value === 'debt'"
