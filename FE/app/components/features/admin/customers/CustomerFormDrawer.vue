@@ -36,6 +36,14 @@ const roleOptions = computed(() => [
   { label: t('admin_role_admin'), value: constants.value?.[ConstantKey.Role]?.ADMIN || 'admin' }
 ])
 
+const customerTypeOptions = computed(() => [
+  { label: 'Khách lẻ', value: constants.value?.[ConstantKey.CustomerType]?.RETAIL || 'RETAIL' },
+  {
+    label: 'Khách sỉ',
+    value: constants.value?.[ConstantKey.CustomerType]?.WHOLESALE || 'WHOLESALE'
+  }
+])
+
 const schema = computed(() => {
   return z.object({
     phoneNumber: isEdit.value
@@ -51,7 +59,11 @@ const schema = computed(() => {
       100,
       t('admin_customer_form_name_err_max')
     ),
-    role: requiredString(t('admin_profile_info_role'))
+    role: requiredString(t('admin_profile_info_role')),
+    customerType: z.string().optional(),
+    debtLimit: z.any().optional(),
+    storeName: z.string().max(191).optional(),
+    isPublic: z.boolean().optional()
   })
 })
 
@@ -59,7 +71,11 @@ const state = reactive({
   phoneNumber: '',
   password: '',
   fullName: '',
-  role: ''
+  role: '',
+  customerType: '',
+  debtLimit: 0,
+  storeName: '',
+  isPublic: false
 })
 
 const { formErrors, formRef, validate: validateForm } = useZodForm(schema)
@@ -73,11 +89,20 @@ watch(
         state.password = ''
         state.fullName = props.user.fullName || ''
         state.role = props.user.role || roleOptions.value[0]?.value || ''
+        state.customerType =
+          props.user.profile?.customerType || customerTypeOptions.value[0]?.value || ''
+        state.debtLimit = Number(props.user.profile?.debtLimit) || 0
+        state.storeName = props.user.profile?.storeName || ''
+        state.isPublic = props.user.profile?.isPublic || false
       } else {
         state.phoneNumber = ''
         state.password = ''
         state.fullName = ''
         state.role = roleOptions.value[0]?.value || ''
+        state.customerType = customerTypeOptions.value[0]?.value || ''
+        state.debtLimit = 0
+        state.storeName = ''
+        state.isPublic = false
       }
       formRef.value.clearErrors()
     }
@@ -92,10 +117,19 @@ const onSubmit = handleSubmit(
   async (data: SchemaType) => {
     const roleValue =
       typeof data.role === 'object' ? (data.role as { value: string }).value : data.role
+    const customerTypeValue =
+      typeof data.customerType === 'object'
+        ? (data.customerType as { value: string }).value
+        : data.customerType
+
     if (isEdit.value && props.user) {
       await updateUser(props.user.id, {
         fullName: data.fullName,
-        role: roleValue
+        role: roleValue,
+        customerType: customerTypeValue,
+        debtLimit: Number(data.debtLimit) || 0,
+        storeName: data.storeName,
+        isPublic: data.isPublic
         // Note: Password update usually requires a separate endpoint or field
       })
     } else {
@@ -103,7 +137,11 @@ const onSubmit = handleSubmit(
         phoneNumber: data.phoneNumber || '',
         password: data.password || '',
         fullName: data.fullName,
-        role: roleValue
+        role: roleValue,
+        customerType: customerTypeValue,
+        debtLimit: Number(data.debtLimit) || 0,
+        storeName: data.storeName,
+        isPublic: data.isPublic
       })
     }
   },
@@ -120,6 +158,9 @@ const handleFormSubmit = () => {
   // Tự động chuyển đổi object sang value trước khi validate
   if (typeof state.role === 'object' && state.role !== null) {
     state.role = (state.role as { value: string }).value
+  }
+  if (typeof state.customerType === 'object' && state.customerType !== null) {
+    state.customerType = (state.customerType as { value: string }).value
   }
 
   if (validateForm(state)) {
@@ -169,6 +210,28 @@ const handleFormSubmit = () => {
             label-key="label"
             :placeholder="$t('admin_customer_form_role_ph')"
           />
+        </UFormField>
+
+        <UFormField label="Loại khách hàng" name="customerType" :error="formErrors.customerType">
+          <USelectMenu
+            v-model="state.customerType"
+            :items="customerTypeOptions"
+            value-key="value"
+            label-key="label"
+            placeholder="Chọn loại khách hàng"
+          />
+        </UFormField>
+
+        <UFormField label="Tên cửa hàng" name="storeName" :error="formErrors.storeName">
+          <UInput v-model="state.storeName" placeholder="Ví dụ: Tạp hóa Cô Lan" />
+        </UFormField>
+
+        <UFormField label="Hạn mức công nợ" name="debtLimit" :error="formErrors.debtLimit">
+          <UInput v-model="state.debtLimit" type="number" placeholder="Nhập hạn mức nợ" />
+        </UFormField>
+
+        <UFormField name="isPublic" :error="formErrors.isPublic">
+          <UCheckbox v-model="state.isPublic" label="Hiển thị đại lý trên bản đồ" />
         </UFormField>
       </form>
     </template>

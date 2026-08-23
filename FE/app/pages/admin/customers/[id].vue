@@ -232,6 +232,12 @@ const handleTogglePublic = async (value: boolean) => {
                 "
               />
             </div>
+            <div v-if="customer.profile?.storeName" class="mt-1 flex items-center gap-2">
+              <UIcon name="i-lucide-store" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
+              <span class="text-sm font-medium text-slate-600 dark:text-zinc-300">
+                {{ customer.profile?.storeName }}
+              </span>
+            </div>
             <div class="mt-1.5 flex flex-wrap items-center gap-3">
               <span class="flex items-center gap-1.5 text-sm text-slate-500 dark:text-zinc-400">
                 <UIcon name="i-lucide-phone" class="h-3.5 w-3.5" aria-hidden="true" />
@@ -260,6 +266,20 @@ const handleTogglePublic = async (value: boolean) => {
                       ? $t('admin_role_driver')
                       : $t('common_customer')
                 }}
+              </UBadge>
+              <UBadge
+                v-if="customer.profile?.customerType === 'WHOLESALE'"
+                color="secondary"
+                variant="soft"
+              >
+                Khách sỉ
+              </UBadge>
+              <UBadge
+                v-else-if="customer.profile?.customerType === 'RETAIL'"
+                color="neutral"
+                variant="soft"
+              >
+                Khách lẻ
               </UBadge>
               <UBadge v-if="isPublic" color="info" variant="soft" icon="i-lucide-map-pin">
                 {{ $t('admin_customer_detail_public') }}

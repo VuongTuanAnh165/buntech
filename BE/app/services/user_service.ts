@@ -106,6 +106,9 @@ export default class UserService {
     fullName: string
     role: string
     customerType?: CustomerType
+    debtLimit?: number
+    storeName?: string
+    isPublic?: boolean
   }) {
     // Transaction to ensure user and profile are created together
     return await db.transaction(async (trx) => {
@@ -118,6 +121,9 @@ export default class UserService {
       const profile = new UserProfile()
       profile.userId = user.id
       profile.customerType = data.customerType || CustomerType.RETAIL
+      if (data.debtLimit !== undefined) profile.debtLimit = data.debtLimit.toString()
+      if (data.storeName !== undefined) profile.storeName = data.storeName
+      if (data.isPublic !== undefined) profile.isPublic = data.isPublic
       profile.useTransaction(trx)
       await profile.save()
 
@@ -135,28 +141,43 @@ export default class UserService {
       fullName?: string
       role?: string
       customerType?: CustomerType
+      debtLimit?: number
+      storeName?: string
+      isPublic?: boolean
     }
   ) {
-    const user = await User.findOrFail(id)
-    user.merge({
-      fullName: data.fullName,
-      role: data.role,
-    })
-    await user.save()
+    return await db.transaction(async (trx) => {
+      const user = await User.findOrFail(id)
+      user.useTransaction(trx)
+      user.merge({
+        fullName: data.fullName,
+        role: data.role,
+      })
+      await user.save()
 
-    if (data.customerType) {
-      const profile = await UserProfile.query()
-        .select('user_id', 'customer_type')
-        .where('user_id', user.id)
-        .firstOrFail()
-      profile.customerType = data.customerType
-      await profile.save()
-    }
+      if (
+        data.customerType !== undefined ||
+        data.debtLimit !== undefined ||
+        data.storeName !== undefined ||
+        data.isPublic !== undefined
+      ) {
+        const profile = await UserProfile.query({ client: trx })
+          .select('user_id', 'customer_type', 'debt_limit', 'store_name', 'is_public')
+          .where('user_id', user.id)
+          .firstOrFail()
+        
+        if (data.customerType !== undefined) profile.customerType = data.customerType
+        if (data.debtLimit !== undefined) profile.debtLimit = data.debtLimit.toString()
+        if (data.storeName !== undefined) profile.storeName = data.storeName
+        if (data.isPublic !== undefined) profile.isPublic = data.isPublic
+        await profile.save()
+      }
 
-    await user.load('profile', (q) => {
-      q.select('user_id', 'avatar_url', 'store_name', 'debt_limit', 'current_debt', 'zalo_user_id')
+      await user.load('profile', (q) => {
+        q.select('user_id', 'avatar_url', 'store_name', 'debt_limit', 'current_debt', 'zalo_user_id', 'customer_type', 'is_public')
+      })
+      return user
     })
-    return user
   }
 
   /**

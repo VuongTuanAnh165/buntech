@@ -16,6 +16,9 @@ export const createUserValidator = vine.compile(
     fullName: vine.string().trim().maxLength(100),
     role: vine.enum(Object.values(Role)),
     customerType: vine.enum(Object.values(CustomerType)).optional(),
+    debtLimit: vine.number().min(0).optional(),
+    storeName: vine.string().trim().maxLength(191).optional(),
+    isPublic: vine.boolean().optional(),
   })
 )
 
@@ -24,6 +27,9 @@ export const updateUserValidator = vine.compile(
     fullName: vine.string().trim().maxLength(100).optional(),
     role: vine.enum(Object.values(Role)).optional(),
     customerType: vine.enum(Object.values(CustomerType)).optional(),
+    debtLimit: vine.number().min(0).optional(),
+    storeName: vine.string().trim().maxLength(191).optional(),
+    isPublic: vine.boolean().optional(),
   })
 )
 

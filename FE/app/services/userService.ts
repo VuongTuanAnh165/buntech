@@ -8,12 +8,18 @@ export type CreateUserPayload = {
   fullName: string
   role: string
   customerType?: string
+  debtLimit?: number
+  storeName?: string
+  isPublic?: boolean
 }
 
 export type UpdateUserPayload = {
   fullName?: string
   role?: string
   customerType?: string
+  debtLimit?: number
+  storeName?: string
+  isPublic?: boolean
 }
 
 export type UpdateProfilePayload = {
