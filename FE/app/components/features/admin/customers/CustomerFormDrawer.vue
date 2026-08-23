@@ -5,7 +5,9 @@ import { ConstantKey } from '~/enums/constantKeys'
 import type { UserDTO } from '~/utils/types'
 import { useUsers } from '~/composables/admin/useUsers'
 import { t } from '~/utils/i18n'
+import { uploadService } from '~/services/uploadService'
 
+const toast = useToast()
 const { constants } = useMasterData()
 const { createUser, updateUser } = useUsers()
 
@@ -63,7 +65,8 @@ const schema = computed(() => {
     customerType: z.string().optional(),
     debtLimit: z.any().optional(),
     storeName: z.string().max(191).optional(),
-    isPublic: z.boolean().optional()
+    isPublic: z.boolean().optional(),
+    avatarUrl: z.string().optional()
   })
 })
 
@@ -75,7 +78,8 @@ const state = reactive({
   customerType: '',
   debtLimit: 0,
   storeName: '',
-  isPublic: false
+  isPublic: false,
+  avatarUrl: ''
 })
 
 const { formErrors, formRef, validate: validateForm } = useZodForm(schema)
@@ -90,10 +94,16 @@ watch(
         state.fullName = props.user.fullName || ''
         state.role = props.user.role || roleOptions.value[0]?.value || ''
         state.customerType =
-          props.user.profile?.customerType || customerTypeOptions.value[0]?.value || ''
-        state.debtLimit = Number(props.user.profile?.debtLimit) || 0
-        state.storeName = props.user.profile?.storeName || ''
-        state.isPublic = props.user.profile?.isPublic || false
+          props.user.profile?.customer_type ||
+          props.user.profile?.customerType ||
+          customerTypeOptions.value[0]?.value ||
+          ''
+        state.debtLimit =
+          Number(props.user.profile?.debt_limit || props.user.profile?.debtLimit) || 0
+        state.storeName = props.user.profile?.store_name || props.user.profile?.storeName || ''
+        const pub = props.user.profile?.is_public ?? props.user.profile?.isPublic
+        state.isPublic = Boolean(pub === 1 || pub === '1' || pub === true)
+        state.avatarUrl = props.user.profile?.avatar_url || props.user.profile?.avatarUrl || ''
       } else {
         state.phoneNumber = ''
         state.password = ''
@@ -103,6 +113,7 @@ watch(
         state.debtLimit = 0
         state.storeName = ''
         state.isPublic = false
+        state.avatarUrl = ''
       }
       formRef.value.clearErrors()
     }
@@ -129,7 +140,8 @@ const onSubmit = handleSubmit(
         customerType: customerTypeValue,
         debtLimit: Number(data.debtLimit) || 0,
         storeName: data.storeName,
-        isPublic: data.isPublic
+        isPublic: data.isPublic,
+        avatarUrl: data.avatarUrl
         // Note: Password update usually requires a separate endpoint or field
       })
     } else {
@@ -141,7 +153,8 @@ const onSubmit = handleSubmit(
         customerType: customerTypeValue,
         debtLimit: Number(data.debtLimit) || 0,
         storeName: data.storeName,
-        isPublic: data.isPublic
+        isPublic: data.isPublic,
+        avatarUrl: data.avatarUrl
       })
     }
   },
@@ -167,6 +180,39 @@ const handleFormSubmit = () => {
     onSubmit(state)
   }
 }
+
+const fileInputRef = ref<HTMLInputElement | null>(null)
+const isUploading = ref(false)
+
+function triggerFileSelect() {
+  fileInputRef.value?.click()
+}
+
+async function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  if (file.size > 5 * 1024 * 1024) {
+    toast.add({ title: 'Kích thước ảnh quá lớn (tối đa 5MB)', color: 'warning' })
+    return
+  }
+
+  isUploading.value = true
+  try {
+    const url = await uploadService.uploadImage(file)
+    state.avatarUrl = url
+  } catch {
+    toast.add({ title: 'Lỗi tải ảnh lên', color: 'error' })
+  } finally {
+    isUploading.value = false
+    if (fileInputRef.value) fileInputRef.value.value = ''
+  }
+}
+
+function clearImage() {
+  state.avatarUrl = ''
+}
 </script>
 
 <template>
@@ -176,6 +222,41 @@ const handleFormSubmit = () => {
   >
     <template #body>
       <form id="customer-form" class="space-y-4" @submit.prevent="handleFormSubmit">
+        <div class="mb-4 flex flex-col items-center gap-2">
+          <input
+            ref="fileInputRef"
+            type="file"
+            class="hidden"
+            accept="image/jpeg,image/png,image/webp"
+            @change="handleFileChange"
+          />
+          <UAvatar
+            :src="state.avatarUrl || undefined"
+            :alt="state.fullName || 'Avatar'"
+            size="3xl"
+            class="ring-primary-500/20 ring-2"
+          />
+          <div class="mt-2 flex items-center gap-2">
+            <UButton
+              color="neutral"
+              variant="soft"
+              size="sm"
+              :loading="isUploading"
+              @click="triggerFileSelect"
+            >
+              Tải ảnh lên
+            </UButton>
+            <UButton
+              v-if="state.avatarUrl"
+              color="error"
+              variant="ghost"
+              size="sm"
+              icon="i-lucide-trash"
+              @click="clearImage"
+            />
+          </div>
+        </div>
+
         <UFormField
           v-if="!isEdit"
           :label="$t('auth_login_phone')"

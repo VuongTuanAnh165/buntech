@@ -11,6 +11,7 @@ export type CreateUserPayload = {
   debtLimit?: number
   storeName?: string
   isPublic?: boolean
+  avatarUrl?: string
 }
 
 export type UpdateUserPayload = {
@@ -20,6 +21,7 @@ export type UpdateUserPayload = {
   debtLimit?: number
   storeName?: string
   isPublic?: boolean
+  avatarUrl?: string
 }
 
 export type UpdateProfilePayload = {

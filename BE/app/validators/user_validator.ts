@@ -19,6 +19,7 @@ export const createUserValidator = vine.compile(
     debtLimit: vine.number().min(0).optional(),
     storeName: vine.string().trim().maxLength(191).optional(),
     isPublic: vine.boolean().optional(),
+    avatarUrl: vine.string().trim().optional(),
   })
 )
 
@@ -30,6 +31,7 @@ export const updateUserValidator = vine.compile(
     debtLimit: vine.number().min(0).optional(),
     storeName: vine.string().trim().maxLength(191).optional(),
     isPublic: vine.boolean().optional(),
+    avatarUrl: vine.string().trim().optional(),
   })
 )
 

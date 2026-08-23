@@ -1,12 +1,20 @@
 export interface UserProfileDTO {
   userId: string | number
+  user_id?: string | number
   avatarUrl: string | null
+  avatar_url?: string | null
   storeName: string | null
+  store_name?: string | null
   debtLimit: string | number
+  debt_limit?: string | number
   currentDebt: string | number
+  current_debt?: string | number
   zaloUserId: string | null
+  zalo_user_id?: string | null
   customerType: string | null
-  isPublic?: boolean
+  customer_type?: string | null
+  isPublic?: boolean | number | string
+  is_public?: boolean | number | string
 }
 
 export interface UserDTO {
@@ -96,8 +104,10 @@ export interface Address {
   district?: string
   province?: string
   city?: string
-  isDefault: boolean
+  isDefault?: boolean | number | string
+  is_default?: boolean | number | string
   createdAt: string
+  created_at?: string
   latitude?: string | null
   longitude?: string | null
 }

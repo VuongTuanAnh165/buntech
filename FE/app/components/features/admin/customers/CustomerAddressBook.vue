@@ -53,9 +53,14 @@ const handleDelete = async (addr: Address) => {
 const sortedAddresses = computed(() => {
   const arr = [...props.addresses]
   return arr.sort((a, b) => {
-    if (a.isDefault) return -1
-    if (b.isDefault) return 1
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    const aIsDefault = a.isDefault || a.is_default
+    const bIsDefault = b.isDefault || b.is_default
+    if (aIsDefault) return -1
+    if (bIsDefault) return 1
+    return (
+      new Date(b.createdAt || b.created_at || '').getTime() -
+      new Date(a.createdAt || a.created_at || '').getTime()
+    )
   })
 })
 
@@ -110,11 +115,12 @@ const columns = [
 
       <template #isDefault-cell="{ row }">
         <span
-          v-if="row.isDefault"
+          v-if="row.isDefault || row.is_default"
           class="bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-400 rounded px-2 py-0.5 text-xs font-medium"
         >
           {{ $t('admin_address_col_default') }}
         </span>
+        <span v-else />
       </template>
 
       <template #actions-cell="{ row }">

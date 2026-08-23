@@ -51,17 +51,40 @@ const {
 const addresses = computed(() => addressesData.value?.data || [])
 const addressLoading = computed(() => addressStatus.value === 'pending')
 
+const isPublic = computed(() => {
+  const val = customer.value?.profile?.isPublic ?? customer.value?.profile?.is_public
+  return val === true || val === 1 || val === '1'
+})
+const debtLimit = computed(() => {
+  const limit = customer.value?.profile?.debtLimit || customer.value?.profile?.debt_limit
+  return limit ? Number(limit) : 0
+})
 const currentDebt = computed(() => {
-  let debt = 0
-  for (const tx of transactions.value) {
-    if (tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_INCREASE) debt += tx.amount
-    if (tx.type === constants.value?.[ConstantKey.TransactionType]?.DEBT_PAYMENT) debt -= tx.amount
-  }
-  return debt
+  const debt = customer.value?.profile?.currentDebt || customer.value?.profile?.current_debt
+  return debt ? Number(debt) : 0
+})
+const customerType = computed(
+  () => customer.value?.profile?.customerType || customer.value?.profile?.customer_type
+)
+const storeName = computed(
+  () => customer.value?.profile?.storeName || customer.value?.profile?.store_name
+)
+const avatarUrl = computed(
+  () => customer.value?.profile?.avatarUrl || customer.value?.profile?.avatar_url
+)
+
+const roleLabel = computed(() => {
+  const roles = constants.value?.[ConstantKey.Role] || {}
+  const role = customer.value?.role
+  return role ? roles[role] || role : ''
 })
 
-const debtLimit = computed(() => Number(customer.value?.profile?.debtLimit ?? 0))
-const _debtRemaining = computed(() => Math.max(0, debtLimit.value - currentDebt.value))
+const customerTypeLabel = computed(() => {
+  const types = constants.value?.[ConstantKey.CustomerType] || {}
+  const type = customerType.value
+  return type ? types[type] || type : ''
+})
+
 const _debtUtilization = computed(() =>
   debtLimit.value > 0 ? Math.min(100, Math.round((currentDebt.value / debtLimit.value) * 100)) : 0
 )
@@ -135,21 +158,10 @@ const statCards = computed(() => [
 
 const showCustomerEdit = ref(false)
 
-const isPublic = ref(customer.value?.profile?.isPublic ?? false)
-
-watch(
-  () => customer.value?.profile?.isPublic,
-  (newVal) => {
-    isPublic.value = newVal ?? false
-  }
-)
-
 const isTogglingPublic = ref(false)
 const handleTogglePublic = async (value: boolean) => {
   isTogglingPublic.value = true
   try {
-    isPublic.value = value // Optimistic UI update
-
     await updateProfile(customerId, { isPublic: value })
 
     // Sync backing data to avoid reverting if another part of the page refreshes
@@ -212,7 +224,7 @@ const handleTogglePublic = async (value: boolean) => {
         <div class="relative flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <UAvatar
             :alt="customer.fullName"
-            :src="getImageUrl(customer.profile?.avatarUrl || undefined) || undefined"
+            :src="getImageUrl(avatarUrl || undefined) || undefined"
             size="3xl"
           />
           <div class="min-w-0 flex-1">
@@ -232,10 +244,10 @@ const handleTogglePublic = async (value: boolean) => {
                 "
               />
             </div>
-            <div v-if="customer.profile?.storeName" class="mt-1 flex items-center gap-2">
+            <div v-if="storeName" class="mt-1 flex items-center gap-2">
               <UIcon name="i-lucide-store" class="h-4 w-4 text-slate-400 dark:text-zinc-500" />
               <span class="text-sm font-medium text-slate-600 dark:text-zinc-300">
-                {{ customer.profile?.storeName }}
+                {{ storeName }}
               </span>
             </div>
             <div class="mt-1.5 flex flex-wrap items-center gap-3">
@@ -251,35 +263,22 @@ const handleTogglePublic = async (value: boolean) => {
             <div class="mt-2.5 flex flex-wrap items-center gap-2">
               <UBadge
                 :color="
-                  customer.role === 'DRIVER'
+                  customer.role === 'driver'
                     ? 'warning'
-                    : customer.role === 'ADMIN'
+                    : customer.role === 'admin'
                       ? 'error'
                       : 'success'
                 "
                 variant="soft"
               >
-                {{
-                  customer.role === 'ADMIN'
-                    ? $t('admin_role_admin')
-                    : customer.role === 'DRIVER'
-                      ? $t('admin_role_driver')
-                      : $t('common_customer')
-                }}
+                {{ roleLabel }}
               </UBadge>
               <UBadge
-                v-if="customer.profile?.customerType === 'WHOLESALE'"
-                color="secondary"
+                v-if="customerTypeLabel"
+                :color="customerType === 'wholesale' ? 'secondary' : 'neutral'"
                 variant="soft"
               >
-                Khách sỉ
-              </UBadge>
-              <UBadge
-                v-else-if="customer.profile?.customerType === 'RETAIL'"
-                color="neutral"
-                variant="soft"
-              >
-                Khách lẻ
+                {{ customerTypeLabel }}
               </UBadge>
               <UBadge v-if="isPublic" color="info" variant="soft" icon="i-lucide-map-pin">
                 {{ $t('admin_customer_detail_public') }}

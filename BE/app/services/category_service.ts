@@ -11,7 +11,7 @@ type UpdateCategoryDTO = Infer<typeof updateCategoryValidator>
 
 @inject()
 export default class CategoryService {
-  constructor(protected fileUploadService: FileUploadService) { }
+  constructor(protected fileUploadService: FileUploadService) {}
 
   /**
    * Lấy danh sách phân trang (Cho Admin)

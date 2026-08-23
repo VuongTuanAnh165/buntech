@@ -8,10 +8,55 @@ import { CustomerType } from '#enums/customer_type'
 import { Role } from '#enums/role'
 import { OrderStatus } from '#enums/order_status'
 import { DateTime } from 'luxon'
+import drive from '@adonisjs/drive/services/main'
+import logger from '@adonisjs/core/services/logger'
 
 @inject()
 export default class UserService {
   constructor(protected fileUploadService: FileUploadService) {}
+
+  private async processAvatar(
+    newUrl: string | undefined | null,
+    oldUrl: string | null
+  ): Promise<string | null> {
+    if (newUrl === oldUrl) return oldUrl || null
+
+    // Xóa ảnh cũ
+    if (oldUrl && oldUrl.includes('/uploads/avatars/')) {
+      try {
+        const filename = oldUrl.substring(oldUrl.lastIndexOf('/') + 1)
+        const oldKey = `avatars/${filename}`
+        if (await drive.use('fs').exists(oldKey)) {
+          await drive.use('fs').delete(oldKey)
+          logger.info(`[UserService] Deleted old avatar: ${oldKey}`)
+        }
+      } catch (err) {
+        logger.error(`[UserService] Error deleting old avatar: ${(err as Error).message}`)
+      }
+    }
+
+    if (!newUrl) return null
+
+    // Chuyển ảnh mới từ tmp/ sang avatars/
+    if (newUrl.includes('/uploads/tmp/')) {
+      try {
+        const filename = newUrl.substring(newUrl.lastIndexOf('/') + 1)
+        const tmpKey = `tmp/${filename}`
+        const newKey = `avatars/${filename}`
+        if (await drive.use('fs').exists(tmpKey)) {
+          await drive.use('fs').copy(tmpKey, newKey)
+          await drive.use('fs').delete(tmpKey)
+          logger.info(`[UserService] Moved avatar from ${tmpKey} to ${newKey}`)
+          return newUrl.replace('/uploads/tmp/', '/uploads/avatars/')
+        }
+      } catch (err) {
+        logger.error(`[UserService] Error moving avatar: ${(err as Error).message}`)
+      }
+    }
+
+    return newUrl
+  }
+
   /**
    * Get list of users with pagination and optional role filter
    */
@@ -109,11 +154,17 @@ export default class UserService {
     debtLimit?: number
     storeName?: string
     isPublic?: boolean
+    avatarUrl?: string
   }) {
     // Transaction to ensure user and profile are created together
     return await db.transaction(async (trx) => {
       const user = new User()
-      user.fill(data)
+      user.fill({
+        phoneNumber: data.phoneNumber,
+        password: data.password,
+        fullName: data.fullName,
+        role: data.role,
+      })
       user.useTransaction(trx)
       await user.save()
 
@@ -124,6 +175,8 @@ export default class UserService {
       if (data.debtLimit !== undefined) profile.debtLimit = data.debtLimit.toString()
       if (data.storeName !== undefined) profile.storeName = data.storeName
       if (data.isPublic !== undefined) profile.isPublic = data.isPublic
+      if (data.avatarUrl !== undefined)
+        profile.avatarUrl = await this.processAvatar(data.avatarUrl, null)
       profile.useTransaction(trx)
       await profile.save()
 
@@ -144,6 +197,7 @@ export default class UserService {
       debtLimit?: number
       storeName?: string
       isPublic?: boolean
+      avatarUrl?: string
     }
   ) {
     return await db.transaction(async (trx) => {
@@ -159,22 +213,35 @@ export default class UserService {
         data.customerType !== undefined ||
         data.debtLimit !== undefined ||
         data.storeName !== undefined ||
-        data.isPublic !== undefined
+        data.isPublic !== undefined ||
+        data.avatarUrl !== undefined
       ) {
         const profile = await UserProfile.query({ client: trx })
-          .select('user_id', 'customer_type', 'debt_limit', 'store_name', 'is_public')
+          .select('user_id', 'customer_type', 'debt_limit', 'store_name', 'is_public', 'avatar_url')
           .where('user_id', user.id)
           .firstOrFail()
-        
+
         if (data.customerType !== undefined) profile.customerType = data.customerType
         if (data.debtLimit !== undefined) profile.debtLimit = data.debtLimit.toString()
         if (data.storeName !== undefined) profile.storeName = data.storeName
         if (data.isPublic !== undefined) profile.isPublic = data.isPublic
+        if (data.avatarUrl !== undefined) {
+          profile.avatarUrl = await this.processAvatar(data.avatarUrl, profile.avatarUrl)
+        }
         await profile.save()
       }
 
       await user.load('profile', (q) => {
-        q.select('user_id', 'avatar_url', 'store_name', 'debt_limit', 'current_debt', 'zalo_user_id', 'customer_type', 'is_public')
+        q.select(
+          'user_id',
+          'avatar_url',
+          'store_name',
+          'debt_limit',
+          'current_debt',
+          'zalo_user_id',
+          'customer_type',
+          'is_public'
+        )
       })
       return user
     })
@@ -194,6 +261,10 @@ export default class UserService {
    */
   async deleteUser(id: number) {
     const user = await User.query().select('id').where('id', id).firstOrFail()
+    const profile = await UserProfile.query().where('user_id', id).first()
+    if (profile && profile.avatarUrl) {
+      await this.processAvatar(null, profile.avatarUrl)
+    }
     await user.delete() // AppBaseModel will handle soft delete if configured, or hard delete
   }
 
@@ -224,24 +295,17 @@ export default class UserService {
       .where('user_id', userId)
       .firstOrFail()
 
-    const oldAvatarUrl = profile.avatarUrl
-
     // debtLimit in DB is string (decimal), we cast number to string if provided
     const updateData: Record<string, unknown> = { ...data }
     if (data.debtLimit !== undefined) {
       updateData.debtLimit = data.debtLimit.toString()
     }
+    if (data.avatarUrl !== undefined) {
+      updateData.avatarUrl = await this.processAvatar(data.avatarUrl, profile.avatarUrl)
+    }
 
     profile.merge(updateData)
     await profile.save()
-
-    // Clean up old avatar if it was replaced
-    if (data.avatarUrl && oldAvatarUrl && data.avatarUrl !== oldAvatarUrl) {
-      const oldAvatarKey = this.fileUploadService.extractKeyFromUrl(oldAvatarUrl, 'users/avatars')
-      if (oldAvatarKey) {
-        await this.fileUploadService.delete(oldAvatarKey).catch(() => {})
-      }
-    }
 
     return profile
   }

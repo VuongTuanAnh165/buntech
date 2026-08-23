@@ -18,6 +18,7 @@ const mapContainer = ref<HTMLElement | null>(null)
 const currentLatLng = ref<[number, number]>(defaultCenter)
 let mapInstance: Map | null = null
 let markerInstance: Marker | null = null
+let resizeObserver: ResizeObserver | null = null
 
 onMounted(async () => {
   if (import.meta.client && mapContainer.value) {
@@ -91,16 +92,20 @@ onMounted(async () => {
       })
     }
 
-    // Fix for Leaflet blank map in Modals (wait for transition)
-    setTimeout(() => {
+    // Fix for Leaflet blank map in Modals (wait for transition or visibility)
+    resizeObserver = new ResizeObserver(() => {
       if (mapInstance) {
         mapInstance.invalidateSize()
       }
-    }, 300)
+    })
+    resizeObserver.observe(mapContainer.value)
   }
 })
 
 onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
   if (mapInstance) {
     mapInstance.remove()
   }
