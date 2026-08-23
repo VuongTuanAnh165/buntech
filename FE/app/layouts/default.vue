@@ -308,7 +308,7 @@ onUnmounted(() => {
       class="glass border-surface-border/50 safe-area-bottom fixed right-0 bottom-0 left-0 z-50 border-t md:hidden"
       aria-label="Bottom navigation"
     >
-      <div class="flex items-stretch justify-around px-2 py-1.5">
+      <div class="flex items-stretch justify-around bg-white/90 px-2 py-1.5 dark:bg-zinc-950/90">
         <NuxtLink
           v-for="item in bottomNavItems"
           :key="item.to"

@@ -140,5 +140,12 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: ['leaflet', '@vue-leaflet/vue-leaflet']
     }
+  },
+
+  // --- Cấu hình Nuxt Image ---
+  image: {
+    // Khi build cho mobile (SSR: false), tắt IPX server (provider: 'none')
+    // vì IPX cần Node.js server chạy ngầm. Ảnh từ FE sẽ lấy link gốc.
+    provider: isMobileBuild ? 'none' : 'ipx'
   }
 })
